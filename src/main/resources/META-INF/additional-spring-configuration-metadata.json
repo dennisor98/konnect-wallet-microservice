@@ -1,0 +1,112 @@
+{"properties": [
+  {
+    "name": "BANK_ALLOWED_IPS",
+    "type": "java.lang.String",
+    "description": "A description for 'BANK_ALLOWED_IPS'"
+  },
+  {
+    "name": "WINDOW_SIZE",
+    "type": "java.lang.String",
+    "description": "A description for 'WINDOW_SIZE'"
+  },
+  {
+    "name": "OTP_TTL",
+    "type": "java.lang.String",
+    "description": "A description for 'OTP_TTL'"
+  },
+  {
+    "name": "DB_NAME",
+    "type": "java.lang.String",
+    "description": "A description for 'DB_NAME'"
+  },
+  {
+    "name": "DB_PASSWORD",
+    "type": "java.lang.String",
+    "description": "A description for 'DB_PASSWORD'"
+  },
+  {
+    "name": "DB_USERNAME",
+    "type": "java.lang.String",
+    "description": "A description for 'DB_USERNAME'"
+  },
+  {
+    "name": "DB_HOST",
+    "type": "java.lang.String",
+    "description": "A description for 'DB_HOST'"
+  },
+  {
+    "name": "DB_TYPE",
+    "type": "java.lang.String",
+    "description": "A description for 'DB_TYPE'"
+  },
+  {
+    "name": "DB_PORT",
+    "type": "java.lang.String",
+    "description": "A description for 'DB_PORT'"
+  },
+  {
+    "name": "CELCOM_URL",
+    "type": "java.lang.String",
+    "description": "A description for 'CELCOM_URL'"
+  },
+  {
+    "name": "SMS_SENDER_ID",
+    "type": "java.lang.String",
+    "description": "A description for 'SMS_SENDER_ID'"
+  },
+  {
+    "name": "ENVIROMENT",
+    "type": "java.lang.String",
+    "description": "A description for 'ENVIROMENT'"
+  },
+  {
+    "name": "JWT_SECRET",
+    "type": "java.lang.String",
+    "description": "A description for 'JWT_SECRET'"
+  },
+  {
+    "name": "JWT_EXPIRY_TIME",
+    "type": "java.lang.String",
+    "description": "A description for 'JWT_EXPIRY_TIME'"
+  },
+  {
+    "name": "REFRESH_EXPRITY_TIME",
+    "type": "java.lang.String",
+    "description": "A description for 'REFRESH_EXPRITY_TIME'"
+  },
+  {
+    "name": "CELCOM_COOKIE",
+    "type": "java.lang.String",
+    "description": "A description for 'CELCOM_COOKIE'"
+  },
+  {
+    "name": "CELCOM_API_KEY",
+    "type": "java.lang.String",
+    "description": "A description for 'CELCOM_API_KEY'"
+  },
+  {
+    "name": "CELCOM_PARTNER_ID",
+    "type": "java.lang.String",
+    "description": "A description for 'CELCOM_PARTNER_ID'"
+  },
+  {
+    "name": "REFRESH_EXPRITY_TIME",
+    "type": "java.lang.String",
+    "description": "A description for 'REFRESH_EXPRITY_TIME'"
+  },
+  {
+    "name": "AFRICAS_TALKING_FROM",
+    "type": "java.lang.String",
+    "description": "A description for 'AFRICAS_TALKING_FROM'"
+  },
+  {
+    "name": "AFRICAS_TALKING_USERNAME",
+    "type": "java.lang.String",
+    "description": "A description for 'AFRICAS_TALKING_USERNAME'"
+  },
+  {
+    "name": "PRIMARY_SMS_PROVIDER",
+    "type": "java.lang.String",
+    "description": "A description for 'PRIMARY_SMS_PROVIDER'"
+  }
+]}

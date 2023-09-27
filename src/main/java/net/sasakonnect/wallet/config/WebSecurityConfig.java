@@ -1,0 +1,136 @@
+package net.sasakonnect.wallet.config;
+
+import java.util.Arrays;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
+import net.sasakonnect.wallet.services.UserService;
+
+@Configuration
+@EnableMethodSecurity
+
+public class WebSecurityConfig {
+
+	private static final String[] AUTH_WHITELIST = {
+			// -- Swagger UI v2
+			"/v2/api-docs", "/swagger-resources", "/swagger-resources/**", "/configuration/ui",
+			"/configuration/security", "/swagger-ui.html", "/webjars/**",
+			// -- Swagger UI v3 (OpenAPI)
+			"/v3/api-docs/**", "/swagger-ui/**"
+			// other public endpoints of your API may be appended to this array
+	};
+
+	UserService userService;
+	JwtAuthenticationFilter jwtAuthenticationFilter;
+
+	WebSecurityConfig(UserService userService, JwtAuthenticationFilter jwtAuthenticationFilter) {
+		this.userService = userService;
+		this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+	}
+
+	@Bean
+	PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+
+	@Bean
+	CorsConfigurationSource corsFilter() {
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.setAllowedOrigins(Arrays.asList("*"));
+		configuration.setAllowedMethods(Arrays.asList("*"));
+		configuration.setAllowedHeaders(Arrays.asList("*"));
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration);
+		return source;
+
+	}
+
+	@Bean
+	@Order(1)
+	SecurityFilterChain auth0FilterChain(HttpSecurity http) throws Exception {
+		http.authorizeHttpRequests((authz) ->
+		// .requestMatchers("/userLogin", "/register").permitAll()
+		authz.requestMatchers("api-docs/**", // Swagger API documentation
+				"/swagger-ui/**", // Swagger UI web interface
+				"/swagger-resources/**", // Swagger resources like JS and CSS
+				"/webjars/**").permitAll().requestMatchers("/user/userLogin", "/user/confirmOtp").permitAll()
+				.requestMatchers(AUTH_WHITELIST).permitAll() // whitelist Swagger UI resources
+
+				.anyRequest().authenticated() // require authentication for any endpoint that's not
+		// whitelisted
+
+		);
+		http.httpBasic(basic -> basic.disable());
+		http.csrf(csrf -> csrf.disable());
+		http.headers(headers -> headers.disable());
+//		http.anonymous((a) -> a.disable());
+
+		http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+		return http.build();
+
+	}
+
+	@Bean
+	AuthenticationProvider authenticationProvider() {
+		DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+		authenticationProvider.setUserDetailsService(userService);
+		authenticationProvider.setPasswordEncoder(passwordEncoder());
+		return authenticationProvider;
+	}
+
+	@Bean
+	AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+		return config.getAuthenticationManager();
+	}
+
+	@Bean
+	static MethodSecurityExpressionHandler expressionHandler(UserService userService) {
+		var expressionHandler = new DefaultMethodSecurityExpressionHandler();
+		expressionHandler.setPermissionEvaluator(new CustomPermissionEvaluator(userService));
+		return expressionHandler;
+	}
+
+	@Bean
+	public OpenAPI openApiInformation() {
+		Server localServer = new Server().url("http://localhost:8080").description("Localhost Server URL");
+		Contact contact = new Contact().email("devops@gmail.com").name("DevOps");
+		Info info = new Info().contact(contact).description("Wallet Based implimentation Through Choice Bank")
+				.summary("Easy way to Buy").title("Konnect Wallet").version("V1.0.0")
+				.license(new License().name("Apache 2.0").url("http://springdoc.org"));
+
+		return new OpenAPI().addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
+				.components(new Components().addSecuritySchemes("Bearer Authentication", createAPIKeyScheme()))
+				.info(info).addServersItem(localServer);
+	}
+
+	private SecurityScheme createAPIKeyScheme() {
+		return new SecurityScheme().type(SecurityScheme.Type.HTTP).bearerFormat("JWT").scheme("bearer");
+	}
+
+}

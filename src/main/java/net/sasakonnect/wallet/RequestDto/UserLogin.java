@@ -1,0 +1,32 @@
+package net.sasakonnect.wallet.RequestDto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class UserLogin {
+	@NotNull(message = "Phone number is required")
+	private String phoneNumber;
+	@NotNull
+	private String messageSignature;
+	@Nullable
+	@Builder.Default
+	@Schema(hidden = true) // Exclude this property from documentation
+
+	private String countryCode = "254";
+
+	@Schema(hidden = true) // Exclude this property from documentation
+
+	public String getFullPhone() {
+		return this.countryCode + this.phoneNumber;
+	}
+
+}
