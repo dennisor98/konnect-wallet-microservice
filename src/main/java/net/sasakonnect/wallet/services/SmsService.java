@@ -74,7 +74,7 @@ public class SmsService {
 //			smsJob.setTemplate(
 //					this.template + ((userLogin.getMessageSignature() == null) ? "" : userLogin.getMessageSignature()));
 //			smsJob.params = savedOtp;
-			smsManager.sendMessage(template, userLogin.getPhoneNumber());
+			smsManager.sendMessage(template + " " + savedOtp.getCode(), userLogin.getPhoneNumber());
 			// this.jobProducer.enqueueJob(smsJob);
 			ObjectNode json = JsonNodeFactory.instance.objectNode();
 
