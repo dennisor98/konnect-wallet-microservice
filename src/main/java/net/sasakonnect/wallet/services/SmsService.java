@@ -64,20 +64,8 @@ public class SmsService {
 			otpEntity.setHash(Signature.createHashFrom(user.get().getId() + otp));
 			Otp savedOtp = this.otpService.saveOtp(otpEntity);
 
-//			var smsJob = new Celcom();
-//			smsJob.setCelcomKey(this.celcomKey);
-//			smsJob.setCelcom_cookie(this.celcom_cookie);
-//			smsJob.setShortcode(this.shortcode);
-//			smsJob.setOtp_ttl(this.otp_ttl);
-//			smsJob.setPartnerID(this.partnerID);
-//			smsJob.setCelcomUrl(this.celcomUrl);
-//			smsJob.setTemplate(
-//					this.template + ((userLogin.getMessageSignature() == null) ? "" : userLogin.getMessageSignature()));
-//			smsJob.params = savedOtp;
-			smsManager.sendMessage(template + " " + savedOtp.getCode(), userLogin.getPhoneNumber());
-			// this.jobProducer.enqueueJob(smsJob);
+			smsManager.sendMessage(template + ":" + savedOtp.getCode(), userLogin.getFullPhone());
 			ObjectNode json = JsonNodeFactory.instance.objectNode();
-
 			json.put("hash", Signature.createHashFrom(user.get().getId() + otp));
 			json.put("message",
 					"otp message sent it will expire within the next " + savedOtp.getTtl() / 60 + " minutes");

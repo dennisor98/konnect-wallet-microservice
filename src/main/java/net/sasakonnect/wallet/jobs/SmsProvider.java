@@ -13,5 +13,6 @@ public abstract class SmsProvider extends Queueable {
 	private static final long serialVersionUID = 1L;
 	String template;
 	String phoneNumber;
+	Integer retryCount = 0;
 
 }

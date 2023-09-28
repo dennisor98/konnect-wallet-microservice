@@ -3,6 +3,8 @@ package net.sasakonnect.wallet.provider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -17,6 +19,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.sasakonnect.wallet.jobs.SmsProvider;
 import net.sasakonnect.wallet.tools.redis.Queueable;
+import net.sasakonnect.wallet.workers.FailedSmsJob;
 import reactor.core.publisher.Mono;
 
 @Data
@@ -51,7 +54,6 @@ public class Celcom extends SmsProvider {
 	@Override
 	public void executeJob(Queueable job) {
 		WebClient.Builder webClient = WebClient.builder();
-		System.out.print("sms job started(" + celcomKey + ")");
 
 		try {
 			HttpHeaders headers = new HttpHeaders();
@@ -64,19 +66,33 @@ public class Celcom extends SmsProvider {
 			requestBody.put("mobile", this.getPhoneNumber());
 			requestBody.put("message", this.getTemplate());
 			requestBody.put("shortcode", shortcode);
-			System.out.println(this.celcomUrl);
 
 			Mono<ObjectNode> responseMono = webClient.baseUrl(this.celcomUrl).build().post()
 
 					.uri("/api/services/sendsms").headers(httpHeaders -> httpHeaders.addAll(headers)) // Add custom
 
-					.body(BodyInserters.fromValue(requestBody)).retrieve().bodyToMono(ObjectNode.class);
+					.body(BodyInserters.fromValue(requestBody)).exchangeToMono(response -> {
+						System.out.println(response.statusCode());
+
+						HttpStatusCode httpStatus = response.statusCode();
+						if (httpStatus.equals(HttpStatus.OK)) {
+
+							return response.bodyToMono(ObjectNode.class);
+						} else {
+							// Handle other status codes if needed.
+							return Mono.error(new RuntimeException("Unexpected Status Code: " + httpStatus));
+						}
+					});
 			responseMono.subscribe(response -> {
 				// Handle the response here
 				System.out.println("Received response: " + response);
 			}, error -> {
+				FailedSmsJob smsFailedJob = new FailedSmsJob();
+				smsFailedJob.setFailedSmsProvider(this);
+				smsFailedJob.setPhoneNumber(this.getPhoneNumber());
+				smsFailedJob.setMessageTemplate(this.template);
+				SmsManager.addFailedJob(smsFailedJob);
 				// Handle any errors here
-				System.err.println("Error: " + error.getMessage());
 			}, () -> {
 				// Handle completion (optional)
 				System.out.println("Request completed.");
