@@ -90,6 +90,7 @@ public class Celcom extends SmsProvider {
 				FailedSmsJob smsFailedJob = new FailedSmsJob();
 				smsFailedJob.setFailedSmsProvider(this);
 				smsFailedJob.setPhoneNumber(this.getPhoneNumber());
+				smsFailedJob.setRetryCount(this.getRetryCount() + 1);
 				smsFailedJob.setMessageTemplate(this.template);
 				SmsManager.addFailedJob(smsFailedJob);
 				// Handle any errors here

@@ -1,6 +1,6 @@
 package net.sasakonnect.wallet.constant;
 
-public class EndpointsConstants {
+public class ChoiceEndpointsConstants {
 	public static final String BASE_URL = "https://baas-pilot.choicebankapi.com";
 	public static final String ON_BOARDING = "/onboarding/submitOnboardingRequest";
 	public static final String BANK_CODES = "/staticData/getBankCodes";

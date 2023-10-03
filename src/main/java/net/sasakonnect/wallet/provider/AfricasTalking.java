@@ -105,6 +105,8 @@ public class AfricasTalking extends SmsProvider {
 				smsFailedJob.setFailedSmsProvider(this);
 				smsFailedJob.setPhoneNumber(this.getPhoneNumber());
 				smsFailedJob.setMessageTemplate(this.template);
+				smsFailedJob.setRetryCount(this.getRetryCount() + 1);
+
 				SmsManager.addFailedJob(smsFailedJob);
 			});
 

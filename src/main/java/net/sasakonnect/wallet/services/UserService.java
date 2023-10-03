@@ -126,7 +126,6 @@ public class UserService extends RestClientService implements UserDetailsService
 
 	public ResponseEntity<Object> verifyOtp(@Valid ConfirmOtp confirmOtp) {
 		var opt = this.smsService.verifyOtp(confirmOtp);
-		System.out.println(opt.get().toString());
 		if (opt.isPresent()) {
 			if (opt.get().isValid()) {
 
@@ -158,6 +157,12 @@ public class UserService extends RestClientService implements UserDetailsService
 		}
 		return null;
 		// TODO Auto-generated method stub
+	}
+
+	public Optional<User> findUserWallet(User user) {
+		return this.userRepository.findUserWithUserWalletsById(user.getId());
+		// TODO Auto-generated method stub
+
 	}
 
 //	public Object userRegister(@Valid UserSignUp userSignUp) throws UserInputException {

@@ -1,6 +1,8 @@
 package net.sasakonnect.wallet.provider;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executors;
@@ -41,7 +43,7 @@ public class SmsManager {
 
 	public static synchronized void addFailedJob(FailedSmsJob failedSmsJob) {
 		SmsManager.failedSmsJob.add(failedSmsJob);
-		logger.debug(SECURITY_MARKER, "Sms Added failed job");
+		logger.warn(SECURITY_MARKER, "Sms Added failed job");
 
 	}
 
@@ -84,12 +86,14 @@ public class SmsManager {
 			synchronized (SmsManager.failedSmsJob) {
 
 				String[] classNames = className.split(",");
-
+				List<String> myList = new ArrayList<>(Arrays.asList(classNames));
+				Collections.shuffle(myList);
 				if (SmsManager.failedSmsJob.size() > 0) {
-
-					Optional<? extends SmsProvider> smsProvider = Stream.of(classNames)
-							.filter((name) -> !(name.equals(this.primary_sms_provider.trim()))).map((rawClass) -> {
-
+					FailedSmsJob oneFailedJob = SmsManager.failedSmsJob.get(0);
+					Optional<? extends SmsProvider> smsProvider = myList.stream()
+							.filter((name) -> (!(name.equals(this.primary_sms_provider.trim()))
+									|| oneFailedJob.getRetryCount() > 1))
+							.map((rawClass) -> {
 								try {
 									logger.debug(SECURITY_MARKER, "Candidate Provider found" + rawClass);
 
@@ -100,16 +104,12 @@ public class SmsManager {
 								}
 								return null;
 							}).map((otherProviders) -> {
-
 								Class<? extends SmsProvider> smsProviderClass = otherProviders
 										.asSubclass(SmsProvider.class);
 
 								return context.getBean(smsProviderClass);
-
 							}).findFirst();
 					if (smsProvider.isPresent()) {
-
-						FailedSmsJob oneFailedJob = SmsManager.failedSmsJob.get(0);
 						SmsProvider myBean = smsProvider.get();
 						myBean.setPhoneNumber(oneFailedJob.getPhoneNumber());
 						myBean.setRetryCount(oneFailedJob.getRetryCount());
@@ -117,7 +117,6 @@ public class SmsManager {
 						System.err.println("Sms Destination " + SmsManager.failedSmsJob.get(0).getPhoneNumber()
 								+ " failed retrying.. with " + smsProvider.get().getClass().getName());
 						this.jobProducer.enqueueJob(myBean);
-
 						SmsManager.removeJob(oneFailedJob);
 					} else {
 						logger.debug(SECURITY_MARKER, "Candidate Sms Provider Not found");
@@ -138,7 +137,6 @@ public class SmsManager {
 
 	public void sendMessage(String template, String phoneNumber) {
 		String[] classNamesArray = className.split(",");
-		System.out.println(classNamesArray);
 
 		Stream.of(classNamesArray).forEach((className) -> {
 			System.out.println("provider exist");
@@ -158,6 +156,7 @@ public class SmsManager {
 						SmsProvider myBean = context.getBean(smsProviderClass);
 						myBean.setPhoneNumber(phoneNumber);
 						myBean.setTemplate(template);
+
 						this.jobProducer.enqueueJob(myBean);
 
 					}

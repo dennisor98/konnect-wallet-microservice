@@ -6,8 +6,10 @@ import java.util.List;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
+import lombok.Data;
 
 @Entity
+@Data
 public class Wallet extends BaseWalletDomain implements Serializable {
 
 	@Column

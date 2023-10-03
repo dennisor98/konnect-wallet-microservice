@@ -2,8 +2,6 @@ package net.sasakonnect.wallet.domain;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -62,12 +60,8 @@ public class Otp extends BaseWalletDomain implements Serializable {
 		// Add ttl seconds to createdAt
 		Instant expirationInstant = createdAtInstant.plusSeconds(this.getTtl());
 
-		// Convert the expiration timestamp to your local time (assuming UTC+4)
-		ZoneId yourTimeZone = ZoneId.of("UTC-4");
-		LocalDateTime expirationLocalTime = LocalDateTime.ofInstant(expirationInstant, yourTimeZone);
-
 		// Check if the expiration time is before the current local time
-		if (expirationLocalTime.isBefore(LocalDateTime.now(yourTimeZone))) {
+		if (expirationInstant.isAfter(utcNow)) {
 			return true;
 		}
 		return false;

@@ -21,7 +21,7 @@ import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.provider.AfricasTalking;
 import net.sasakonnect.wallet.provider.Celcom;
 import net.sasakonnect.wallet.provider.SmsManager;
-import net.sasakonnect.wallet.tools.Signature;
+import net.sasakonnect.wallet.tools.RequestSigner;
 
 @Service
 public class SmsService {
@@ -61,12 +61,12 @@ public class SmsService {
 			otpEntity.setPhoneNumber(userLogin.getFullPhone());
 			otpEntity.setUser(user.get());
 			otpEntity.setTtl(otp_ttl);
-			otpEntity.setHash(Signature.createHashFrom(user.get().getId() + otp));
+			otpEntity.setHash(RequestSigner.createHashFrom(user.get().getId() + otp));
 			Otp savedOtp = this.otpService.saveOtp(otpEntity);
 
 			smsManager.sendMessage(template + ":" + savedOtp.getCode(), userLogin.getFullPhone());
 			ObjectNode json = JsonNodeFactory.instance.objectNode();
-			json.put("hash", Signature.createHashFrom(user.get().getId() + otp));
+			json.put("hash", RequestSigner.createHashFrom(user.get().getId() + otp));
 			json.put("message",
 					"otp message sent it will expire within the next " + savedOtp.getTtl() / 60 + " minutes");
 

@@ -12,7 +12,6 @@ import net.sasakonnect.wallet.CustomController;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.services.WalletService;
-import reactor.core.publisher.Mono;
 
 @CustomController()
 
@@ -44,7 +43,7 @@ public class WalletController {
 	}
 
 	@PostMapping("/info")
-	public ResponseEntity<Mono<String>> info() {
+	public ResponseEntity<Object> info() {
 		return ResponseEntity.ok(this.walletService.getWalletInfo());
 	}
 
@@ -69,9 +68,9 @@ public class WalletController {
 	}
 
 	@GetMapping("balance")
-	public Mono<String> balance() {
+	public Object balance() {
 
-		return this.walletService.getWalletInfo();
+		return this.walletService.getWalletBalance();
 	}
 
 	@GetMapping("account/state")
@@ -114,9 +113,9 @@ public class WalletController {
 		return ResponseEntity.ok(userService.getUserById("0"));
 	}
 
-	@PostMapping("/transactionhistory")
-	public ResponseEntity<Optional<User>> transactionHistory() {
-		return ResponseEntity.ok(userService.getUserById("0"));
+	@GetMapping("/transactionhistory")
+	public ResponseEntity<Object> transactionHistory() {
+		return ResponseEntity.ok(this.walletService.getTransactionHistory());
 	}
 
 	@PostMapping("/transactionhistory/any")
