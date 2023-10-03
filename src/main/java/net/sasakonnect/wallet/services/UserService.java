@@ -1,6 +1,8 @@
 package net.sasakonnect.wallet.services;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -9,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -26,9 +29,11 @@ import net.sasakonnect.wallet.ResponseDto.UserResponseDTO;
 import net.sasakonnect.wallet.domain.Permission;
 import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.domain.UserPin;
 import net.sasakonnect.wallet.repository.PermissionRepository;
 import net.sasakonnect.wallet.repository.RolePermissionRepository;
 import net.sasakonnect.wallet.repository.RoleRepository;
+import net.sasakonnect.wallet.repository.UserPinRepository;
 import net.sasakonnect.wallet.repository.UserRepository;
 import net.sasakonnect.wallet.repository.UserRoleRepository;
 import net.sasakonnect.wallet.tools.JwtService;
@@ -45,6 +50,8 @@ public class UserService extends RestClientService implements UserDetailsService
 	private RolePermissionRepository rolePermissionRepository;
 	@Autowired
 	private UserRoleRepository userRoleRepository;
+	@Autowired
+	private UserPinRepository userPinRepository;
 	@Autowired
 	private RoleRepository roleRepository;
 	@Autowired
@@ -163,6 +170,37 @@ public class UserService extends RestClientService implements UserDetailsService
 		return this.userRepository.findUserWithUserWalletsById(user.getId());
 		// TODO Auto-generated method stub
 
+	}
+
+	public Optional<User> findUserWallet(String id) {
+		return this.userRepository.findUserWithUserWalletsById(id);
+		// TODO Auto-generated method stub
+
+	}
+
+	public Object isPinSet() {
+
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		Optional<List<UserPin>> userPins = this.userPinRepository.getUserPinThatIsNotArchived(user);
+
+		if (userPins.isPresent() && (userPins.get().size() > 0)) {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("message", "Account Ready");
+			return ResponseEntity.ok(map);
+		} else {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("message", "Pin not set");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(map);
+
+		}
+
+		// TODO Auto-generated method stub
+	}
+
+	public Object findDeletedPinsForUser() {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		System.err.print("sdfjksdafnsdlkfjnskjfnkdsalfndjslfsd");
+		return null;
 	}
 
 //	public Object userRegister(@Valid UserSignUp userSignUp) throws UserInputException {

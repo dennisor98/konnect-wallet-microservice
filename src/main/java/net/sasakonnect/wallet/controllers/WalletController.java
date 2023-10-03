@@ -32,9 +32,9 @@ public class WalletController {
 		return ResponseEntity.ok(userService.getUserById("0"));
 	}
 
-	@PostMapping("pin/set")
-	public ResponseEntity<Optional<User>> getAll() {
-		return ResponseEntity.ok(userService.getUserById("0"));
+	@GetMapping("pin/set")
+	public Object isPinSet() {
+		return userService.isPinSet();
 	}
 
 	@PostMapping("/messaging/token")
@@ -42,7 +42,7 @@ public class WalletController {
 		return ResponseEntity.ok(userService.getUserById("0"));
 	}
 
-	@PostMapping("/info")
+	@GetMapping("/info")
 	public ResponseEntity<Object> info() {
 		return ResponseEntity.ok(this.walletService.getWalletInfo());
 	}

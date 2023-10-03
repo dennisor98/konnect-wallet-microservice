@@ -2,6 +2,7 @@
 package net.sasakonnect.wallet.config;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,6 +16,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.tools.JwtService;
 
@@ -38,8 +40,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		}
 
 		if (id != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+			Optional<User> user = this.userService.findUserWallet(id);
 			UserDetails userDetails = userService.loadUserByUsername(id);
-			if (jwtService.validateToken(token, userDetails)) {
+			if (user.isPresent() && this.jwtService.validateToken(token, userDetails)) {
 				System.out.println("this is do internal");
 
 				UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
