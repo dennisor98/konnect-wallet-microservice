@@ -8,7 +8,7 @@ build:
     - echo "Building the application on SSH server..."
     - hostname
     - pwd
-    - ssh -p 22 david@172.26.0.41  "cd /home/david/application/wallet/ && chmod +x ./gradlew && ./gradlew clean && ./gradlew build -x test && systemctl restart wallet"
+    - ssh -p 22 david@172.26.0.41  "cd /home/david/application/wallet/ && chmod +x ./gradlew && ./gradlew clean && ./gradlew build -x test && sudo systemctl restart wallet"
     - echo "Source code built on remote server"
   only:
     - main
