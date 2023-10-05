@@ -5,10 +5,17 @@ import java.util.Optional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import net.sasakonnect.wallet.CustomController;
+import net.sasakonnect.wallet.RequestDto.ChangePin;
+import net.sasakonnect.wallet.RequestDto.Mpesa;
+import net.sasakonnect.wallet.RequestDto.PinDto;
+import net.sasakonnect.wallet.RequestDto.TransactionPeriod;
+import net.sasakonnect.wallet.annotations.TransactionMiddleware;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.services.WalletService;
@@ -48,21 +55,24 @@ public class WalletController {
 	}
 
 	@PostMapping("/statement")
+	@TransactionMiddleware()
 	public ResponseEntity<Optional<User>> statement() {
 		return ResponseEntity.ok(userService.getUserById("0"));
 	}
 
 	@PostMapping("/from/mpesa/deposit")
-	public ResponseEntity<Optional<User>> depositFromMpesa() {
-		return ResponseEntity.ok(userService.getUserById("0"));
+	public Object depositFromMpesa(@Valid @RequestBody Mpesa mpesa) {
+		return this.walletService.loadWalletFromMpesa(mpesa);
 	}
 
 	@PostMapping("/to/mpesa")
-	public ResponseEntity<Optional<User>> toMpesa() {
-		return ResponseEntity.ok(userService.getUserById("0"));
+	@TransactionMiddleware()
+	public Object toMpesa(@Valid @RequestBody Mpesa mpesa) {
+		return this.walletService.loadWalletFromMpesa(mpesa);
 	}
 
 	@PostMapping("buy/airtime")
+	@TransactionMiddleware()
 	public ResponseEntity<Optional<User>> buyAirtime() {
 		return ResponseEntity.ok(userService.getUserById("0"));
 	}
@@ -78,9 +88,9 @@ public class WalletController {
 		return ResponseEntity.ok(userService.getUserById("0"));
 	}
 
-	@GetMapping("window/period")
-	public ResponseEntity<Optional<User>> windowPeriod() {
-		return ResponseEntity.ok(userService.getUserById("0"));
+	@PostMapping("window/period")
+	public Object windowPeriod(@Valid @RequestBody PinDto setPin) {
+		return this.userService.createWindowPeriod(setPin);
 	}
 
 	@PostMapping("confirm/otp/transfer")
@@ -104,13 +114,13 @@ public class WalletController {
 	}
 
 	@PostMapping("/setPin")
-	public ResponseEntity<Optional<User>> setPin() {
-		return ResponseEntity.ok(userService.getUserById("0"));
+	public Object setPin(@Valid @RequestBody PinDto setPin) {
+		return userService.setPin(setPin);
 	}
 
 	@PostMapping("/changePin")
-	public ResponseEntity<Optional<User>> changePin() {
-		return ResponseEntity.ok(userService.getUserById("0"));
+	public Object changePin(@Valid @RequestBody ChangePin changePin) {
+		return userService.changePing(changePin);
 	}
 
 	@GetMapping("/transactionhistory")
@@ -119,8 +129,8 @@ public class WalletController {
 	}
 
 	@PostMapping("/transactionhistory/any")
-	public ResponseEntity<Optional<User>> transactionHistoryAny() {
-		return ResponseEntity.ok(userService.getUserById("0"));
+	public Object transactionHistoryAny(@Valid @RequestBody TransactionPeriod changePin) {
+		return walletService.getTransactionHistoryAsOf(changePin);
 	}
 
 	@GetMapping("applyForShortCode")
@@ -134,8 +144,8 @@ public class WalletController {
 	}
 
 	@GetMapping("bankCode")
-	public ResponseEntity<Optional<User>> bankCode() {
-		return ResponseEntity.ok(userService.getUserById("0"));
+	public Object bankCode() {
+		return this.walletService.getBankCode();
 	}
 
 }

@@ -14,6 +14,10 @@ import org.springframework.web.reactive.function.BodyInserters;
 
 import com.google.gson.Gson;
 
+import jakarta.validation.Valid;
+import net.sasakonnect.wallet.RequestDto.Mpesa;
+import net.sasakonnect.wallet.RequestDto.OnboardingStatus;
+import net.sasakonnect.wallet.RequestDto.TransactionPeriod;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
 import net.sasakonnect.wallet.domain.User;
@@ -52,11 +56,26 @@ public class WalletService extends JwtService {
 		return null;
 	}
 
-//
-//	public ResponseEntity<> getBalance() {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
+	public Object getBankCode() {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		var reqId = new HashMap<String, Object>();
+		reqId.put("userId", user.getId());
+		var reqs = requestSigner.signRequest(reqId);
+
+		Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.BANK_CODES)
+				.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
+				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
+
+		String responseJson = responseMono.block();
+
+		if (responseJson != null) {
+			return new Gson().fromJson(responseJson, Object.class);
+
+		}
+
+		return null;
+	}
+
 	public Object getWalletBalance() {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		var user2 = this.userService.findUserWallet(user);
@@ -135,6 +154,105 @@ public class WalletService extends JwtService {
 			}
 		}
 
+		return null;
+	}
+
+	public Object getTransactionHistoryAsOf(@Valid TransactionPeriod transactionPeriod) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		var user2 = this.userService.findUserWallet(user);
+		List<WalletTransactionType> transactionTypes = new ArrayList<>(Arrays.asList(WalletTransactionType.TTID0001,
+				WalletTransactionType.TTID0002, WalletTransactionType.TTID0003, WalletTransactionType.TTID0004,
+				WalletTransactionType.TTID0005, WalletTransactionType.TTID0006, WalletTransactionType.TTID0007));
+
+		// Create an ArrayList for TransactionStatus
+		List<TransactionStatus> transactionStatuses = new ArrayList<>(
+				Arrays.asList(TransactionStatus.TIMEOUT, TransactionStatus.PENDING, TransactionStatus.PROCESSING,
+						TransactionStatus.FAILED, TransactionStatus.SUCCESS));
+
+		if (user2.isPresent()) {
+			var wallets = user2.get().getUserWallets();
+
+			if (!wallets.isEmpty()) {
+				System.out.println("Start time is " + transactionPeriod.getStartDate());
+				var oneWallet = wallets.get(0);
+				var reqId = new HashMap<String, Object>();
+				reqId.put("userId", user.getId());
+				reqId.put("accountId", oneWallet.getWallet().getAccountId());
+				reqId.put("txType",
+						transactionTypes.stream().map(WalletTransactionType::getValue).collect(Collectors.toList()));
+
+				reqId.put("txStatus",
+						transactionStatuses.stream().map(TransactionStatus::getValue).collect(Collectors.toList()));
+
+				reqId.put("startTime", transactionPeriod.getStartDate());
+				reqId.put("endTime", transactionPeriod.getEndDate());
+				reqId.put("pageSize", 20);
+				reqId.put("pageNo", 1);
+				reqId.put("orderByDesc", 1);
+
+				var reqs = requestSigner.signRequest(reqId);
+
+				Mono<String> responseMono = this.bankClientBean.webClient.post()
+						.uri(ChoiceEndpointsConstants.GET_TRANSACTIONS).contentType(MediaType.APPLICATION_JSON)
+						.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+						.bodyToMono(String.class);
+
+				String responseJson = responseMono.block();
+
+				if (responseJson != null) {
+					return new Gson().fromJson(responseJson, Object.class);
+
+				}
+			}
+		}
+
+		return null;
+	}
+
+	public Object getOnBoardingStatus(OnboardingStatus onboardingStatus) {
+		var user = this.userService.getUserById(onboardingStatus.getUser_id());
+		if (user.isPresent()) {
+
+			var reqId = new HashMap<String, Object>();
+			reqId.put("onboardingRequestId", user.get().getOnboardingRequestId());
+			var reqs = this.requestSigner.signRequest(reqId);
+
+			Mono<String> responseMono = this.bankClientBean.webClient.post()
+					.uri(ChoiceEndpointsConstants.POLL_ONBOARDING).contentType(MediaType.APPLICATION_JSON)
+					.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+					.bodyToMono(String.class);
+
+			String responseJson = responseMono.block();
+
+			if (responseJson != null) {
+				return new Gson().fromJson(responseJson, Object.class);
+
+			}
+
+		}
+
+		return null;
+	}
+
+	public Object loadWalletFromMpesa(Mpesa mpesa) {
+
+		var reqId = new HashMap<String, Object>();
+		// reqId.put("onboardingRequestId", user.get().getOnboardingRequestId());
+		var reqs = this.requestSigner.signRequest(reqId);
+
+		Mono<String> responseMono = this.bankClientBean.webClient.post()
+				.uri(ChoiceEndpointsConstants.DEPOSIT_FROM_MPESA).contentType(MediaType.APPLICATION_JSON)
+				.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+				.bodyToMono(String.class);
+
+		String responseJson = responseMono.block();
+
+		if (responseJson != null) {
+			return new Gson().fromJson(responseJson, Object.class);
+
+		}
+
+		// TODO Auto-generated method stub
 		return null;
 	}
 

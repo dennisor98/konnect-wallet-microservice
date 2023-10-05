@@ -1,5 +1,8 @@
 package net.sasakonnect.wallet.services;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,10 +26,14 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import net.sasakonnect.wallet.RequestDto.ChangePin;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
+import net.sasakonnect.wallet.RequestDto.PinDto;
 import net.sasakonnect.wallet.RequestDto.UserLogin;
 import net.sasakonnect.wallet.ResponseDto.UserResponseDTO;
+import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.domain.Permission;
 import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.User;
@@ -56,6 +64,8 @@ public class UserService extends RestClientService implements UserDetailsService
 	private RoleRepository roleRepository;
 	@Autowired
 	private JwtService jwtService;
+	@Autowired
+	BankWebClientBean bankClientBean;
 
 	public Optional<User> getUserById(String id) {
 		return this.userRepository.findById(id);
@@ -100,26 +110,6 @@ public class UserService extends RestClientService implements UserDetailsService
 
 		}
 
-//		{
-//			  "hash": "c068e38b5bc9d237e3b0007d5eb0d485b07ddde7c77a57a13865da4ffe843943",
-//			  "message": "Otp sent please wait for 299.789 seconds  before requesting",
-//			  "success": true
-//			}
-
-//		if (user.isPresent()
-//				&& new BCryptPasswordEncoder().matches(userLogin.getPassword(), user.get().getPassword())) {
-//			User u = user.get();
-//			return UserLoginResponse.builder().token(jwtService.generateToken(u))
-//					.refreshToken(jwtService.generateRefreshToken(u))
-//
-//					.user(UserDto.builder().address(u.getAddress()).firstName(u.getFirstName())
-//							.lastName(u.getLastName()).mobile(u.getMobile()).email(u.getEmail())
-//							.countryCode(u.getCountryCode()).build()
-//
-//					).build();
-//
-//		}
-
 	}
 
 	public boolean findPermissionByRoleName(Optional<Role> role, Object permission) {
@@ -159,7 +149,7 @@ public class UserService extends RestClientService implements UserDetailsService
 			}
 		} else {
 			ObjectNode json = JsonNodeFactory.instance.objectNode();
-			json.put("message", "otp code is Invaliddd");
+			json.put("message", "otp code is Invalid");
 			return ResponseEntity.badRequest().body(json);
 		}
 		return null;
@@ -201,6 +191,123 @@ public class UserService extends RestClientService implements UserDetailsService
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		System.err.print("sdfjksdafnsdlkfjnskjfnkdsalfndjslfsd");
 		return null;
+	}
+
+	public Object setPin(@Valid PinDto setPin) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		Optional<List<UserPin>> userPins = this.userPinRepository.getUserPinThatIsNotArchived(user);
+
+		if (userPins.isPresent() && (userPins.get().size() > 0)) {
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("message", "Pin already set please ,try to reset");
+			map.put("success", false);
+			return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
+		} else {
+			var passwordencoded = new BCryptPasswordEncoder().encode(user.getId() + setPin.getPin());
+			var userpin = new UserPin();
+			userpin.setUser(user);
+			userpin.setPin(passwordencoded);
+			this.userPinRepository.save(userpin);
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("message", "You pin has been set");
+			map.put("success", true);
+			return ResponseEntity.status(HttpStatus.OK).body(map);
+
+		}
+	}
+
+	@Transactional
+	public Object changePing(@Valid ChangePin setPin) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		Optional<List<UserPin>> userPins = this.userPinRepository.getUserPinThatIsNotArchived(user);
+		if (userPins.isPresent() && (userPins.get().size() > 0)) {
+			var pins = this.userPinRepository.findPinsUsedWithinLastThreeMonths(user.getId(), this.threeMonthsAgo());
+			var encoder = new BCryptPasswordEncoder();
+			if (pins.isPresent()) {
+				// check if pin have being used for the pass three months
+				var lasthreemontpin = pins.get().stream()
+						.filter((data) -> encoder.matches(user.getId() + setPin.getPin(), data.getPin()))
+						.collect(Collectors.toList());
+				if (!lasthreemontpin.isEmpty()) {
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("message", "Please use a pin you have not used in the past three months");
+					map.put("success", false);
+					return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(map);
+				} else {
+					var activeUserPin = userPins.get().get(0);
+					if (encoder.matches(user.getId() + setPin.getOldPin(), activeUserPin.getPin())) {
+						var passwordencoded = new BCryptPasswordEncoder().encode(user.getId() + setPin.getPin());
+						var userpin = new UserPin();
+						userpin.setUser(user);
+						userpin.setPin(passwordencoded);
+						this.userPinRepository.markUserPinAsDeleted(activeUserPin.getId());
+						this.userPinRepository.save(userpin);
+						Map<String, Object> map = new HashMap<String, Object>();
+						map.put("message", "Pin changed Successfully");
+						map.put("success", true);
+						return ResponseEntity.status(HttpStatus.OK).body(map);
+
+					} else {
+						Map<String, Object> map = new HashMap<String, Object>();
+						map.put("message", "Old pin mismatch ");
+						map.put("success", false);
+						return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(map);
+
+					}
+
+					// compare the old pin with the existing
+				}
+
+			}
+
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("message", "Unknown Error while changing pin ");
+			map.put("success", false);
+			return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(map);
+
+		} else {
+
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("message", "Please set you Pin first");
+			map.put("success", false);
+			return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(map);
+
+		}
+
+	}
+
+	private Date threeMonthsAgo() {
+		LocalDate currentDate = LocalDate.now();
+		LocalDate threeMonthsAgoDate = currentDate.minusMonths(3);
+		Date threeMonthsAgo = Date.from(threeMonthsAgoDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+		return threeMonthsAgo;
+	}
+
+	public Object createWindowPeriod(@Valid PinDto setPin) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		var bycryp = new BCryptPasswordEncoder();
+		var userPinRepository = this.userPinRepository.getUserPinThatIsNotArchived(user);
+		if (userPinRepository.isPresent() && userPinRepository.get().size() > 0) {
+			if (bycryp.matches(user.getId() + setPin.getPin(), userPinRepository.get().get(0).getPin())) {
+				var token = this.jwtService.generateToken(user);
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("window", token);
+				map.put("success", true);
+				return ResponseEntity.status(HttpStatus.OK).body(map);
+			} else {
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("message", "Pin Entered does not match");
+				map.put("success", false);
+				return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
+			}
+		} else {
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("message", "Something went wrong");
+			map.put("success", false);
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(map);
+		}
+
+		// TODO Auto-generated method stub
 	}
 
 //	public Object userRegister(@Valid UserSignUp userSignUp) throws UserInputException {

@@ -1,9 +1,11 @@
 package net.sasakonnect.wallet.repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -15,7 +17,16 @@ public interface UserPinRepository extends JpaRepository<UserPin, String> {
 
 	Optional<User> findUserWithUserWalletsById(@Param("userId") String userId);
 
-	@Query("SELECT up FROM UserPin up WHERE up.user = :user AND up.deletedAt IS NOT NULL")
+	@Query("SELECT up FROM UserPin up WHERE up.user = :user AND up.deletedAt IS  NULL ")
 	Optional<List<UserPin>> getUserPinThatIsNotArchived(@Param("user") User user);
+
+	@Query("SELECT u FROM UserPin u WHERE u.user.id = :userId AND u.createdAt >= :startDate")
+
+	Optional<List<UserPin>> findPinsUsedWithinLastThreeMonths(@Param("userId") String String,
+			@Param("startDate") Date startDate);
+
+	@Modifying
+	@Query("UPDATE UserPin up SET up.deletedAt = current_timestamp() WHERE up.id = :pinId")
+	void markUserPinAsDeleted(@Param("pinId") String pinId);
 
 }

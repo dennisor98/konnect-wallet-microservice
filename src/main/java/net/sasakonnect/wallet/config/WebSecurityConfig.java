@@ -36,15 +36,6 @@ import net.sasakonnect.wallet.services.UserService;
 
 public class WebSecurityConfig {
 
-	private static final String[] AUTH_WHITELIST = {
-			// -- Swagger UI v2
-			"/v2/api-docs", "/swagger-resources", "/swagger-resources/**", "/configuration/ui",
-			"/configuration/security", "/swagger-ui.html", "/webjars/**",
-			// -- Swagger UI v3 (OpenAPI)
-			"/v3/api-docs/**", "/swagger-ui/**"
-			// other public endpoints of your API may be appended to this array
-	};
-
 	UserService userService;
 	JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -78,10 +69,11 @@ public class WebSecurityConfig {
 		authz.requestMatchers("api-docs/**", // Swagger API documentation
 				"/swagger-ui/**", // Swagger UI web interface
 				"/swagger-resources/**", // Swagger resources like JS and CSS
-				"/webjars/**").permitAll().requestMatchers("/user/userLogin", "/user/confirmOtp").permitAll()
-				.requestMatchers(AUTH_WHITELIST).permitAll() // whitelist Swagger UI resources
+				"/webjars/**").permitAll()
+				.requestMatchers("/konnect-wallet/user/userLogin", "/konnect-wallet/user/confirmOtp").permitAll()
+				// whitelist Swagger UI resources
 
-				.anyRequest().authenticated() // require authentication for any endpoint that's not
+				.anyRequest().permitAll() // require authentication for any endpoint that's not
 		// whitelisted
 
 		);
@@ -118,15 +110,21 @@ public class WebSecurityConfig {
 
 	@Bean
 	public OpenAPI openApiInformation() {
-		Server localServer = new Server().url("http://localhost:8080").description("Localhost Server URL");
+		Server localServer = new Server().url("http://localhost:8080/konnect-wallet")
+				.description("Localhost Server URL");
 		Contact contact = new Contact().email("devops@gmail.com").name("DevOps");
-		Info info = new Info().contact(contact).description("Wallet Based implimentation Through Choice Bank")
+		Info info = new Info().contact(contact).description("Wallet Based implementation Through Choice Bank")
 				.summary("Easy way to Buy").title("Konnect Wallet").version("V1.0.0")
 				.license(new License().name("Apache 2.0").url("http://springdoc.org"));
 
+		// Define custom header here
+		Components components = new Components();
+		components.addSecuritySchemes("Bearer Authentication", createAPIKeyScheme());
+		components.addHeaders("x-transaction-id",
+				new io.swagger.v3.oas.models.headers.Header().description("A transaction window"));
+
 		return new OpenAPI().addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
-				.components(new Components().addSecuritySchemes("Bearer Authentication", createAPIKeyScheme()))
-				.info(info).addServersItem(localServer);
+				.components(components).info(info).addServersItem(localServer);
 	}
 
 	private SecurityScheme createAPIKeyScheme() {
