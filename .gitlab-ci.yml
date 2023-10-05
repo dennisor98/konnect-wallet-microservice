@@ -1,0 +1,25 @@
+stages:
+  - move
+  - build
+
+build:
+  stage: build
+  script:
+    - echo "Building the application on SSH server..."
+    - hostname
+    - pwd
+    - ssh -p 22 ahdev@172.26.0.41  "cd /home/david/application/wallet/ && chmod +x ./gradlew && ./gradlew clean && ./gradlew build -x test"
+    - echo "Source code built on remote server"
+  only:
+    - master
+
+move:
+  stage: move
+  script:
+    - echo "Copying artifacts from remote server to GitLab CI/CD..."
+    - hostname
+    - pwd
+    - scp   -P 22 -r ./*  ahdev@172.26.0.41:/home/david/application/wallet/ 
+    - echo "Artifacts uploaded to GitLab CI/CD."
+  only:
+    - master
