@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -23,10 +25,15 @@ public class RequestSigner {
 	private String choiceSender;
 
 	public String signRequest(Map<String, Object> data) {
+		data.entrySet().removeIf(entry -> entry.getValue() instanceof Map
+				&& ((Map<?, ?>) entry.getValue()).values().stream().allMatch(Objects::isNull));
 		try {
 			Map<String, Object> request = new HashMap<>();
+			if (data.get("requestId") == null) {
+				data.put("requestId", UUID.randomUUID());
+			}
 
-			request.put("requestId", "APPREQ00990320fed02000");
+			request.put("requestId", data.get("requestId"));
 			request.put("sender", choiceSender);
 			request.put("locale", "en_KE");
 			request.put("timestamp", System.currentTimeMillis());
@@ -66,6 +73,7 @@ public class RequestSigner {
 			Object value = obj.get(key);
 			if (value instanceof Map) {
 				Map<String, Object> nestedMap = (Map<String, Object>) value;
+
 				String nestedQueryString = flattenAndSortJSON(nestedMap);
 				List<String> nestedKeyValues = Arrays.stream(nestedQueryString.split("&"))
 						.map(nestedKey -> key + "." + nestedKey).collect(Collectors.toList());
@@ -83,7 +91,10 @@ public class RequestSigner {
 			}
 
 			else {
-				keyValuePairs.add(key + "=" + value.toString());
+				if (value != null) {
+					keyValuePairs.add(key + "=" + value.toString());
+
+				}
 			}
 		}
 

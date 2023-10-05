@@ -5,6 +5,7 @@ import java.util.Arrays;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -70,10 +71,12 @@ public class WebSecurityConfig {
 				"/swagger-ui/**", // Swagger UI web interface
 				"/swagger-resources/**", // Swagger resources like JS and CSS
 				"/webjars/**").permitAll()
-				.requestMatchers("/konnect-wallet/user/userLogin", "/konnect-wallet/user/confirmOtp").permitAll()
-				// whitelist Swagger UI resources
 
-				.anyRequest().permitAll() // require authentication for any endpoint that's not
+				// whitelist Swagger UI resources
+				.requestMatchers("/user/userLogin", "/user/confirmOtp").permitAll()
+				.requestMatchers(HttpMethod.POST, "/wallet").permitAll().anyRequest().authenticated()
+
+		// require authentication for any endpoint that's not
 		// whitelisted
 
 		);

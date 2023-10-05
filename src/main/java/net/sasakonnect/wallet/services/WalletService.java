@@ -4,17 +4,25 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 import jakarta.validation.Valid;
+import net.sasakonnect.wallet.RequestDto.EasyOnboardingRequestParams;
 import net.sasakonnect.wallet.RequestDto.Mpesa;
 import net.sasakonnect.wallet.RequestDto.OnboardingStatus;
 import net.sasakonnect.wallet.RequestDto.TransactionPeriod;
@@ -254,6 +262,82 @@ public class WalletService extends JwtService {
 
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public Object createNewOnBoardingUser(@Valid EasyOnboardingRequestParams easyOnboarding) {
+		Map<String, Object> userMap = new HashMap<String, Object>();
+		userMap.put("firstName", easyOnboarding.getFirstName());
+		userMap.put("middleName", easyOnboarding.getMiddleName());
+		userMap.put("lastName", easyOnboarding.getLastName());
+		userMap.put("birthday", easyOnboarding.getBirthday());
+		userMap.put("gender", easyOnboarding.getGender());
+		userMap.put("countryCode", easyOnboarding.getCountryCode());
+		userMap.put("mobile", easyOnboarding.getMobile());
+		userMap.put("idType", easyOnboarding.getIdTypeVerbal());
+		userMap.put("idNumber", easyOnboarding.getIdNumber());
+		userMap.put("kraPin", easyOnboarding.getKraPin());
+		userMap.put("address", easyOnboarding.getMobile());
+		userMap.put("employmentStatus", easyOnboarding.getEmploymentStatusType().getCode());
+		userMap.put("monthlyIncome", easyOnboarding.monthlyIncomeType().getCode());
+		var user = User.builder().firstName(easyOnboarding.getFirstName()).lastName(easyOnboarding.getLastName())
+				.middleName(easyOnboarding.getMiddleName()).lastName(easyOnboarding.getLastName())
+				.birthday(easyOnboarding.parseBithDay()).address(easyOnboarding.getAddress())
+				.gender(easyOnboarding.getGenderVerbal()).countryCode(Integer.parseInt(easyOnboarding.getCountryCode()))
+				.mobile(easyOnboarding.getMobile()).idType(easyOnboarding.getIdTypeEnum())
+				.monthlyIncome(easyOnboarding.monthlyIncomeType()).kraPin(easyOnboarding.getKraPin())
+				.employmentStatus(easyOnboarding.getEmploymentStatusType()).idNumber(easyOnboarding.getIdNumber())
+				.build();
+		try {
+			final User savedUser = this.userService.createUser(user);
+			userMap.put("userId", savedUser.getId());
+
+			var reqs = this.requestSigner.signRequest(userMap);
+
+			Mono<String> responseMono = this.bankClientBean.webClient.post()
+					.uri(ChoiceEndpointsConstants.OPEN_WALLET_ACCOUNT).contentType(MediaType.APPLICATION_JSON)
+					.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+					.bodyToMono(String.class);
+			responseMono = responseMono.flatMap((String response) -> {
+				// Check if "onboardingRequestId" is null in the response JSON
+				ObjectMapper objectMapper = new ObjectMapper();
+				try {
+					JsonNode responseJson = objectMapper.readTree(response);
+					JsonNode onboardingRequestId = responseJson.path("data").path("onboardingRequestId");
+
+					if (onboardingRequestId.isNull()) {
+						// The "onboardingRequestId" is null, delete the user here
+						this.userService.deleteUserById(savedUser.getId());
+					} else {
+						savedUser.setOnboardingRequestId(onboardingRequestId.asText());
+						this.userService.updateUser(savedUser);
+					}
+
+					// Return the response as-is
+					return Mono.just(response);
+				} catch (JsonProcessingException e) {
+					return Mono.just("Error response: " + e.getMessage());
+				}
+			}).onErrorResume(throwable -> {
+				// Handle other errors here
+				this.userService.deleteUserById(savedUser.getId());
+				return Mono.just("Error response: " + throwable.getMessage());
+			});
+			String responseJson = responseMono.block();
+
+			if (responseJson != null) {
+				return new Gson().fromJson(responseJson, Object.class);
+
+			}
+
+			// TODO Auto-generated method stub
+			return null;
+
+		} catch (DataIntegrityViolationException e) {
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("message", "Account already exist");
+			map.put("success", false);
+			return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
+		}
 	}
 
 }

@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import net.sasakonnect.wallet.CustomController;
 import net.sasakonnect.wallet.RequestDto.ChangePin;
+import net.sasakonnect.wallet.RequestDto.EasyOnboardingRequestParams;
 import net.sasakonnect.wallet.RequestDto.Mpesa;
 import net.sasakonnect.wallet.RequestDto.PinDto;
 import net.sasakonnect.wallet.RequestDto.TransactionPeriod;
@@ -35,8 +36,8 @@ public class WalletController {
 	}
 
 	@PostMapping("")
-	public ResponseEntity<Optional<User>> onBoarding() {
-		return ResponseEntity.ok(userService.getUserById("0"));
+	public Object onBoarding(@Valid @RequestBody EasyOnboardingRequestParams easyOnboarding) {
+		return this.walletService.createNewOnBoardingUser(easyOnboarding);
 	}
 
 	@GetMapping("pin/set")

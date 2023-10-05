@@ -21,7 +21,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import net.sasakonnect.wallet.enums.EmploymentStatus;
 import net.sasakonnect.wallet.enums.Gender;
 import net.sasakonnect.wallet.enums.IdType;
@@ -29,6 +32,9 @@ import net.sasakonnect.wallet.enums.MonthlyIncome;
 
 @Entity
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class User extends BaseWalletDomain implements Serializable, UserDetails {
 	Set<SimpleGrantedAuthority> simple = new HashSet<SimpleGrantedAuthority>();
 	@Column(nullable = false)

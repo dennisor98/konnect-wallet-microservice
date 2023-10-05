@@ -310,6 +310,22 @@ public class UserService extends RestClientService implements UserDetailsService
 		// TODO Auto-generated method stub
 	}
 
+	public User createUser(User user) {
+		return this.userRepository.save(user);
+
+	}
+
+	public void deleteUserById(String id) {
+		this.userRepository.deleteById(id);
+
+	}
+
+	public User updateUser(User savedUser) {
+		return this.userRepository.save(savedUser);
+		// TODO Auto-generated method stub
+
+	}
+
 //	public Object userRegister(@Valid UserSignUp userSignUp) throws UserInputException {
 //		Optional<User> userPhone = this.userRepository.findByMobile(userSignUp.getPhoneNumber());
 //		Optional<User> userEmail = this.userRepository.findByEmail(userSignUp.getEmail());
