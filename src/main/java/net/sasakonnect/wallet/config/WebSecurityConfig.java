@@ -112,6 +112,8 @@ public class WebSecurityConfig {
 	public OpenAPI openApiInformation() {
 		Server localServer = new Server().url("http://localhost:8080/konnect-wallet")
 				.description("Localhost Server URL");
+		Server gatewayServer = new Server().url("https://gw.sasakonnect.net/konnect-wallet")
+				.description("Gateway Server Server URL");
 		Contact contact = new Contact().email("devops@gmail.com").name("DevOps");
 		Info info = new Info().contact(contact).description("Wallet Based implementation Through Choice Bank")
 				.summary("Easy way to Buy").title("Konnect Wallet").version("V1.0.0")
@@ -124,7 +126,7 @@ public class WebSecurityConfig {
 				new io.swagger.v3.oas.models.headers.Header().description("A transaction window"));
 
 		return new OpenAPI().addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
-				.components(components).info(info).addServersItem(localServer);
+				.components(components).info(info).addServersItem(localServer).addServersItem(gatewayServer);
 	}
 
 	private SecurityScheme createAPIKeyScheme() {
