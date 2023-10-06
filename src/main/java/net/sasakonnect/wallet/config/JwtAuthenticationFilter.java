@@ -2,7 +2,6 @@
 package net.sasakonnect.wallet.config;
 
 import java.io.IOException;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,7 +15,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.tools.JwtService;
 
@@ -38,18 +36,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			token = authHeader.substring(7);
 			id = jwtService.extractUsername(token);
 		}
+		System.out.println(id);
 
 		if (id != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-			Optional<User> user = this.userService.findUserWallet(id);
-			UserDetails userDetails = userService.loadUserByUsername(id);
-			if (user.isPresent() && this.jwtService.validateToken(token, userDetails)) {
-				System.out.println("this is do internal");
+			try {
+//				Optional<User> user = this.userService.findUserWallet(id);
+				UserDetails userDetails = userService.loadUserByUsername(id);
+				if (userDetails != null && this.jwtService.validateToken(token, userDetails)) {
+					System.out.println("this is do internal");
 
-				UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
-						null, null);
-				authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-				SecurityContextHolder.getContext().setAuthentication(authToken);
+					UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
+							null, null);
+					authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+					SecurityContextHolder.getContext().setAuthentication(authToken);
+				}
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+
 			}
+
 		}
 		filterChain.doFilter(request, response);
 
