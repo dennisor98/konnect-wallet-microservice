@@ -73,7 +73,7 @@ public class WebSecurityConfig {
 				"/webjars/**").permitAll()
 
 				// whitelist Swagger UI resources
-				.requestMatchers("/user/userLogin", "/user/confirmOtp").permitAll()
+				.requestMatchers("/user/userLogin", "/user/confirmOtp", "konnect/callBack").permitAll()
 				.requestMatchers(HttpMethod.POST, "/wallet").permitAll().anyRequest().authenticated()
 
 		// require authentication for any endpoint that's not
@@ -117,6 +117,7 @@ public class WebSecurityConfig {
 				.description("Localhost Server URL");
 		Server gatewayServer = new Server().url("https://gw.sasakonnect.net/konnect-wallet")
 				.description("Gateway Server Server URL");
+		Server nginxServer = new Server().url("https://wallet.sasakonnect.net").description("Nginx Server Server URL");
 		Contact contact = new Contact().email("devops@gmail.com").name("DevOps");
 		Info info = new Info().contact(contact).description("Wallet Based implementation Through Choice Bank")
 				.summary("Easy way to Buy").title("Konnect Wallet").version("V1.0.0")
@@ -129,7 +130,8 @@ public class WebSecurityConfig {
 				new io.swagger.v3.oas.models.headers.Header().description("A transaction window"));
 
 		return new OpenAPI().addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
-				.components(components).info(info).addServersItem(localServer).addServersItem(gatewayServer);
+				.components(components).info(info).addServersItem(localServer).addServersItem(gatewayServer)
+				.addServersItem(nginxServer);
 	}
 
 	private SecurityScheme createAPIKeyScheme() {
