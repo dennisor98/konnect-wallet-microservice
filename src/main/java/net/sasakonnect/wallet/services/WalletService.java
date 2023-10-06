@@ -364,6 +364,11 @@ public class WalletService extends JwtService {
 			map.put("message", "Account already exist");
 			map.put("success", false);
 			return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
+		} catch (Exception e) {
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("message", e.getMessage());
+			map.put("success", false);
+			return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
 		}
 	}
 
