@@ -7,9 +7,15 @@ import java.util.List;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
+import lombok.Builder;
+import lombok.Data;
 
 @Entity
+@Builder
+@Data
 public class Transaction extends BaseWalletDomain implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	@Column
 	private String txId;

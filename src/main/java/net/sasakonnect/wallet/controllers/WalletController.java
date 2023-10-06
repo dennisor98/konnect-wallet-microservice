@@ -14,6 +14,7 @@ import net.sasakonnect.wallet.CustomController;
 import net.sasakonnect.wallet.RequestDto.ChangePin;
 import net.sasakonnect.wallet.RequestDto.EasyOnboardingRequestParams;
 import net.sasakonnect.wallet.RequestDto.Mpesa;
+import net.sasakonnect.wallet.RequestDto.OnBoardingOtp;
 import net.sasakonnect.wallet.RequestDto.PinDto;
 import net.sasakonnect.wallet.RequestDto.TransactionPeriod;
 import net.sasakonnect.wallet.annotations.TransactionMiddleware;
@@ -43,6 +44,16 @@ public class WalletController {
 	@GetMapping("pin/set")
 	public Object isPinSet() {
 		return userService.isPinSet();
+	}
+
+	@PostMapping("confirm/onboarding/otp")
+	public Object confirmOnboardingOtp(@Valid @RequestBody OnBoardingOtp easyOnboarding) {
+		return this.walletService.confirmOnboardingOtp(easyOnboarding);
+	}
+
+	@PostMapping("resend/onboarding/otp")
+	public Object resendOnboardingOtp(@Valid @RequestBody OnBoardingOtp easyOnboarding) {
+		return this.walletService.resendOnboardingOtp();
 	}
 
 	@PostMapping("/messaging/token")

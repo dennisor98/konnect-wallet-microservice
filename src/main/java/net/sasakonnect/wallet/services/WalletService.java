@@ -19,13 +19,16 @@ import org.springframework.web.reactive.function.BodyInserters;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 
 import jakarta.validation.Valid;
 import net.sasakonnect.wallet.RequestDto.EasyOnboardingRequestParams;
 import net.sasakonnect.wallet.RequestDto.Mpesa;
+import net.sasakonnect.wallet.RequestDto.OnBoardingOtp;
 import net.sasakonnect.wallet.RequestDto.OnboardingStatus;
 import net.sasakonnect.wallet.RequestDto.TransactionPeriod;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
@@ -37,6 +40,8 @@ import net.sasakonnect.wallet.enums.NotificationBody;
 import net.sasakonnect.wallet.enums.NotificationType;
 import net.sasakonnect.wallet.enums.TransactionStatus;
 import net.sasakonnect.wallet.enums.WalletTransactionType;
+import net.sasakonnect.wallet.notification.NotificationResult;
+import net.sasakonnect.wallet.notification.TransactionResultNotification;
 import net.sasakonnect.wallet.repository.UserWalletRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.tools.JwtService;
@@ -56,6 +61,7 @@ public class WalletService extends JwtService {
 
 	@Autowired
 	UserWalletRepository userWalletRepository;
+	private TransactionService transactionService;
 
 	public Object getWalletInfo() {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -313,6 +319,8 @@ public class WalletService extends JwtService {
 			responseMono = responseMono.flatMap((String response) -> {
 				// Check if "onboardingRequestId" is null in the response JSON
 				ObjectMapper objectMapper = new ObjectMapper();
+				objectMapper.registerModule(new JavaTimeModule()); // Register the Java 8 date/time module
+
 				try {
 					JsonNode responseJson = objectMapper.readTree(response);
 					JsonNode onboardingRequestId = responseJson.path("data").path("onboardingRequestId");
@@ -342,6 +350,7 @@ public class WalletService extends JwtService {
 			String responseJson = responseMono.block();
 
 			if (responseJson != null) {
+				System.out.println(responseJson);
 				return new Gson().fromJson(responseJson, Object.class);
 
 			}
@@ -389,6 +398,13 @@ public class WalletService extends JwtService {
 			} else if (notification_Type == NotificationType.ACCOUNT_STATEMENT.getCode()) {
 
 			} else if (notification_Type == NotificationType.TRANSACTION.getCode()) {
+				TypeToken<NotificationResult<TransactionResultNotification>> typeToken = new TypeToken<NotificationResult<TransactionResultNotification>>() {
+				};
+
+				NotificationResult<TransactionResultNotification> results = new Gson().fromJson(params,
+						typeToken.getType());
+
+				this.transactionService.saveTransaction(results);
 
 			} else if (notification_Type == NotificationType.BALANCE.getCode()) {
 
@@ -421,6 +437,56 @@ public class WalletService extends JwtService {
 		map.put("message", "Got You!");
 		map.put("success", true);
 		return ResponseEntity.status(HttpStatus.OK).body(map);
+	}
+
+	public Object confirmOnboardingOtp(@Valid OnBoardingOtp otp) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		var reqId = new HashMap<String, Object>();
+		reqId.put("onboardingRequestId", user.getOnboardingRequestId());
+		reqId.put("onboardType", "personal");
+		reqId.put("code", otp.getOtp());
+
+		var reqs = this.requestSigner.signRequest(reqId);
+
+		Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.CONFIRM_OTP)
+				.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
+				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
+
+		String responseJson = responseMono.block();
+
+		if (responseJson != null) {
+			return new Gson().fromJson(responseJson, Object.class);
+
+		}
+
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Object resendOnboardingOtp() {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		var reqId = new HashMap<String, Object>();
+		reqId.put("onboardingRequestId", user.getOnboardingRequestId());
+		reqId.put("onboardType", "personal");
+
+		var reqs = this.requestSigner.signRequest(reqId);
+
+		Mono<String> responseMono = this.bankClientBean.webClient.post()
+				.uri(ChoiceEndpointsConstants.REQUEST_OTP_RESEND).contentType(MediaType.APPLICATION_JSON)
+				.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+				.bodyToMono(String.class);
+
+		String responseJson = responseMono.block();
+
+		if (responseJson != null) {
+			return new Gson().fromJson(responseJson, Object.class);
+
+		}
+
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
