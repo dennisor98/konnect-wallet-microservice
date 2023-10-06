@@ -156,6 +156,20 @@ public class UserService extends RestClientService implements UserDetailsService
 		// TODO Auto-generated method stub
 	}
 
+	public Object createJwtFor(User u) {
+		var response = UserResponseDTO.builder().token(jwtService.generateToken(u))
+				.refreshToken(jwtService.generateRefreshToken(u)).middleName(u.getMiddleName())
+				.gender(u.getGender().name()).idType(u.getIdType().name()).idNumber(u.getIdNumber())
+				.onboardingRequestId(u.getOnboardingRequestId()).birthday(u.getBirthday().toString())
+				.updatedAt(u.getUpdatedAt().toInstant()).kraPin(u.getKraPin())
+				.employmentStatus(u.getEmploymentStatus().name()).monthlyIncome(u.getMonthlyIncome().toString())
+				.createdAt(u.getCreatedAt().toInstant()).id(u.getId())
+
+				.address(u.getAddress()).firstName(u.getFirstName()).lastName(u.getLastName()).mobile(u.getMobile())
+				.countryCode(u.getCountryCode()).build();
+		return ResponseEntity.ok(response);
+	}
+
 	public Optional<User> findUserWallet(User user) {
 		return this.userRepository.findUserWithUserWalletsById(user.getId());
 		// TODO Auto-generated method stub
@@ -322,6 +336,12 @@ public class UserService extends RestClientService implements UserDetailsService
 
 	public User updateUser(User savedUser) {
 		return this.userRepository.save(savedUser);
+		// TODO Auto-generated method stub
+
+	}
+
+	public void deletUserByOnboardingRequestId(String onboardingRequestId) {
+		this.userRepository.deleteByOnboardingRequestId(onboardingRequestId);
 		// TODO Auto-generated method stub
 
 	}

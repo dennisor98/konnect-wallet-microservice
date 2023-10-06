@@ -322,7 +322,11 @@ public class WalletService extends JwtService {
 						this.userService.deleteUserById(savedUser.getId());
 					} else {
 						savedUser.setOnboardingRequestId(onboardingRequestId.asText());
-						this.userService.updateUser(savedUser);
+						var updateduser = this.userService.updateUser(savedUser);
+						var userData = this.userService.createJwtFor(updateduser);
+
+						return Mono.just(objectMapper.writeValueAsString(userData));
+
 					}
 
 					// Return the response as-is
@@ -376,6 +380,10 @@ public class WalletService extends JwtService {
 					userWallet.setUser(user.get());
 					userWallet.setWallet(savedwallet);
 					this.userWalletRepository.save(userWallet);
+
+				} else {
+					var onboardingRequestId = params.get("onboardingRequestId").getAsString();
+					this.userService.deletUserByOnboardingRequestId(onboardingRequestId);
 
 				}
 			} else if (notification_Type == NotificationType.ACCOUNT_STATEMENT.getCode()) {
