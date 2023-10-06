@@ -1,0 +1,76 @@
+Evaluation Feedback
+
+This document provides feedback and improvement suggestions for the product based on an evaluation. It outlines various areas that require modification, new features to be added, and improvements to enhance the user experience.
+
+## Feedback and Suggestions
+
+### Logo Modification
+- Consider updating the logo to give the product a fresh and appealing look.
+
+### Wallet Features
+- Implement the ability to load the wallet from modified sources, including a feature to specify the amount to be loaded.
+- Introduce a "Load from Bank" feature to facilitate easier fund transfers.
+- Allow users to view statements for transactions, with the option to fetch the last transaction easily.
+
+### User Interface Enhancements
+- Modify the "View More" feature for improved usability.
+- Refactor the "Pay Bill" functionality to a more generic "Utility" feature.
+- Define a utility UI with links to utility-related functions.
+
+### User Experience Improvements
+- Remove redundancy in the bottom bar and app bar, excluding the withdrawal option.
+- Add a "Send Money" feature for wallet-to-wallet transactions.
+- Clarify if Airtel Money is available as a payment option from the choice bank.
+- Implement a "Scan to Pay" feature.
+- Add the ability to withdraw funds to a bank account.
+- Include a note-taking feature during transactions, enriching it with categories for spend management.
+- Allow users to mark favorite merchants and add tags or notes for regular transactions.
+
+### UI and Navigation
+- Persist the bottom bar on all screens for easier navigation.
+- Provide an option to add tags in the statement view.
+
+### Communication and Messaging
+- Explore the probability of enabling messaging between senders and receivers.
+- Consider introducing chat gamification features to incentivize user engagement on the platform.
+
+### Integration and Features
+- Evaluate the possibility of sending SMS messages on behalf of the user's messaging app during transactions (Feature testing).
+- Push catalog information to wholesale and allow shop owners to manage some catalog items (Feature release).
+- Confirm if it's possible to create accounts from countries other than Kenya (e.g., 254).
+- Notify users to set accurate dates of birth in their profiles.
+
+### Pay/Transfer Features
+- Implement the following pay/transfer features:
+  - Wallet to Wallet
+  - Pay to Mpesa Number
+  - Buy Goods (Till)
+  - Mpesa Paybill
+  - Transfer to Bank Account
+
+### Utilities/Commands
+- Provide quick access to various utility services, including:
+  - Konnect Internet
+  - KonnectFood+
+  - KPLC (Prepay, Postpay)
+  - Nairobi Water
+  - Airtime Top-Up
+
+### Bottom Bar Properties
+- Refine the bottom bar properties for easier navigation, including options like:
+  - Home
+  - Deposit
+  - Scan
+  - Pay
+  - Chat
+
+## Feedback Implementation
+
+We encourage the product development team to consider these feedback points for enhancing the product. By implementing these suggestions, we aim to improve the user experience and provide a more feature-rich and user-friendly product.
+ selenium import webdriver
+
+options = webdriver.ChromeOptions()
+options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36")
+
+driver = webdriver.Chrome(options=options)
+
