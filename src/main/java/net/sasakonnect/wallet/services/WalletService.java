@@ -298,15 +298,16 @@ public class WalletService extends JwtService {
 		userMap.put("address", easyOnboarding.getMobile());
 		userMap.put("employmentStatus", easyOnboarding.getEmploymentStatusType().getCode());
 		userMap.put("monthlyIncome", easyOnboarding.monthlyIncomeType().getCode());
-		var user = User.builder().firstName(easyOnboarding.getFirstName()).lastName(easyOnboarding.getLastName())
-				.middleName(easyOnboarding.getMiddleName()).lastName(easyOnboarding.getLastName())
-				.birthday(easyOnboarding.parseBithDay()).address(easyOnboarding.getAddress())
-				.gender(easyOnboarding.getGenderVerbal()).countryCode(Integer.parseInt(easyOnboarding.getCountryCode()))
-				.mobile(easyOnboarding.getMobile()).idType(easyOnboarding.getIdTypeEnum())
-				.monthlyIncome(easyOnboarding.monthlyIncomeType()).kraPin(easyOnboarding.getKraPin())
-				.employmentStatus(easyOnboarding.getEmploymentStatusType()).idNumber(easyOnboarding.getIdNumber())
-				.build();
 		try {
+			var user = User.builder().firstName(easyOnboarding.getFirstName()).lastName(easyOnboarding.getLastName())
+					.middleName(easyOnboarding.getMiddleName()).lastName(easyOnboarding.getLastName())
+					.birthday(easyOnboarding.parseBithDay()).address(easyOnboarding.getAddress())
+					.gender(easyOnboarding.getGenderVerbal())
+					.countryCode(Integer.parseInt(easyOnboarding.getCountryCode())).mobile(easyOnboarding.getMobile())
+					.idType(easyOnboarding.getIdTypeEnum()).monthlyIncome(easyOnboarding.monthlyIncomeType())
+					.kraPin(easyOnboarding.getKraPin()).employmentStatus(easyOnboarding.getEmploymentStatusType())
+					.idNumber(easyOnboarding.getIdNumber()).build();
+
 			final User savedUser = this.userService.createUser(user);
 			userMap.put("userId", savedUser.getId());
 
