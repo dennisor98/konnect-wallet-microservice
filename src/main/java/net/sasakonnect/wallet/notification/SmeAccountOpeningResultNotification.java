@@ -1,0 +1,18 @@
+package net.sasakonnect.wallet.notification;
+
+import java.util.List;
+
+import lombok.Data;
+
+@Data
+public class SmeAccountOpeningResultNotification {
+	private String userId;
+	private String onboardingRequestId;
+	private int status;
+	private String accountId;
+	private String accountType;
+	private long completeTime;
+	private List<String> rejectionReasonIds;
+	private List<String> rejectionReasonMsgs;
+
+}

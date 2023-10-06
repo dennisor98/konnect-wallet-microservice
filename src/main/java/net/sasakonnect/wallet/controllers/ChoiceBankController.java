@@ -2,10 +2,14 @@ package net.sasakonnect.wallet.controllers;
 
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+
+import com.google.gson.JsonObject;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -22,6 +26,8 @@ public class ChoiceBankController {
 
 	private final UserService userService;
 	private final WalletService walletService;
+	@Autowired
+	private ApplicationEventPublisher eventPublisher;
 
 	public ChoiceBankController(UserService userService, WalletService walletService) {
 		this.userService = userService;
@@ -34,8 +40,8 @@ public class ChoiceBankController {
 	}
 
 	@PostMapping("konnect/callBack")
-	public ResponseEntity<Optional<User>> konnectCallBack() {
-		return ResponseEntity.ok(userService.getUserById("0"));
+	public Object konnectCallBack(@RequestBody JsonObject body) {
+		return this.walletService.onCallBackInvocation(body);
 	}
 
 	@PostMapping("choice-bank/onboarding/status")

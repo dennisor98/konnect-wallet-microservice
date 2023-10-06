@@ -20,6 +20,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 
 import jakarta.validation.Valid;
 import net.sasakonnect.wallet.RequestDto.EasyOnboardingRequestParams;
@@ -29,8 +31,14 @@ import net.sasakonnect.wallet.RequestDto.TransactionPeriod;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
 import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.domain.UserWallet;
+import net.sasakonnect.wallet.domain.Wallet;
+import net.sasakonnect.wallet.enums.NotificationBody;
+import net.sasakonnect.wallet.enums.NotificationType;
 import net.sasakonnect.wallet.enums.TransactionStatus;
 import net.sasakonnect.wallet.enums.WalletTransactionType;
+import net.sasakonnect.wallet.repository.UserWalletRepository;
+import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.tools.JwtService;
 import net.sasakonnect.wallet.tools.RequestSigner;
 import reactor.core.publisher.Mono;
@@ -43,6 +51,11 @@ public class WalletService extends JwtService {
 	RequestSigner requestSigner;
 	@Autowired
 	UserService userService;
+	@Autowired
+	WalletRepository walletRepository;
+
+	@Autowired
+	UserWalletRepository userWalletRepository;
 
 	public Object getWalletInfo() {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -338,6 +351,68 @@ public class WalletService extends JwtService {
 			map.put("success", false);
 			return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
 		}
+	}
+
+	public Object onCallBackInvocation(JsonObject body) {
+		// TODO Auto-generated method stub
+		return this.callBackContentResolver(body);
+
+	}
+
+	private Object callBackContentResolver(JsonObject body) {
+		var notification_Type = body.get("notificationType").getAsString();
+		var params = body.getAsJsonObject("params");
+		try {
+			NotificationBody notificationBody = new Gson().fromJson(params, NotificationBody.class);
+
+			if (notification_Type == NotificationType.ONBOARD.getCode()) {
+				var user = this.userService.getUserById(params.get("userId").getAsString());
+				if (notificationBody.getStatus() == 7) {
+					var wallet = new Wallet();
+					wallet.setAccountId(notificationBody.getAccountId());
+					wallet.setAccountType(notificationBody.getAccountType());
+					var savedwallet = this.walletRepository.save(wallet);
+					var userWallet = new UserWallet();
+					userWallet.setUser(user.get());
+					userWallet.setWallet(savedwallet);
+					this.userWalletRepository.save(userWallet);
+
+				}
+			} else if (notification_Type == NotificationType.ACCOUNT_STATEMENT.getCode()) {
+
+			} else if (notification_Type == NotificationType.TRANSACTION.getCode()) {
+
+			} else if (notification_Type == NotificationType.BALANCE.getCode()) {
+
+			} else if (notification_Type == NotificationType.INTERNAL_BATCH_TRANSACTION.getCode()) {
+
+			} else if (notification_Type == NotificationType.WALLET_ACCOUNT_UPGRADE.getCode()) {
+
+			} else if (notification_Type == NotificationType.SME_ACCOUNT_OPEN.getCode()) {
+
+			} else if (notification_Type == NotificationType.UTILITY.getCode()) {
+
+			} else if (notification_Type == NotificationType.BULK_PAYMENT.getCode()) {
+
+			} else if (notification_Type == NotificationType.FOREIGN_CURRENCY_DEPOSIT.getCode()) {
+
+			} else if (notification_Type == NotificationType.FOREIGN_CURRENCY_OUTBOUND_TRANSACTION.getCode()) {
+
+			} else if (notification_Type == NotificationType.MULTIPLE_ACCOUNT_OPENING.getCode()) {
+
+			} else if (notification_Type == NotificationType.FOREIGN_CURRENCY_EXCHANGE.getCode()) {
+
+			} else if (notification_Type == NotificationType.BULK_UTILITY_PAYMENT.getCode()) {
+
+			}
+		} catch (JsonSyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("message", "Got You!");
+		map.put("success", true);
+		return ResponseEntity.status(HttpStatus.OK).body(map);
 	}
 
 }

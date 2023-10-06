@@ -87,7 +87,7 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 	@JoinColumn(name = "meta_id")
 	private MetaMask metaMask;
 
-	@OneToMany(mappedBy = "user")
+	@OneToMany(mappedBy = "user") // This 'user' should match the field name in UserWallet
 	private List<UserWallet> userWallets;
 
 	@OneToMany(mappedBy = "user")
