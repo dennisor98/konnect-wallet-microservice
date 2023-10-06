@@ -51,8 +51,8 @@ public class WalletController {
 		return this.walletService.confirmOnboardingOtp(easyOnboarding);
 	}
 
-	@PostMapping("resend/onboarding/otp")
-	public Object resendOnboardingOtp(@Valid @RequestBody OnBoardingOtp easyOnboarding) {
+	@GetMapping("resend/onboarding/otp")
+	public Object resendOnboardingOtp() {
 		return this.walletService.resendOnboardingOtp();
 	}
 
