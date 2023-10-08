@@ -24,11 +24,14 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.media.StringSchema;
+import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
@@ -124,7 +127,6 @@ public class WebSecurityConfig {
 		Info info = new Info().contact(contact).description("Wallet Based implementation Through Choice Bank")
 				.summary("Easy way to Buy").title("Konnect Wallet").version("V1.0.0")
 				.license(new License().name("Apache 2.0").url("http://springdoc.org"));
-
 		// Define custom header here
 		Components components = new Components();
 		components.addHeaders("X-Custom-Header",
@@ -134,12 +136,22 @@ public class WebSecurityConfig {
 //		components.addHeaders("x-transaction-id",
 //				new io.swagger.v3.oas.models.headers.Header().description("A transaction window"));
 
-		return new OpenAPI().addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
-				.components(components
+		Object example_token = "xy......bearertoken";
+		var openApi = new OpenAPI();
+		openApi.addSecurityItem(new SecurityRequirement().addList("Bearer Authentication")).components(components
 
-				)
+		)
 
 				.info(info).addServersItem(gatewayServer).addServersItem(nginxServer).addServersItem(localServer);
+		Paths paths = new Paths();
+		paths.put("/wallet/*", new PathItem());
+		openApi.setPaths(paths);
+		openApi.getPaths().values().stream().flatMap(pathItem -> pathItem.readOperations().stream())
+				.forEach(operation -> operation
+						.addParametersItem(new HeaderParameter().name(KonnectHeader.X_TRANSACTION_HEADER.toString())
+								.allowEmptyValue(false).example(example_token).required(true)));
+
+		return openApi;
 	}
 
 	private SecurityScheme createAPIKeyScheme() {

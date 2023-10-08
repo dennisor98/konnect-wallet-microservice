@@ -14,25 +14,10 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.servlet.http.HttpServletRequest;
+import net.sasakonnect.wallet.config.KonnectHeader;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.tools.JwtService;
-
-enum KonnectHeader {
-	X_TRANSACTION_HEADER("x-transaction-id");
-
-	private String value;
-
-	KonnectHeader(String string) {
-		this.value = string;
-		// TODO Auto-generated constructor stub
-	}
-
-	@Override
-	public String toString() {
-		return this.value;
-	}
-}
 
 @Aspect
 @Component
