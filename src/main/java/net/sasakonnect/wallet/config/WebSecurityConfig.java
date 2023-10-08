@@ -139,7 +139,7 @@ public class WebSecurityConfig {
 
 				)
 
-				.info(info).addServersItem(localServer).addServersItem(gatewayServer).addServersItem(nginxServer);
+				.info(info).addServersItem(gatewayServer).addServersItem(nginxServer).addServersItem(localServer);
 	}
 
 	private SecurityScheme createAPIKeyScheme() {
