@@ -108,5 +108,10 @@
     "name": "PRIMARY_SMS_PROVIDER",
     "type": "java.lang.String",
     "description": "A description for 'PRIMARY_SMS_PROVIDER'"
+  },
+  {
+    "name": "MAX_PIN_ATTEMPT",
+    "type": "java.lang.String",
+    "description": "A description for 'MAX_PIN_ATTEMPT'"
   }
 ]}

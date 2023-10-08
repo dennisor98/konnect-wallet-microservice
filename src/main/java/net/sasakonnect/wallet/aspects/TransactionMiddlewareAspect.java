@@ -42,7 +42,6 @@ public class TransactionMiddlewareAspect {
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("message", "x-transaction-id is required");
 			map.put("success", false);
-
 			throw new ResponseStatusException(HttpStatus.GONE, map.toString());
 		} else {
 			var isValid = this.jwtService.validateToken(transaction_token, (User) authentication.getPrincipal());

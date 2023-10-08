@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -66,6 +67,8 @@ public class UserService extends RestClientService implements UserDetailsService
 	private JwtService jwtService;
 	@Autowired
 	BankWebClientBean bankClientBean;
+	@Value("${MAX_PIN_ATTEMPT:3}")
+	private int maxpinattempt;
 
 	public Optional<User> getUserById(String id) {
 		return this.userRepository.findById(id);
@@ -301,14 +304,18 @@ public class UserService extends RestClientService implements UserDetailsService
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		var bycryp = new BCryptPasswordEncoder();
 		var userPinRepository = this.userPinRepository.getUserPinThatIsNotArchived(user);
-		if (userPinRepository.isPresent() && userPinRepository.get().size() > 0) {
+		if (userPinRepository.isPresent() && userPinRepository.get().size() > 0
+				&& !(userPinRepository.get().get(0).getPinAttempts() >= maxpinattempt)) {
 			if (bycryp.matches(user.getId() + setPin.getPin(), userPinRepository.get().get(0).getPin())) {
 				var token = this.jwtService.generateToken(user);
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("window", token);
 				map.put("success", true);
+				this.userPinRepository.resetPinAttempts(user);
+
 				return ResponseEntity.status(HttpStatus.OK).body(map);
 			} else {
+				this.userPinRepository.incrementPinAttempts(user);
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("message", "Pin Entered does not match");
 				map.put("success", false);

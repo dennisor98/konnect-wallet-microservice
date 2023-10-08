@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import jakarta.transaction.Transactional;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.UserPin;
 
@@ -28,5 +29,15 @@ public interface UserPinRepository extends JpaRepository<UserPin, String> {
 	@Modifying
 	@Query("UPDATE UserPin up SET up.deletedAt = current_timestamp() WHERE up.id = :pinId")
 	void markUserPinAsDeleted(@Param("pinId") String pinId);
+
+	@Modifying
+	@Transactional
+	@Query("UPDATE UserPin up SET up.pinAttempts = up.pinAttempts + 1 WHERE up.user = :user AND up.deletedAt IS NULL")
+	void incrementPinAttempts(@Param("user") User user);
+
+	@Modifying
+	@Transactional
+	@Query("UPDATE UserPin up SET up.pinAttempts = 0 WHERE up.user = :user AND up.deletedAt IS NULL")
+	void resetPinAttempts(@Param("user") User user);
 
 }
