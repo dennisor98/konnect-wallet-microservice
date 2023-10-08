@@ -24,14 +24,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.media.StringSchema;
-import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
@@ -143,13 +140,13 @@ public class WebSecurityConfig {
 		)
 
 				.info(info).addServersItem(gatewayServer).addServersItem(nginxServer).addServersItem(localServer);
-		Paths paths = new Paths();
-		paths.put("/wallet/*", new PathItem());
-		openApi.setPaths(paths);
-		openApi.getPaths().values().stream().flatMap(pathItem -> pathItem.readOperations().stream())
-				.forEach(operation -> operation
-						.addParametersItem(new HeaderParameter().name(KonnectHeader.X_TRANSACTION_HEADER.toString())
-								.allowEmptyValue(false).example(example_token).required(true)));
+//		Paths paths = new Paths();
+//		paths.put("/wallet/*", new PathItem());
+//		openApi.setPaths(paths);
+//		openApi.getPaths().values().stream().flatMap(pathItem -> pathItem.readOperations().stream())
+//				.forEach(operation -> operation
+//						.addParametersItem(new HeaderParameter().name(KonnectHeader.X_TRANSACTION_HEADER.toString())
+//								.allowEmptyValue(false).example(example_token).required(true)));
 
 		return openApi;
 	}
