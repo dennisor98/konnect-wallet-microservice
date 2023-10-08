@@ -57,16 +57,6 @@ public class WalletExceptionHandler extends ResponseEntityExceptionHandler {
 
 	}
 
-//	@ExceptionHandler({ org.springframework.web.bind.MethodArgumentNotValidException.class })
-//	public ResponseEntity<Object> handleMethodArgumentNotValidException(ResponseStatusException ex, WebRequest request)
-//			throws JsonProcessingException {
-//		List<String> errors = new ArrayList<String>();
-//		ObjectMapper objectMapper = new ObjectMapper();
-//		var jsonres = objectMapper.writeValueAsString(ex.getReason());
-//		ApiError apiError = new ApiError(ex.getStatusCode(), jsonres, errors);
-//		return this.handleExceptionInternal(ex, apiError, new HttpHeaders(), apiError.getStatus(), request);
-//
-//	}
 	@Override
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
 			HttpHeaders headers, HttpStatusCode status, WebRequest request) {

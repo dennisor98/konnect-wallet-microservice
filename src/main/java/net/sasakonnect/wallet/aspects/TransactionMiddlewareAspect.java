@@ -14,6 +14,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.servlet.http.HttpServletRequest;
+import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.services.UserService;
+import net.sasakonnect.wallet.tools.JwtService;
 
 enum KonnectHeader {
 	X_TRANSACTION_HEADER("x-transaction-id");
@@ -34,7 +37,17 @@ enum KonnectHeader {
 @Aspect
 @Component
 public class TransactionMiddlewareAspect {
+	private UserService userService;
+	private JwtService jwtService;
+
+	public TransactionMiddlewareAspect(UserService userService, JwtService jwtService) {
+		this.userService = userService;
+
+		this.jwtService = jwtService;
+	}
+
 	@Before("@annotation(net.sasakonnect.wallet.annotations.TransactionMiddleware)")
+
 	public void beforeControllerMethodExecution() {
 		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
 				.getRequest();
@@ -47,7 +60,14 @@ public class TransactionMiddlewareAspect {
 
 			throw new ResponseStatusException(HttpStatus.GONE, map.toString());
 		} else {
+			var isValid = this.jwtService.validateToken(transaction_token, (User) authentication.getPrincipal());
+			if (!isValid) {
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("message", "could not validate session");
+				map.put("success", false);
+				throw new ResponseStatusException(HttpStatus.FORBIDDEN, map.toString());
 
+			}
 		}
 
 	}

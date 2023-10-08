@@ -24,9 +24,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
@@ -125,13 +127,19 @@ public class WebSecurityConfig {
 
 		// Define custom header here
 		Components components = new Components();
+		components.addHeaders("X-Custom-Header",
+				new Header().description("Description of custom header").schema(new StringSchema()));
 		components.addSecuritySchemes("Bearer Authentication", createAPIKeyScheme());
-		components.addHeaders("x-transaction-id",
-				new io.swagger.v3.oas.models.headers.Header().description("A transaction window"));
+
+//		components.addHeaders("x-transaction-id",
+//				new io.swagger.v3.oas.models.headers.Header().description("A transaction window"));
 
 		return new OpenAPI().addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
-				.components(components).info(info).addServersItem(localServer).addServersItem(gatewayServer)
-				.addServersItem(nginxServer);
+				.components(components
+
+				)
+
+				.info(info).addServersItem(localServer).addServersItem(gatewayServer).addServersItem(nginxServer);
 	}
 
 	private SecurityScheme createAPIKeyScheme() {
