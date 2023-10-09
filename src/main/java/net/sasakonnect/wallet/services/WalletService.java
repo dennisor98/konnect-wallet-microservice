@@ -262,23 +262,32 @@ public class WalletService extends JwtService {
 	}
 
 	public Object loadWalletFromMpesa(Mpesa mpesa) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-		var reqId = new HashMap<String, Object>();
-		// reqId.put("onboardingRequestId", user.get().getOnboardingRequestId());
-		var reqs = this.requestSigner.signRequest(reqId);
+		var userWallets = this.walletRepository.findByUserWalletsUser(user);
+		if (!userWallets.isEmpty()) {
+			var userwallet = userWallets.get(0);
 
-		Mono<String> responseMono = this.bankClientBean.webClient.post()
-				.uri(ChoiceEndpointsConstants.DEPOSIT_FROM_MPESA).contentType(MediaType.APPLICATION_JSON)
-				.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
-				.bodyToMono(String.class);
+			var reqId = new HashMap<String, Object>();
+			reqId.put("accountId", userwallet.getAccountId());
+			reqId.put("amount", mpesa.getAmount());
 
-		String responseJson = responseMono.block();
+			reqId.put("mobile", mpesa.getMpesaNumber());
 
-		if (responseJson != null) {
-			return new Gson().fromJson(responseJson, Object.class);
+			var reqs = this.requestSigner.signRequest(reqId);
 
+			Mono<String> responseMono = this.bankClientBean.webClient.post()
+					.uri(ChoiceEndpointsConstants.DEPOSIT_FROM_MPESA).contentType(MediaType.APPLICATION_JSON)
+					.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+					.bodyToMono(String.class);
+
+			String responseJson = responseMono.block();
+
+			if (responseJson != null) {
+				return new Gson().fromJson(responseJson, Object.class);
+
+			}
 		}
-
 		// TODO Auto-generated method stub
 		return null;
 	}
