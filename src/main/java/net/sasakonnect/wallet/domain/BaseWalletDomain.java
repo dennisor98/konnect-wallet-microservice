@@ -7,6 +7,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Temporal;
@@ -19,6 +21,8 @@ public abstract class BaseWalletDomain {
 
 	@Id
 	@UuidGenerator(style = UuidGenerator.Style.RANDOM)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+
 	protected String id;
 
 	@Temporal(TemporalType.TIMESTAMP)

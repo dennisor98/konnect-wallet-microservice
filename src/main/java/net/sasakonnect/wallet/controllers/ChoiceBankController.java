@@ -1,8 +1,6 @@
 package net.sasakonnect.wallet.controllers;
 
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,18 +45,21 @@ public class ChoiceBankController {
 	}
 
 	@PostMapping("konnect/callBack")
-	public Object konnectCallBack(@RequestBody JsonObject body, HttpServletRequest request) {
-		String remoteIpAddress = request.getRemoteAddr();
-		var collectors = Stream.of(this.allowedIps.split(",")).filter(ip -> {
-			return remoteIpAddress.equalsIgnoreCase(ip);
+	public Object konnectCallBack(@RequestBody String body, HttpServletRequest request) {
+		JsonObject jsonObject = JsonParser.parseString(body).getAsJsonObject();
 
-		}).collect(Collectors.toList());
-		if (!collectors.isEmpty()) {
-			return this.walletService.onCallBackInvocation(body);
-
-		}
-		System.err.println("Someunknow ips" + remoteIpAddress);
-		return null;
+		return this.walletService.onCallBackInvocation(jsonObject);
+//		String remoteIpAddress = request.getRemoteAddr();
+//		var collectors = Stream.of(this.allowedIps.split(",")).filter(ip -> {
+//			return remoteIpAddress.equalsIgnoreCase(ip);
+//
+//		}).collect(Collectors.toList());
+//		if (!collectors.isEmpty()) {
+//			return this.walletService.onCallBackInvocation(body);
+//
+//		}
+//		System.err.println("Someunknow ips" + remoteIpAddress);
+//		return null;
 
 	}
 

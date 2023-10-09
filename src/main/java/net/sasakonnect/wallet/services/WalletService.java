@@ -379,6 +379,7 @@ public class WalletService extends JwtService {
 	}
 
 	private Object callBackContentResolver(JsonObject body) {
+		System.out.println(body);
 		var notification_Type = body.get("notificationType").getAsString();
 		var params = body.getAsJsonObject("params");
 		try {
@@ -491,6 +492,11 @@ public class WalletService extends JwtService {
 
 		}
 
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Object sendToOtherWallet() {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -160,4 +160,10 @@ public class WalletController {
 		return this.walletService.getBankCode();
 	}
 
+	@GetMapping("sendToOtherWallet")
+	@TransactionMiddleware()
+	public Object sendToOtherWallet() {
+		return this.walletService.sendToOtherWallet();
+	}
+
 }

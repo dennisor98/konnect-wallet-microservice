@@ -27,6 +27,9 @@ public class Wallet extends BaseWalletDomain implements Serializable {
 	@OneToMany(mappedBy = "wallet")
 	private List<UserWallet> userWallets;
 
+	@OneToMany(mappedBy = "wallet")
+	private List<WalletFreeze> walletFreezes;
+
 	// Constructors, getters, and setters go here
 
 	// Don't forget to add getters and setters for all fields, including 'id'.
