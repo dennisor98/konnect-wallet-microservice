@@ -307,7 +307,7 @@ public class UserService extends RestClientService implements UserDetailsService
 		if (userPinRepository.isPresent() && userPinRepository.get().size() > 0
 				&& !(userPinRepository.get().get(0).getPinAttempts() >= maxpinattempt)) {
 			if (bycryp.matches(user.getId() + setPin.getPin(), userPinRepository.get().get(0).getPin())) {
-				var token = this.jwtService.generateToken(user);
+				var token = this.jwtService.generateTokenForWindow(user);
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("window", token);
 				map.put("success", true);
@@ -324,13 +324,17 @@ public class UserService extends RestClientService implements UserDetailsService
 		} else {
 			Map<String, Object> map = new HashMap<String, Object>();
 
-			if ((userPinRepository.get().get(0).getPinAttempts() >= maxpinattempt)) {
-				map.put("message", "Pin Blocked");
+			if (userPinRepository.isPresent()) {
+				if ((!(userPinRepository.get().isEmpty())
+						&& userPinRepository.get().get(0).getPinAttempts() >= maxpinattempt)) {
+					map.put("message", "Pin Blocked");
 
-			} else {
-				map.put("message", "Something went wrong");
+				} else {
+					map.put("message", "Pin not set");
 
+				}
 			}
+
 			map.put("success", false);
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(map);
 		}

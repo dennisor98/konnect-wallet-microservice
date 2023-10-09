@@ -26,11 +26,13 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import jakarta.validation.Valid;
+import net.sasakonnect.wallet.RequestDto.ChoiceTransferDto;
 import net.sasakonnect.wallet.RequestDto.EasyOnboardingRequestParams;
 import net.sasakonnect.wallet.RequestDto.Mpesa;
 import net.sasakonnect.wallet.RequestDto.OnBoardingOtp;
 import net.sasakonnect.wallet.RequestDto.OnboardingStatus;
 import net.sasakonnect.wallet.RequestDto.TransactionPeriod;
+import net.sasakonnect.wallet.RequestDto.TransferToMpesa;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
 import net.sasakonnect.wallet.domain.User;
@@ -159,8 +161,8 @@ public class WalletService extends JwtService {
 				reqId.put("txStatus",
 						transactionStatuses.stream().map(TransactionStatus::getValue).collect(Collectors.toList()));
 
-				reqId.put("startTime", 1680419930226L);
-				reqId.put("endTime", 1687245530226L);
+				reqId.put("startTime", TransactionPeriod.getThisMonthStart());
+				reqId.put("endTime", TransactionPeriod.getTimeNow());
 				reqId.put("pageSize", 20);
 				reqId.put("pageNo", 1);
 				reqId.put("orderByDesc", 1);
@@ -509,6 +511,76 @@ public class WalletService extends JwtService {
 	}
 
 	public Object sendToOtherWallet() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Object sendToMpesa(@Valid TransferToMpesa mpesa) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		var userWallets = this.walletRepository.findByUserWalletsUser(user);
+		if (!userWallets.isEmpty()) {
+			var userwallet = userWallets.get(0);
+
+			var reqId = new HashMap<String, Object>();
+			reqId.put("payerAccountId", userwallet.getAccountId());
+			reqId.put("amount", mpesa.getAmount());
+
+			reqId.put("payeeBankCode", "M-PESA");
+			reqId.put("payeeAccountId", mpesa.getReceiverMobileNumber());
+			reqId.put("currency", mpesa.getCurrencyCode());
+			reqId.put("remark", mpesa.getRemarks());
+			reqId.put("otpType", "SMS");
+			reqId.put("payeeMobileForNotification", mpesa.getPayeeMobileForNotification());
+
+			var reqs = this.requestSigner.signRequest(reqId);
+
+			Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.WITHDRAW)
+					.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
+					.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
+
+			String responseJson = responseMono.block();
+
+			if (responseJson != null) {
+				return new Gson().fromJson(responseJson, Object.class);
+
+			}
+		}
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Object sendToOtherBankingInstitution(@Valid ChoiceTransferDto mpesa) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		var userWallets = this.walletRepository.findByUserWalletsUser(user);
+		if (!userWallets.isEmpty()) {
+			var userwallet = userWallets.get(0);
+
+			var reqId = new HashMap<String, Object>();
+			reqId.put("payerAccountId", userwallet.getAccountId());
+			reqId.put("amount", mpesa.getAmount());
+
+			reqId.put("payeeBankCode", mpesa.getBankCode());
+			reqId.put("payeeAccountId", mpesa.getReceiverAccount());
+			reqId.put("currency", mpesa.getCurrencyCode());
+			reqId.put("remark", mpesa.getRemarks());
+			reqId.put("otpType", "SMS");
+			reqId.put("payeeMobileForNotification", mpesa.getPayeeMobileForNotification());
+
+			var reqs = this.requestSigner.signRequest(reqId);
+
+			Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.WITHDRAW)
+					.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
+					.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
+
+			String responseJson = responseMono.block();
+
+			if (responseJson != null) {
+				return new Gson().fromJson(responseJson, Object.class);
+
+			}
+		}
 		// TODO Auto-generated method stub
 		return null;
 	}

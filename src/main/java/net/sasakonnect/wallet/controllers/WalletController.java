@@ -17,6 +17,7 @@ import net.sasakonnect.wallet.RequestDto.Mpesa;
 import net.sasakonnect.wallet.RequestDto.OnBoardingOtp;
 import net.sasakonnect.wallet.RequestDto.PinDto;
 import net.sasakonnect.wallet.RequestDto.TransactionPeriod;
+import net.sasakonnect.wallet.RequestDto.TransferToMpesa;
 import net.sasakonnect.wallet.annotations.TransactionMiddleware;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.services.UserService;
@@ -79,8 +80,8 @@ public class WalletController {
 
 	@PostMapping("/to/mpesa")
 	@TransactionMiddleware()
-	public Object toMpesa(@Valid @RequestBody Mpesa mpesa) {
-		return this.walletService.loadWalletFromMpesa(mpesa);
+	public Object toMpesa(@Valid @RequestBody TransferToMpesa mpesa) {
+		return this.walletService.sendToMpesa(mpesa);
 	}
 
 	@PostMapping("buy/airtime")

@@ -13,6 +13,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.server.ResponseStatusException;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import net.sasakonnect.wallet.config.KonnectHeader;
 import net.sasakonnect.wallet.domain.User;
@@ -44,10 +45,19 @@ public class TransactionMiddlewareAspect {
 			map.put("success", false);
 			throw new ResponseStatusException(HttpStatus.GONE, map.toString());
 		} else {
-			var isValid = this.jwtService.validateToken(transaction_token, (User) authentication.getPrincipal());
-			if (!isValid) {
+			try {
+				var isValid = this.jwtService.validateToken(transaction_token, (User) authentication.getPrincipal());
+				if (!isValid) {
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("message", "could not validate session");
+					map.put("success", false);
+					throw new ResponseStatusException(HttpStatus.FORBIDDEN, map.toString());
+
+				}
+
+			} catch (JwtException e) {
 				Map<String, Object> map = new HashMap<String, Object>();
-				map.put("message", "could not validate session");
+				map.put("message", "malformed token");
 				map.put("success", false);
 				throw new ResponseStatusException(HttpStatus.FORBIDDEN, map.toString());
 
