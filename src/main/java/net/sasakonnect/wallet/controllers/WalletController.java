@@ -167,4 +167,9 @@ public class WalletController {
 		return this.walletService.sendToOtherWallet();
 	}
 
+	@GetMapping("getOnboardingStatus")
+	public Object getOnboardingStatus() {
+		return this.walletService.getOnboardingStatus();
+	}
+
 }

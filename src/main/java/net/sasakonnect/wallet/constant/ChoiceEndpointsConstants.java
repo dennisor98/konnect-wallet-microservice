@@ -20,5 +20,6 @@ public class ChoiceEndpointsConstants {
 	public static final String CHECK_BALANCE = "/query/getAccountDetails";
 	public static final String SHORT_CODE = "/account/applyForShortCode";
 	public static final String GET_SHORT_CODE = "/account/queryAccountByShortCode";
+	public static final String GET_ONBOARDING_STATUS = "/onboarding/getOnboardingStatus";
 
 }
