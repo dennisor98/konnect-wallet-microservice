@@ -21,6 +21,6 @@ public interface UserRepository extends JpaRepository<User, String> {
 	@Transactional
 	@Modifying
 	@Query("DELETE FROM User u WHERE u.onboardingRequestId = :onboardingRequestId")
-	void deleteByOnboardingRequestId(String onboardingRequestId);
+	void deleteByOnboardingRequestId(@Param("onboardingRequestId") String onboardingRequestId);
 
 }

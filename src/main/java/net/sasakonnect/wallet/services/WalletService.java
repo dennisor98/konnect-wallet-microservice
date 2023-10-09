@@ -379,15 +379,17 @@ public class WalletService extends JwtService {
 	}
 
 	private Object callBackContentResolver(JsonObject body) {
-		System.out.println(body);
 		var notification_Type = body.get("notificationType").getAsString();
 		var params = body.getAsJsonObject("params");
+		System.out.println(NotificationType.ONBOARD.getCode());
+
 		try {
 			NotificationBody notificationBody = new Gson().fromJson(params, NotificationBody.class);
+			System.out.println(NotificationType.ONBOARD.getCode() + "is null");
 
-			if (notification_Type == NotificationType.ONBOARD.getCode()) {
+			if (notification_Type.equalsIgnoreCase(NotificationType.ONBOARD.getCode())) {
 				var user = this.userService.getUserById(params.get("userId").getAsString());
-				if (notificationBody.getStatus() == 7) {
+				if (notificationBody.getStatus() == 7 && user.isPresent()) {
 					var wallet = new Wallet();
 					wallet.setAccountId(notificationBody.getAccountId());
 					wallet.setAccountType(notificationBody.getAccountType());
@@ -399,6 +401,7 @@ public class WalletService extends JwtService {
 
 				} else {
 					var onboardingRequestId = params.get("onboardingRequestId").getAsString();
+					System.out.println(onboardingRequestId);
 					this.userService.deletUserByOnboardingRequestId(onboardingRequestId);
 
 				}
