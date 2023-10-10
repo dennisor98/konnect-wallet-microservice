@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import net.sasakonnect.wallet.CustomController;
 import net.sasakonnect.wallet.RequestDto.BuyAirtime;
 import net.sasakonnect.wallet.RequestDto.ChangePin;
+import net.sasakonnect.wallet.RequestDto.ChoiceTransferDto;
 import net.sasakonnect.wallet.RequestDto.EasyOnboardingRequestParams;
 import net.sasakonnect.wallet.RequestDto.Mpesa;
 import net.sasakonnect.wallet.RequestDto.OnBoardingOtp;
@@ -162,11 +163,11 @@ public class WalletController {
 		return this.walletService.getBankCode();
 	}
 
-//	@GetMapping("sendToOtherWallet")
-//	@TransactionMiddleware()
-//	public Object sendToOtherWallet() {
-//		return this.walletService.sendToOtherWallet();
-//	}
+	@PostMapping("sendToOtherInstution")
+	@TransactionMiddleware()
+	public Object sendToOtherWallet(@RequestBody() @Valid() ChoiceTransferDto choiceTransfer) {
+		return this.walletService.applyForTransfer(choiceTransfer);
+	}
 
 	@GetMapping("getOnboardingStatus")
 	public Object getOnboardingStatus() {

@@ -405,6 +405,7 @@ public class WalletService extends JwtService {
 			if (notification_Type.equalsIgnoreCase(NotificationType.ONBOARD.getCode())) {
 				var user = this.userService.getUserById(params.get("userId").getAsString());
 				if (notificationBody.getStatus() == 7 && user.isPresent()) {
+
 					var wallet = new Wallet();
 					wallet.setAccountId(notificationBody.getAccountId());
 					wallet.setAccountType(notificationBody.getAccountType());
@@ -694,6 +695,46 @@ public class WalletService extends JwtService {
 		var reqs = this.requestSigner.signRequest(reqId);
 
 		Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.BUY_AIRTIME)
+				.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
+				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
+
+		String responseJson = responseMono.block();
+
+		if (responseJson != null) {
+			return new Gson().fromJson(responseJson, Object.class);
+
+		}
+
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Object applyForTransfer(@Valid ChoiceTransferDto choiceTransfer) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		var reqId = new HashMap<String, Object>();
+
+		var userWallets = this.walletRepository.findByUserWalletsUser(user);
+		if (!userWallets.isEmpty()) {
+			var userwallet = userWallets.get(0);
+			reqId.put("payerAccountId", userwallet.getAccountId());
+
+		}
+
+		reqId.put("payeeBankCode", choiceTransfer.getBankCode());
+
+		reqId.put("payeeAccountId", choiceTransfer.getReceiverAccount());
+		reqId.put("payeeAccountName", choiceTransfer.getReceiverName());
+
+		reqId.put("currency", choiceTransfer.getCurrencyCode());
+		reqId.put("amount", choiceTransfer.getAmount());
+		reqId.put("otpMobile", user.getMobile());
+		reqId.put("otpType", choiceTransfer.getOtpType());
+		reqId.put("payeeMobileForNotification", choiceTransfer.getPayeeMobileForNotification());
+
+		var reqs = this.requestSigner.signRequest(reqId);
+
+		Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.WITHDRAW)
 				.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
 				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 
