@@ -94,7 +94,7 @@ public class UserService extends RestClientService implements UserDetailsService
 	}
 
 	public ResponseEntity<ObjectNode> userLogin(UserLogin userLogin) {
-		var<User> user = this.userRepository.findByMobileAndCountryCode(userLogin.getPhoneNumber(),
+		var user = this.userRepository.findByMobileAndCountryCode(userLogin.getPhoneNumber(),
 				Integer.valueOf(userLogin.getCountryCode()));
 		if (user.isEmpty()) {
 			ObjectMapper objectMapper = new ObjectMapper();
