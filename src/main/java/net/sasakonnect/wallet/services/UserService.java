@@ -94,7 +94,7 @@ public class UserService extends RestClientService implements UserDetailsService
 	}
 
 	public ResponseEntity<ObjectNode> userLogin(UserLogin userLogin) {
-		var user = this.userRepository.findByMobileAndCountryCode(userLogin.getPhoneNumber(),
+		var<User> user = this.userRepository.findByMobileAndCountryCode(userLogin.getPhoneNumber(),
 				Integer.valueOf(userLogin.getCountryCode()));
 		if (user.isEmpty()) {
 			ObjectMapper objectMapper = new ObjectMapper();
@@ -185,18 +185,21 @@ public class UserService extends RestClientService implements UserDetailsService
 
 	}
 
-	public Object isPinSet() {
+	public ResponseEntity<Map> isPinSet() {
 
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		Optional<List<UserPin>> userPins = this.userPinRepository.getUserPinThatIsNotArchived(user);
 
 		if (userPins.isPresent() && (userPins.get().size() > 0)) {
 			Map<String, String> map = new HashMap<String, String>();
-			map.put("message", "Account Ready");
+			map.put("message", "Account State Valid");
+			map.put("success", "true");
 			return ResponseEntity.ok(map);
 		} else {
 			Map<String, String> map = new HashMap<String, String>();
 			map.put("message", "Pin not set");
+			map.put("success", "false");
+
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(map);
 
 		}

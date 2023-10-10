@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import net.sasakonnect.wallet.CustomController;
+import net.sasakonnect.wallet.RequestDto.BuyAirtime;
 import net.sasakonnect.wallet.RequestDto.ChangePin;
 import net.sasakonnect.wallet.RequestDto.EasyOnboardingRequestParams;
 import net.sasakonnect.wallet.RequestDto.Mpesa;
@@ -86,8 +87,8 @@ public class WalletController {
 
 	@PostMapping("buy/airtime")
 	@TransactionMiddleware()
-	public ResponseEntity<Optional<User>> buyAirtime() {
-		return ResponseEntity.ok(userService.getUserById("0"));
+	public Object payUtility(@RequestBody() @Valid BuyAirtime buyAirtime) {
+		return this.walletService.airtimePayment(buyAirtime);
 	}
 
 	@GetMapping("balance")
@@ -97,8 +98,8 @@ public class WalletController {
 	}
 
 	@GetMapping("account/state")
-	public ResponseEntity<Optional<User>> accountState() {
-		return ResponseEntity.ok(userService.getUserById("0"));
+	public Object accountState() {
+		return this.walletService.getAccountStatus();
 	}
 
 	@PostMapping("window/period")
@@ -161,11 +162,11 @@ public class WalletController {
 		return this.walletService.getBankCode();
 	}
 
-	@GetMapping("sendToOtherWallet")
-	@TransactionMiddleware()
-	public Object sendToOtherWallet() {
-		return this.walletService.sendToOtherWallet();
-	}
+//	@GetMapping("sendToOtherWallet")
+//	@TransactionMiddleware()
+//	public Object sendToOtherWallet() {
+//		return this.walletService.sendToOtherWallet();
+//	}
 
 	@GetMapping("getOnboardingStatus")
 	public Object getOnboardingStatus() {

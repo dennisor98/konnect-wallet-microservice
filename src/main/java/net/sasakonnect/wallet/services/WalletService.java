@@ -26,6 +26,7 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import jakarta.validation.Valid;
+import net.sasakonnect.wallet.RequestDto.BuyAirtime;
 import net.sasakonnect.wallet.RequestDto.ChoiceTransferDto;
 import net.sasakonnect.wallet.RequestDto.EasyOnboardingRequestParams;
 import net.sasakonnect.wallet.RequestDto.Mpesa;
@@ -44,6 +45,7 @@ import net.sasakonnect.wallet.enums.TransactionStatus;
 import net.sasakonnect.wallet.enums.WalletTransactionType;
 import net.sasakonnect.wallet.notification.NotificationResult;
 import net.sasakonnect.wallet.notification.TransactionResultNotification;
+import net.sasakonnect.wallet.repository.CurrencyRepository;
 import net.sasakonnect.wallet.repository.UserWalletRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.tools.JwtService;
@@ -60,6 +62,8 @@ public class WalletService extends JwtService {
 	UserService userService;
 	@Autowired
 	WalletRepository walletRepository;
+	@Autowired
+	CurrencyRepository currencyRepository;
 
 	@Autowired
 	UserWalletRepository userWalletRepository;
@@ -609,4 +613,98 @@ public class WalletService extends JwtService {
 		return null;
 	}
 
+	public Object getAccountStatus() {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		var res = this.userService.isPinSet();
+		if (res.getStatusCode() == HttpStatus.OK) {
+			return res;
+		} else {
+			return res;
+		}
+
+	}
+
+	public Object currencyIso() {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("message", currencyRepository.findAll());
+		map.put("success", true);
+		return ResponseEntity.status(HttpStatus.OK).body(map);
+
+	}
+
+	public Object airtimePayment(@Valid BuyAirtime buyAirtime) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		var reqId = new HashMap<String, Object>();
+		if (buyAirtime.getAccountId() == null) {
+			var userWallets = this.walletRepository.findByUserWalletsUser(user);
+			if (!userWallets.isEmpty()) {
+				var userwallet = userWallets.get(0);
+				reqId.put("accountId", userwallet.getAccountId());
+
+			}
+		} else {
+			reqId.put("accountId", buyAirtime.getAccountId());
+
+		}
+		reqId.put("mobileNumber", buyAirtime.getMobileNumber());
+
+		reqId.put("networkProvider", buyAirtime.getNetworkProviderId());
+
+		reqId.put("amount", Integer.parseInt(buyAirtime.getAmount()));
+
+		var reqs = this.requestSigner.signRequest(reqId);
+
+		Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.BUY_AIRTIME)
+				.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
+				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
+
+		String responseJson = responseMono.block();
+
+		if (responseJson != null) {
+			return new Gson().fromJson(responseJson, Object.class);
+
+		}
+
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Object payUtility(@Valid BuyAirtime buyAirtime) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		var reqId = new HashMap<String, Object>();
+		if (buyAirtime.getAccountId() == null) {
+			var userWallets = this.walletRepository.findByUserWalletsUser(user);
+			if (!userWallets.isEmpty()) {
+				var userwallet = userWallets.get(0);
+				reqId.put("accountId", userwallet.getAccountId());
+
+			}
+		} else {
+			reqId.put("accountId", buyAirtime.getAccountId());
+
+		}
+		reqId.put("mobileNumber", buyAirtime.getMobileNumber());
+
+		reqId.put("networkProvider", buyAirtime.getNetworkProviderId());
+
+		reqId.put("amount", Integer.parseInt(buyAirtime.getAmount()));
+
+		var reqs = this.requestSigner.signRequest(reqId);
+
+		Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.BUY_AIRTIME)
+				.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
+				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
+
+		String responseJson = responseMono.block();
+
+		if (responseJson != null) {
+			return new Gson().fromJson(responseJson, Object.class);
+
+		}
+
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

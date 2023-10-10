@@ -44,6 +44,11 @@ public class ChoiceBankController {
 		return ResponseEntity.ok(userService.getUserById("0"));
 	}
 
+	@GetMapping("currency/iso")
+	public Object getCurrencyIso() {
+		return this.walletService.currencyIso();
+	}
+
 	@PostMapping("konnect/callBack")
 	public Object konnectCallBack(@RequestBody String body, HttpServletRequest request) {
 		JsonObject jsonObject = JsonParser.parseString(body).getAsJsonObject();
