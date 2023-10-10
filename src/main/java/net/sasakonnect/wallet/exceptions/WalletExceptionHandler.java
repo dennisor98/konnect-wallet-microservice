@@ -18,7 +18,6 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.annotation.Nullable;
 import jakarta.validation.ConstraintViolation;
@@ -47,13 +46,11 @@ public class WalletExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	@ExceptionHandler({ ResponseStatusException.class })
-	public ResponseEntity<Object> handleConstraintViolation(ResponseStatusException ex, WebRequest request)
+	public ResponseStatusException handleConstraintViolation(ResponseStatusException ex, WebRequest request)
 			throws JsonProcessingException {
 		List<String> errors = new ArrayList<String>();
-		ObjectMapper objectMapper = new ObjectMapper();
-		var jsonres = objectMapper.writeValueAsString(ex.getReason());
-		ApiError apiError = new ApiError(ex.getStatusCode(), jsonres, errors);
-		return this.handleExceptionInternal(ex, apiError, new HttpHeaders(), apiError.getStatus(), request);
+
+		return new ResponseStatusException(HttpStatus.FORBIDDEN, ex.getReason());
 
 	}
 

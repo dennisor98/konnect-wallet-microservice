@@ -13,6 +13,9 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import net.sasakonnect.wallet.config.KonnectHeader;
@@ -43,7 +46,16 @@ public class TransactionMiddlewareAspect {
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("message", "x-transaction-id is required");
 			map.put("success", false);
-			throw new ResponseStatusException(HttpStatus.GONE, map.toString());
+			ObjectMapper objectMapper = new ObjectMapper();
+			try {
+				String jsonError = objectMapper.writeValueAsString(map);
+				throw new ResponseStatusException(HttpStatus.GONE, jsonError);
+
+			} catch (JsonProcessingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 		} else {
 			try {
 				var isValid = this.jwtService.validateToken(transaction_token, (User) authentication.getPrincipal());
@@ -51,7 +63,16 @@ public class TransactionMiddlewareAspect {
 					Map<String, Object> map = new HashMap<String, Object>();
 					map.put("message", "could not validate session");
 					map.put("success", false);
-					throw new ResponseStatusException(HttpStatus.FORBIDDEN, map.toString());
+
+					ObjectMapper objectMapper = new ObjectMapper();
+					try {
+						String jsonError = objectMapper.writeValueAsString(map);
+						throw new ResponseStatusException(HttpStatus.FORBIDDEN, jsonError);
+
+					} catch (JsonProcessingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 
 				}
 
@@ -59,7 +80,16 @@ public class TransactionMiddlewareAspect {
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("message", "malformed token");
 				map.put("success", false);
-				throw new ResponseStatusException(HttpStatus.FORBIDDEN, map.toString());
+
+				ObjectMapper objectMapper = new ObjectMapper();
+				try {
+					String jsonError = objectMapper.writeValueAsString(map);
+					throw new ResponseStatusException(HttpStatus.FORBIDDEN, jsonError);
+
+				} catch (JsonProcessingException ex) {
+					// TODO Auto-generated catch block
+					ex.printStackTrace();
+				}
 
 			}
 		}
