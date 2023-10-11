@@ -16,7 +16,8 @@ import net.sasakonnect.wallet.RequestDto.ChangePin;
 import net.sasakonnect.wallet.RequestDto.ChoiceTransferDto;
 import net.sasakonnect.wallet.RequestDto.EasyOnboardingRequestParams;
 import net.sasakonnect.wallet.RequestDto.Mpesa;
-import net.sasakonnect.wallet.RequestDto.OnBoardingOtp;
+import net.sasakonnect.wallet.RequestDto.OnboardingOtp;
+import net.sasakonnect.wallet.RequestDto.OtpTransfer;
 import net.sasakonnect.wallet.RequestDto.PinDto;
 import net.sasakonnect.wallet.RequestDto.TransactionPeriod;
 import net.sasakonnect.wallet.RequestDto.TransferToMpesa;
@@ -50,7 +51,7 @@ public class WalletController {
 	}
 
 	@PostMapping("confirm/onboarding/otp")
-	public Object confirmOnboardingOtp(@Valid @RequestBody OnBoardingOtp easyOnboarding) {
+	public Object confirmOnboardingOtp(@Valid @RequestBody OnboardingOtp easyOnboarding) {
 		return this.walletService.confirmOnboardingOtp(easyOnboarding);
 	}
 
@@ -109,8 +110,9 @@ public class WalletController {
 	}
 
 	@PostMapping("confirm/otp/transfer")
-	public ResponseEntity<Optional<User>> confirmTransfer() {
-		return ResponseEntity.ok(userService.getUserById("0"));
+	@TransactionMiddleware()
+	public Object confirmTransfer(@Valid @RequestBody OtpTransfer otpTransfer) {
+		return this.walletService.confirmOtpTransfer(otpTransfer);
 	}
 
 	@GetMapping("resendOtp")

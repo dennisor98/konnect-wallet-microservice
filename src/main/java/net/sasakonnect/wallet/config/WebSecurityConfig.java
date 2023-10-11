@@ -25,6 +25,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -182,6 +183,8 @@ public class WebSecurityConfig {
 	@Bean
 	ObjectMapper objectMapper() {
 		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.registerModule(new JavaTimeModule());
+
 		// Enable pretty-printing for JSON output
 		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 		return objectMapper;

@@ -30,8 +30,9 @@ import net.sasakonnect.wallet.RequestDto.BuyAirtime;
 import net.sasakonnect.wallet.RequestDto.ChoiceTransferDto;
 import net.sasakonnect.wallet.RequestDto.EasyOnboardingRequestParams;
 import net.sasakonnect.wallet.RequestDto.Mpesa;
-import net.sasakonnect.wallet.RequestDto.OnBoardingOtp;
+import net.sasakonnect.wallet.RequestDto.OnboardingOtp;
 import net.sasakonnect.wallet.RequestDto.OnboardingStatus;
+import net.sasakonnect.wallet.RequestDto.OtpTransfer;
 import net.sasakonnect.wallet.RequestDto.TransactionPeriod;
 import net.sasakonnect.wallet.RequestDto.TransferToMpesa;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
@@ -465,7 +466,7 @@ public class WalletService extends JwtService {
 		return ResponseEntity.status(HttpStatus.OK).body(map);
 	}
 
-	public Object confirmOnboardingOtp(@Valid OnBoardingOtp otp) {
+	public Object confirmOnboardingOtp(@Valid OnboardingOtp otp) {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
 		var reqId = new HashMap<String, Object>();
@@ -737,6 +738,31 @@ public class WalletService extends JwtService {
 		Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.WITHDRAW)
 				.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
 				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
+
+		String responseJson = responseMono.block();
+
+		if (responseJson != null) {
+			return new Gson().fromJson(responseJson, Object.class);
+
+		}
+
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Object confirmOtpTransfer(OtpTransfer otpTransfer) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		var reqId = new HashMap<String, Object>();
+		reqId.put("txId", otpTransfer.getTxId());
+		reqId.put("otpCode", otpTransfer.getOtp());
+
+		var reqs = this.requestSigner.signRequest(reqId);
+
+		Mono<String> responseMono = this.bankClientBean.webClient.post()
+				.uri(ChoiceEndpointsConstants.CONFIRM_OTP_TRANSFER).contentType(MediaType.APPLICATION_JSON)
+				.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+				.bodyToMono(String.class);
 
 		String responseJson = responseMono.block();
 

@@ -3,7 +3,7 @@ package net.sasakonnect.wallet.RequestDto;
 import lombok.Data;
 
 @Data
-public class OnBoardingOtp {
+public class OnboardingOtp {
 	String otp;
 
 }
