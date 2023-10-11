@@ -110,7 +110,7 @@ public class WalletController {
 	}
 
 	@PostMapping("confirm/otp/transfer")
-	@TransactionMiddleware()
+
 	public Object confirmTransfer(@Valid @RequestBody OtpTransfer otpTransfer) {
 		return this.walletService.confirmOtpTransfer(otpTransfer);
 	}
