@@ -46,9 +46,12 @@ public class SmsService {
 	}
 
 	public ResponseEntity<ObjectNode> sendSms(UserLogin userLogin, String template, Optional<User> user) {
+		StringBuilder stringbuilder = new StringBuilder();
+
 		if (template == null) {
 			template = this.template;
 		}
+		stringbuilder.append(template);
 
 		// Check if SMS can be sent for the provided phone number
 		String data = otpService.canSendSms(userLogin.getFullPhone());
@@ -63,8 +66,13 @@ public class SmsService {
 			otpEntity.setTtl(otp_ttl);
 			otpEntity.setHash(RequestSigner.createHashFrom(user.get().getId() + otp));
 			Otp savedOtp = this.otpService.saveOtp(otpEntity);
+			stringbuilder.append(":" + savedOtp.getCode());
+			if (userLogin.getMessageSignature() != null && userLogin.getMessageSignature().length() == 11) {
+				stringbuilder.append(" " + userLogin.getMessageSignature());
 
-			smsManager.sendMessage(template + ":" + savedOtp.getCode(), userLogin.getFullPhone());
+			}
+
+			smsManager.sendMessage(stringbuilder.toString(), userLogin.getFullPhone());
 			ObjectNode json = JsonNodeFactory.instance.objectNode();
 			json.put("hash", RequestSigner.createHashFrom(user.get().getId() + otp));
 			json.put("message",
