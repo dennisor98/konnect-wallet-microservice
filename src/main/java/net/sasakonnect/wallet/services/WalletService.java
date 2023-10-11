@@ -531,7 +531,6 @@ public class WalletService extends JwtService {
 			var reqId = new HashMap<String, Object>();
 			reqId.put("payerAccountId", userwallet.getAccountId());
 			reqId.put("amount", mpesa.getAmount());
-
 			reqId.put("payeeBankCode", "M-PESA");
 			reqId.put("payeeAccountId", mpesa.getReceiverMobileNumber());
 			reqId.put("currency", mpesa.getCurrencyCode());
