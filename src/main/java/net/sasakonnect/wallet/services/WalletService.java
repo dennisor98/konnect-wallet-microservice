@@ -305,7 +305,7 @@ public class WalletService extends JwtService {
 		userMap.put("middleName", easyOnboarding.getMiddleName());
 		userMap.put("lastName", easyOnboarding.getLastName());
 		userMap.put("birthday", easyOnboarding.getBirthday());
-		userMap.put("gender", easyOnboarding.getGender());
+		userMap.put("gender", easyOnboarding.getGenderVerbal().getValue());
 		userMap.put("countryCode", easyOnboarding.getCountryCode());
 		userMap.put("mobile", easyOnboarding.getMobile());
 		userMap.put("idType", easyOnboarding.getIdTypeVerbal());
@@ -334,6 +334,8 @@ public class WalletService extends JwtService {
 					.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
 					.bodyToMono(String.class);
 			responseMono = responseMono.flatMap((String response) -> {
+				System.err.println(response);
+
 				// Check if "onboardingRequestId" is null in the response JSON
 				ObjectMapper objectMapper = new ObjectMapper();
 				objectMapper.registerModule(new JavaTimeModule()); // Register the Java 8 date/time module
@@ -346,6 +348,9 @@ public class WalletService extends JwtService {
 						// The "onboardingRequestId" is null, delete the user here
 						this.userService.deleteUserById(savedUser.getId());
 					} else {
+						System.err.println("execute here");
+						System.err.println(onboardingRequestId.asText());
+
 						savedUser.setOnboardingRequestId(onboardingRequestId.asText());
 						var updateduser = this.userService.updateUser(savedUser);
 						var userData = this.userService.createJwtFor(updateduser);
