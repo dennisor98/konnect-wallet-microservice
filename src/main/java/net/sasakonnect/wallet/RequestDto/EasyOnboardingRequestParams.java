@@ -35,7 +35,7 @@ public class EasyOnboardingRequestParams {
 	String birthday;
 
 	@NotNull
-	Integer gender;
+	String gender;
 
 	@NotBlank
 	String countryCode;
@@ -61,10 +61,10 @@ public class EasyOnboardingRequestParams {
 	@JsonIgnore
 	public Gender getGenderVerbal() {
 		switch (gender) {
-		case 0: {
+		case "FEMALE": {
 			return Gender.FEMALE;
 		}
-		case 1: {
+		case "MALE": {
 			return Gender.MALE;
 
 		}
