@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -56,6 +58,7 @@ public class EasyOnboardingRequestParams {
 	@NotBlank
 	String kraPin;
 
+	@JsonIgnore
 	public Gender getGenderVerbal() {
 		switch (gender) {
 		case 0: {
@@ -69,6 +72,7 @@ public class EasyOnboardingRequestParams {
 		return Gender.MALE;
 	}
 
+	@JsonIgnore
 	public int getIdTypeVerbal() {
 		switch (this.idType) {
 		case "KENYA_ID": {
@@ -82,6 +86,7 @@ public class EasyOnboardingRequestParams {
 		return 101;
 	}
 
+	@JsonIgnore
 	public IdType getIdTypeEnum() {
 		switch (this.idType) {
 		case "KENYA_ID": {
@@ -95,6 +100,7 @@ public class EasyOnboardingRequestParams {
 		return IdType.KENYA_ID;
 	}
 
+	@JsonIgnore
 	public Date parseBithDay() {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		dateFormat.setLenient(false);
@@ -111,6 +117,7 @@ public class EasyOnboardingRequestParams {
 		}
 	}
 
+	@JsonIgnore
 	public MonthlyIncome monthlyIncomeType() {
 		switch (this.monthlyIncome) {
 		case "LESS_THAN_FIVE_THOUSAND": {
@@ -137,6 +144,7 @@ public class EasyOnboardingRequestParams {
 		return MonthlyIncome.LESS_THAN_FIVE_THOUSAND;
 	}
 
+	@JsonIgnore
 	public EmploymentStatus getEmploymentStatusType() {
 		switch (this.employmentStatus) {
 		case "STUDENT": {

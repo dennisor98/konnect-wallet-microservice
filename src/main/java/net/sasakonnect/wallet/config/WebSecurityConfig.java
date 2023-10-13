@@ -6,7 +6,6 @@ import org.springdoc.core.customizers.GlobalOpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -102,7 +101,7 @@ public class WebSecurityConfig {
 				"/webjars/**").permitAll()
 
 				.requestMatchers("/user/userLogin", "/user/confirmOtp", "konnect/callBack").permitAll()
-				.requestMatchers(HttpMethod.POST, "/wallet").permitAll().anyRequest().authenticated()
+				.requestMatchers("/wallet").permitAll().anyRequest().authenticated()
 
 		// require authentication for any endpoint that's not
 		// whitelisted
