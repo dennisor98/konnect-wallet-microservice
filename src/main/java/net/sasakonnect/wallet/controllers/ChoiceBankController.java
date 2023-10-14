@@ -55,7 +55,7 @@ public class ChoiceBankController {
 
 	@PostMapping("konnect/callBack")
 	public Object konnectCallBack(@RequestBody Map<String, Object> body, HttpServletRequest request) {
-		System.out.println(body);
+		System.err.println(body);
 		ObjectMapper objectMapper = new ObjectMapper();
 
 		JsonObject jsonObject;
