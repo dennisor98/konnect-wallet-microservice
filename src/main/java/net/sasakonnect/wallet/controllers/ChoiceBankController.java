@@ -51,6 +51,7 @@ public class ChoiceBankController {
 
 	@PostMapping("konnect/callBack")
 	public Object konnectCallBack(@RequestBody String body, HttpServletRequest request) {
+		System.out.println(body);
 		JsonObject jsonObject = JsonParser.parseString(body).getAsJsonObject();
 
 		return this.walletService.onCallBackInvocation(jsonObject);
