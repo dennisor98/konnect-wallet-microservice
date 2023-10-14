@@ -995,3 +995,416 @@
 2023-10-14 21:43:43 [restartedMain] WARN  o.s.c.LocalVariableTableParameterNameDiscoverer - Using deprecated '-debug' fallback for parameter name resolution. Compile the affected code with '-parameters' instead or avoid its introspection: net.sasakonnect.wallet.repository.WalletRepository
 2023-10-14 21:43:43 [restartedMain] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
 2023-10-14 21:43:43 [restartedMain] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@1e5fa2c3, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@6e161fe5, org.springframework.security.web.context.SecurityContextHolderFilter@610fc366, org.springframework.security.web.authentication.logout.LogoutFilter@4686c7fa, net.sasakonnect.wallet.config.JwtAuthenticationFilter@766f7ac0, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@56dd70cf, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@71e48d35, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@116e712e, org.springframework.security.web.access.ExceptionTranslationFilter@488c19be, org.springframework.security.web.access.intercept.AuthorizationFilter@2eb83b81]
+2023-10-14 21:43:43 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2023-10-14 21:43:43 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port(s): 8080 (http) with context path '/konnect-wallet'
+2023-10-14 21:43:43 [restartedMain] INFO  n.s.wallet.WalletApplication - Started WalletApplication in 10.3 seconds (process running for 522.232)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    select
+        p1_0.id,
+        p1_0.created_at,
+        p1_0.deleted_at,
+        p1_0.description,
+        p1_0.name,
+        p1_0.updated_at 
+    from
+        permission p1_0 
+    where
+        p1_0.name=?
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    select
+        p1_0.id,
+        p1_0.created_at,
+        p1_0.deleted_at,
+        p1_0.description,
+        p1_0.name,
+        p1_0.updated_at 
+    from
+        permission p1_0 
+    where
+        p1_0.name=?
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    insert 
+    into
+        bank
+        (bank_code,bank_name,created_at,deleted_at,former_name,imageurl,is_cooperative,is_operational,updated_at,id) 
+    values
+        (?,?,?,?,?,?,?,?,?,?)
+2023-10-14 21:43:43 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2023-10-14 21:57:54 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2023-10-14 21:57:54 [Thread-11] INFO  o.a.catalina.core.StandardService - Stopping service [Tomcat]
+2023-10-14 21:57:55 [Thread-11] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2023-10-14 21:57:55 [Thread-11] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Shutdown initiated...
+2023-10-14 21:57:56 [Thread-11] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Shutdown completed.
+2023-10-14 21:57:56 [restartedMain] INFO  n.s.wallet.WalletApplication - Starting WalletApplication using Java 17.0.1 with PID 14526 (/Users/davidkiarie/Document/eclipse/Wallet/bin/main started by davidkiarie in /Users/davidkiarie/Document/eclipse/Wallet)
+2023-10-14 21:57:56 [restartedMain] INFO  n.s.wallet.WalletApplication - No active profile set, falling back to 1 default profile: "default"
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 48 ms. Found 12 JPA repository interfaces.
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.BankRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.CurrencyRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.OtpRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.PermissionRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.RolePermissionRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.RoleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.TransactionRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.UserPinRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.UserRoleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.UserWalletRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.WalletRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 14 ms. Found 0 Redis repository interfaces.
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'jpa.named-queries#2' of type [org.springframework.data.repository.config.PropertiesBasedNamedQueriesFactoryBean] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'jpa.named-queries#2' of type [org.springframework.data.repository.core.support.PropertiesBasedNamedQueries] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.boot.autoconfigure.sql.init.DataSourceInitializationConfiguration' of type [org.springframework.boot.autoconfigure.sql.init.DataSourceInitializationConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.boot.autoconfigure.jdbc.DataSourceConfiguration$Hikari' of type [org.springframework.boot.autoconfigure.jdbc.DataSourceConfiguration$Hikari] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'spring.datasource-org.springframework.boot.autoconfigure.jdbc.DataSourceProperties' of type [org.springframework.boot.autoconfigure.jdbc.DataSourceProperties] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration$PooledDataSourceConfiguration' of type [org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration$PooledDataSourceConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'jdbcConnectionDetails' of type [org.springframework.boot.autoconfigure.jdbc.PropertiesJdbcConnectionDetails] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'dataSource' of type [com.zaxxer.hikari.HikariDataSource] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'spring.sql.init-org.springframework.boot.autoconfigure.sql.init.SqlInitializationProperties' of type [org.springframework.boot.autoconfigure.sql.init.SqlInitializationProperties] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'dataSourceScriptDatabaseInitializer' of type [org.springframework.boot.autoconfigure.sql.init.SqlDataSourceScriptDatabaseInitializer] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.boot.devtools.autoconfigure.DevToolsDataSourceAutoConfiguration' of type [org.springframework.boot.devtools.autoconfigure.DevToolsDataSourceAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'inMemoryDatabaseShutdownExecutor' of type [org.springframework.boot.devtools.autoconfigure.DevToolsDataSourceAutoConfiguration$NonEmbeddedInMemoryDatabaseShutdownExecutor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'spring.jpa-org.springframework.boot.autoconfigure.orm.jpa.JpaProperties' of type [org.springframework.boot.autoconfigure.orm.jpa.JpaProperties] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'spring.jpa.hibernate-org.springframework.boot.autoconfigure.orm.jpa.HibernateProperties' of type [org.springframework.boot.autoconfigure.orm.jpa.HibernateProperties] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.boot.autoconfigure.jdbc.metadata.DataSourcePoolMetadataProvidersConfiguration$HikariPoolDataSourceMetadataProviderConfiguration' of type [org.springframework.boot.autoconfigure.jdbc.metadata.DataSourcePoolMetadataProvidersConfiguration$HikariPoolDataSourceMetadataProviderConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'hikariPoolDataSourceMetadataProvider' of type [org.springframework.boot.autoconfigure.jdbc.metadata.DataSourcePoolMetadataProvidersConfiguration$HikariPoolDataSourceMetadataProviderConfiguration$$Lambda$741/0x0000000801132d40] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaConfiguration' of type [org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'jpaVendorAdapter' of type [org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'entityManagerFactoryBuilder' of type [org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'persistenceManagedTypes' of type [org.springframework.orm.jpa.persistenceunit.SimplePersistenceManagedTypes] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-14 21:57:57 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2023-10-14 21:57:57 [restartedMain] INFO  o.h.b.i.BytecodeProviderInitiator - HHH000021: Bytecode provider name : bytebuddy
+2023-10-14 21:57:57 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2023-10-14 21:57:57 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Starting...

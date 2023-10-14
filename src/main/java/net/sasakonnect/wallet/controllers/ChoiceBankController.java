@@ -1,5 +1,6 @@
 package net.sasakonnect.wallet.controllers;
 
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +11,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,11 +54,20 @@ public class ChoiceBankController {
 	}
 
 	@PostMapping("konnect/callBack")
-	public Object konnectCallBack(@RequestBody String body, HttpServletRequest request) {
+	public Object konnectCallBack(@RequestBody Map<String, Object> body, HttpServletRequest request) {
 		System.out.println(body);
-		JsonObject jsonObject = JsonParser.parseString(body).getAsJsonObject();
+		ObjectMapper objectMapper = new ObjectMapper();
 
-		return this.walletService.onCallBackInvocation(jsonObject);
+		JsonObject jsonObject;
+		try {
+			jsonObject = JsonParser.parseString(objectMapper.writeValueAsString(body)).getAsJsonObject();
+			return this.walletService.onCallBackInvocation(jsonObject);
+
+		} catch (JsonSyntaxException | JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "error";
 //		String remoteIpAddress = request.getRemoteAddr();
 //		var collectors = Stream.of(this.allowedIps.split(",")).filter(ip -> {
 //			return remoteIpAddress.equalsIgnoreCase(ip);
