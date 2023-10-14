@@ -18,7 +18,6 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import net.sasakonnect.wallet.CustomController;
 import net.sasakonnect.wallet.RequestDto.OnboardingStatus;
@@ -54,7 +53,7 @@ public class ChoiceBankController {
 	}
 
 	@PostMapping("konnect/callBack")
-	public Object konnectCallBack(@RequestBody Map<String, Object> body, HttpServletRequest request) {
+	public Object konnectCallBack(@RequestBody Map<String, Object> body) {
 		System.err.println(body);
 		ObjectMapper objectMapper = new ObjectMapper();
 
