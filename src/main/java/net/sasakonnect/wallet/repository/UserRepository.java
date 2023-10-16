@@ -11,11 +11,10 @@ import jakarta.transaction.Transactional;
 import net.sasakonnect.wallet.domain.User;
 
 public interface UserRepository extends JpaRepository<User, String> {
-
-	Optional<User> findByMobileAndCountryCode(String mobile, int countryCode);
+	@Query("SELECT u FROM User u WHERE u.mobile = :mobile AND u.countryCode=:country_code ")
+	Optional<User> findByMobileAndCountryCode(@Param("mobile") String mobile, @Param("country_code") int countryCode);
 
 	@Query("SELECT u FROM User u JOIN FETCH u.userWallets uw JOIN FETCH uw.wallet WHERE u.id = :userId")
-
 	Optional<User> findUserWithUserWalletsById(@Param("userId") String userId);
 
 	@Transactional

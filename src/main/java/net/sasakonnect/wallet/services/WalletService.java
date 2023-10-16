@@ -30,6 +30,7 @@ import net.sasakonnect.wallet.RequestDto.BuyAirtime;
 import net.sasakonnect.wallet.RequestDto.ChoiceTransferDto;
 import net.sasakonnect.wallet.RequestDto.EasyOnboardingRequestParams;
 import net.sasakonnect.wallet.RequestDto.Mpesa;
+import net.sasakonnect.wallet.RequestDto.MpesaBilling;
 import net.sasakonnect.wallet.RequestDto.OnboardingOtp;
 import net.sasakonnect.wallet.RequestDto.OnboardingStatus;
 import net.sasakonnect.wallet.RequestDto.OtpTransfer;
@@ -61,6 +62,8 @@ public class WalletService extends JwtService {
 	RequestSigner requestSigner;
 	@Autowired
 	UserService userService;
+	@Autowired
+	ChatService chatService;
 	@Autowired
 	WalletRepository walletRepository;
 	@Autowired
@@ -419,6 +422,8 @@ public class WalletService extends JwtService {
 					var userWallet = new UserWallet();
 					userWallet.setUser(user.get());
 					userWallet.setWallet(savedwallet);
+					this.chatService.registerUserToOpenFire(user.get());
+
 					this.userWalletRepository.save(userWallet);
 
 				} else {
@@ -765,6 +770,56 @@ public class WalletService extends JwtService {
 
 		Mono<String> responseMono = this.bankClientBean.webClient.post()
 				.uri(ChoiceEndpointsConstants.CONFIRM_OTP_TRANSFER).contentType(MediaType.APPLICATION_JSON)
+				.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+				.bodyToMono(String.class);
+
+		String responseJson = responseMono.block();
+
+		if (responseJson != null) {
+			return new Gson().fromJson(responseJson, Object.class);
+
+		}
+
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Object mpesaTillAndByGoods(@Valid MpesaBilling tillAndBuyGoods) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		var reqId = new HashMap<String, Object>();
+
+		var userWallets = this.walletRepository.findByUserWalletsUser(user);
+		if (!userWallets.isEmpty()) {
+			var userwallet = userWallets.get(0);
+			reqId.put("payerAccountId", userwallet.getAccountId());
+
+		}
+		reqId.put("payType", tillAndBuyGoods.getBillType().getCode());
+
+		switch (tillAndBuyGoods.billType) {
+		case BUY_GOODS:
+			reqId.put("payeeReferenNumber", tillAndBuyGoods.getReceivingAccount());
+
+			break;
+		case TILL:
+
+			break;
+		default:
+			break;
+
+		}
+		reqId.put("payeeShortCode", tillAndBuyGoods.getShortCode());
+
+		reqId.put("amount", tillAndBuyGoods.getAmount());
+		reqId.put("description", tillAndBuyGoods.getShortNote());
+
+		reqId.put("otpType", tillAndBuyGoods.getOtpType());
+
+		var reqs = this.requestSigner.signRequest(reqId);
+
+		Mono<String> responseMono = this.bankClientBean.webClient.post()
+				.uri(ChoiceEndpointsConstants.MPESA_TILL_AND_PAYBILL).contentType(MediaType.APPLICATION_JSON)
 				.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
 				.bodyToMono(String.class);
 

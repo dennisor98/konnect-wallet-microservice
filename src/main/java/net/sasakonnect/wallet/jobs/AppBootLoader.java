@@ -15,10 +15,13 @@ import net.sasakonnect.wallet.domain.Currency;
 import net.sasakonnect.wallet.domain.Permission;
 import net.sasakonnect.wallet.repository.BankRepository;
 import net.sasakonnect.wallet.repository.CurrencyRepository;
+import net.sasakonnect.wallet.services.ChatService;
 import net.sasakonnect.wallet.services.PermissionService;
 
 @Component
 public class AppBootLoader implements ApplicationListener<ApplicationReadyEvent> {
+	@Autowired
+	ChatService chatService;
 	List<Currency> currencyEntities = List.of(new Currency("AFGHANISTAN", "Afghani", "AFN", 2),
 			new Currency("ÅLAND ISLANDS", "Euro", "EUR", 2), new Currency("ALBANIA", "Lek", "ALL", 2),
 			new Currency("ALGERIA", "Algerian Dinar", "DZD", 2), new Currency("AMERICAN SAMOA", "US Dollar", "USD", 2),

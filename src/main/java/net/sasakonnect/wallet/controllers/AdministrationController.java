@@ -20,7 +20,6 @@ public class AdministrationController {
 	public String upload() throws AccountNotFoundException {
 		// Logic to retrieve targetDomainObject
 		// For example: String targetDomainObject = someService.getTargetDomainObject();
-
 		return "account: ";
 	}
 

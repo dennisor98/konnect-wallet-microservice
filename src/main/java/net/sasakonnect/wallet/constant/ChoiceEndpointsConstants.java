@@ -21,5 +21,6 @@ public class ChoiceEndpointsConstants {
 	public static final String SHORT_CODE = "/account/applyForShortCode";
 	public static final String GET_SHORT_CODE = "/account/queryAccountByShortCode";
 	public static final String GET_ONBOARDING_STATUS = "/onboarding/getOnboardingStatus";
+	public static final String MPESA_TILL_AND_PAYBILL = "/trans/applyForMpesaBusinessTransfer";
 
 }

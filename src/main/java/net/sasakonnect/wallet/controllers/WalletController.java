@@ -16,6 +16,7 @@ import net.sasakonnect.wallet.RequestDto.ChangePin;
 import net.sasakonnect.wallet.RequestDto.ChoiceTransferDto;
 import net.sasakonnect.wallet.RequestDto.EasyOnboardingRequestParams;
 import net.sasakonnect.wallet.RequestDto.Mpesa;
+import net.sasakonnect.wallet.RequestDto.MpesaBilling;
 import net.sasakonnect.wallet.RequestDto.OnboardingOtp;
 import net.sasakonnect.wallet.RequestDto.OtpTransfer;
 import net.sasakonnect.wallet.RequestDto.PinDto;
@@ -91,6 +92,12 @@ public class WalletController {
 	@TransactionMiddleware()
 	public Object payUtility(@RequestBody() @Valid BuyAirtime buyAirtime) {
 		return this.walletService.airtimePayment(buyAirtime);
+	}
+
+	@PostMapping("mpesa/payments")
+	@TransactionMiddleware()
+	public Object mpesaPayments(@RequestBody() @Valid MpesaBilling tillAndBuyGoods) {
+		return this.walletService.mpesaTillAndByGoods(tillAndBuyGoods);
 	}
 
 	@GetMapping("balance")
