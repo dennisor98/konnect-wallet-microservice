@@ -3,6 +3,9 @@ package net.sasakonnect.wallet.domain;
 import java.io.Serializable;
 import java.time.Instant;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -32,6 +35,7 @@ public class Otp extends BaseWalletDomain implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "user_id", referencedColumnName = "id")
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private User user;
 
 	// Constructors, getters, and setters
