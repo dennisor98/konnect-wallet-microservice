@@ -430,7 +430,7 @@ public class WalletService extends JwtService {
 					}
 
 				} else {
-					var onboardingRequestId = params.get("onboardingRequestId").getAsString();
+					var onboardingRequestId = params.get("onboarding§RequestId").getAsString();
 					System.out.println(onboardingRequestId);
 					this.userService.deletUserByOnboardingRequestId(onboardingRequestId);
 
@@ -630,7 +630,15 @@ public class WalletService extends JwtService {
 	public Object getAccountStatus() {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		var res = this.userService.isPinSet();
-		if (res.getStatusCode() == HttpStatus.OK) {
+		Optional<List<Wallet>> wallets = this.walletRepository.findByUserWalletsUser(user);
+		if (wallets.isEmpty()) {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("message", "Wallet Not Confirmed");
+			map.put("code", "KWEC001");
+			map.put("success", "false");
+
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(map);
+		} else if (res.getStatusCode() == HttpStatus.OK) {
 			return res;
 		} else {
 			return res;

@@ -201,6 +201,8 @@ public class UserService extends RestClientService implements UserDetailsService
 		} else {
 			Map<String, String> map = new HashMap<String, String>();
 			map.put("message", "Pin not set");
+			map.put("code", "KWEC002");
+
 			map.put("success", "false");
 
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(map);
