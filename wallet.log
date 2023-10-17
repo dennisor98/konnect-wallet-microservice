@@ -13164,3 +13164,9 @@ Caused by: java.lang.IllegalStateException: FirebaseApp name [DEFAULT] already e
             on u2_0.id=u1_0.user_id 
     where
         u2_0.id=?
+2023-10-17 16:30:11 [RMI TCP Connection(18)-127.0.0.1] INFO  o.s.b.a.SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin - Application shutdown requested.
+2023-10-17 16:30:11 [RMI TCP Connection(18)-127.0.0.1] INFO  o.a.catalina.core.StandardService - Stopping service [Tomcat]
+2023-10-17 16:30:11 [RMI TCP Connection(18)-127.0.0.1] INFO  o.a.c.c.C.[.[.[/konnect-wallet] - Destroying Spring FrameworkServlet 'dispatcherServlet'
+2023-10-17 16:30:12 [RMI TCP Connection(18)-127.0.0.1] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2023-10-17 16:30:12 [RMI TCP Connection(18)-127.0.0.1] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2023-10-17 16:30:12 [RMI TCP Connection(18)-127.0.0.1] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.

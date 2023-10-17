@@ -9,7 +9,7 @@ import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.Wallet;
 
 public interface WalletRepository extends JpaRepository<Wallet, String> {
-	Optional<List<Wallet>> findByUserWalletsUser(User user);
+	List<Wallet> findByUserWalletsUser(User user);
 
 	List<Wallet> findByUserWalletsUser_Id(String userId);
 

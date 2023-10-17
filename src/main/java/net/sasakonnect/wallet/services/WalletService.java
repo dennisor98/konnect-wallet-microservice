@@ -630,8 +630,8 @@ public class WalletService extends JwtService {
 	public Object getAccountStatus() {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		var res = this.userService.isPinSet();
-		Optional<List<Wallet>> wallets = this.walletRepository.findByUserWalletsUser(user);
-		if (wallets.isEmpty()) {
+		List<Wallet> wallets = this.walletRepository.findByUserWalletsUser(user);
+		if (wallets != null && wallets.isEmpty()) {
 			Map<String, String> map = new HashMap<String, String>();
 			map.put("message", "Wallet Not Confirmed");
 			map.put("code", "KWEC001");
