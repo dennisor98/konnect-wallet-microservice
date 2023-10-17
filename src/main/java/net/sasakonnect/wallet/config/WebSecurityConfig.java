@@ -1,11 +1,17 @@
 package net.sasakonnect.wallet.config;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 
 import org.springdoc.core.customizers.GlobalOpenApiCustomizer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,6 +31,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -51,6 +60,11 @@ public class WebSecurityConfig {
 		this.userService = userService;
 		this.jwtAuthenticationFilter = jwtAuthenticationFilter;
 	}
+
+	@Value("${FIREBASE_ADMIN_CONFIG_FILE}")
+	private String firebaseconfig_file;
+	@Autowired
+	private ResourceLoader resourceLoader;
 
 	@Bean
 	PasswordEncoder passwordEncoder() {
@@ -178,5 +192,26 @@ public class WebSecurityConfig {
 		// Enable pretty-printing for JSON output
 		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 		return objectMapper;
+	}
+
+	@Bean
+	FirebaseApp getFirebaseBean() {
+		FirebaseOptions options;
+
+		// Check if the file exists
+		Resource resource = resourceLoader.getResource("classpath:" + firebaseconfig_file);
+
+		if (!resource.exists()) {
+			throw new RuntimeException("Firebase service account JSON file not found: " + firebaseconfig_file);
+		}
+
+		try (InputStream serviceAccount = resource.getInputStream()) {
+			options = FirebaseOptions.builder().setCredentials(GoogleCredentials.fromStream(serviceAccount)).build();
+			return FirebaseApp.initializeApp(options);
+		} catch (IOException e) {
+			// Handle the exception here, e.g., log the error or throw a custom exception
+			e.printStackTrace();
+			throw new RuntimeException("Error initializing Firebase", e);
+		}
 	}
 }

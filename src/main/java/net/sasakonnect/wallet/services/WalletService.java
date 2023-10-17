@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -414,17 +415,19 @@ public class WalletService extends JwtService {
 			if (notification_Type.equalsIgnoreCase(NotificationType.ONBOARD.getCode())) {
 				var user = this.userService.getUserById(params.get("userId").getAsString());
 				if (notificationBody.getStatus() == 7 && user.isPresent()) {
+					Optional<Wallet> existingWallet = walletRepository.findByAccountId(notificationBody.getAccountId());
+					if (existingWallet.isEmpty()) {
+						var wallet = new Wallet();
+						wallet.setAccountId(notificationBody.getAccountId());
+						wallet.setAccountType(notificationBody.getAccountType());
+						var savedwallet = this.walletRepository.save(wallet);
+						var userWallet = new UserWallet();
+						userWallet.setUser(user.get());
+						userWallet.setWallet(savedwallet);
+						this.chatService.registerUserToOpenFire(user.get());
 
-					var wallet = new Wallet();
-					wallet.setAccountId(notificationBody.getAccountId());
-					wallet.setAccountType(notificationBody.getAccountType());
-					var savedwallet = this.walletRepository.save(wallet);
-					var userWallet = new UserWallet();
-					userWallet.setUser(user.get());
-					userWallet.setWallet(savedwallet);
-					this.chatService.registerUserToOpenFire(user.get());
-
-					this.userWalletRepository.save(userWallet);
+						this.userWalletRepository.save(userWallet);
+					}
 
 				} else {
 					var onboardingRequestId = params.get("onboardingRequestId").getAsString();
