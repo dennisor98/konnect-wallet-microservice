@@ -430,7 +430,7 @@ public class WalletService extends JwtService {
 					}
 
 				} else {
-					var onboardingRequestId = params.get("onboarding§RequestId").getAsString();
+					var onboardingRequestId = params.get("onboardingRequestId").getAsString();
 					System.out.println(onboardingRequestId);
 					this.userService.deletUserByOnboardingRequestId(onboardingRequestId);
 
