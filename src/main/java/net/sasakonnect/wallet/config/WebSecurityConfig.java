@@ -46,6 +46,7 @@ import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
+import net.sasakonnect.wallet.provider.FirebaseWrapper;
 import net.sasakonnect.wallet.services.UserService;
 
 @Configuration
@@ -195,7 +196,7 @@ public class WebSecurityConfig {
 	}
 
 	@Bean
-	FirebaseApp getFirebaseBean() {
+	FirebaseWrapper getFirebaseBean() {
 		FirebaseOptions options;
 
 		// Check if the file exists
@@ -207,7 +208,7 @@ public class WebSecurityConfig {
 
 		try (InputStream serviceAccount = resource.getInputStream()) {
 			options = FirebaseOptions.builder().setCredentials(GoogleCredentials.fromStream(serviceAccount)).build();
-			return FirebaseApp.initializeApp(options);
+			return FirebaseWrapper.builder().firebaseApp(FirebaseApp.initializeApp(options)).build();
 		} catch (IOException e) {
 			// Handle the exception here, e.g., log the error or throw a custom exception
 			e.printStackTrace();

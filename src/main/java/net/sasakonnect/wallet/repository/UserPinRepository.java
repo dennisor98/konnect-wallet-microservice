@@ -40,4 +40,6 @@ public interface UserPinRepository extends JpaRepository<UserPin, String> {
 	@Query("UPDATE UserPin up SET up.pinAttempts = 0 WHERE up.user = :user AND up.deletedAt IS NULL")
 	void resetPinAttempts(@Param("user") User user);
 
+	void deletAllWhereUser_Id(String id);
+
 }

@@ -1,5 +1,9 @@
 package net.sasakonnect.wallet.controllers;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,7 +16,12 @@ import jakarta.validation.Valid;
 import net.sasakonnect.wallet.CustomController;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
 import net.sasakonnect.wallet.RequestDto.UserLogin;
+import net.sasakonnect.wallet.provider.Firebase;
+import net.sasakonnect.wallet.provider.FirebaseMessage;
+import net.sasakonnect.wallet.provider.FirebaseWrapper;
 import net.sasakonnect.wallet.services.UserService;
+import net.sasakonnect.wallet.tools.redis.JobProducer;
+import net.sasakonnect.wallet.tools.redis.Queueable;
 
 @RequestMapping("user")
 @CustomController()
@@ -20,6 +29,10 @@ import net.sasakonnect.wallet.services.UserService;
 
 public class UserController {
 	private final UserService userService;
+	@Autowired
+	private JobProducer<Queueable<List<FirebaseMessage>>> jobProducer;
+	@Autowired
+	FirebaseWrapper firebaseWrapper;
 
 	public UserController(UserService userService) {
 		this.userService = userService;
@@ -27,6 +40,11 @@ public class UserController {
 
 	@PostMapping("userLogin")
 	public ResponseEntity<ObjectNode> getAll(@Valid @RequestBody UserLogin loginDto) {
+		Queueable<List<FirebaseMessage>> myBean = new Firebase(firebaseWrapper);
+		myBean.params = new ArrayList<FirebaseMessage>();
+		myBean.params.add(FirebaseMessage.builder().message("hello this").token("yes").build());
+
+		this.jobProducer.enqueueJob("firebase", myBean);
 		return userService.userLogin(loginDto);
 	}
 

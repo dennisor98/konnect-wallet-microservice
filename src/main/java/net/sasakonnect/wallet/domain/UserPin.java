@@ -2,6 +2,7 @@ package net.sasakonnect.wallet.domain;
 
 import java.io.Serializable;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
@@ -17,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserPin extends BaseWalletDomain implements Serializable {
 
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.REMOVE)
 	private User user;
 
 	@Column(nullable = false)

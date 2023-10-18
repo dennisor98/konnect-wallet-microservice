@@ -15,4 +15,8 @@ public class JobProducer<T extends Queueable> {
 	public void enqueueJob(T job) {
 		redisTemplate.opsForList().leftPush("jobQueue", job);
 	}
+
+	public void enqueueJob(String name, T job) {
+		redisTemplate.opsForList().leftPush(name, job);
+	}
 }
