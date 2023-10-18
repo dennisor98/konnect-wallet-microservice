@@ -1,7 +1,7 @@
 package net.sasakonnect.wallet.RequestDto;
 
 public enum MpesaBillType {
-	TILL(0), BUY_GOODS(1);
+	TILL(1), PAY_BILL(0);
 
 	int code;
 

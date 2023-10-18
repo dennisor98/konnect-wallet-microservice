@@ -809,7 +809,7 @@ public class WalletService extends JwtService {
 		reqId.put("payType", tillAndBuyGoods.getBillType().getCode());
 
 		switch (tillAndBuyGoods.billType) {
-		case BUY_GOODS:
+		case PAY_BILL:
 			reqId.put("payeeReferenNumber", tillAndBuyGoods.getReceivingAccount());
 
 			break;
