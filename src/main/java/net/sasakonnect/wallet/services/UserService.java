@@ -97,8 +97,7 @@ public class UserService extends RestClientService implements UserDetailsService
 
 		var user = this.userRepository.findByMobileAndCountryCode(userLogin.getPhoneNumber(),
 				Integer.valueOf(userLogin.getCountryCode()));
-		System.out.println(user.get().getFirstName());
-		System.out.println(userLogin.getPhoneNumber());
+
 		if (user.isEmpty()) {
 			ObjectMapper objectMapper = new ObjectMapper();
 

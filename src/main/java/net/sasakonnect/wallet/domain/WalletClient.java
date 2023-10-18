@@ -23,5 +23,7 @@ public class WalletClient extends BaseWalletDomain {
 	String appDescription;
 	@Column(nullable = true, columnDefinition = "boolean default false")
 	Boolean enabled;
+	@Column(nullable = true)
+	String callBackUrl;
 
 }
