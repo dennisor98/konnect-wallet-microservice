@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class WalletClientsAccount {
+public class WalletClientsAccount extends BaseWalletDomain {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = true)
 	private FinancialInstituation accountType;
