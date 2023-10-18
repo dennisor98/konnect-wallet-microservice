@@ -1,6 +1,5 @@
 package net.sasakonnect.wallet.controllers;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,6 @@ import jakarta.validation.Valid;
 import net.sasakonnect.wallet.CustomController;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
 import net.sasakonnect.wallet.RequestDto.UserLogin;
-import net.sasakonnect.wallet.provider.Firebase;
 import net.sasakonnect.wallet.provider.FirebaseMessage;
 import net.sasakonnect.wallet.provider.FirebaseWrapper;
 import net.sasakonnect.wallet.services.UserService;
@@ -40,11 +38,13 @@ public class UserController {
 
 	@PostMapping("userLogin")
 	public ResponseEntity<ObjectNode> getAll(@Valid @RequestBody UserLogin loginDto) {
-		Queueable<List<FirebaseMessage>> myBean = new Firebase(firebaseWrapper);
-		myBean.params = new ArrayList<FirebaseMessage>();
-		myBean.params.add(FirebaseMessage.builder().message("hello this").token("yes").build());
+//		test firebase
+		// Queueable<List<FirebaseMessage>> myBean = new Firebase(firebaseWrapper);
+//		myBean.params = new ArrayList<FirebaseMessage>();
+//		myBean.params.add(FirebaseMessage.builder().message("hello this").token("yes").build());
+//
+//		this.jobProducer.enqueueJob("firebase", myBean);
 
-		this.jobProducer.enqueueJob("firebase", myBean);
 		return userService.userLogin(loginDto);
 	}
 
@@ -52,31 +52,5 @@ public class UserController {
 	public ResponseEntity confirmOtp(@Valid @RequestBody ConfirmOtp confirmOtp) {
 		return userService.verifyOtp(confirmOtp);
 	}
-
-//	@PostMapping("/userLogin")
-//	public Optional<UserLoginResponse> userLogin(@Valid @RequestBody UserLogin userLogin, BindingResult bindingResult)
-//			throws UserInputException {
-//
-//		return Optional.of(userService.userLogin(userLogin));
-//
-//	}
-//
-//	@PostMapping("/register")
-//	public Optional<Object> userRegister(@Valid @RequestBody UserSignUp userSignUp, BindingResult bindingResult)
-//			throws UserInputException {
-//
-//		return Optional.ofNullable(userService.userRegister(userSignUp));
-//
-//	}
-//
-//	@GetMapping("/account")
-//	@PreAuthorize("hasPermission(#apartmentId, 'view.account')")
-//	@RequirePermission("view.account")
-//	public String account(@Valid @RequestBody AccountRequestDto accountRequest) throws AccountNotFoundException {
-//		// Logic to retrieve targetDomainObject
-//		// For example: String targetDomainObject = someService.getTargetDomainObject();
-//
-//		return "account: ";
-//	}
 
 }
