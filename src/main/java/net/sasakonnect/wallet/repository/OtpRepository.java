@@ -20,7 +20,7 @@ public interface OtpRepository extends JpaRepository<Otp, String> {
 
 	Optional<Otp> findByHashWithUser(@Param("hash") String hash);
 
-	@Query("SELECT otp FROM Otp otp JOIN FETCH otp.user WHERE otp.hash = :hash AND otp.code =:code ")
+	@Query("SELECT otp FROM Otp otp JOIN FETCH otp.user WHERE otp.hash = :hash AND otp.code =:code ORDER BY otp.createdAt DESC")
 
 	Optional<Otp> findByHashAndCodeWithUser(@Param("hash") String hash, @Param("code") String code);
 

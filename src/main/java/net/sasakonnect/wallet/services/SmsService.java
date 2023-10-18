@@ -65,6 +65,7 @@ public class SmsService {
 			otpEntity.setUser(user.get());
 			otpEntity.setTtl(otp_ttl);
 			otpEntity.setHash(RequestSigner.createHashFrom(user.get().getId() + otp));
+
 			Otp savedOtp = this.otpService.saveOtp(otpEntity);
 			stringbuilder.append(":" + savedOtp.getCode());
 			if (userLogin.getMessageSignature() != null && userLogin.getMessageSignature().length() == 11) {
