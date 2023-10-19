@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import net.sasakonnect.wallet.RequestDto.SdkPayDto;
 import net.sasakonnect.wallet.RequestDto.WalletClientAccountDto;
 import net.sasakonnect.wallet.RequestDto.WalletClientDTO;
+import net.sasakonnect.wallet.beans.ClientAppsBean;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.WalletClient;
 import net.sasakonnect.wallet.domain.WalletClientAccount;
@@ -29,6 +30,10 @@ public class WalletClientService {
 	WalletClientRepository wallectClientRepository;
 	@Autowired
 	WalletClientAccountRepository walletClientAccountRepository;
+	@Autowired
+	private ClientAppsBean clientAppsBean;
+	@Autowired
+	private WalletService walletService;
 
 	public WalletClient createWallectClientApp(WalletClientDTO walleClientDto) {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -77,8 +82,10 @@ public class WalletClientService {
 	}
 
 	public Object payThroughSdk(@Valid SdkPayDto sdkpayDto) {
+		var clientApp = clientAppsBean.getWalletClient();
+		return this.walletService.requestWalletDeduction(sdkpayDto, clientApp);
 		// TODO Auto-generated method stub
-		return null;
+		// return null;
 	}
 
 }

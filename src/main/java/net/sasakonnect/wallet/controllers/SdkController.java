@@ -28,7 +28,12 @@ public class SdkController {
 	@TransactionMiddleware()
 	@SdkMiddleware()
 	public Object payUtility(
-			@Parameter(name = "custom-header", description = "Custom header description", in = ParameterIn.HEADER, required = true) @RequestHeader("custom-header") String customHeader,
+			@Parameter(example = "37c8043a43adca4368607e5742a10d501c0cb990a26906603818f18ad8d15882", name = "app-key", description = "Provide app key of the app you created on dashboard", in = ParameterIn.HEADER, required = true) @RequestHeader("app-key") String appKey,
+
+			@Parameter(name = "secret-key", example = "b9c58367305d98e9ab6d05fd7fe16619cc567ba59fd96e78e089", description = "Please provide App secret", in = ParameterIn.HEADER, required = true)
+
+			@RequestHeader("secret-key") String secretkey,
+
 			@RequestBody() @Valid SdkPayDto sdkpayDto) {
 		return this.walletClientService.payThroughSdk(sdkpayDto);
 	}

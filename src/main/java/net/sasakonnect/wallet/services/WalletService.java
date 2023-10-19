@@ -31,10 +31,12 @@ import net.sasakonnect.wallet.RequestDto.BuyAirtime;
 import net.sasakonnect.wallet.RequestDto.ChoiceTransferDto;
 import net.sasakonnect.wallet.RequestDto.EasyOnboardingRequestParams;
 import net.sasakonnect.wallet.RequestDto.Mpesa;
+import net.sasakonnect.wallet.RequestDto.MpesaBillType;
 import net.sasakonnect.wallet.RequestDto.MpesaBilling;
 import net.sasakonnect.wallet.RequestDto.OnboardingOtp;
 import net.sasakonnect.wallet.RequestDto.OnboardingStatus;
 import net.sasakonnect.wallet.RequestDto.OtpTransfer;
+import net.sasakonnect.wallet.RequestDto.SdkPayDto;
 import net.sasakonnect.wallet.RequestDto.TransactionPeriod;
 import net.sasakonnect.wallet.RequestDto.TransferToMpesa;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
@@ -42,6 +44,7 @@ import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.UserWallet;
 import net.sasakonnect.wallet.domain.Wallet;
+import net.sasakonnect.wallet.domain.WalletClient;
 import net.sasakonnect.wallet.enums.NotificationBody;
 import net.sasakonnect.wallet.enums.NotificationType;
 import net.sasakonnect.wallet.enums.TransactionStatus;
@@ -849,5 +852,39 @@ public class WalletService extends JwtService {
 
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public Object requestWalletDeduction(@Valid SdkPayDto sdkpayDto, WalletClient clientApp) {
+		var account = clientApp.getWalletClientAccount();
+		switch (account.getAccountType()) {
+		case BANK:
+			break;
+		case MPESA:
+			var mpesaBill = new MpesaBilling();
+			mpesaBill.amount = Integer.parseInt(sdkpayDto.getAmount());
+			if (account.getTillNumber() != null) {
+				mpesaBill.shortCode = account.getTillNumber();
+				mpesaBill.setBillType(MpesaBillType.TILL);
+				return this.mpesaTillAndByGoods(mpesaBill);
+
+			} else if (account.getPayBillAccountNo() != null && account.getPaybillNumber() != null) {
+				mpesaBill.shortCode = account.getPaybillNumber();
+				mpesaBill.setBillType(MpesaBillType.PAY_BILL);
+				mpesaBill.setReceivingAccount(account.getPayBillAccountNo());
+				return this.mpesaTillAndByGoods(mpesaBill);
+			}
+
+			break;
+		case WALLET:
+
+			break;
+		default:
+			break;
+
+		}
+		return clientApp.getWalletClientAccount().getAccountType().name();
+
+		// TODO Auto-generated method stub
+
 	}
 }
