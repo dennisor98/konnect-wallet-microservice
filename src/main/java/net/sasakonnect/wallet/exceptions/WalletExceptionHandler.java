@@ -46,11 +46,12 @@ public class WalletExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	@ExceptionHandler({ ResponseStatusException.class })
-	public ResponseStatusException handleConstraintViolation(ResponseStatusException ex, WebRequest request)
+	public ResponseEntity<Object> handleConstraintViolation(ResponseStatusException ex, WebRequest request)
 			throws JsonProcessingException {
 		List<String> errors = new ArrayList<String>();
-
-		return new ResponseStatusException(HttpStatus.FORBIDDEN, ex.getReason());
+		Map<String, String> fieldErrorMap = new HashMap<>();
+		fieldErrorMap.put("message", ex.getMessage());
+		return ResponseEntity.status(ex.getStatusCode()).headers(ex.getHeaders()).body(ex.getReason());
 
 	}
 

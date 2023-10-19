@@ -23,8 +23,9 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
 
 	@Override
 	public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
-		System.out.print("Check permission for " + authentication.getPrincipal() + "For target domain object"
-				+ targetDomainObject + " for permission " + permission);
+//		System.out.print("Check permission for " + authentication.getPrincipal() + "For target domain object"
+//				+ targetDomainObject + " for permission " + permission);
+		System.out.print("check error");
 		Optional<Role> role = this.userService
 				.getUserRoleByUserId(((User) authentication.getPrincipal()).getId().toString());
 		if (role.isEmpty() && permission == null) {

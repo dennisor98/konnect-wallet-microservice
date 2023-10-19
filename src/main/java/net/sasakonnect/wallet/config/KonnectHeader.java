@@ -1,7 +1,7 @@
 package net.sasakonnect.wallet.config;
 
 public enum KonnectHeader {
-	X_TRANSACTION_HEADER("x-transaction-id");
+	X_TRANSACTION_HEADER("x-transaction-id"), CLIENT_APP_KEY_HEADER("app-key"), SECRET_APP_KEY_HEADER("secret-key");
 
 	private String value;
 

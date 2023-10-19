@@ -105,7 +105,7 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 
 	@OneToMany(mappedBy = "user")
 	private List<UserDevice> userDevices;
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<UserPin> userPins;
 
 	public Map<String, Object> toBankPayload() {

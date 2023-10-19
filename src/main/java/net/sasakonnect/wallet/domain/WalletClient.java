@@ -1,9 +1,12 @@
 package net.sasakonnect.wallet.domain;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,8 +30,14 @@ public class WalletClient extends BaseWalletDomain {
 	Boolean enabled;
 	@Column(nullable = true)
 	String callBackUrl;
-	@OneToOne
+
+	@ManyToOne
 	@JoinColumn(name = "wallet_client_account_id", nullable = true)
-	WalletClientsAccount walletClientsAccount;
+
+	WalletClientAccount walletClientAccount;
+	@ManyToOne
+	@JoinColumn(name = "owner_id", referencedColumnName = "id")
+	@OnDelete(action = OnDeleteAction.CASCADE)
+	private User user;
 
 }

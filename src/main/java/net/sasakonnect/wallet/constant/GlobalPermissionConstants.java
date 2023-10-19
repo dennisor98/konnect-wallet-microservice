@@ -36,6 +36,21 @@ public final class GlobalPermissionConstants {
 		}
 	}
 
+	public static class CreateWalletClient extends PermissionEntry {
+		public static final String PERMISSION = "can.create.wallet.client";
+		public static final String DESCRIPTION = "can create client to be used by other languages such as dart and node";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
+
 	public static Map<String, String> scan() {
 		Class<?>[] innerClasses = GlobalPermissionConstants.class.getDeclaredClasses();
 

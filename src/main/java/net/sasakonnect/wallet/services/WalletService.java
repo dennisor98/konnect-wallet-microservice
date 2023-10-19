@@ -329,6 +329,14 @@ public class WalletService extends JwtService {
 					.idNumber(easyOnboarding.getIdNumber()).build();
 
 			final User savedUser = this.userService.createUser(user);
+			savedUser.setPins(null);
+			savedUser.setFirebaseTokens(null);
+			savedUser.setUserDevices(null);
+			savedUser.setUserWallets(null);
+			savedUser.setUserPins(null);
+			savedUser.setUserRole(null);
+			savedUser.setNotifications(null);
+
 			userMap.put("userId", savedUser.getId());
 
 			var reqs = this.requestSigner.signRequest(userMap);
@@ -357,7 +365,7 @@ public class WalletService extends JwtService {
 
 						savedUser.setOnboardingRequestId(onboardingRequestId.asText());
 						var updateduser = this.userService.updateUser(savedUser);
-						var userData = this.userService.createJwtFor(updateduser);
+						var userData = this.userService.createJwtFor(savedUser);
 
 						return Mono.just(objectMapper.writeValueAsString(userData));
 
