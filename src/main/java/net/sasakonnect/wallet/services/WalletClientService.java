@@ -81,11 +81,14 @@ public class WalletClientService {
 		return this.wallectClientRepository.findByAppKeyAndAppSecret(client_app_key, appSecret);
 	}
 
+	public Optional<List<WalletClient>> findMerchantByClientAppKey(String client_app_key) {
+		// TODO Auto-generated method stub
+		return this.wallectClientRepository.findByAppKeyAnd(client_app_key);
+	}
+
 	public Object payThroughSdk(@Valid SdkPayDto sdkpayDto) {
 		var clientApp = clientAppsBean.getWalletClient();
 		return this.walletService.requestWalletDeduction(sdkpayDto, clientApp);
-		// TODO Auto-generated method stub
-		// return null;
 	}
 
 }

@@ -41,11 +41,9 @@ public class SdkMiddlewareAspect {
 		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
 				.getRequest();
 		var client_app_key = request.getHeader(KonnectHeader.CLIENT_APP_KEY_HEADER.toString());
-		var client_app_secret = request.getHeader(KonnectHeader.SECRET_APP_KEY_HEADER.toString());
-		System.out.println(client_app_secret + "client key");
-		if (client_app_key == null || client_app_secret == null) {
+		if (client_app_key == null) {
 			Map<String, Object> map = new HashMap<String, Object>();
-			map.put("message", "key and app secret required");
+			map.put("message", "merchant key  required");
 			map.put("success", false);
 			ObjectMapper objectMapper = new ObjectMapper();
 			try {
@@ -58,7 +56,7 @@ public class SdkMiddlewareAspect {
 			}
 
 		} else {
-			var walletclient = this.walletclientService.findBuyKeyAndSecret(client_app_key, client_app_secret);
+			var walletclient = this.walletclientService.findMerchantByClientAppKey(client_app_key);
 			if (walletclient.isPresent()) {
 				var clients = walletclient.get();
 				if (!clients.isEmpty()) {
@@ -68,7 +66,7 @@ public class SdkMiddlewareAspect {
 				}
 			}
 			Map<String, Object> map = new HashMap<String, Object>();
-			map.put("message", "key and app secret required");
+			map.put("message", "merchant key  required");
 			map.put("success", false);
 			ObjectMapper objectMapper = new ObjectMapper();
 			try {

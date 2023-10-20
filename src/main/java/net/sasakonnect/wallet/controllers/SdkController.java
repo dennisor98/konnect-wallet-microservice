@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import net.sasakonnect.wallet.CustomController;
+import net.sasakonnect.wallet.RequestDto.MerchantKeyDto;
 import net.sasakonnect.wallet.RequestDto.SdkPayDto;
 import net.sasakonnect.wallet.annotations.SdkMiddleware;
 import net.sasakonnect.wallet.annotations.TransactionMiddleware;
@@ -30,12 +31,18 @@ public class SdkController {
 	public Object payUtility(
 			@Parameter(example = "37c8043a43adca4368607e5742a10d501c0cb990a26906603818f18ad8d15882", name = "app-key", description = "Provide app key of the app you created on dashboard", in = ParameterIn.HEADER, required = true) @RequestHeader("app-key") String appKey,
 
-			@Parameter(name = "secret-key", example = "b9c58367305d98e9ab6d05fd7fe16619cc567ba59fd96e78e089", description = "Please provide App secret", in = ParameterIn.HEADER, required = true)
-
-			@RequestHeader("secret-key") String secretkey,
-
 			@RequestBody() @Valid SdkPayDto sdkpayDto) {
 		return this.walletClientService.payThroughSdk(sdkpayDto);
+	}
+
+	@PostMapping("merchant")
+	@TransactionMiddleware()
+
+	public Object getMerchant(
+			@Parameter(example = "37c8043a43adca4368607e5742a10d501c0cb990a26906603818f18ad8d15882", name = "app-key", description = "Provide app key of the app you created on dashboard", in = ParameterIn.HEADER, required = true) @RequestHeader("app-key") String appKey,
+
+			@RequestBody() @Valid MerchantKeyDto merchnantKeyDto) {
+		return this.walletClientService.findMerchantByClientAppKey(merchnantKeyDto.getMerchant());
 	}
 
 }
