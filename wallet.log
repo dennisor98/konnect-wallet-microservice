@@ -35628,3 +35628,1029 @@ java.lang.StackOverflowError: null
         wallet_client_account w1_0 
     where
         w1_0.id=?
+2023-10-20 21:42:43 [http-nio-8080-exec-3] DEBUG o.s.security.web.FilterChainProxy - Securing POST /sdk/merchant
+2023-10-20 21:42:43 [http-nio-8080-exec-3] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.birthday,
+        u1_0.country_code,
+        u1_0.created_at,
+        u1_0.deleted_at,
+        u1_0.employment_status,
+        u1_0.first_name,
+        u1_0.gender,
+        u1_0.id_number,
+        u1_0.id_type,
+        u1_0.kra_pin,
+        u1_0.last_name,
+        m1_0.id,
+        m1_0.client_id,
+        m1_0.created_at,
+        m1_0.deleted_at,
+        m1_0.flow_id,
+        m1_0.updated_at,
+        u1_0.middle_name,
+        u1_0.mobile,
+        u1_0.monthly_income,
+        u1_0.onboarding_request_id,
+        u1_0.simple,
+        u1_0.updated_at,
+        u2_0.id,
+        a1_0.id,
+        a1_0.address,
+        a1_0.birthday,
+        a1_0.country_code,
+        a1_0.created_at,
+        a1_0.deleted_at,
+        a1_0.employment_status,
+        a1_0.first_name,
+        a1_0.gender,
+        a1_0.id_number,
+        a1_0.id_type,
+        a1_0.kra_pin,
+        a1_0.last_name,
+        a1_0.meta_id,
+        a1_0.middle_name,
+        a1_0.mobile,
+        a1_0.monthly_income,
+        a1_0.onboarding_request_id,
+        a1_0.simple,
+        a1_0.updated_at,
+        u2_0.created_at,
+        u2_0.deleted_at,
+        u2_0.is_deactivated,
+        r1_0.id,
+        r1_0.created_at,
+        r1_0.deleted_at,
+        r1_0.description,
+        r1_0.role_name,
+        r1_0.updated_at,
+        r1_0.creator_id,
+        u2_0.role_id,
+        u2_0.updated_at,
+        u2_0.user_id 
+    from
+        user u1_0 
+    left join
+        meta_mask m1_0 
+            on m1_0.id=u1_0.meta_id 
+    left join
+        user_role u2_0 
+            on u1_0.id=u2_0.user_id 
+    left join
+        user a1_0 
+            on a1_0.id=u2_0.assigner_id 
+    left join
+        role r1_0 
+            on r1_0.id=u2_0.role_id 
+    where
+        u1_0.id=?
+2023-10-20 21:42:43 [http-nio-8080-exec-3] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        a1_0.id,
+        a1_0.address,
+        a1_0.birthday,
+        a1_0.country_code,
+        a1_0.created_at,
+        a1_0.deleted_at,
+        a1_0.employment_status,
+        a1_0.first_name,
+        a1_0.gender,
+        a1_0.id_number,
+        a1_0.id_type,
+        a1_0.kra_pin,
+        a1_0.last_name,
+        m1_0.id,
+        m1_0.client_id,
+        m1_0.created_at,
+        m1_0.deleted_at,
+        m1_0.flow_id,
+        m1_0.updated_at,
+        a1_0.middle_name,
+        a1_0.mobile,
+        a1_0.monthly_income,
+        a1_0.onboarding_request_id,
+        a1_0.simple,
+        a1_0.updated_at,
+        u2_0.id,
+        u2_0.assigner_id,
+        u2_0.created_at,
+        u2_0.deleted_at,
+        u2_0.is_deactivated,
+        u2_0.role_id,
+        u2_0.updated_at,
+        u2_0.user_id,
+        u1_0.created_at,
+        u1_0.deleted_at,
+        u1_0.is_deactivated,
+        r2_0.id,
+        r2_0.created_at,
+        r2_0.deleted_at,
+        r2_0.description,
+        r2_0.role_name,
+        r2_0.updated_at,
+        u3_0.id,
+        u3_0.address,
+        u3_0.birthday,
+        u3_0.country_code,
+        u3_0.created_at,
+        u3_0.deleted_at,
+        u3_0.employment_status,
+        u3_0.first_name,
+        u3_0.gender,
+        u3_0.id_number,
+        u3_0.id_type,
+        u3_0.kra_pin,
+        u3_0.last_name,
+        u3_0.meta_id,
+        u3_0.middle_name,
+        u3_0.mobile,
+        u3_0.monthly_income,
+        u3_0.onboarding_request_id,
+        u3_0.simple,
+        u3_0.updated_at,
+        u1_0.role_id,
+        u1_0.updated_at,
+        u4_0.id,
+        u4_0.address,
+        u4_0.birthday,
+        u4_0.country_code,
+        u4_0.created_at,
+        u4_0.deleted_at,
+        u4_0.employment_status,
+        u4_0.first_name,
+        u4_0.gender,
+        u4_0.id_number,
+        u4_0.id_type,
+        u4_0.kra_pin,
+        u4_0.last_name,
+        m3_0.id,
+        m3_0.client_id,
+        m3_0.created_at,
+        m3_0.deleted_at,
+        m3_0.flow_id,
+        m3_0.updated_at,
+        u4_0.middle_name,
+        u4_0.mobile,
+        u4_0.monthly_income,
+        u4_0.onboarding_request_id,
+        u4_0.simple,
+        u4_0.updated_at,
+        u1_0.user_id 
+    from
+        user_role u1_0 
+    left join
+        user a1_0 
+            on a1_0.id=u1_0.assigner_id 
+    left join
+        meta_mask m1_0 
+            on m1_0.id=a1_0.meta_id 
+    left join
+        user_role u2_0 
+            on a1_0.id=u2_0.user_id 
+    left join
+        role r2_0 
+            on r2_0.id=u1_0.role_id 
+    left join
+        user u3_0 
+            on u3_0.id=r2_0.creator_id 
+    left join
+        user u4_0 
+            on u4_0.id=u1_0.user_id 
+    left join
+        meta_mask m3_0 
+            on m3_0.id=u4_0.meta_id 
+    where
+        u1_0.user_id=?
+2023-10-20 21:42:43 [http-nio-8080-exec-3] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        a1_0.id,
+        a1_0.address,
+        a1_0.birthday,
+        a1_0.country_code,
+        a1_0.created_at,
+        a1_0.deleted_at,
+        a1_0.employment_status,
+        a1_0.first_name,
+        a1_0.gender,
+        a1_0.id_number,
+        a1_0.id_type,
+        a1_0.kra_pin,
+        a1_0.last_name,
+        m1_0.id,
+        m1_0.client_id,
+        m1_0.created_at,
+        m1_0.deleted_at,
+        m1_0.flow_id,
+        m1_0.updated_at,
+        a1_0.middle_name,
+        a1_0.mobile,
+        a1_0.monthly_income,
+        a1_0.onboarding_request_id,
+        a1_0.simple,
+        a1_0.updated_at,
+        u2_0.id,
+        u2_0.assigner_id,
+        u2_0.created_at,
+        u2_0.deleted_at,
+        u2_0.is_deactivated,
+        u2_0.role_id,
+        u2_0.updated_at,
+        u2_0.user_id,
+        u1_0.created_at,
+        u1_0.deleted_at,
+        u1_0.is_deactivated,
+        r2_0.id,
+        r2_0.created_at,
+        r2_0.deleted_at,
+        r2_0.description,
+        r2_0.role_name,
+        r2_0.updated_at,
+        u3_0.id,
+        u3_0.address,
+        u3_0.birthday,
+        u3_0.country_code,
+        u3_0.created_at,
+        u3_0.deleted_at,
+        u3_0.employment_status,
+        u3_0.first_name,
+        u3_0.gender,
+        u3_0.id_number,
+        u3_0.id_type,
+        u3_0.kra_pin,
+        u3_0.last_name,
+        u3_0.meta_id,
+        u3_0.middle_name,
+        u3_0.mobile,
+        u3_0.monthly_income,
+        u3_0.onboarding_request_id,
+        u3_0.simple,
+        u3_0.updated_at,
+        u1_0.role_id,
+        u1_0.updated_at,
+        u4_0.id,
+        u4_0.address,
+        u4_0.birthday,
+        u4_0.country_code,
+        u4_0.created_at,
+        u4_0.deleted_at,
+        u4_0.employment_status,
+        u4_0.first_name,
+        u4_0.gender,
+        u4_0.id_number,
+        u4_0.id_type,
+        u4_0.kra_pin,
+        u4_0.last_name,
+        m3_0.id,
+        m3_0.client_id,
+        m3_0.created_at,
+        m3_0.deleted_at,
+        m3_0.flow_id,
+        m3_0.updated_at,
+        u4_0.middle_name,
+        u4_0.mobile,
+        u4_0.monthly_income,
+        u4_0.onboarding_request_id,
+        u4_0.simple,
+        u4_0.updated_at,
+        u1_0.user_id 
+    from
+        user_role u1_0 
+    left join
+        user a1_0 
+            on a1_0.id=u1_0.assigner_id 
+    left join
+        meta_mask m1_0 
+            on m1_0.id=a1_0.meta_id 
+    left join
+        user_role u2_0 
+            on a1_0.id=u2_0.user_id 
+    left join
+        role r2_0 
+            on r2_0.id=u1_0.role_id 
+    left join
+        user u3_0 
+            on u3_0.id=r2_0.creator_id 
+    left join
+        user u4_0 
+            on u4_0.id=u1_0.user_id 
+    left join
+        meta_mask m3_0 
+            on m3_0.id=u4_0.meta_id 
+    where
+        u1_0.user_id=?
+2023-10-20 21:42:44 [http-nio-8080-exec-3] DEBUG org.hibernate.SQL - 
+    select
+        r1_0.id,
+        r1_0.created_at,
+        r1_0.deleted_at,
+        r1_0.description,
+        r1_0.role_name,
+        r1_0.updated_at,
+        r1_0.creator_id 
+    from
+        user_role u1_0 
+    join
+        role r1_0 
+            on r1_0.id=u1_0.role_id 
+    where
+        u1_0.user_id=?
+2023-10-20 21:42:44 [http-nio-8080-exec-3] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.birthday,
+        u1_0.country_code,
+        u1_0.created_at,
+        u1_0.deleted_at,
+        u1_0.employment_status,
+        u1_0.first_name,
+        u1_0.gender,
+        u1_0.id_number,
+        u1_0.id_type,
+        u1_0.kra_pin,
+        u1_0.last_name,
+        m1_0.id,
+        m1_0.client_id,
+        m1_0.created_at,
+        m1_0.deleted_at,
+        m1_0.flow_id,
+        m1_0.updated_at,
+        u1_0.middle_name,
+        u1_0.mobile,
+        u1_0.monthly_income,
+        u1_0.onboarding_request_id,
+        u1_0.simple,
+        u1_0.updated_at,
+        u2_0.id,
+        a1_0.id,
+        a1_0.address,
+        a1_0.birthday,
+        a1_0.country_code,
+        a1_0.created_at,
+        a1_0.deleted_at,
+        a1_0.employment_status,
+        a1_0.first_name,
+        a1_0.gender,
+        a1_0.id_number,
+        a1_0.id_type,
+        a1_0.kra_pin,
+        a1_0.last_name,
+        a1_0.meta_id,
+        a1_0.middle_name,
+        a1_0.mobile,
+        a1_0.monthly_income,
+        a1_0.onboarding_request_id,
+        a1_0.simple,
+        a1_0.updated_at,
+        u2_0.created_at,
+        u2_0.deleted_at,
+        u2_0.is_deactivated,
+        r1_0.id,
+        r1_0.created_at,
+        r1_0.deleted_at,
+        r1_0.description,
+        r1_0.role_name,
+        r1_0.updated_at,
+        r1_0.creator_id,
+        u2_0.role_id,
+        u2_0.updated_at,
+        u2_0.user_id 
+    from
+        user u1_0 
+    left join
+        meta_mask m1_0 
+            on m1_0.id=u1_0.meta_id 
+    left join
+        user_role u2_0 
+            on u1_0.id=u2_0.user_id 
+    left join
+        user a1_0 
+            on a1_0.id=u2_0.assigner_id 
+    left join
+        role r1_0 
+            on r1_0.id=u2_0.role_id 
+    where
+        u1_0.id=?
+2023-10-20 21:42:44 [http-nio-8080-exec-3] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        a1_0.id,
+        a1_0.address,
+        a1_0.birthday,
+        a1_0.country_code,
+        a1_0.created_at,
+        a1_0.deleted_at,
+        a1_0.employment_status,
+        a1_0.first_name,
+        a1_0.gender,
+        a1_0.id_number,
+        a1_0.id_type,
+        a1_0.kra_pin,
+        a1_0.last_name,
+        m1_0.id,
+        m1_0.client_id,
+        m1_0.created_at,
+        m1_0.deleted_at,
+        m1_0.flow_id,
+        m1_0.updated_at,
+        a1_0.middle_name,
+        a1_0.mobile,
+        a1_0.monthly_income,
+        a1_0.onboarding_request_id,
+        a1_0.simple,
+        a1_0.updated_at,
+        u2_0.id,
+        u2_0.assigner_id,
+        u2_0.created_at,
+        u2_0.deleted_at,
+        u2_0.is_deactivated,
+        u2_0.role_id,
+        u2_0.updated_at,
+        u2_0.user_id,
+        u1_0.created_at,
+        u1_0.deleted_at,
+        u1_0.is_deactivated,
+        r2_0.id,
+        r2_0.created_at,
+        r2_0.deleted_at,
+        r2_0.description,
+        r2_0.role_name,
+        r2_0.updated_at,
+        u3_0.id,
+        u3_0.address,
+        u3_0.birthday,
+        u3_0.country_code,
+        u3_0.created_at,
+        u3_0.deleted_at,
+        u3_0.employment_status,
+        u3_0.first_name,
+        u3_0.gender,
+        u3_0.id_number,
+        u3_0.id_type,
+        u3_0.kra_pin,
+        u3_0.last_name,
+        u3_0.meta_id,
+        u3_0.middle_name,
+        u3_0.mobile,
+        u3_0.monthly_income,
+        u3_0.onboarding_request_id,
+        u3_0.simple,
+        u3_0.updated_at,
+        u1_0.role_id,
+        u1_0.updated_at,
+        u4_0.id,
+        u4_0.address,
+        u4_0.birthday,
+        u4_0.country_code,
+        u4_0.created_at,
+        u4_0.deleted_at,
+        u4_0.employment_status,
+        u4_0.first_name,
+        u4_0.gender,
+        u4_0.id_number,
+        u4_0.id_type,
+        u4_0.kra_pin,
+        u4_0.last_name,
+        m3_0.id,
+        m3_0.client_id,
+        m3_0.created_at,
+        m3_0.deleted_at,
+        m3_0.flow_id,
+        m3_0.updated_at,
+        u4_0.middle_name,
+        u4_0.mobile,
+        u4_0.monthly_income,
+        u4_0.onboarding_request_id,
+        u4_0.simple,
+        u4_0.updated_at,
+        u1_0.user_id 
+    from
+        user_role u1_0 
+    left join
+        user a1_0 
+            on a1_0.id=u1_0.assigner_id 
+    left join
+        meta_mask m1_0 
+            on m1_0.id=a1_0.meta_id 
+    left join
+        user_role u2_0 
+            on a1_0.id=u2_0.user_id 
+    left join
+        role r2_0 
+            on r2_0.id=u1_0.role_id 
+    left join
+        user u3_0 
+            on u3_0.id=r2_0.creator_id 
+    left join
+        user u4_0 
+            on u4_0.id=u1_0.user_id 
+    left join
+        meta_mask m3_0 
+            on m3_0.id=u4_0.meta_id 
+    where
+        u1_0.user_id=?
+2023-10-20 21:42:44 [http-nio-8080-exec-3] DEBUG o.s.security.web.FilterChainProxy - Secured POST /sdk/merchant
+2023-10-20 21:42:44 [http-nio-8080-exec-3] DEBUG org.hibernate.SQL - 
+    select
+        w1_0.id,
+        w1_0.app_description,
+        w1_0.app_key,
+        w1_0.app_name,
+        w1_0.app_secret,
+        w1_0.call_back_url,
+        w1_0.created_at,
+        w1_0.deleted_at,
+        w1_0.enabled,
+        w1_0.updated_at,
+        w1_0.owner_id,
+        w1_0.wallet_client_account_id 
+    from
+        wallet_client w1_0 
+    where
+        w1_0.app_key=? 
+        and w1_0.enabled=1 
+    order by
+        w1_0.created_at desc
+2023-10-20 21:42:44 [http-nio-8080-exec-3] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.birthday,
+        u1_0.country_code,
+        u1_0.created_at,
+        u1_0.deleted_at,
+        u1_0.employment_status,
+        u1_0.first_name,
+        u1_0.gender,
+        u1_0.id_number,
+        u1_0.id_type,
+        u1_0.kra_pin,
+        u1_0.last_name,
+        m1_0.id,
+        m1_0.client_id,
+        m1_0.created_at,
+        m1_0.deleted_at,
+        m1_0.flow_id,
+        m1_0.updated_at,
+        u1_0.middle_name,
+        u1_0.mobile,
+        u1_0.monthly_income,
+        u1_0.onboarding_request_id,
+        u1_0.simple,
+        u1_0.updated_at,
+        u2_0.id,
+        a1_0.id,
+        a1_0.address,
+        a1_0.birthday,
+        a1_0.country_code,
+        a1_0.created_at,
+        a1_0.deleted_at,
+        a1_0.employment_status,
+        a1_0.first_name,
+        a1_0.gender,
+        a1_0.id_number,
+        a1_0.id_type,
+        a1_0.kra_pin,
+        a1_0.last_name,
+        a1_0.meta_id,
+        a1_0.middle_name,
+        a1_0.mobile,
+        a1_0.monthly_income,
+        a1_0.onboarding_request_id,
+        a1_0.simple,
+        a1_0.updated_at,
+        u2_0.created_at,
+        u2_0.deleted_at,
+        u2_0.is_deactivated,
+        r1_0.id,
+        r1_0.created_at,
+        r1_0.deleted_at,
+        r1_0.description,
+        r1_0.role_name,
+        r1_0.updated_at,
+        r1_0.creator_id,
+        u2_0.role_id,
+        u2_0.updated_at,
+        u2_0.user_id 
+    from
+        user u1_0 
+    left join
+        meta_mask m1_0 
+            on m1_0.id=u1_0.meta_id 
+    left join
+        user_role u2_0 
+            on u1_0.id=u2_0.user_id 
+    left join
+        user a1_0 
+            on a1_0.id=u2_0.assigner_id 
+    left join
+        role r1_0 
+            on r1_0.id=u2_0.role_id 
+    where
+        u1_0.id=?
+2023-10-20 21:42:44 [http-nio-8080-exec-3] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        a1_0.id,
+        a1_0.address,
+        a1_0.birthday,
+        a1_0.country_code,
+        a1_0.created_at,
+        a1_0.deleted_at,
+        a1_0.employment_status,
+        a1_0.first_name,
+        a1_0.gender,
+        a1_0.id_number,
+        a1_0.id_type,
+        a1_0.kra_pin,
+        a1_0.last_name,
+        m1_0.id,
+        m1_0.client_id,
+        m1_0.created_at,
+        m1_0.deleted_at,
+        m1_0.flow_id,
+        m1_0.updated_at,
+        a1_0.middle_name,
+        a1_0.mobile,
+        a1_0.monthly_income,
+        a1_0.onboarding_request_id,
+        a1_0.simple,
+        a1_0.updated_at,
+        u2_0.id,
+        u2_0.assigner_id,
+        u2_0.created_at,
+        u2_0.deleted_at,
+        u2_0.is_deactivated,
+        u2_0.role_id,
+        u2_0.updated_at,
+        u2_0.user_id,
+        u1_0.created_at,
+        u1_0.deleted_at,
+        u1_0.is_deactivated,
+        r2_0.id,
+        r2_0.created_at,
+        r2_0.deleted_at,
+        r2_0.description,
+        r2_0.role_name,
+        r2_0.updated_at,
+        u3_0.id,
+        u3_0.address,
+        u3_0.birthday,
+        u3_0.country_code,
+        u3_0.created_at,
+        u3_0.deleted_at,
+        u3_0.employment_status,
+        u3_0.first_name,
+        u3_0.gender,
+        u3_0.id_number,
+        u3_0.id_type,
+        u3_0.kra_pin,
+        u3_0.last_name,
+        u3_0.meta_id,
+        u3_0.middle_name,
+        u3_0.mobile,
+        u3_0.monthly_income,
+        u3_0.onboarding_request_id,
+        u3_0.simple,
+        u3_0.updated_at,
+        u1_0.role_id,
+        u1_0.updated_at,
+        u4_0.id,
+        u4_0.address,
+        u4_0.birthday,
+        u4_0.country_code,
+        u4_0.created_at,
+        u4_0.deleted_at,
+        u4_0.employment_status,
+        u4_0.first_name,
+        u4_0.gender,
+        u4_0.id_number,
+        u4_0.id_type,
+        u4_0.kra_pin,
+        u4_0.last_name,
+        m3_0.id,
+        m3_0.client_id,
+        m3_0.created_at,
+        m3_0.deleted_at,
+        m3_0.flow_id,
+        m3_0.updated_at,
+        u4_0.middle_name,
+        u4_0.mobile,
+        u4_0.monthly_income,
+        u4_0.onboarding_request_id,
+        u4_0.simple,
+        u4_0.updated_at,
+        u1_0.user_id 
+    from
+        user_role u1_0 
+    left join
+        user a1_0 
+            on a1_0.id=u1_0.assigner_id 
+    left join
+        meta_mask m1_0 
+            on m1_0.id=a1_0.meta_id 
+    left join
+        user_role u2_0 
+            on a1_0.id=u2_0.user_id 
+    left join
+        role r2_0 
+            on r2_0.id=u1_0.role_id 
+    left join
+        user u3_0 
+            on u3_0.id=r2_0.creator_id 
+    left join
+        user u4_0 
+            on u4_0.id=u1_0.user_id 
+    left join
+        meta_mask m3_0 
+            on m3_0.id=u4_0.meta_id 
+    where
+        u1_0.user_id=?
+2023-10-20 21:42:44 [http-nio-8080-exec-3] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        a1_0.id,
+        a1_0.address,
+        a1_0.birthday,
+        a1_0.country_code,
+        a1_0.created_at,
+        a1_0.deleted_at,
+        a1_0.employment_status,
+        a1_0.first_name,
+        a1_0.gender,
+        a1_0.id_number,
+        a1_0.id_type,
+        a1_0.kra_pin,
+        a1_0.last_name,
+        m1_0.id,
+        m1_0.client_id,
+        m1_0.created_at,
+        m1_0.deleted_at,
+        m1_0.flow_id,
+        m1_0.updated_at,
+        a1_0.middle_name,
+        a1_0.mobile,
+        a1_0.monthly_income,
+        a1_0.onboarding_request_id,
+        a1_0.simple,
+        a1_0.updated_at,
+        u2_0.id,
+        u2_0.assigner_id,
+        u2_0.created_at,
+        u2_0.deleted_at,
+        u2_0.is_deactivated,
+        u2_0.role_id,
+        u2_0.updated_at,
+        u2_0.user_id,
+        u1_0.created_at,
+        u1_0.deleted_at,
+        u1_0.is_deactivated,
+        r2_0.id,
+        r2_0.created_at,
+        r2_0.deleted_at,
+        r2_0.description,
+        r2_0.role_name,
+        r2_0.updated_at,
+        u3_0.id,
+        u3_0.address,
+        u3_0.birthday,
+        u3_0.country_code,
+        u3_0.created_at,
+        u3_0.deleted_at,
+        u3_0.employment_status,
+        u3_0.first_name,
+        u3_0.gender,
+        u3_0.id_number,
+        u3_0.id_type,
+        u3_0.kra_pin,
+        u3_0.last_name,
+        u3_0.meta_id,
+        u3_0.middle_name,
+        u3_0.mobile,
+        u3_0.monthly_income,
+        u3_0.onboarding_request_id,
+        u3_0.simple,
+        u3_0.updated_at,
+        u1_0.role_id,
+        u1_0.updated_at,
+        u4_0.id,
+        u4_0.address,
+        u4_0.birthday,
+        u4_0.country_code,
+        u4_0.created_at,
+        u4_0.deleted_at,
+        u4_0.employment_status,
+        u4_0.first_name,
+        u4_0.gender,
+        u4_0.id_number,
+        u4_0.id_type,
+        u4_0.kra_pin,
+        u4_0.last_name,
+        m3_0.id,
+        m3_0.client_id,
+        m3_0.created_at,
+        m3_0.deleted_at,
+        m3_0.flow_id,
+        m3_0.updated_at,
+        u4_0.middle_name,
+        u4_0.mobile,
+        u4_0.monthly_income,
+        u4_0.onboarding_request_id,
+        u4_0.simple,
+        u4_0.updated_at,
+        u1_0.user_id 
+    from
+        user_role u1_0 
+    left join
+        user a1_0 
+            on a1_0.id=u1_0.assigner_id 
+    left join
+        meta_mask m1_0 
+            on m1_0.id=a1_0.meta_id 
+    left join
+        user_role u2_0 
+            on a1_0.id=u2_0.user_id 
+    left join
+        role r2_0 
+            on r2_0.id=u1_0.role_id 
+    left join
+        user u3_0 
+            on u3_0.id=r2_0.creator_id 
+    left join
+        user u4_0 
+            on u4_0.id=u1_0.user_id 
+    left join
+        meta_mask m3_0 
+            on m3_0.id=u4_0.meta_id 
+    where
+        u1_0.user_id=?
+2023-10-20 21:42:44 [http-nio-8080-exec-3] DEBUG org.hibernate.SQL - 
+    select
+        w1_0.id,
+        w1_0.account_type,
+        w1_0.bank_code,
+        w1_0.created_at,
+        w1_0.deleted_at,
+        w1_0.pay_bill_account_no,
+        w1_0.paybill_number,
+        w1_0.till_number,
+        w1_0.updated_at,
+        w1_0.wallet_account_no 
+    from
+        wallet_client_account w1_0 
+    where
+        w1_0.id=?
+2023-10-20 21:49:37 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 2 class path changes (0 additions, 0 deletions, 2 modifications)
+2023-10-20 21:49:37 [Thread-41] INFO  o.a.catalina.core.StandardService - Stopping service [Tomcat]
+2023-10-20 21:49:37 [Thread-41] INFO  o.a.c.c.C.[.[.[/konnect-wallet] - Destroying Spring FrameworkServlet 'dispatcherServlet'
+2023-10-20 21:49:37 [Thread-41] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2023-10-20 21:49:37 [Thread-41] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-11 - Shutdown initiated...
+2023-10-20 21:49:38 [Thread-41] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-11 - Shutdown completed.
+2023-10-20 21:49:38 [restartedMain] INFO  n.s.wallet.WalletApplication - Starting WalletApplication using Java 17.0.1 with PID 87573 (/Users/davidkiarie/Document/eclipse/wallet-backend/bin/main started by davidkiarie in /Users/davidkiarie/Document/eclipse/wallet-backend)
+2023-10-20 21:49:38 [restartedMain] INFO  n.s.wallet.WalletApplication - No active profile set, falling back to 1 default profile: "default"
+2023-10-20 21:49:38 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2023-10-20 21:49:38 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-10-20 21:49:38 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 45 ms. Found 14 JPA repository interfaces.
+2023-10-20 21:49:38 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2023-10-20 21:49:38 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2023-10-20 21:49:38 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.BankRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-20 21:49:38 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.CurrencyRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-20 21:49:38 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.OtpRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-20 21:49:38 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.PermissionRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-20 21:49:38 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.RolePermissionRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-20 21:49:38 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.RoleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-20 21:49:38 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.TransactionRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-20 21:49:38 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.UserPinRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-20 21:49:38 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-20 21:49:38 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.UserRoleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-20 21:49:38 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.UserWalletRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-20 21:49:38 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.WalletClientAccountRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-20 21:49:38 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.WalletClientRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-20 21:49:38 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.WalletRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-20 21:49:38 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 31 ms. Found 0 Redis repository interfaces.
+2023-10-20 21:49:39 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'jpa.named-queries#6' of type [org.springframework.data.repository.config.PropertiesBasedNamedQueriesFactoryBean] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-20 21:49:39 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'jpa.named-queries#6' of type [org.springframework.data.repository.core.support.PropertiesBasedNamedQueries] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-20 21:49:39 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.boot.autoconfigure.sql.init.DataSourceInitializationConfiguration' of type [org.springframework.boot.autoconfigure.sql.init.DataSourceInitializationConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-20 21:49:39 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.boot.autoconfigure.jdbc.DataSourceConfiguration$Hikari' of type [org.springframework.boot.autoconfigure.jdbc.DataSourceConfiguration$Hikari] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-20 21:49:39 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'spring.datasource-org.springframework.boot.autoconfigure.jdbc.DataSourceProperties' of type [org.springframework.boot.autoconfigure.jdbc.DataSourceProperties] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-20 21:49:39 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration$PooledDataSourceConfiguration' of type [org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration$PooledDataSourceConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-20 21:49:39 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'jdbcConnectionDetails' of type [org.springframework.boot.autoconfigure.jdbc.PropertiesJdbcConnectionDetails] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-20 21:49:39 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'dataSource' of type [com.zaxxer.hikari.HikariDataSource] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-20 21:49:39 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'spring.sql.init-org.springframework.boot.autoconfigure.sql.init.SqlInitializationProperties' of type [org.springframework.boot.autoconfigure.sql.init.SqlInitializationProperties] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-20 21:49:39 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'dataSourceScriptDatabaseInitializer' of type [org.springframework.boot.autoconfigure.sql.init.SqlDataSourceScriptDatabaseInitializer] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-20 21:49:39 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.boot.devtools.autoconfigure.DevToolsDataSourceAutoConfiguration' of type [org.springframework.boot.devtools.autoconfigure.DevToolsDataSourceAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-20 21:49:39 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'inMemoryDatabaseShutdownExecutor' of type [org.springframework.boot.devtools.autoconfigure.DevToolsDataSourceAutoConfiguration$NonEmbeddedInMemoryDatabaseShutdownExecutor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-20 21:49:39 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'spring.jpa-org.springframework.boot.autoconfigure.orm.jpa.JpaProperties' of type [org.springframework.boot.autoconfigure.orm.jpa.JpaProperties] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-20 21:49:39 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'spring.jpa.hibernate-org.springframework.boot.autoconfigure.orm.jpa.HibernateProperties' of type [org.springframework.boot.autoconfigure.orm.jpa.HibernateProperties] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-20 21:49:39 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.boot.autoconfigure.jdbc.metadata.DataSourcePoolMetadataProvidersConfiguration$HikariPoolDataSourceMetadataProviderConfiguration' of type [org.springframework.boot.autoconfigure.jdbc.metadata.DataSourcePoolMetadataProvidersConfiguration$HikariPoolDataSourceMetadataProviderConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-20 21:49:39 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'hikariPoolDataSourceMetadataProvider' of type [org.springframework.boot.autoconfigure.jdbc.metadata.DataSourcePoolMetadataProvidersConfiguration$HikariPoolDataSourceMetadataProviderConfiguration$$Lambda$743/0x000000080113fa88] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-20 21:49:39 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaConfiguration' of type [org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-20 21:49:39 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'jpaVendorAdapter' of type [org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-20 21:49:39 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'entityManagerFactoryBuilder' of type [org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-20 21:49:39 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'persistenceManagedTypes' of type [org.springframework.orm.jpa.persistenceunit.SimplePersistenceManagedTypes] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-20 21:49:39 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2023-10-20 21:49:39 [restartedMain] INFO  o.h.b.i.BytecodeProviderInitiator - HHH000021: Bytecode provider name : bytebuddy
+2023-10-20 21:49:39 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2023-10-20 21:49:39 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-12 - Starting...
+2023-10-20 21:49:39 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-12 - Added connection com.mysql.cj.jdbc.ConnectionImpl@53b1fb2
+2023-10-20 21:49:39 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-12 - Start completed.
+2023-10-20 21:49:39 [restartedMain] INFO  o.h.b.i.BytecodeProviderInitiator - HHH000021: Bytecode provider name : bytebuddy
+2023-10-20 21:49:39 [restartedMain] INFO  o.h.m.i.EntityInstantiatorPojoStandard - HHH000182: No default (no-argument) constructor for class: net.sasakonnect.wallet.domain.Transaction (class must be instantiated by Interceptor)
+2023-10-20 21:49:40 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2023-10-20 21:49:40 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table bank 
+       modify column created_at  datetime(6)
+2023-10-20 21:49:40 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table bank 
+       modify column deleted_at  datetime(6)
+2023-10-20 21:49:40 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table bank 
+       modify column updated_at  datetime(6)
+2023-10-20 21:49:40 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table currency 
+       modify column created_at  datetime(6)
+2023-10-20 21:49:40 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table currency 
+       modify column deleted_at  datetime(6)
+2023-10-20 21:49:41 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table currency 
+       modify column updated_at  datetime(6)
+2023-10-20 21:49:41 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table device 
+       modify column created_at  datetime(6)
+2023-10-20 21:49:42 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table device 
+       modify column deleted_at  datetime(6)
+2023-10-20 21:49:42 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table device 
+       modify column updated_at  datetime(6)
+2023-10-20 21:49:42 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table firebase_token 
+       modify column created_at  datetime(6)
+2023-10-20 21:49:42 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table firebase_token 
+       modify column deleted_at  datetime(6)
+2023-10-20 21:49:42 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table firebase_token 
+       modify column updated_at  datetime(6)
+2023-10-20 21:49:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table meta_mask 
+       modify column created_at  datetime(6)
+2023-10-20 21:49:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table meta_mask 
+       modify column deleted_at  datetime(6)
+2023-10-20 21:49:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table meta_mask 
+       modify column updated_at  datetime(6)
+2023-10-20 21:49:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table notification 
+       modify column created_at  datetime(6)
+2023-10-20 21:49:43 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table notification 
+       modify column deleted_at  datetime(6)
+2023-10-20 21:49:44 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table notification 
+       modify column updated_at  datetime(6)
+2023-10-20 21:49:44 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table otp 
+       modify column created_at  datetime(6)
+2023-10-20 21:49:44 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table otp 
+       modify column deleted_at  datetime(6)
+2023-10-20 21:49:44 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table otp 
+       modify column updated_at  datetime(6)
+2023-10-20 21:49:44 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table permission 
+       modify column created_at  datetime(6)
+2023-10-20 21:49:44 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table permission 
+       modify column deleted_at  datetime(6)
+2023-10-20 21:49:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table permission 
+       modify column updated_at  datetime(6)
+2023-10-20 21:49:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table role 
+       modify column created_at  datetime(6)
+2023-10-20 21:49:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table role 
+       modify column deleted_at  datetime(6)
+2023-10-20 21:49:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table role 
+       modify column updated_at  datetime(6)
+2023-10-20 21:49:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table role_permission 
+       modify column created_at  datetime(6)
+2023-10-20 21:49:46 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table role_permission 
+       modify column deleted_at  datetime(6)
+2023-10-20 21:49:46 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table role_permission 
+       modify column updated_at  datetime(6)
+2023-10-20 21:49:46 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table transaction 
+       modify column created_at  datetime(6)

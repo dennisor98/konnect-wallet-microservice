@@ -103,6 +103,12 @@ public class WalletClientService {
 		return ResponseEntity.status(HttpStatus.OK).body(map);
 	}
 
+	@Transactional
+	public Optional<List<WalletClient>> findMerchantByClientAppByKey(String client_app_key) {
+		// TODO Auto-generated method stub
+		return this.wallectClientRepository.findByAppKeyAnd(client_app_key);
+	}
+
 	public Object payThroughSdk(@Valid SdkPayDto sdkpayDto) {
 		var clientApp = clientAppsBean.getWalletClient();
 		return this.walletService.requestWalletDeduction(sdkpayDto, clientApp);

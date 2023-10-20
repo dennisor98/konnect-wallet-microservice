@@ -56,7 +56,7 @@ public class SdkMiddlewareAspect {
 			}
 
 		} else {
-			var walletclient = this.walletclientService.findMerchantByClientAppKey(client_app_key);
+			var walletclient = this.walletclientService.findMerchantByClientAppByKey(client_app_key);
 			if (walletclient.isPresent()) {
 				var clients = walletclient.get();
 				if (!clients.isEmpty()) {
