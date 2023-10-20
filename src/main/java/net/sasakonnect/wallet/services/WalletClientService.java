@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -81,9 +82,25 @@ public class WalletClientService {
 		return this.wallectClientRepository.findByAppKeyAndAppSecret(client_app_key, appSecret);
 	}
 
-	public Optional<List<WalletClient>> findMerchantByClientAppKey(String client_app_key) {
+	@Transactional
+	public ResponseEntity<Object> findMerchantByClientAppKey(String client_app_key) {
 		// TODO Auto-generated method stub
-		return this.wallectClientRepository.findByAppKeyAnd(client_app_key);
+		var client = this.wallectClientRepository.findByAppKeyAnd(client_app_key);
+		if (client.isPresent()) {
+			var results = client.get().stream().map(merchant -> merchant.getAppName()).collect(Collectors.toList());
+			Map<String, String> map = new HashMap<String, String>();
+
+			map.put("success", "true");
+			map.put("body", results.get(0));
+
+			return ResponseEntity.status(HttpStatus.OK).body(map);
+		}
+		Map<String, String> map = new HashMap<String, String>();
+
+		map.put("success", "false");
+		map.put("body", null);
+
+		return ResponseEntity.status(HttpStatus.OK).body(map);
 	}
 
 	public Object payThroughSdk(@Valid SdkPayDto sdkpayDto) {
