@@ -169,8 +169,8 @@ public class UserService extends RestClientService implements UserDetailsService
 		var response = UserResponseDTO.builder().token(jwtService.generateToken(u))
 				.refreshToken(jwtService.generateRefreshToken(u)).middleName(u.getMiddleName())
 				.gender(u.getGender().name()).idType(u.getIdType().name()).idNumber(u.getIdNumber())
-				.onboardingRequestId(u.getOnboardingRequestId()).birthday(u.getBirthday())
-				.updatedAt(u.getUpdatedAt().toInstant()).kraPin(u.getKraPin())
+				.onboardingRequestId(u.getOnboardingRequestId()).birthday(formatter.format(u.getBirthday().toInstant()))
+				.updatedAt(u.getUpdatedAt().toInstant()).updatedAt(u.getUpdatedAt().toInstant()).kraPin(u.getKraPin())
 				.employmentStatus(u.getEmploymentStatus().name()).monthlyIncome(u.getMonthlyIncome().toString())
 				.createdAt(u.getCreatedAt().toInstant()).id(u.getId())
 
