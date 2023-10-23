@@ -2,6 +2,8 @@ package net.sasakonnect.wallet.services;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -69,6 +71,7 @@ public class UserService extends RestClientService implements UserDetailsService
 	BankWebClientBean bankClientBean;
 	@Value("${MAX_PIN_ATTEMPT:3}")
 	private int maxpinattempt;
+	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneOffset.UTC);
 
 	public Optional<User> getUserById(String id) {
 		return this.userRepository.findById(id);
@@ -142,10 +145,11 @@ public class UserService extends RestClientService implements UserDetailsService
 				var response = UserResponseDTO.builder().token(jwtService.generateToken(u))
 						.refreshToken(jwtService.generateRefreshToken(u)).middleName(u.getMiddleName())
 						.gender(u.getGender().name()).idType(u.getIdType().name()).idNumber(u.getIdNumber())
-						.onboardingRequestId(u.getOnboardingRequestId()).birthday(u.getBirthday().toString())
-						.updatedAt(u.getUpdatedAt().toInstant()).kraPin(u.getKraPin())
-						.employmentStatus(u.getEmploymentStatus().name()).monthlyIncome(u.getMonthlyIncome().toString())
-						.createdAt(u.getCreatedAt().toInstant()).id(u.getId())
+						.onboardingRequestId(u.getOnboardingRequestId())
+						.birthday(formatter.format(u.getBirthday().toInstant())).updatedAt(u.getUpdatedAt().toInstant())
+						.kraPin(u.getKraPin()).employmentStatus(u.getEmploymentStatus().name())
+						.monthlyIncome(u.getMonthlyIncome().toString()).createdAt(u.getCreatedAt().toInstant())
+						.id(u.getId())
 
 						.address(u.getAddress()).firstName(u.getFirstName()).lastName(u.getLastName())
 						.mobile(u.getMobile()).countryCode(u.getCountryCode()).build();
@@ -165,7 +169,7 @@ public class UserService extends RestClientService implements UserDetailsService
 		var response = UserResponseDTO.builder().token(jwtService.generateToken(u))
 				.refreshToken(jwtService.generateRefreshToken(u)).middleName(u.getMiddleName())
 				.gender(u.getGender().name()).idType(u.getIdType().name()).idNumber(u.getIdNumber())
-				.onboardingRequestId(u.getOnboardingRequestId()).birthday(u.getBirthday().toString())
+				.onboardingRequestId(u.getOnboardingRequestId()).birthday(u.getBirthday())
 				.updatedAt(u.getUpdatedAt().toInstant()).kraPin(u.getKraPin())
 				.employmentStatus(u.getEmploymentStatus().name()).monthlyIncome(u.getMonthlyIncome().toString())
 				.createdAt(u.getCreatedAt().toInstant()).id(u.getId())
