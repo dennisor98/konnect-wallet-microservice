@@ -1,5 +1,6 @@
 package net.sasakonnect.wallet.services;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -353,6 +354,7 @@ public class WalletService extends JwtService {
 
 				// Check if "onboardingRequestId" is null in the response JSON
 				ObjectMapper objectMapper = new ObjectMapper();
+				objectMapper.setDateFormat(new SimpleDateFormat("yyyy/MM/dd"));
 				objectMapper.registerModule(new JavaTimeModule()); // Register the Java 8 date/time module
 
 				try {
