@@ -1,5 +1,6 @@
 package net.sasakonnect.wallet.services;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -24,10 +25,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -137,23 +141,30 @@ public class UserService extends RestClientService implements UserDetailsService
 				ObjectNode json = JsonNodeFactory.instance.objectNode();
 				json.put("message", "otp code is Invalid");
 				return ResponseEntity.badRequest().body(json);
-
 			}
 			var u = opt.get().getUser();
 			if (u != null) {
-
+				System.out.println(u.getCreatedAt());
 				var response = UserResponseDTO.builder().token(jwtService.generateToken(u))
 						.refreshToken(jwtService.generateRefreshToken(u)).middleName(u.getMiddleName())
 						.gender(u.getGender().name()).idType(u.getIdType().name()).idNumber(u.getIdNumber())
 						.onboardingRequestId(u.getOnboardingRequestId())
-						.birthday(formatter.format(u.getBirthday().toInstant())).updatedAt(u.getUpdatedAt().toInstant())
+						.birthday(formatter.format(u.getBirthday().toInstant())).updatedAt(u.getUpdatedAt())
 						.kraPin(u.getKraPin()).employmentStatus(u.getEmploymentStatus().name())
-						.monthlyIncome(u.getMonthlyIncome().toString()).createdAt(u.getCreatedAt().toInstant())
-						.id(u.getId())
-
+						.monthlyIncome(u.getMonthlyIncome().toString()).createdAt(u.getCreatedAt()).id(u.getId())
 						.address(u.getAddress()).firstName(u.getFirstName()).lastName(u.getLastName())
 						.mobile(u.getMobile()).countryCode(u.getCountryCode()).build();
-				return ResponseEntity.ok(response);
+				ObjectMapper objectMapper = new ObjectMapper();
+				objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+				objectMapper.registerModule(new JavaTimeModule());
+				objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+				try {
+					return ResponseEntity.ok(objectMapper.writeValueAsString(response));
+				} catch (JsonProcessingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 
 			}
 		} else {
@@ -170,9 +181,9 @@ public class UserService extends RestClientService implements UserDetailsService
 				.refreshToken(jwtService.generateRefreshToken(u)).middleName(u.getMiddleName())
 				.gender(u.getGender().name()).idType(u.getIdType().name()).idNumber(u.getIdNumber())
 				.onboardingRequestId(u.getOnboardingRequestId()).birthday(formatter.format(u.getBirthday().toInstant()))
-				.updatedAt(u.getUpdatedAt().toInstant()).updatedAt(u.getUpdatedAt().toInstant()).kraPin(u.getKraPin())
+				.updatedAt(u.getUpdatedAt()).updatedAt(u.getUpdatedAt()).kraPin(u.getKraPin())
 				.employmentStatus(u.getEmploymentStatus().name()).monthlyIncome(u.getMonthlyIncome().toString())
-				.createdAt(u.getCreatedAt().toInstant()).id(u.getId())
+				.createdAt(u.getCreatedAt()).id(u.getId())
 
 				.address(u.getAddress()).firstName(u.getFirstName()).lastName(u.getLastName()).mobile(u.getMobile())
 				.countryCode(u.getCountryCode()).build();

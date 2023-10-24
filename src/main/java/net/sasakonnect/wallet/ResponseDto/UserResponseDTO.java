@@ -1,6 +1,6 @@
 package net.sasakonnect.wallet.ResponseDto;
 
-import java.time.Instant;
+import java.util.Date;
 
 import lombok.Builder;
 import lombok.Data;
@@ -9,9 +9,9 @@ import lombok.Data;
 @Builder
 public class UserResponseDTO {
 	private String id;
-	private Instant createdAt;
-	private Instant deletedAt;
-	private Instant updatedAt;
+	private Date createdAt;
+	private Date deletedAt;
+	private Date updatedAt;
 	private String firstName;
 	private String middleName;
 	private String lastName;
