@@ -1,6 +1,5 @@
 package net.sasakonnect.wallet.services;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,7 +17,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -307,7 +305,7 @@ public class WalletService extends JwtService {
 		return null;
 	}
 
-	public Object createNewOnBoardingUser(@Valid EasyOnboardingRequestParams easyOnboarding) {
+	public ResponseEntity<Object> createNewOnBoardingUser(@Valid EasyOnboardingRequestParams easyOnboarding) {
 		Map<String, Object> userMap = new HashMap<String, Object>();
 		userMap.put("firstName", easyOnboarding.getFirstName());
 		userMap.put("middleName", easyOnboarding.getMiddleName());
@@ -344,55 +342,92 @@ public class WalletService extends JwtService {
 			userMap.put("userId", savedUser.getId());
 
 			var reqs = this.requestSigner.signRequest(userMap);
-
-			Mono<String> responseMono = this.bankClientBean.webClient.post()
+			Mono<JsonNode> responseMono = this.bankClientBean.webClient.post()
 					.uri(ChoiceEndpointsConstants.OPEN_WALLET_ACCOUNT).contentType(MediaType.APPLICATION_JSON)
 					.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
-					.bodyToMono(String.class);
-			responseMono = responseMono.flatMap((String response) -> {
-				System.err.println(response);
+					.bodyToMono(String.class) // Deserialize the response as a String
+					.map(response -> {
+						ObjectMapper objectMapper = new ObjectMapper();
+						objectMapper.registerModule(new JavaTimeModule());
 
-				// Check if "onboardingRequestId" is null in the response JSON
-				ObjectMapper objectMapper = new ObjectMapper();
-				objectMapper.setDateFormat(new SimpleDateFormat("yyyy/MM/dd"));
-				objectMapper.registerModule(new JavaTimeModule()); // Register the Java 8 date/time module
-
-				try {
-					JsonNode responseJson = objectMapper.readTree(response);
-					JsonNode onboardingRequestId = responseJson.path("data").path("onboardingRequestId");
-
-					if (onboardingRequestId.isNull()) {
-						// The "onboardingRequestId" is null, delete the user here
-						this.userService.deleteUserById(savedUser.getId());
-					} else {
-						System.err.println("execute here");
-						System.err.println(onboardingRequestId.asText());
-
-						savedUser.setOnboardingRequestId(onboardingRequestId.asText());
-						var updateduser = this.userService.updateUser(savedUser);
-						var userData = this.userService.createJwtFor(savedUser);
-
-						return Mono.just(objectMapper.writeValueAsString(userData));
-
-					}
-
-					// Return the response as-is
-					return Mono.just(response);
-				} catch (JsonProcessingException e) {
-					return Mono.just("Error response: " + e.getMessage());
-				}
-			}).onErrorResume(throwable -> {
-				// Handle other errors here
+						try {
+							JsonNode jsonNode = objectMapper.readTree(response);
+							return jsonNode;
+						} catch (Exception e) {
+							// Handle any potential exception here
+							e.printStackTrace();
+							return objectMapper.createObjectNode(); // Return an empty JsonObject or handle the error
+																	// appropriately
+						}
+					});
+			var jsonNode = responseMono.block();
+			var onboardingRequestId = jsonNode.path("data").path("onboardingRequestId");
+			if (onboardingRequestId.isNull()) {
 				this.userService.deleteUserById(savedUser.getId());
-				return Mono.just("Error response: " + throwable.getMessage());
-			});
-			String responseJson = responseMono.block();
-
-			if (responseJson != null) {
-				System.out.println(responseJson);
-				return new Gson().fromJson(responseJson, Object.class);
+			} else {
+				savedUser.setOnboardingRequestId(onboardingRequestId.asText());
+				var updateduser = this.userService.updateUser(savedUser);
+				return this.userService.createJwtFor(savedUser);
 
 			}
+
+//			Mono<String> responseMono = this.bankClientBean.webClient.post()
+//					.uri(ChoiceEndpointsConstants.OPEN_WALLET_ACCOUNT).contentType(MediaType.APPLICATION_JSON)
+//					.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+//					.bodyToMono(JSo.class);
+//			responseMono = responseMono.flatMap((String response) -> {
+//				System.err.println(response);
+//
+//				// Check if "onboardingRequestId" is null in the response JSON
+//				ObjectMapper objectMapper = new ObjectMapper();
+//				objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+//				objectMapper.registerModule(new JavaTimeModule()); // Register the Java 8 date/time module
+//
+//				try {
+//					JsonNode responseJson = objectMapper.readTree(response);
+//					JsonNode onboardingRequestId = responseJson.path("data").path("onboardingRequestId");
+//
+//					if (onboardingRequestId.isNull()) {
+//						// The "onboardingRequestId" is null, delete the user here
+//						this.userService.deleteUserById(savedUser.getId());
+//					} else {
+//						System.err.println("execute here");
+//						System.err.println(onboardingRequestId.asText());
+//
+//						savedUser.setOnboardingRequestId(onboardingRequestId.asText());
+//						var updateduser = this.userService.updateUser(savedUser);
+//						var userData = this.userService.createJwtFor(savedUser);
+//
+//						if (responseJson != null) {
+//							
+//							try {
+//					            return Mono.just(objectMapper.writeValueAsString(userData));
+//
+//							} catch (JsonProcessingException e) {
+//								// TODO Auto-generated catch block
+//								e.printStackTrace();
+//							}
+//						}
+//						//return Mono.just(objectMapper.writeValueAsString(userData));
+//
+//					}
+//
+//					// Return the response as-is
+//				} catch (JsonProcessingException e) {
+//					return Mono.just("Error response: " + e.getMessage());
+//				}
+//			}).onErrorResume(throwable -> {
+//				// Handle other errors here
+//				this.userService.deleteUserById(savedUser.getId());
+//				return Mono.just("Error response: " + throwable.getMessage());
+//			});
+			// String responseJson = responseMono.block();
+
+//			if (responseJson != null) {
+//				System.out.println(responseJson);
+//				return new Gson().fromJson(responseJson, Object.class);
+//
+//			}
 
 			// TODO Auto-generated method stub
 			return null;

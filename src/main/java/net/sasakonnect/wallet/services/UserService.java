@@ -26,6 +26,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -176,7 +177,7 @@ public class UserService extends RestClientService implements UserDetailsService
 		// TODO Auto-generated method stub
 	}
 
-	public Object createJwtFor(User u) {
+	public ResponseEntity<Object> createJwtFor(User u) {
 		var response = UserResponseDTO.builder().token(jwtService.generateToken(u))
 				.refreshToken(jwtService.generateRefreshToken(u)).middleName(u.getMiddleName())
 				.gender(u.getGender().name()).idType(u.getIdType().name()).idNumber(u.getIdNumber())
@@ -187,7 +188,25 @@ public class UserService extends RestClientService implements UserDetailsService
 
 				.address(u.getAddress()).firstName(u.getFirstName()).lastName(u.getLastName()).mobile(u.getMobile())
 				.countryCode(u.getCountryCode()).build();
-		return ResponseEntity.ok(response);
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+		objectMapper.registerModule(new JavaTimeModule()); // Register the Java 8 date/time module
+		String jsonString;
+		try {
+			jsonString = objectMapper.writeValueAsString(response);
+			JsonNode jsonObject = objectMapper.readTree(jsonString);
+			return ResponseEntity.ok(jsonObject);
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("message", "something went wrong");
+		map.put("success", "false");
+		return ResponseEntity.ok(map);
+
+		// Parse the JSON string into a JSON object
+
 	}
 
 	public Optional<User> findUserWallet(User user) {
