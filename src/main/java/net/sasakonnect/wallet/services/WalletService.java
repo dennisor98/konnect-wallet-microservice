@@ -364,6 +364,10 @@ public class WalletService extends JwtService {
 			var onboardingRequestId = jsonNode.path("data").path("onboardingRequestId");
 			if (onboardingRequestId.isNull()) {
 				this.userService.deleteUserById(savedUser.getId());
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("payload", jsonNode);
+				map.put("success", false);
+				return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
 			} else {
 				savedUser.setOnboardingRequestId(onboardingRequestId.asText());
 				var updateduser = this.userService.updateUser(savedUser);
@@ -430,7 +434,6 @@ public class WalletService extends JwtService {
 //			}
 
 			// TODO Auto-generated method stub
-			return null;
 
 		} catch (DataIntegrityViolationException e) {
 			Map<String, Object> map = new HashMap<String, Object>();
