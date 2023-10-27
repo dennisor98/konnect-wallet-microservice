@@ -14,7 +14,6 @@ public class PayUtility {
 	@Schema(hidden = true)
 	String accountId;
 	String billOrderNumber;
-	@Schema(hidden = true)
 
 	String billType;
 	String amount;
