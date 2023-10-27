@@ -14,10 +14,10 @@ public class PayUtility {
 	@Schema(hidden = true)
 	String accountId;
 	String billOrderNumber;
+	@Schema(hidden = true)
+
 	String billType;
 	String amount;
-
-	@Schema(hidden = true)
 
 	public Integer getBillType() {
 		switch (this.billType) {
