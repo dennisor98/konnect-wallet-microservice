@@ -102,7 +102,7 @@ public class OtpService {
 			}).collect(Collectors.toList());
 
 			this.otpRepository.saveAll(otps);
-			return Optional.of(otps.get(0));
+			return Optional.of(otps.isEmpty() ? null : otps.get(0));
 		} else {
 			return Optional.empty();
 		}
