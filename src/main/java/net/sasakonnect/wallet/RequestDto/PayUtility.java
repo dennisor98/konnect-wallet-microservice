@@ -1,5 +1,6 @@
 package net.sasakonnect.wallet.RequestDto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,12 +11,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PayUtility {
+	@Schema(hidden = true)
 	String accountId;
 	String billOrderNumber;
 	String billType;
 	String amount;
 
-	public Integer getNetworkProviderId() {
+	@Schema(hidden = true)
+
+	public Integer getBillType() {
 		switch (this.billType) {
 		case "DSTV": {
 			return 0;

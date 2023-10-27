@@ -36,6 +36,7 @@ import net.sasakonnect.wallet.RequestDto.MpesaBilling;
 import net.sasakonnect.wallet.RequestDto.OnboardingOtp;
 import net.sasakonnect.wallet.RequestDto.OnboardingStatus;
 import net.sasakonnect.wallet.RequestDto.OtpTransfer;
+import net.sasakonnect.wallet.RequestDto.PayUtility;
 import net.sasakonnect.wallet.RequestDto.SdkPayDto;
 import net.sasakonnect.wallet.RequestDto.TransactionPeriod;
 import net.sasakonnect.wallet.RequestDto.TransferToMpesa;
@@ -745,11 +746,11 @@ public class WalletService extends JwtService {
 		return null;
 	}
 
-	public Object payUtility(@Valid BuyAirtime buyAirtime) {
+	public Object payUtility(@Valid PayUtility payUtiltiy) {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
 		var reqId = new HashMap<String, Object>();
-		if (buyAirtime.getAccountId() == null) {
+		if (payUtiltiy.getAccountId() == null) {
 			var userWallets = this.walletRepository.findByUserWalletsUser(user);
 			if (!userWallets.isEmpty()) {
 				var userwallet = userWallets.get(0);
@@ -757,18 +758,18 @@ public class WalletService extends JwtService {
 
 			}
 		} else {
-			reqId.put("accountId", buyAirtime.getAccountId());
+			reqId.put("accountId", payUtiltiy.getAccountId());
 
 		}
-		reqId.put("mobileNumber", buyAirtime.getMobileNumber());
+		reqId.put("billOrderNumber", payUtiltiy.getBillOrderNumber());
 
-		reqId.put("networkProvider", buyAirtime.getNetworkProviderId());
+		reqId.put("billType", payUtiltiy.getBillType());
 
-		reqId.put("amount", Integer.parseInt(buyAirtime.getAmount()));
+		reqId.put("amount", Integer.parseInt(payUtiltiy.getAmount()));
 
 		var reqs = this.requestSigner.signRequest(reqId);
 
-		Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.BUY_AIRTIME)
+		Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.PAY_UTILITY)
 				.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
 				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 

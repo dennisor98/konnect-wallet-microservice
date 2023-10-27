@@ -17,6 +17,8 @@ public class ChoiceEndpointsConstants {
 	public static final String CONFIRM_OTP_TRANSFER = "/trans/confirmTransfer";
 	public static final String WITHDRAW = "/trans/applyForTransfer";
 	public static final String BUY_AIRTIME = "/utilityPayment/airtimePayment";
+	public static final String PAY_UTILITY = "/utilityPayment/billPayment";
+
 	public static final String CHECK_BALANCE = "/query/getAccountDetails";
 	public static final String SHORT_CODE = "/account/applyForShortCode";
 	public static final String GET_SHORT_CODE = "/account/queryAccountByShortCode";
