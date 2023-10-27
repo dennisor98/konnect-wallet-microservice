@@ -495,8 +495,8 @@ public class WalletService extends JwtService {
 				};
 				NotificationResult<TransactionResultNotification> results = new Gson().fromJson(params,
 						typeToken.getType());
-				log.debug(typeToken.getType().getTypeName());
-				log.debug(results.getNotificationType());
+				System.out.println(typeToken.getType().getTypeName());
+				System.out.println(results.getNotificationType());
 				this.transactionService.saveTransaction(results);
 
 			} else if (notification_Type == NotificationType.BALANCE.getCode()) {
