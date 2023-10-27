@@ -1,8 +1,10 @@
 package net.sasakonnect.wallet.services;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -92,11 +94,15 @@ public class OtpService {
 		// TODO Auto-generated method stub
 		var otp = otpRepository.findByHashAndCodeWithUser(hash, code);
 		System.out.print("otp is present" + otp.isPresent());
-		if (otp.isPresent() && otp.get().isValid()) {
+		if (otp.isPresent() && !otp.isEmpty()) {
+			List<Otp> otps = otp.get().stream().filter((item) -> item.isValid()).map((item) -> {
 
-			otp.get().setDeletedAt(new Date());
-			this.otpRepository.save(otp.get());
-			return Optional.of(otp.get());
+				item.setDeletedAt(new Date());
+				return item;
+			}).collect(Collectors.toList());
+
+			this.otpRepository.saveAll(otps);
+			return Optional.of(otps.get(0));
 		} else {
 			return Optional.empty();
 		}

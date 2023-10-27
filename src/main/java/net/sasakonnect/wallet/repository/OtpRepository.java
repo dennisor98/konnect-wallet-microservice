@@ -1,5 +1,6 @@
 package net.sasakonnect.wallet.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,6 +23,6 @@ public interface OtpRepository extends JpaRepository<Otp, String> {
 
 	@Query("SELECT otp FROM Otp otp JOIN FETCH otp.user WHERE otp.hash = :hash AND otp.code =:code ORDER BY otp.createdAt DESC")
 
-	Optional<Otp> findByHashAndCodeWithUser(@Param("hash") String hash, @Param("code") String code);
+	Optional<List<Otp>> findByHashAndCodeWithUser(@Param("hash") String hash, @Param("code") String code);
 
 }
