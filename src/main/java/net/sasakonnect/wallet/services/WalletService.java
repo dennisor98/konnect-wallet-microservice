@@ -26,6 +26,7 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.BuyAirtime;
 import net.sasakonnect.wallet.RequestDto.ChoiceTransferDto;
 import net.sasakonnect.wallet.RequestDto.EasyOnboardingRequestParams;
@@ -58,6 +59,7 @@ import net.sasakonnect.wallet.tools.RequestSigner;
 import reactor.core.publisher.Mono;
 
 @Service
+@Slf4j
 public class WalletService extends JwtService {
 	@Autowired
 	BankWebClientBean bankClientBean;
@@ -493,6 +495,8 @@ public class WalletService extends JwtService {
 				};
 				NotificationResult<TransactionResultNotification> results = new Gson().fromJson(params,
 						typeToken.getType());
+				log.debug(typeToken.getType().getTypeName());
+				log.debug(results.getNotificationType());
 				this.transactionService.saveTransaction(results);
 
 			} else if (notification_Type == NotificationType.BALANCE.getCode()) {
