@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import net.sasakonnect.wallet.domain.User;
 
@@ -76,16 +77,32 @@ public class JwtService {
 	}
 
 	public boolean validateToken(String token, UserDetails userDetails) {
-		final String username = extractUsername(token);
-		System.out.println(username);
-		System.out.println(userDetails.getUsername());
-		User user = (User) userDetails;
-		return (username.equals(user.getId()) && !isTokenExpired(token));
+		try {
+			final String username = extractUsername(token);
+			System.out.println(username);
+			System.out.println(userDetails.getUsername());
+			User user = (User) userDetails;
+			return (username.equals(user.getId()) && !isTokenExpired(token));
+		} catch (MalformedJwtException e) {
+			e.printStackTrace();
+		}
+		return false;
+
 	}
 
-	public String extractUsername(String token) {
-		Claims claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
-		return claims.getSubject();
+	public String extractUsername(String token) throws MalformedJwtException {
+		try {
+			if (Jwts.parserBuilder().setSigningKey(secretKey).build().isSigned(token)) {
+				Claims claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
+				return claims.getSubject();
+
+			} else {
+				return null;
+			}
+
+		} catch (MalformedJwtException e) {
+			throw e;
+		}
 
 	}
 

@@ -2,14 +2,19 @@
 package net.sasakonnect.wallet.config;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.server.HandshakeInterceptor;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -19,7 +24,7 @@ import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.tools.JwtService;
 
 @Component
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
+public class JwtAuthenticationFilter extends OncePerRequestFilter implements HandshakeInterceptor {
 	@Autowired
 	UserService userService;
 	@Autowired
@@ -65,6 +70,54 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		}
 		filterChain.doFilter(request, response);
+
+	}
+
+	@Override
+	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
+			Map<String, Object> attributes) throws Exception {
+		String authHeader = request.getHeaders().getFirst("Authorization");
+		String token = null;
+		String id = null;
+		if (authHeader != null && authHeader.startsWith("Bearer ")) {
+			token = authHeader.substring(7);
+			if (token != null) {
+				try {
+					id = jwtService.extractUsername(token);
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+			}
+		}
+		System.out.println(id);
+
+		if (id != null) {
+			try {
+//				Optional<User> user = this.userService.findUserWallet(id);
+				UserDetails userDetails = userService.loadUserByUsername(id);
+				if (userDetails != null && this.jwtService.validateToken(token, userDetails)) {
+					System.out.println("this is do internal");
+					attributes.put("principal", userDetails);
+					return true;
+				}
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+
+			}
+
+		}
+
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
+			Exception exception) {
+
+		// TODO Auto-generated method stub
 
 	}
 
