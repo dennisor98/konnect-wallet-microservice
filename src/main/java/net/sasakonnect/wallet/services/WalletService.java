@@ -446,8 +446,11 @@ public class WalletService extends JwtService {
 //				System.out.println(typeToken.getType().getTypeName());
 //				System.out.println(results.getNotificationType());
 				var createdTransaction = this.transactionService.saveTransaction(results);
-				if (createdTransaction == null) {
-					this.publisher.publishEvent(TransactionEvent.builder().transaction(createdTransaction));
+				if (createdTransaction != null) {
+					log.info("publish transaction to socket {}", createdTransaction);
+
+					this.publisher.publishEvent(TransactionEvent.builder().userService(userService)
+							.transaction(createdTransaction).build());
 				}
 
 			} else if (notification_Type == NotificationType.BALANCE.getCode()) {

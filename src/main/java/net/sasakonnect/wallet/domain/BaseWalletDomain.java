@@ -8,7 +8,6 @@ import org.hibernate.annotations.UuidGenerator;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
@@ -18,6 +17,7 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import lombok.Data;
+import net.sasakonnect.wallet.serde.CustomDateSerializer;
 
 @Data
 @MappedSuperclass
@@ -29,18 +29,18 @@ public abstract class BaseWalletDomain {
 	protected String id;
 
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
-	@JsonSerialize(using = InstantSerializer.class)
+	@JsonSerialize(using = CustomDateSerializer.class)
 	@Temporal(TemporalType.TIMESTAMP)
 	@CreationTimestamp
 	@Column(name = "created_at")
 	protected Date createdAt;
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
-	@JsonSerialize(using = InstantSerializer.class)
+	@JsonSerialize(using = CustomDateSerializer.class)
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "deleted_at")
 	protected Date deletedAt;
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
-	@JsonSerialize(using = InstantSerializer.class)
+	@JsonSerialize(using = CustomDateSerializer.class)
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "updated_at")
 	@UpdateTimestamp
