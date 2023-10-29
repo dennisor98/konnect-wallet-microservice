@@ -8,11 +8,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@Slf4j
 public class MessagePayload {
 	public String senderId;
 	public String receiverId;
@@ -67,7 +69,7 @@ public class MessagePayload {
 		return null;
 	}
 
-	public MessagePayload buildFromJson(String jsonString) {
+	public MessagePayload buildFromJson(String jsonString) throws JsonProcessingException {
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 			ObjectNode jsonObject = objectMapper.readValue(jsonString, ObjectNode.class);
@@ -81,9 +83,8 @@ public class MessagePayload {
 
 			return this;
 		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
+			throw e;
 
-		return null;
+		}
 	}
 }

@@ -1,5 +1,9 @@
 package net.sasakonnect.wallet.config.websocket;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.web.socket.BinaryMessage;
@@ -7,6 +11,9 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.config.websocket.defination.MessagePayload;
@@ -27,11 +34,31 @@ public class WalletSocketHandler implements WebSocketHandler {
 		if (message instanceof BinaryMessage) {
 
 		} else {
-			var messagecocnent = MessagePayload.builder().build().buildFromJson((String) message.getPayload());
-			var messageevent = new MessageEvent();
+			MessagePayload messagecocnent;
+			try {
+				messagecocnent = MessagePayload.builder().build().buildFromJson((String) message.getPayload());
+				var messageevent = new MessageEvent();
 
-			messageevent.setMessagePayload(messagecocnent);
-			this.publisher.publishEvent(messageevent);
+				messageevent.setMessagePayload(messagecocnent);
+				this.publisher.publishEvent(messageevent);
+			} catch (JsonProcessingException e) {
+				try {
+					Map<String, Object> data = new HashMap<>();
+					data.put("message", "message could not be understood");
+					data.put("status", 422);
+					ObjectMapper objectMapper = new ObjectMapper();
+
+					WebSocketMessage<?> ws = new BinaryMessage(objectMapper.writeValueAsString(data).getBytes());
+
+					session.sendMessage(ws);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 		}
 	}
 
