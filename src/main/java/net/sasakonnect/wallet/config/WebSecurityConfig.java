@@ -141,8 +141,9 @@ public class WebSecurityConfig {
 		Server localServer = new Server().url("http://localhost:8080/konnect-wallet")
 				.description("Localhost Server URL");
 		Server gatewayServer = new Server().url("https://gw.sasakonnect.net/konnect-wallet")
-				.description("Gateway Server Server URL");
-		Server nginxServer = new Server().url("https://wallet.sasakonnect.net").description("Nginx Server Server URL");
+				.description("Gateway Server Server URL(Dev)");
+		Server nginxServer = new Server().url("https://wallet.sasakonnect.net/konnect-wallet")
+				.description("Production env");
 		Contact contact = new Contact().email("devops@gmail.com").name("DevOps");
 		Info info = new Info().contact(contact).description("Wallet Based implementation Through Choice Bank")
 				.summary("Easy way to Buy").title("Konnect Wallet").version("V1.0.0")
