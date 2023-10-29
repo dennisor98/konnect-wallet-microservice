@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
 
@@ -24,6 +25,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
 		// Register the endpoint and allow certain origins to connect to it.
 		registry.addHandler(getWebSockeHandler(), "/test").setAllowedOrigins("*")
+
 				.addInterceptors(jwtAuthenticationFilter);
 	}
 
@@ -36,4 +38,13 @@ public class WebSocketConfig implements WebSocketConfigurer {
 	WalletSocketHandler getWebSockeHandler() {
 		return new WalletSocketHandler();
 	}
+
+	@Bean
+	public WebSocketTransportRegistration customWebSocketTransportRegistration() {
+		WebSocketTransportRegistration registration = new WebSocketTransportRegistration();
+		// Set an effectively infinite session timeout
+		registration.setSendTimeLimit(0).setSendBufferSizeLimit(512 * 1024);
+		return registration;
+	}
+
 }

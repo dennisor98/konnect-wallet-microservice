@@ -56,7 +56,6 @@ public class WalletSocketHandler implements WebSocketHandler {
 					e1.printStackTrace();
 				}
 				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 
 		}
