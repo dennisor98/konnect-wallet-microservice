@@ -1,50 +1,37 @@
 package net.sasakonnect.wallet.config.websocket;
 
-import java.io.IOException;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import lombok.extern.slf4j.Slf4j;
-import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.config.websocket.defination.MessagePayload;
+import net.sasakonnect.wallet.events.MessageEvent;
 
 @Slf4j
 public class WalletSocketHandler implements WebSocketHandler {
 	@Autowired
 	private RedisWebSocketSessionStore sessionStore;
 
+	@Autowired
+	private ApplicationEventPublisher publisher;
+	@Autowired
+	private SockectManager socketManager;
+
 	@Override
 	public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) {
-		// Handle incoming messages here
-		String receivedMessage = (String) message.getPayload();
+		if (message instanceof BinaryMessage) {
 
-		// Access the user details from the session attributes
-		User user = (User) session.getAttributes().get("principal");
-
-		if (user != null) {
-			log.info("User ID: {}, First Name: {}", user.getId(), user.getFirstName());
-
-			// Iterate through all WebSocket sessions and send the message
-			sessionStore.getAllSessions().forEach(sessionList -> {
-				for (WebSocketSession targetSession : sessionList) {
-					try {
-						targetSession.sendMessage(message);
-					} catch (IOException e) {
-						// Handle the exception, e.g., remove the session from the list
-						log.error("Error sending message to session ID: {}", targetSession.getId(), e);
-
-						// Check if the session is closed and remove it
-						if (!targetSession.isOpen()) {
-							sessionList.remove(targetSession);
-						}
-					}
-				}
-			});
 		} else {
-			log.warn("User not authenticated. User details are not available.");
+			var messagecocnent = MessagePayload.builder().build().buildFromJson((String) message.getPayload());
+			var messageevent = new MessageEvent();
+
+			messageevent.setMessagePayload(messagecocnent);
+			this.publisher.publishEvent(messageevent);
 		}
 	}
 

@@ -51,6 +51,11 @@ public class RedisWebSocketSessionStore {
 		return webSockets.values();
 	}
 
+	public List<WebSocketSession> getUserWebSession(String user_id) {
+		List<WebSocketSession> sessions = this.webSockets.get(user_id);
+		return sessions != null ? sessions : new ArrayList<>();
+	}
+
 	public void removeUserSession(WebSocketSession session) {
 		var user = ((User) session.getAttributes().get("principal"));
 

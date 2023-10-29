@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -77,7 +78,10 @@ public class WalletService extends JwtService {
 
 	@Autowired
 	UserWalletRepository userWalletRepository;
+	@Autowired
 	private TransactionService transactionService;
+	@Autowired
+	private ApplicationEventPublisher publisher;
 
 	public Object getWalletInfo() {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -378,66 +382,6 @@ public class WalletService extends JwtService {
 
 			}
 
-//			Mono<String> responseMono = this.bankClientBean.webClient.post()
-//					.uri(ChoiceEndpointsConstants.OPEN_WALLET_ACCOUNT).contentType(MediaType.APPLICATION_JSON)
-//					.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
-//					.bodyToMono(JSo.class);
-//			responseMono = responseMono.flatMap((String response) -> {
-//				System.err.println(response);
-//
-//				// Check if "onboardingRequestId" is null in the response JSON
-//				ObjectMapper objectMapper = new ObjectMapper();
-//				objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
-//				objectMapper.registerModule(new JavaTimeModule()); // Register the Java 8 date/time module
-//
-//				try {
-//					JsonNode responseJson = objectMapper.readTree(response);
-//					JsonNode onboardingRequestId = responseJson.path("data").path("onboardingRequestId");
-//
-//					if (onboardingRequestId.isNull()) {
-//						// The "onboardingRequestId" is null, delete the user here
-//						this.userService.deleteUserById(savedUser.getId());
-//					} else {
-//						System.err.println("execute here");
-//						System.err.println(onboardingRequestId.asText());
-//
-//						savedUser.setOnboardingRequestId(onboardingRequestId.asText());
-//						var updateduser = this.userService.updateUser(savedUser);
-//						var userData = this.userService.createJwtFor(savedUser);
-//
-//						if (responseJson != null) {
-//							
-//							try {
-//					            return Mono.just(objectMapper.writeValueAsString(userData));
-//
-//							} catch (JsonProcessingException e) {
-//								// TODO Auto-generated catch block
-//								e.printStackTrace();
-//							}
-//						}
-//						//return Mono.just(objectMapper.writeValueAsString(userData));
-//
-//					}
-//
-//					// Return the response as-is
-//				} catch (JsonProcessingException e) {
-//					return Mono.just("Error response: " + e.getMessage());
-//				}
-//			}).onErrorResume(throwable -> {
-//				// Handle other errors here
-//				this.userService.deleteUserById(savedUser.getId());
-//				return Mono.just("Error response: " + throwable.getMessage());
-//			});
-			// String responseJson = responseMono.block();
-
-//			if (responseJson != null) {
-//				System.out.println(responseJson);
-//				return new Gson().fromJson(responseJson, Object.class);
-//
-//			}
-
-			// TODO Auto-generated method stub
-
 		} catch (DataIntegrityViolationException e) {
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("message", "Account already exist");
@@ -460,11 +404,9 @@ public class WalletService extends JwtService {
 	private Object callBackContentResolver(JsonObject body) {
 		var notification_Type = body.get("notificationType").getAsString();
 		var params = body.getAsJsonObject("params");
-		System.out.println(NotificationType.ONBOARD.getCode());
 
 		try {
 			NotificationBody notificationBody = new Gson().fromJson(params, NotificationBody.class);
-			System.out.println(NotificationType.ONBOARD.getCode() + "is null");
 
 			if (notification_Type.equalsIgnoreCase(NotificationType.ONBOARD.getCode())) {
 				var user = this.userService.getUserById(params.get("userId").getAsString());
@@ -491,13 +433,17 @@ public class WalletService extends JwtService {
 				}
 			} else if (notification_Type == NotificationType.ACCOUNT_STATEMENT.getCode()) {
 
-			} else if (notification_Type == NotificationType.TRANSACTION.getCode()) {
-				TypeToken<NotificationResult<TransactionResultNotification>> typeToken = new TypeToken<NotificationResult<TransactionResultNotification>>() {
-				};
-				NotificationResult<TransactionResultNotification> results = new Gson().fromJson(params,
-						typeToken.getType());
-				System.out.println(typeToken.getType().getTypeName());
-				System.out.println(results.getNotificationType());
+			} else if (notification_Type.equalsIgnoreCase(NotificationType.TRANSACTION.getCode())) {
+				log.info("payload {}", body.toString());
+//				TypeToken<NotificationResult<TransactionResultNotification>> typeToken = new TypeToken<NotificationResult<TransactionResultNotification>>() {
+//				};
+				NotificationResult<TransactionResultNotification> results = new Gson().fromJson(body.toString(),
+						new TypeToken<NotificationResult<TransactionResultNotification>>() {
+						}.getType());
+
+				log.info("transacttion {}", results);
+//				System.out.println(typeToken.getType().getTypeName());
+//				System.out.println(results.getNotificationType());
 				this.transactionService.saveTransaction(results);
 
 			} else if (notification_Type == NotificationType.BALANCE.getCode()) {

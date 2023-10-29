@@ -3,12 +3,14 @@ package net.sasakonnect.wallet.services;
 import java.math.BigDecimal;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import net.sasakonnect.wallet.domain.Transaction;
 import net.sasakonnect.wallet.notification.NotificationResult;
 import net.sasakonnect.wallet.notification.TransactionResultNotification;
 import net.sasakonnect.wallet.repository.TransactionRepository;
 
+@Service
 public class TransactionService {
 	@Autowired
 	TransactionRepository transactionRepository;
