@@ -49,6 +49,9 @@ public class Transaction extends BaseWalletDomain implements Serializable {
 	private String oppoSubAccount;
 
 	@Column
+	private Integer txStatus;
+
+	@Column
 	private String mpesaBusinessPayType;
 
 	@Column
@@ -56,6 +59,8 @@ public class Transaction extends BaseWalletDomain implements Serializable {
 
 	@Column
 	private String extInfo;
+	@Column
+	private String oppoChannelId;
 
 	@Column
 	private String thirdPartyTxType;
