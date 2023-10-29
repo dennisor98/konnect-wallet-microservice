@@ -17,13 +17,24 @@ public class TransactionService {
 
 	public void saveTransaction(NotificationResult<TransactionResultNotification> results) {
 		var trans = results.getParams();
-		var transaction = Transaction.builder().txId(trans.getTxId()).txType(trans.getTxType())
-				.externalTxId(trans.getExternalTxId()).accountId(trans.getAccountId())
-				.accountName(trans.getAccountName()).oppoSubAccount(trans.getOppoSubAccount())
-				// .mpesaBusinessPayType(trans.getMpesaBusinessPayType())
-				.oppoAccountName(trans.getAccountName()).thirdPartyTxType(trans.getThirdPartyTxType())
-				.currency(trans.getCurrency()).amount(new BigDecimal(trans.getAmount())).build();
-		this.transactionRepository.save(transaction);
+		var existingTransaction = this.transactionRepository.findByTxId(trans.getTxId());
+		if (!existingTransaction.isPresent()) {
+			var transaction = Transaction.builder().txId(trans.getTxId()).txType(trans.getTxType())
+					.externalTxId(trans.getExternalTxId()).accountId(trans.getAccountId())
+					.accountName(trans.getAccountName()).oppoSubAccount(trans.getOppoSubAccount())
+					// .mpesaBusinessPayType(trans.getMpesaBusinessPayType())
+					.oppoAccountName(trans.getAccountName()).thirdPartyTxType(trans.getThirdPartyTxType())
+					.currency(trans.getCurrency()).amount(new BigDecimal(trans.getAmount())).build();
+			this.transactionRepository.save(transaction);
+		} else {
+//			var transaction = Transaction.builder().txId(trans.getTxId()).txType(trans.getTxType())
+//					.externalTxId(trans.getExternalTxId()).accountId(trans.getAccountId())
+//					.accountName(trans.getAccountName()).oppoSubAccount(trans.getOppoSubAccount())
+//					// .mpesaBusinessPayType(trans.getMpesaBusinessPayType())
+//					.oppoAccountName(trans.getAccountName()).thirdPartyTxType(trans.getThirdPartyTxType())
+//					.currency(trans.getCurrency()).amount(new BigDecimal(trans.getAmount())).build();
+//			this.transactionRepository.save(transaction);	
+		}
 
 		// results.getParams()results;
 		// TODO Auto-generated method stub
