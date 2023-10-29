@@ -405,6 +405,11 @@ public class UserService extends RestClientService implements UserDetailsService
 
 	}
 
+	public Optional<User> findUserByAccountd(String accountId) {
+		return this.userRepository.findUserByWalletAccountId(accountId);
+		// TODO Auto-generated method stub
+
+	}
 //	public Object userRegister(@Valid UserSignUp userSignUp) throws UserInputException {
 //		Optional<User> userPhone = this.userRepository.findByMobile(userSignUp.getPhoneNumber());
 //		Optional<User> userEmail = this.userRepository.findByEmail(userSignUp.getEmail());

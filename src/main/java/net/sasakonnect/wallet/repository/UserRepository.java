@@ -17,6 +17,9 @@ public interface UserRepository extends JpaRepository<User, String> {
 	@Query("SELECT u FROM User u JOIN FETCH u.userWallets uw JOIN FETCH uw.wallet WHERE u.id = :userId")
 	Optional<User> findUserWithUserWalletsById(@Param("userId") String userId);
 
+	@Query("SELECT u FROM User u JOIN u.userWallets uw WHERE uw.wallet.accountId = :accountId")
+	Optional<User> findUserByWalletAccountId(@Param("accountId") String accountId);;
+
 	@Transactional
 	@Modifying
 	@Query("DELETE FROM User u WHERE u.onboardingRequestId = :onboardingRequestId")

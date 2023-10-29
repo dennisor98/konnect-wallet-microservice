@@ -1,30 +1,30 @@
 package net.sasakonnect.wallet.config.websocket.defination;
 
-import org.apache.commons.codec.binary.Base64;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Data
 public class MessagePayload {
 	public String senderId;
 	public String receiverId;
 	public MessageType messageType;
-	public byte[] message;
+	public String message;
 
 	public MessagePayload buildFromJson(ObjectNode jsonObject) {
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 			String jsonString = objectMapper.writeValueAsString(jsonObject);
 			this.messageType = MessageType.BIN_JSON;
-			message = jsonString.getBytes();
+			message = jsonString;
 			return this;
 
 		} catch (JsonProcessingException e) {
@@ -33,14 +33,6 @@ public class MessagePayload {
 		}
 
 		return null;
-
-	}
-
-	public MessagePayload fromBytes(byte[] bytesObject) {
-		message = bytesObject;
-		this.messageType = MessageType.BIN;
-
-		return this;
 
 	}
 
@@ -60,8 +52,7 @@ public class MessagePayload {
 		jsonObject.put("messageType", messageType.toString());
 
 		// Encode the message field (byte array) as Base64 and include it in the JSON
-		String base64Message = Base64.encodeBase64String(message);
-		jsonObject.put("message", base64Message);
+		jsonObject.put("message", message);
 
 		// Convert the entire object to JSON
 		try {
@@ -86,8 +77,7 @@ public class MessagePayload {
 			this.messageType = MessageType.valueOf(jsonObject.get("messageType").asText());
 
 			// Decode the Base64 message field to a byte array
-			String base64Message = jsonObject.get("message").asText();
-			this.message = Base64.decodeBase64(base64Message);
+			this.message = jsonObject.get("message").asText();
 
 			return this;
 		} catch (JsonProcessingException e) {

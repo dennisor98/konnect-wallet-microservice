@@ -51,6 +51,7 @@ import net.sasakonnect.wallet.enums.NotificationBody;
 import net.sasakonnect.wallet.enums.NotificationType;
 import net.sasakonnect.wallet.enums.TransactionStatus;
 import net.sasakonnect.wallet.enums.WalletTransactionType;
+import net.sasakonnect.wallet.events.TransactionEvent;
 import net.sasakonnect.wallet.notification.NotificationResult;
 import net.sasakonnect.wallet.notification.TransactionResultNotification;
 import net.sasakonnect.wallet.repository.CurrencyRepository;
@@ -444,7 +445,10 @@ public class WalletService extends JwtService {
 				log.info("transacttion {}", results);
 //				System.out.println(typeToken.getType().getTypeName());
 //				System.out.println(results.getNotificationType());
-				this.transactionService.saveTransaction(results);
+				var createdTransaction = this.transactionService.saveTransaction(results);
+				if (createdTransaction == null) {
+					this.publisher.publishEvent(TransactionEvent.builder().transaction(createdTransaction));
+				}
 
 			} else if (notification_Type == NotificationType.BALANCE.getCode()) {
 

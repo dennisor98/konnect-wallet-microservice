@@ -15,7 +15,7 @@ public class TransactionService {
 	@Autowired
 	TransactionRepository transactionRepository;
 
-	public void saveTransaction(NotificationResult<TransactionResultNotification> results) {
+	public Transaction saveTransaction(NotificationResult<TransactionResultNotification> results) {
 		var trans = results.getParams();
 		var existingTransaction = this.transactionRepository.findByTxId(trans.getTxId());
 		if (!existingTransaction.isPresent()) {
@@ -27,7 +27,7 @@ public class TransactionService {
 					.oppoChannelId(trans.getOppoChannelId()).oppoAccountName(trans.getOppoAccountName())
 					.thirdPartyTxType(trans.getThirdPartyTxType()).currency(trans.getCurrency())
 					.amount(new BigDecimal(trans.getAmount())).build();
-			this.transactionRepository.save(transaction);
+			return this.transactionRepository.save(transaction);
 		} else {
 //			var transaction = Transaction.builder().txId(trans.getTxId()).txType(trans.getTxType())
 //					.externalTxId(trans.getExternalTxId()).accountId(trans.getAccountId())
@@ -40,6 +40,7 @@ public class TransactionService {
 
 		// results.getParams()results;
 		// TODO Auto-generated method stub
+		return null;
 
 	}
 

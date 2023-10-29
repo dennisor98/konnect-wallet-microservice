@@ -16,6 +16,12 @@ public class WalletEventListener {
 	public void handleCustomEvent(BaseEvent event) {
 		if (event instanceof MessageEvent) {
 			socketManager.sendMessage(((MessageEvent) event).messagePayload);
+		} else if (event instanceof TransactionEvent) {
+			TransactionEvent transactionEvent = (TransactionEvent) event; // Cast to TransactionEvent
+			if (transactionEvent.createNotificationPayLoad().isPresent()) {
+				socketManager.sendMessage(transactionEvent.createNotificationPayLoad().get());
+
+			}
 		}
 		System.out.println("Received custom event: " + event.getClass());
 		// Do something with the event
