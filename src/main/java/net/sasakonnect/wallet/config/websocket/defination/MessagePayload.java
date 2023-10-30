@@ -85,6 +85,8 @@ public class MessagePayload {
 		} catch (JsonProcessingException e) {
 			throw e;
 
+		} catch (Exception e) {
+			throw e;
 		}
 	}
 }

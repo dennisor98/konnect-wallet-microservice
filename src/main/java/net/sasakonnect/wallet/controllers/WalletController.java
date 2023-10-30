@@ -173,13 +173,13 @@ public class WalletController {
 		return this.walletService.getBankCode();
 	}
 
-	@PostMapping("sendToOtherInstution")
+	@PostMapping("sendToOtherInstitution")
 	@TransactionMiddleware()
 	public Object sendToOtherWallet(@RequestBody() @Valid() ChoiceTransferDto choiceTransfer) {
 		return this.walletService.applyForTransfer(choiceTransfer);
 	}
 
-	@PostMapping("pay/utitlity")
+	@PostMapping("pay/utility")
 	@TransactionMiddleware()
 	public Object payUtility(@RequestBody() @Valid() PayUtility payUtility) {
 		return this.walletService.payUtility(payUtility);
