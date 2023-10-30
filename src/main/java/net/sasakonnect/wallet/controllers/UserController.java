@@ -1,9 +1,13 @@
 package net.sasakonnect.wallet.controllers;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +21,7 @@ import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
 import net.sasakonnect.wallet.RequestDto.UserLogin;
 import net.sasakonnect.wallet.provider.FirebaseMessage;
 import net.sasakonnect.wallet.provider.FirebaseWrapper;
+import net.sasakonnect.wallet.services.TransactionService;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.tools.redis.JobProducer;
 import net.sasakonnect.wallet.tools.redis.Queueable;
@@ -27,6 +32,8 @@ import net.sasakonnect.wallet.tools.redis.Queueable;
 
 public class UserController {
 	private final UserService userService;
+	@Autowired
+	private TransactionService transactionService;
 	@Autowired
 	private JobProducer<Queueable<List<FirebaseMessage>>> jobProducer;
 	@Autowired
@@ -51,6 +58,15 @@ public class UserController {
 	@PostMapping("confirmOtp")
 	public ResponseEntity confirmOtp(@Valid @RequestBody ConfirmOtp confirmOtp) {
 		return userService.verifyOtp(confirmOtp);
+	}
+
+	@GetMapping("financialContact")
+	public ResponseEntity financialContact() {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("payload", transactionService.getFancanctialContact());
+		map.put("success", "true");
+
+		return ResponseEntity.status(HttpStatus.OK).body(map);
 	}
 
 }

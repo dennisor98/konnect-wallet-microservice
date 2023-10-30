@@ -1,19 +1,29 @@
 package net.sasakonnect.wallet.services;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import net.sasakonnect.wallet.domain.Transaction;
+import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.domain.Wallet;
 import net.sasakonnect.wallet.notification.NotificationResult;
 import net.sasakonnect.wallet.notification.TransactionResultNotification;
 import net.sasakonnect.wallet.repository.TransactionRepository;
+import net.sasakonnect.wallet.repository.WalletRepository;
 
 @Service
 public class TransactionService {
 	@Autowired
 	TransactionRepository transactionRepository;
+	@Autowired
+	WalletRepository walletRepository;
 
 	public Transaction saveTransaction(NotificationResult<TransactionResultNotification> results) {
 		var trans = results.getParams();
@@ -41,6 +51,25 @@ public class TransactionService {
 		// results.getParams()results;
 		// TODO Auto-generated method stub
 		return null;
+
+	}
+
+	public List<Object> getFancanctialContact() {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		List<Wallet> wallets = this.walletRepository.findByUserWalletsUser(user);
+		if (!wallets.isEmpty()) {
+			var account = wallets.get(0).getAccountId();
+
+			return this.transactionRepository.findDistinctInteractions(account).stream().map((Object[] element) -> {
+				Map<String, Object> jsonMap = new HashMap<>();
+				jsonMap.put("name", element.length > 0 ? element[0] : null);
+				jsonMap.put("account", element.length > 1 ? element[1] : null);
+				return jsonMap;
+			}).filter(accounts -> !(accounts.get("name") == null || accounts.get("name") == account))
+					.collect(Collectors.toList());
+
+		}
+		return List.of();
 
 	}
 
