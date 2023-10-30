@@ -64,6 +64,8 @@ public class TransactionService {
 				Map<String, Object> jsonMap = new HashMap<>();
 				jsonMap.put("name", element.length > 0 ? element[0] : null);
 				jsonMap.put("account", element.length > 1 ? element[1] : null);
+				jsonMap.put("user_id", element.length > 2 ? element[2] : null);
+
 				return jsonMap;
 			}).filter(accounts -> !(accounts.get("name") == null || accounts.get("name") == account))
 					.collect(Collectors.toList());
