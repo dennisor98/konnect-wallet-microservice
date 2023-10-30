@@ -24,7 +24,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 	@Override
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
 		// Register the endpoint and allow certain origins to connect to it.
-		registry.addHandler(getWebSockeHandler(), "/test").setAllowedOrigins("*")
+		registry.addHandler(getWebSockeHandler(), "/live").setAllowedOrigins("*")
 
 				.addInterceptors(jwtAuthenticationFilter);
 	}

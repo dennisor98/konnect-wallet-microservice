@@ -10182,3 +10182,1590 @@ java.lang.NullPointerException: Cannot invoke "String.equals(Object)" because "u
             on u2_0.id=u1_0.user_id 
     where
         u2_0.id=?
+2023-10-30 12:46:59 [http-nio-8080-exec-8] DEBUG o.s.security.web.FilterChainProxy - Securing GET /transaction
+2023-10-30 12:46:59 [http-nio-8080-exec-8] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.birthday,
+        u1_0.country_code,
+        u1_0.created_at,
+        u1_0.deleted_at,
+        u1_0.employment_status,
+        u1_0.first_name,
+        u1_0.gender,
+        u1_0.id_number,
+        u1_0.id_type,
+        u1_0.kra_pin,
+        u1_0.last_name,
+        m1_0.id,
+        m1_0.client_id,
+        m1_0.created_at,
+        m1_0.deleted_at,
+        m1_0.flow_id,
+        m1_0.updated_at,
+        u1_0.middle_name,
+        u1_0.mobile,
+        u1_0.monthly_income,
+        u1_0.onboarding_request_id,
+        u1_0.simple,
+        u1_0.updated_at,
+        u2_0.id,
+        a1_0.id,
+        a1_0.address,
+        a1_0.birthday,
+        a1_0.country_code,
+        a1_0.created_at,
+        a1_0.deleted_at,
+        a1_0.employment_status,
+        a1_0.first_name,
+        a1_0.gender,
+        a1_0.id_number,
+        a1_0.id_type,
+        a1_0.kra_pin,
+        a1_0.last_name,
+        a1_0.meta_id,
+        a1_0.middle_name,
+        a1_0.mobile,
+        a1_0.monthly_income,
+        a1_0.onboarding_request_id,
+        a1_0.simple,
+        a1_0.updated_at,
+        u2_0.created_at,
+        u2_0.deleted_at,
+        u2_0.is_deactivated,
+        r1_0.id,
+        r1_0.created_at,
+        r1_0.deleted_at,
+        r1_0.description,
+        r1_0.role_name,
+        r1_0.updated_at,
+        r1_0.creator_id,
+        u2_0.role_id,
+        u2_0.updated_at,
+        u2_0.user_id 
+    from
+        user u1_0 
+    left join
+        meta_mask m1_0 
+            on m1_0.id=u1_0.meta_id 
+    left join
+        user_role u2_0 
+            on u1_0.id=u2_0.user_id 
+    left join
+        user a1_0 
+            on a1_0.id=u2_0.assigner_id 
+    left join
+        role r1_0 
+            on r1_0.id=u2_0.role_id 
+    where
+        u1_0.id=?
+2023-10-30 12:47:00 [http-nio-8080-exec-8] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        a1_0.id,
+        a1_0.address,
+        a1_0.birthday,
+        a1_0.country_code,
+        a1_0.created_at,
+        a1_0.deleted_at,
+        a1_0.employment_status,
+        a1_0.first_name,
+        a1_0.gender,
+        a1_0.id_number,
+        a1_0.id_type,
+        a1_0.kra_pin,
+        a1_0.last_name,
+        m1_0.id,
+        m1_0.client_id,
+        m1_0.created_at,
+        m1_0.deleted_at,
+        m1_0.flow_id,
+        m1_0.updated_at,
+        a1_0.middle_name,
+        a1_0.mobile,
+        a1_0.monthly_income,
+        a1_0.onboarding_request_id,
+        a1_0.simple,
+        a1_0.updated_at,
+        u2_0.id,
+        u2_0.assigner_id,
+        u2_0.created_at,
+        u2_0.deleted_at,
+        u2_0.is_deactivated,
+        u2_0.role_id,
+        u2_0.updated_at,
+        u2_0.user_id,
+        u1_0.created_at,
+        u1_0.deleted_at,
+        u1_0.is_deactivated,
+        r2_0.id,
+        r2_0.created_at,
+        r2_0.deleted_at,
+        r2_0.description,
+        r2_0.role_name,
+        r2_0.updated_at,
+        u3_0.id,
+        u3_0.address,
+        u3_0.birthday,
+        u3_0.country_code,
+        u3_0.created_at,
+        u3_0.deleted_at,
+        u3_0.employment_status,
+        u3_0.first_name,
+        u3_0.gender,
+        u3_0.id_number,
+        u3_0.id_type,
+        u3_0.kra_pin,
+        u3_0.last_name,
+        u3_0.meta_id,
+        u3_0.middle_name,
+        u3_0.mobile,
+        u3_0.monthly_income,
+        u3_0.onboarding_request_id,
+        u3_0.simple,
+        u3_0.updated_at,
+        u1_0.role_id,
+        u1_0.updated_at,
+        u4_0.id,
+        u4_0.address,
+        u4_0.birthday,
+        u4_0.country_code,
+        u4_0.created_at,
+        u4_0.deleted_at,
+        u4_0.employment_status,
+        u4_0.first_name,
+        u4_0.gender,
+        u4_0.id_number,
+        u4_0.id_type,
+        u4_0.kra_pin,
+        u4_0.last_name,
+        m3_0.id,
+        m3_0.client_id,
+        m3_0.created_at,
+        m3_0.deleted_at,
+        m3_0.flow_id,
+        m3_0.updated_at,
+        u4_0.middle_name,
+        u4_0.mobile,
+        u4_0.monthly_income,
+        u4_0.onboarding_request_id,
+        u4_0.simple,
+        u4_0.updated_at,
+        u1_0.user_id 
+    from
+        user_role u1_0 
+    left join
+        user a1_0 
+            on a1_0.id=u1_0.assigner_id 
+    left join
+        meta_mask m1_0 
+            on m1_0.id=a1_0.meta_id 
+    left join
+        user_role u2_0 
+            on a1_0.id=u2_0.user_id 
+    left join
+        role r2_0 
+            on r2_0.id=u1_0.role_id 
+    left join
+        user u3_0 
+            on u3_0.id=r2_0.creator_id 
+    left join
+        user u4_0 
+            on u4_0.id=u1_0.user_id 
+    left join
+        meta_mask m3_0 
+            on m3_0.id=u4_0.meta_id 
+    where
+        u1_0.user_id=?
+2023-10-30 12:47:00 [http-nio-8080-exec-8] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        a1_0.id,
+        a1_0.address,
+        a1_0.birthday,
+        a1_0.country_code,
+        a1_0.created_at,
+        a1_0.deleted_at,
+        a1_0.employment_status,
+        a1_0.first_name,
+        a1_0.gender,
+        a1_0.id_number,
+        a1_0.id_type,
+        a1_0.kra_pin,
+        a1_0.last_name,
+        m1_0.id,
+        m1_0.client_id,
+        m1_0.created_at,
+        m1_0.deleted_at,
+        m1_0.flow_id,
+        m1_0.updated_at,
+        a1_0.middle_name,
+        a1_0.mobile,
+        a1_0.monthly_income,
+        a1_0.onboarding_request_id,
+        a1_0.simple,
+        a1_0.updated_at,
+        u2_0.id,
+        u2_0.assigner_id,
+        u2_0.created_at,
+        u2_0.deleted_at,
+        u2_0.is_deactivated,
+        u2_0.role_id,
+        u2_0.updated_at,
+        u2_0.user_id,
+        u1_0.created_at,
+        u1_0.deleted_at,
+        u1_0.is_deactivated,
+        r2_0.id,
+        r2_0.created_at,
+        r2_0.deleted_at,
+        r2_0.description,
+        r2_0.role_name,
+        r2_0.updated_at,
+        u3_0.id,
+        u3_0.address,
+        u3_0.birthday,
+        u3_0.country_code,
+        u3_0.created_at,
+        u3_0.deleted_at,
+        u3_0.employment_status,
+        u3_0.first_name,
+        u3_0.gender,
+        u3_0.id_number,
+        u3_0.id_type,
+        u3_0.kra_pin,
+        u3_0.last_name,
+        u3_0.meta_id,
+        u3_0.middle_name,
+        u3_0.mobile,
+        u3_0.monthly_income,
+        u3_0.onboarding_request_id,
+        u3_0.simple,
+        u3_0.updated_at,
+        u1_0.role_id,
+        u1_0.updated_at,
+        u4_0.id,
+        u4_0.address,
+        u4_0.birthday,
+        u4_0.country_code,
+        u4_0.created_at,
+        u4_0.deleted_at,
+        u4_0.employment_status,
+        u4_0.first_name,
+        u4_0.gender,
+        u4_0.id_number,
+        u4_0.id_type,
+        u4_0.kra_pin,
+        u4_0.last_name,
+        m3_0.id,
+        m3_0.client_id,
+        m3_0.created_at,
+        m3_0.deleted_at,
+        m3_0.flow_id,
+        m3_0.updated_at,
+        u4_0.middle_name,
+        u4_0.mobile,
+        u4_0.monthly_income,
+        u4_0.onboarding_request_id,
+        u4_0.simple,
+        u4_0.updated_at,
+        u1_0.user_id 
+    from
+        user_role u1_0 
+    left join
+        user a1_0 
+            on a1_0.id=u1_0.assigner_id 
+    left join
+        meta_mask m1_0 
+            on m1_0.id=a1_0.meta_id 
+    left join
+        user_role u2_0 
+            on a1_0.id=u2_0.user_id 
+    left join
+        role r2_0 
+            on r2_0.id=u1_0.role_id 
+    left join
+        user u3_0 
+            on u3_0.id=r2_0.creator_id 
+    left join
+        user u4_0 
+            on u4_0.id=u1_0.user_id 
+    left join
+        meta_mask m3_0 
+            on m3_0.id=u4_0.meta_id 
+    where
+        u1_0.user_id=?
+2023-10-30 12:47:00 [http-nio-8080-exec-8] DEBUG org.hibernate.SQL - 
+    select
+        r1_0.id,
+        r1_0.created_at,
+        r1_0.deleted_at,
+        r1_0.description,
+        r1_0.role_name,
+        r1_0.updated_at,
+        r1_0.creator_id 
+    from
+        user_role u1_0 
+    join
+        role r1_0 
+            on r1_0.id=u1_0.role_id 
+    where
+        u1_0.user_id=?
+2023-10-30 12:47:01 [http-nio-8080-exec-8] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.birthday,
+        u1_0.country_code,
+        u1_0.created_at,
+        u1_0.deleted_at,
+        u1_0.employment_status,
+        u1_0.first_name,
+        u1_0.gender,
+        u1_0.id_number,
+        u1_0.id_type,
+        u1_0.kra_pin,
+        u1_0.last_name,
+        m1_0.id,
+        m1_0.client_id,
+        m1_0.created_at,
+        m1_0.deleted_at,
+        m1_0.flow_id,
+        m1_0.updated_at,
+        u1_0.middle_name,
+        u1_0.mobile,
+        u1_0.monthly_income,
+        u1_0.onboarding_request_id,
+        u1_0.simple,
+        u1_0.updated_at,
+        u2_0.id,
+        a1_0.id,
+        a1_0.address,
+        a1_0.birthday,
+        a1_0.country_code,
+        a1_0.created_at,
+        a1_0.deleted_at,
+        a1_0.employment_status,
+        a1_0.first_name,
+        a1_0.gender,
+        a1_0.id_number,
+        a1_0.id_type,
+        a1_0.kra_pin,
+        a1_0.last_name,
+        a1_0.meta_id,
+        a1_0.middle_name,
+        a1_0.mobile,
+        a1_0.monthly_income,
+        a1_0.onboarding_request_id,
+        a1_0.simple,
+        a1_0.updated_at,
+        u2_0.created_at,
+        u2_0.deleted_at,
+        u2_0.is_deactivated,
+        r1_0.id,
+        r1_0.created_at,
+        r1_0.deleted_at,
+        r1_0.description,
+        r1_0.role_name,
+        r1_0.updated_at,
+        r1_0.creator_id,
+        u2_0.role_id,
+        u2_0.updated_at,
+        u2_0.user_id 
+    from
+        user u1_0 
+    left join
+        meta_mask m1_0 
+            on m1_0.id=u1_0.meta_id 
+    left join
+        user_role u2_0 
+            on u1_0.id=u2_0.user_id 
+    left join
+        user a1_0 
+            on a1_0.id=u2_0.assigner_id 
+    left join
+        role r1_0 
+            on r1_0.id=u2_0.role_id 
+    where
+        u1_0.id=?
+2023-10-30 12:47:01 [http-nio-8080-exec-8] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        a1_0.id,
+        a1_0.address,
+        a1_0.birthday,
+        a1_0.country_code,
+        a1_0.created_at,
+        a1_0.deleted_at,
+        a1_0.employment_status,
+        a1_0.first_name,
+        a1_0.gender,
+        a1_0.id_number,
+        a1_0.id_type,
+        a1_0.kra_pin,
+        a1_0.last_name,
+        m1_0.id,
+        m1_0.client_id,
+        m1_0.created_at,
+        m1_0.deleted_at,
+        m1_0.flow_id,
+        m1_0.updated_at,
+        a1_0.middle_name,
+        a1_0.mobile,
+        a1_0.monthly_income,
+        a1_0.onboarding_request_id,
+        a1_0.simple,
+        a1_0.updated_at,
+        u2_0.id,
+        u2_0.assigner_id,
+        u2_0.created_at,
+        u2_0.deleted_at,
+        u2_0.is_deactivated,
+        u2_0.role_id,
+        u2_0.updated_at,
+        u2_0.user_id,
+        u1_0.created_at,
+        u1_0.deleted_at,
+        u1_0.is_deactivated,
+        r2_0.id,
+        r2_0.created_at,
+        r2_0.deleted_at,
+        r2_0.description,
+        r2_0.role_name,
+        r2_0.updated_at,
+        u3_0.id,
+        u3_0.address,
+        u3_0.birthday,
+        u3_0.country_code,
+        u3_0.created_at,
+        u3_0.deleted_at,
+        u3_0.employment_status,
+        u3_0.first_name,
+        u3_0.gender,
+        u3_0.id_number,
+        u3_0.id_type,
+        u3_0.kra_pin,
+        u3_0.last_name,
+        u3_0.meta_id,
+        u3_0.middle_name,
+        u3_0.mobile,
+        u3_0.monthly_income,
+        u3_0.onboarding_request_id,
+        u3_0.simple,
+        u3_0.updated_at,
+        u1_0.role_id,
+        u1_0.updated_at,
+        u4_0.id,
+        u4_0.address,
+        u4_0.birthday,
+        u4_0.country_code,
+        u4_0.created_at,
+        u4_0.deleted_at,
+        u4_0.employment_status,
+        u4_0.first_name,
+        u4_0.gender,
+        u4_0.id_number,
+        u4_0.id_type,
+        u4_0.kra_pin,
+        u4_0.last_name,
+        m3_0.id,
+        m3_0.client_id,
+        m3_0.created_at,
+        m3_0.deleted_at,
+        m3_0.flow_id,
+        m3_0.updated_at,
+        u4_0.middle_name,
+        u4_0.mobile,
+        u4_0.monthly_income,
+        u4_0.onboarding_request_id,
+        u4_0.simple,
+        u4_0.updated_at,
+        u1_0.user_id 
+    from
+        user_role u1_0 
+    left join
+        user a1_0 
+            on a1_0.id=u1_0.assigner_id 
+    left join
+        meta_mask m1_0 
+            on m1_0.id=a1_0.meta_id 
+    left join
+        user_role u2_0 
+            on a1_0.id=u2_0.user_id 
+    left join
+        role r2_0 
+            on r2_0.id=u1_0.role_id 
+    left join
+        user u3_0 
+            on u3_0.id=r2_0.creator_id 
+    left join
+        user u4_0 
+            on u4_0.id=u1_0.user_id 
+    left join
+        meta_mask m3_0 
+            on m3_0.id=u4_0.meta_id 
+    where
+        u1_0.user_id=?
+2023-10-30 12:47:01 [http-nio-8080-exec-8] DEBUG o.s.security.web.FilterChainProxy - Secured GET /transaction
+2023-10-30 12:47:01 [http-nio-8080-exec-8] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.birthday,
+        u1_0.country_code,
+        u1_0.created_at,
+        u1_0.deleted_at,
+        u1_0.employment_status,
+        u1_0.first_name,
+        u1_0.gender,
+        u1_0.id_number,
+        u1_0.id_type,
+        u1_0.kra_pin,
+        u1_0.last_name,
+        m1_0.id,
+        m1_0.client_id,
+        m1_0.created_at,
+        m1_0.deleted_at,
+        m1_0.flow_id,
+        m1_0.updated_at,
+        u1_0.middle_name,
+        u1_0.mobile,
+        u1_0.monthly_income,
+        u1_0.onboarding_request_id,
+        u1_0.simple,
+        u1_0.updated_at,
+        u2_0.id,
+        a1_0.id,
+        a1_0.address,
+        a1_0.birthday,
+        a1_0.country_code,
+        a1_0.created_at,
+        a1_0.deleted_at,
+        a1_0.employment_status,
+        a1_0.first_name,
+        a1_0.gender,
+        a1_0.id_number,
+        a1_0.id_type,
+        a1_0.kra_pin,
+        a1_0.last_name,
+        a1_0.meta_id,
+        a1_0.middle_name,
+        a1_0.mobile,
+        a1_0.monthly_income,
+        a1_0.onboarding_request_id,
+        a1_0.simple,
+        a1_0.updated_at,
+        u2_0.created_at,
+        u2_0.deleted_at,
+        u2_0.is_deactivated,
+        r1_0.id,
+        r1_0.created_at,
+        r1_0.deleted_at,
+        r1_0.description,
+        r1_0.role_name,
+        r1_0.updated_at,
+        r1_0.creator_id,
+        u2_0.role_id,
+        u2_0.updated_at,
+        u2_0.user_id 
+    from
+        user u1_0 
+    left join
+        meta_mask m1_0 
+            on m1_0.id=u1_0.meta_id 
+    left join
+        user_role u2_0 
+            on u1_0.id=u2_0.user_id 
+    left join
+        user a1_0 
+            on a1_0.id=u2_0.assigner_id 
+    left join
+        role r1_0 
+            on r1_0.id=u2_0.role_id 
+    where
+        u1_0.id=?
+2023-10-30 12:47:16 [http-nio-8080-exec-10] DEBUG o.s.security.web.FilterChainProxy - Securing GET /wallet/transactionhistory
+2023-10-30 12:47:17 [http-nio-8080-exec-10] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.birthday,
+        u1_0.country_code,
+        u1_0.created_at,
+        u1_0.deleted_at,
+        u1_0.employment_status,
+        u1_0.first_name,
+        u1_0.gender,
+        u1_0.id_number,
+        u1_0.id_type,
+        u1_0.kra_pin,
+        u1_0.last_name,
+        m1_0.id,
+        m1_0.client_id,
+        m1_0.created_at,
+        m1_0.deleted_at,
+        m1_0.flow_id,
+        m1_0.updated_at,
+        u1_0.middle_name,
+        u1_0.mobile,
+        u1_0.monthly_income,
+        u1_0.onboarding_request_id,
+        u1_0.simple,
+        u1_0.updated_at,
+        u2_0.id,
+        a1_0.id,
+        a1_0.address,
+        a1_0.birthday,
+        a1_0.country_code,
+        a1_0.created_at,
+        a1_0.deleted_at,
+        a1_0.employment_status,
+        a1_0.first_name,
+        a1_0.gender,
+        a1_0.id_number,
+        a1_0.id_type,
+        a1_0.kra_pin,
+        a1_0.last_name,
+        a1_0.meta_id,
+        a1_0.middle_name,
+        a1_0.mobile,
+        a1_0.monthly_income,
+        a1_0.onboarding_request_id,
+        a1_0.simple,
+        a1_0.updated_at,
+        u2_0.created_at,
+        u2_0.deleted_at,
+        u2_0.is_deactivated,
+        r1_0.id,
+        r1_0.created_at,
+        r1_0.deleted_at,
+        r1_0.description,
+        r1_0.role_name,
+        r1_0.updated_at,
+        r1_0.creator_id,
+        u2_0.role_id,
+        u2_0.updated_at,
+        u2_0.user_id 
+    from
+        user u1_0 
+    left join
+        meta_mask m1_0 
+            on m1_0.id=u1_0.meta_id 
+    left join
+        user_role u2_0 
+            on u1_0.id=u2_0.user_id 
+    left join
+        user a1_0 
+            on a1_0.id=u2_0.assigner_id 
+    left join
+        role r1_0 
+            on r1_0.id=u2_0.role_id 
+    where
+        u1_0.id=?
+2023-10-30 12:47:17 [http-nio-8080-exec-10] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        a1_0.id,
+        a1_0.address,
+        a1_0.birthday,
+        a1_0.country_code,
+        a1_0.created_at,
+        a1_0.deleted_at,
+        a1_0.employment_status,
+        a1_0.first_name,
+        a1_0.gender,
+        a1_0.id_number,
+        a1_0.id_type,
+        a1_0.kra_pin,
+        a1_0.last_name,
+        m1_0.id,
+        m1_0.client_id,
+        m1_0.created_at,
+        m1_0.deleted_at,
+        m1_0.flow_id,
+        m1_0.updated_at,
+        a1_0.middle_name,
+        a1_0.mobile,
+        a1_0.monthly_income,
+        a1_0.onboarding_request_id,
+        a1_0.simple,
+        a1_0.updated_at,
+        u2_0.id,
+        u2_0.assigner_id,
+        u2_0.created_at,
+        u2_0.deleted_at,
+        u2_0.is_deactivated,
+        u2_0.role_id,
+        u2_0.updated_at,
+        u2_0.user_id,
+        u1_0.created_at,
+        u1_0.deleted_at,
+        u1_0.is_deactivated,
+        r2_0.id,
+        r2_0.created_at,
+        r2_0.deleted_at,
+        r2_0.description,
+        r2_0.role_name,
+        r2_0.updated_at,
+        u3_0.id,
+        u3_0.address,
+        u3_0.birthday,
+        u3_0.country_code,
+        u3_0.created_at,
+        u3_0.deleted_at,
+        u3_0.employment_status,
+        u3_0.first_name,
+        u3_0.gender,
+        u3_0.id_number,
+        u3_0.id_type,
+        u3_0.kra_pin,
+        u3_0.last_name,
+        u3_0.meta_id,
+        u3_0.middle_name,
+        u3_0.mobile,
+        u3_0.monthly_income,
+        u3_0.onboarding_request_id,
+        u3_0.simple,
+        u3_0.updated_at,
+        u1_0.role_id,
+        u1_0.updated_at,
+        u4_0.id,
+        u4_0.address,
+        u4_0.birthday,
+        u4_0.country_code,
+        u4_0.created_at,
+        u4_0.deleted_at,
+        u4_0.employment_status,
+        u4_0.first_name,
+        u4_0.gender,
+        u4_0.id_number,
+        u4_0.id_type,
+        u4_0.kra_pin,
+        u4_0.last_name,
+        m3_0.id,
+        m3_0.client_id,
+        m3_0.created_at,
+        m3_0.deleted_at,
+        m3_0.flow_id,
+        m3_0.updated_at,
+        u4_0.middle_name,
+        u4_0.mobile,
+        u4_0.monthly_income,
+        u4_0.onboarding_request_id,
+        u4_0.simple,
+        u4_0.updated_at,
+        u1_0.user_id 
+    from
+        user_role u1_0 
+    left join
+        user a1_0 
+            on a1_0.id=u1_0.assigner_id 
+    left join
+        meta_mask m1_0 
+            on m1_0.id=a1_0.meta_id 
+    left join
+        user_role u2_0 
+            on a1_0.id=u2_0.user_id 
+    left join
+        role r2_0 
+            on r2_0.id=u1_0.role_id 
+    left join
+        user u3_0 
+            on u3_0.id=r2_0.creator_id 
+    left join
+        user u4_0 
+            on u4_0.id=u1_0.user_id 
+    left join
+        meta_mask m3_0 
+            on m3_0.id=u4_0.meta_id 
+    where
+        u1_0.user_id=?
+2023-10-30 12:47:17 [http-nio-8080-exec-10] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        a1_0.id,
+        a1_0.address,
+        a1_0.birthday,
+        a1_0.country_code,
+        a1_0.created_at,
+        a1_0.deleted_at,
+        a1_0.employment_status,
+        a1_0.first_name,
+        a1_0.gender,
+        a1_0.id_number,
+        a1_0.id_type,
+        a1_0.kra_pin,
+        a1_0.last_name,
+        m1_0.id,
+        m1_0.client_id,
+        m1_0.created_at,
+        m1_0.deleted_at,
+        m1_0.flow_id,
+        m1_0.updated_at,
+        a1_0.middle_name,
+        a1_0.mobile,
+        a1_0.monthly_income,
+        a1_0.onboarding_request_id,
+        a1_0.simple,
+        a1_0.updated_at,
+        u2_0.id,
+        u2_0.assigner_id,
+        u2_0.created_at,
+        u2_0.deleted_at,
+        u2_0.is_deactivated,
+        u2_0.role_id,
+        u2_0.updated_at,
+        u2_0.user_id,
+        u1_0.created_at,
+        u1_0.deleted_at,
+        u1_0.is_deactivated,
+        r2_0.id,
+        r2_0.created_at,
+        r2_0.deleted_at,
+        r2_0.description,
+        r2_0.role_name,
+        r2_0.updated_at,
+        u3_0.id,
+        u3_0.address,
+        u3_0.birthday,
+        u3_0.country_code,
+        u3_0.created_at,
+        u3_0.deleted_at,
+        u3_0.employment_status,
+        u3_0.first_name,
+        u3_0.gender,
+        u3_0.id_number,
+        u3_0.id_type,
+        u3_0.kra_pin,
+        u3_0.last_name,
+        u3_0.meta_id,
+        u3_0.middle_name,
+        u3_0.mobile,
+        u3_0.monthly_income,
+        u3_0.onboarding_request_id,
+        u3_0.simple,
+        u3_0.updated_at,
+        u1_0.role_id,
+        u1_0.updated_at,
+        u4_0.id,
+        u4_0.address,
+        u4_0.birthday,
+        u4_0.country_code,
+        u4_0.created_at,
+        u4_0.deleted_at,
+        u4_0.employment_status,
+        u4_0.first_name,
+        u4_0.gender,
+        u4_0.id_number,
+        u4_0.id_type,
+        u4_0.kra_pin,
+        u4_0.last_name,
+        m3_0.id,
+        m3_0.client_id,
+        m3_0.created_at,
+        m3_0.deleted_at,
+        m3_0.flow_id,
+        m3_0.updated_at,
+        u4_0.middle_name,
+        u4_0.mobile,
+        u4_0.monthly_income,
+        u4_0.onboarding_request_id,
+        u4_0.simple,
+        u4_0.updated_at,
+        u1_0.user_id 
+    from
+        user_role u1_0 
+    left join
+        user a1_0 
+            on a1_0.id=u1_0.assigner_id 
+    left join
+        meta_mask m1_0 
+            on m1_0.id=a1_0.meta_id 
+    left join
+        user_role u2_0 
+            on a1_0.id=u2_0.user_id 
+    left join
+        role r2_0 
+            on r2_0.id=u1_0.role_id 
+    left join
+        user u3_0 
+            on u3_0.id=r2_0.creator_id 
+    left join
+        user u4_0 
+            on u4_0.id=u1_0.user_id 
+    left join
+        meta_mask m3_0 
+            on m3_0.id=u4_0.meta_id 
+    where
+        u1_0.user_id=?
+2023-10-30 12:47:18 [http-nio-8080-exec-10] DEBUG org.hibernate.SQL - 
+    select
+        r1_0.id,
+        r1_0.created_at,
+        r1_0.deleted_at,
+        r1_0.description,
+        r1_0.role_name,
+        r1_0.updated_at,
+        r1_0.creator_id 
+    from
+        user_role u1_0 
+    join
+        role r1_0 
+            on r1_0.id=u1_0.role_id 
+    where
+        u1_0.user_id=?
+2023-10-30 12:47:18 [http-nio-8080-exec-10] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.birthday,
+        u1_0.country_code,
+        u1_0.created_at,
+        u1_0.deleted_at,
+        u1_0.employment_status,
+        u1_0.first_name,
+        u1_0.gender,
+        u1_0.id_number,
+        u1_0.id_type,
+        u1_0.kra_pin,
+        u1_0.last_name,
+        m1_0.id,
+        m1_0.client_id,
+        m1_0.created_at,
+        m1_0.deleted_at,
+        m1_0.flow_id,
+        m1_0.updated_at,
+        u1_0.middle_name,
+        u1_0.mobile,
+        u1_0.monthly_income,
+        u1_0.onboarding_request_id,
+        u1_0.simple,
+        u1_0.updated_at,
+        u2_0.id,
+        a1_0.id,
+        a1_0.address,
+        a1_0.birthday,
+        a1_0.country_code,
+        a1_0.created_at,
+        a1_0.deleted_at,
+        a1_0.employment_status,
+        a1_0.first_name,
+        a1_0.gender,
+        a1_0.id_number,
+        a1_0.id_type,
+        a1_0.kra_pin,
+        a1_0.last_name,
+        a1_0.meta_id,
+        a1_0.middle_name,
+        a1_0.mobile,
+        a1_0.monthly_income,
+        a1_0.onboarding_request_id,
+        a1_0.simple,
+        a1_0.updated_at,
+        u2_0.created_at,
+        u2_0.deleted_at,
+        u2_0.is_deactivated,
+        r1_0.id,
+        r1_0.created_at,
+        r1_0.deleted_at,
+        r1_0.description,
+        r1_0.role_name,
+        r1_0.updated_at,
+        r1_0.creator_id,
+        u2_0.role_id,
+        u2_0.updated_at,
+        u2_0.user_id 
+    from
+        user u1_0 
+    left join
+        meta_mask m1_0 
+            on m1_0.id=u1_0.meta_id 
+    left join
+        user_role u2_0 
+            on u1_0.id=u2_0.user_id 
+    left join
+        user a1_0 
+            on a1_0.id=u2_0.assigner_id 
+    left join
+        role r1_0 
+            on r1_0.id=u2_0.role_id 
+    where
+        u1_0.id=?
+2023-10-30 12:47:18 [http-nio-8080-exec-10] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        a1_0.id,
+        a1_0.address,
+        a1_0.birthday,
+        a1_0.country_code,
+        a1_0.created_at,
+        a1_0.deleted_at,
+        a1_0.employment_status,
+        a1_0.first_name,
+        a1_0.gender,
+        a1_0.id_number,
+        a1_0.id_type,
+        a1_0.kra_pin,
+        a1_0.last_name,
+        m1_0.id,
+        m1_0.client_id,
+        m1_0.created_at,
+        m1_0.deleted_at,
+        m1_0.flow_id,
+        m1_0.updated_at,
+        a1_0.middle_name,
+        a1_0.mobile,
+        a1_0.monthly_income,
+        a1_0.onboarding_request_id,
+        a1_0.simple,
+        a1_0.updated_at,
+        u2_0.id,
+        u2_0.assigner_id,
+        u2_0.created_at,
+        u2_0.deleted_at,
+        u2_0.is_deactivated,
+        u2_0.role_id,
+        u2_0.updated_at,
+        u2_0.user_id,
+        u1_0.created_at,
+        u1_0.deleted_at,
+        u1_0.is_deactivated,
+        r2_0.id,
+        r2_0.created_at,
+        r2_0.deleted_at,
+        r2_0.description,
+        r2_0.role_name,
+        r2_0.updated_at,
+        u3_0.id,
+        u3_0.address,
+        u3_0.birthday,
+        u3_0.country_code,
+        u3_0.created_at,
+        u3_0.deleted_at,
+        u3_0.employment_status,
+        u3_0.first_name,
+        u3_0.gender,
+        u3_0.id_number,
+        u3_0.id_type,
+        u3_0.kra_pin,
+        u3_0.last_name,
+        u3_0.meta_id,
+        u3_0.middle_name,
+        u3_0.mobile,
+        u3_0.monthly_income,
+        u3_0.onboarding_request_id,
+        u3_0.simple,
+        u3_0.updated_at,
+        u1_0.role_id,
+        u1_0.updated_at,
+        u4_0.id,
+        u4_0.address,
+        u4_0.birthday,
+        u4_0.country_code,
+        u4_0.created_at,
+        u4_0.deleted_at,
+        u4_0.employment_status,
+        u4_0.first_name,
+        u4_0.gender,
+        u4_0.id_number,
+        u4_0.id_type,
+        u4_0.kra_pin,
+        u4_0.last_name,
+        m3_0.id,
+        m3_0.client_id,
+        m3_0.created_at,
+        m3_0.deleted_at,
+        m3_0.flow_id,
+        m3_0.updated_at,
+        u4_0.middle_name,
+        u4_0.mobile,
+        u4_0.monthly_income,
+        u4_0.onboarding_request_id,
+        u4_0.simple,
+        u4_0.updated_at,
+        u1_0.user_id 
+    from
+        user_role u1_0 
+    left join
+        user a1_0 
+            on a1_0.id=u1_0.assigner_id 
+    left join
+        meta_mask m1_0 
+            on m1_0.id=a1_0.meta_id 
+    left join
+        user_role u2_0 
+            on a1_0.id=u2_0.user_id 
+    left join
+        role r2_0 
+            on r2_0.id=u1_0.role_id 
+    left join
+        user u3_0 
+            on u3_0.id=r2_0.creator_id 
+    left join
+        user u4_0 
+            on u4_0.id=u1_0.user_id 
+    left join
+        meta_mask m3_0 
+            on m3_0.id=u4_0.meta_id 
+    where
+        u1_0.user_id=?
+2023-10-30 12:47:19 [http-nio-8080-exec-10] DEBUG o.s.security.web.FilterChainProxy - Secured GET /wallet/transactionhistory
+2023-10-30 12:47:19 [http-nio-8080-exec-10] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.birthday,
+        u1_0.country_code,
+        u1_0.created_at,
+        u1_0.deleted_at,
+        u1_0.employment_status,
+        u1_0.first_name,
+        u1_0.gender,
+        u1_0.id_number,
+        u1_0.id_type,
+        u1_0.kra_pin,
+        u1_0.last_name,
+        u1_0.meta_id,
+        u1_0.middle_name,
+        u1_0.mobile,
+        u1_0.monthly_income,
+        u1_0.onboarding_request_id,
+        u1_0.simple,
+        u1_0.updated_at,
+        u2_0.user_id,
+        u2_0.id,
+        u2_0.created_at,
+        u2_0.deleted_at,
+        u2_0.updated_at,
+        w1_0.id,
+        w1_0.account_id,
+        w1_0.account_type,
+        w1_0.created_at,
+        w1_0.deleted_at,
+        w1_0.shortcode,
+        w1_0.updated_at 
+    from
+        user u1_0 
+    join
+        user_wallet u2_0 
+            on u1_0.id=u2_0.user_id 
+    join
+        wallet w1_0 
+            on w1_0.id=u2_0.wallet_id 
+    where
+        u1_0.id=?
+2023-10-30 12:47:19 [http-nio-8080-exec-10] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        a1_0.id,
+        a1_0.address,
+        a1_0.birthday,
+        a1_0.country_code,
+        a1_0.created_at,
+        a1_0.deleted_at,
+        a1_0.employment_status,
+        a1_0.first_name,
+        a1_0.gender,
+        a1_0.id_number,
+        a1_0.id_type,
+        a1_0.kra_pin,
+        a1_0.last_name,
+        m1_0.id,
+        m1_0.client_id,
+        m1_0.created_at,
+        m1_0.deleted_at,
+        m1_0.flow_id,
+        m1_0.updated_at,
+        a1_0.middle_name,
+        a1_0.mobile,
+        a1_0.monthly_income,
+        a1_0.onboarding_request_id,
+        a1_0.simple,
+        a1_0.updated_at,
+        u2_0.id,
+        u2_0.assigner_id,
+        u2_0.created_at,
+        u2_0.deleted_at,
+        u2_0.is_deactivated,
+        u2_0.role_id,
+        u2_0.updated_at,
+        u2_0.user_id,
+        u1_0.created_at,
+        u1_0.deleted_at,
+        u1_0.is_deactivated,
+        r2_0.id,
+        r2_0.created_at,
+        r2_0.deleted_at,
+        r2_0.description,
+        r2_0.role_name,
+        r2_0.updated_at,
+        u3_0.id,
+        u3_0.address,
+        u3_0.birthday,
+        u3_0.country_code,
+        u3_0.created_at,
+        u3_0.deleted_at,
+        u3_0.employment_status,
+        u3_0.first_name,
+        u3_0.gender,
+        u3_0.id_number,
+        u3_0.id_type,
+        u3_0.kra_pin,
+        u3_0.last_name,
+        u3_0.meta_id,
+        u3_0.middle_name,
+        u3_0.mobile,
+        u3_0.monthly_income,
+        u3_0.onboarding_request_id,
+        u3_0.simple,
+        u3_0.updated_at,
+        u1_0.role_id,
+        u1_0.updated_at,
+        u4_0.id,
+        u4_0.address,
+        u4_0.birthday,
+        u4_0.country_code,
+        u4_0.created_at,
+        u4_0.deleted_at,
+        u4_0.employment_status,
+        u4_0.first_name,
+        u4_0.gender,
+        u4_0.id_number,
+        u4_0.id_type,
+        u4_0.kra_pin,
+        u4_0.last_name,
+        m3_0.id,
+        m3_0.client_id,
+        m3_0.created_at,
+        m3_0.deleted_at,
+        m3_0.flow_id,
+        m3_0.updated_at,
+        u4_0.middle_name,
+        u4_0.mobile,
+        u4_0.monthly_income,
+        u4_0.onboarding_request_id,
+        u4_0.simple,
+        u4_0.updated_at,
+        u1_0.user_id 
+    from
+        user_role u1_0 
+    left join
+        user a1_0 
+            on a1_0.id=u1_0.assigner_id 
+    left join
+        meta_mask m1_0 
+            on m1_0.id=a1_0.meta_id 
+    left join
+        user_role u2_0 
+            on a1_0.id=u2_0.user_id 
+    left join
+        role r2_0 
+            on r2_0.id=u1_0.role_id 
+    left join
+        user u3_0 
+            on u3_0.id=r2_0.creator_id 
+    left join
+        user u4_0 
+            on u4_0.id=u1_0.user_id 
+    left join
+        meta_mask m3_0 
+            on m3_0.id=u4_0.meta_id 
+    where
+        u1_0.user_id=?
+2023-10-30 12:47:19 [http-nio-8080-exec-10] DEBUG org.hibernate.SQL - 
+    select
+        u1_0.id,
+        a1_0.id,
+        a1_0.address,
+        a1_0.birthday,
+        a1_0.country_code,
+        a1_0.created_at,
+        a1_0.deleted_at,
+        a1_0.employment_status,
+        a1_0.first_name,
+        a1_0.gender,
+        a1_0.id_number,
+        a1_0.id_type,
+        a1_0.kra_pin,
+        a1_0.last_name,
+        m1_0.id,
+        m1_0.client_id,
+        m1_0.created_at,
+        m1_0.deleted_at,
+        m1_0.flow_id,
+        m1_0.updated_at,
+        a1_0.middle_name,
+        a1_0.mobile,
+        a1_0.monthly_income,
+        a1_0.onboarding_request_id,
+        a1_0.simple,
+        a1_0.updated_at,
+        u2_0.id,
+        u2_0.assigner_id,
+        u2_0.created_at,
+        u2_0.deleted_at,
+        u2_0.is_deactivated,
+        u2_0.role_id,
+        u2_0.updated_at,
+        u2_0.user_id,
+        u1_0.created_at,
+        u1_0.deleted_at,
+        u1_0.is_deactivated,
+        r2_0.id,
+        r2_0.created_at,
+        r2_0.deleted_at,
+        r2_0.description,
+        r2_0.role_name,
+        r2_0.updated_at,
+        u3_0.id,
+        u3_0.address,
+        u3_0.birthday,
+        u3_0.country_code,
+        u3_0.created_at,
+        u3_0.deleted_at,
+        u3_0.employment_status,
+        u3_0.first_name,
+        u3_0.gender,
+        u3_0.id_number,
+        u3_0.id_type,
+        u3_0.kra_pin,
+        u3_0.last_name,
+        u3_0.meta_id,
+        u3_0.middle_name,
+        u3_0.mobile,
+        u3_0.monthly_income,
+        u3_0.onboarding_request_id,
+        u3_0.simple,
+        u3_0.updated_at,
+        u1_0.role_id,
+        u1_0.updated_at,
+        u4_0.id,
+        u4_0.address,
+        u4_0.birthday,
+        u4_0.country_code,
+        u4_0.created_at,
+        u4_0.deleted_at,
+        u4_0.employment_status,
+        u4_0.first_name,
+        u4_0.gender,
+        u4_0.id_number,
+        u4_0.id_type,
+        u4_0.kra_pin,
+        u4_0.last_name,
+        m3_0.id,
+        m3_0.client_id,
+        m3_0.created_at,
+        m3_0.deleted_at,
+        m3_0.flow_id,
+        m3_0.updated_at,
+        u4_0.middle_name,
+        u4_0.mobile,
+        u4_0.monthly_income,
+        u4_0.onboarding_request_id,
+        u4_0.simple,
+        u4_0.updated_at,
+        u1_0.user_id 
+    from
+        user_role u1_0 
+    left join
+        user a1_0 
+            on a1_0.id=u1_0.assigner_id 
+    left join
+        meta_mask m1_0 
+            on m1_0.id=a1_0.meta_id 
+    left join
+        user_role u2_0 
+            on a1_0.id=u2_0.user_id 
+    left join
+        role r2_0 
+            on r2_0.id=u1_0.role_id 
+    left join
+        user u3_0 
+            on u3_0.id=r2_0.creator_id 
+    left join
+        user u4_0 
+            on u4_0.id=u1_0.user_id 
+    left join
+        meta_mask m3_0 
+            on m3_0.id=u4_0.meta_id 
+    where
+        u1_0.user_id=?
+2023-10-30 12:49:29 [HikariPool-3 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-3 - Retrograde clock change detected (housekeeper delta=29s823ms), soft-evicting connections from pool.
+2023-10-30 13:08:40 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2023-10-30 13:08:40 [Thread-11] INFO  o.a.catalina.core.StandardService - Stopping service [Tomcat]
+2023-10-30 13:08:40 [Thread-11] INFO  o.a.c.c.C.[.[.[/konnect-wallet] - Destroying Spring FrameworkServlet 'dispatcherServlet'
+2023-10-30 13:08:41 [Thread-11] WARN  o.a.c.loader.WebappClassLoaderBase - The web application [konnect-wallet] appears to have started a thread named [reactor-http-nio-1] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ java.base@17.0.1/sun.nio.ch.KQueue.poll(Native Method)
+ java.base@17.0.1/sun.nio.ch.KQueueSelectorImpl.doSelect(KQueueSelectorImpl.java:122)
+ java.base@17.0.1/sun.nio.ch.SelectorImpl.lockAndDoSelect(SelectorImpl.java:129)
+ java.base@17.0.1/sun.nio.ch.SelectorImpl.select(SelectorImpl.java:146)
+ app//io.netty.channel.nio.SelectedSelectionKeySetSelector.select(SelectedSelectionKeySetSelector.java:68)
+ app//io.netty.channel.nio.NioEventLoop.select(NioEventLoop.java:879)
+ app//io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:526)
+ app//io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+ app//io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+ app//io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+ java.base@17.0.1/java.lang.Thread.run(Thread.java:833)
+2023-10-30 13:08:41 [Thread-11] WARN  o.a.c.loader.WebappClassLoaderBase - The web application [konnect-wallet] appears to have started a thread named [reactor-http-nio-2] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ java.base@17.0.1/sun.nio.ch.KQueue.poll(Native Method)
+ java.base@17.0.1/sun.nio.ch.KQueueSelectorImpl.doSelect(KQueueSelectorImpl.java:122)
+ java.base@17.0.1/sun.nio.ch.SelectorImpl.lockAndDoSelect(SelectorImpl.java:129)
+ java.base@17.0.1/sun.nio.ch.SelectorImpl.select(SelectorImpl.java:146)
+ app//io.netty.channel.nio.SelectedSelectionKeySetSelector.select(SelectedSelectionKeySetSelector.java:68)
+ app//io.netty.channel.nio.NioEventLoop.select(NioEventLoop.java:879)
+ app//io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:526)
+ app//io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+ app//io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+ app//io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+ java.base@17.0.1/java.lang.Thread.run(Thread.java:833)
+2023-10-30 13:08:41 [Thread-11] WARN  o.a.c.loader.WebappClassLoaderBase - The web application [konnect-wallet] appears to have started a thread named [reactor-http-nio-3] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ java.base@17.0.1/sun.nio.ch.KQueue.poll(Native Method)
+ java.base@17.0.1/sun.nio.ch.KQueueSelectorImpl.doSelect(KQueueSelectorImpl.java:122)
+ java.base@17.0.1/sun.nio.ch.SelectorImpl.lockAndDoSelect(SelectorImpl.java:129)
+ java.base@17.0.1/sun.nio.ch.SelectorImpl.select(SelectorImpl.java:146)
+ app//io.netty.channel.nio.SelectedSelectionKeySetSelector.select(SelectedSelectionKeySetSelector.java:68)
+ app//io.netty.channel.nio.NioEventLoop.select(NioEventLoop.java:879)
+ app//io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:526)
+ app//io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+ app//io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+ app//io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+ java.base@17.0.1/java.lang.Thread.run(Thread.java:833)
+2023-10-30 13:08:41 [Thread-11] WARN  o.a.c.loader.WebappClassLoaderBase - The web application [konnect-wallet] appears to have started a thread named [reactor-http-nio-4] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ java.base@17.0.1/sun.nio.ch.KQueue.poll(Native Method)
+ java.base@17.0.1/sun.nio.ch.KQueueSelectorImpl.doSelect(KQueueSelectorImpl.java:122)
+ java.base@17.0.1/sun.nio.ch.SelectorImpl.lockAndDoSelect(SelectorImpl.java:129)
+ java.base@17.0.1/sun.nio.ch.SelectorImpl.select(SelectorImpl.java:146)
+ app//io.netty.channel.nio.SelectedSelectionKeySetSelector.select(SelectedSelectionKeySetSelector.java:68)
+ app//io.netty.channel.nio.NioEventLoop.select(NioEventLoop.java:879)
+ app//io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:526)
+ app//io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+ app//io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+ app//io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+ java.base@17.0.1/java.lang.Thread.run(Thread.java:833)
+2023-10-30 13:08:41 [Thread-11] WARN  o.a.c.loader.WebappClassLoaderBase - The web application [konnect-wallet] appears to have started a thread named [reactor-http-nio-5] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ java.base@17.0.1/sun.nio.ch.KQueue.poll(Native Method)
+ java.base@17.0.1/sun.nio.ch.KQueueSelectorImpl.doSelect(KQueueSelectorImpl.java:122)
+ java.base@17.0.1/sun.nio.ch.SelectorImpl.lockAndDoSelect(SelectorImpl.java:129)
+ java.base@17.0.1/sun.nio.ch.SelectorImpl.select(SelectorImpl.java:146)
+ app//io.netty.channel.nio.SelectedSelectionKeySetSelector.select(SelectedSelectionKeySetSelector.java:68)
+ app//io.netty.channel.nio.NioEventLoop.select(NioEventLoop.java:879)
+ app//io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:526)
+ app//io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+ app//io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+ app//io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+ java.base@17.0.1/java.lang.Thread.run(Thread.java:833)
+2023-10-30 13:08:41 [Thread-11] WARN  o.a.c.loader.WebappClassLoaderBase - The web application [konnect-wallet] appears to have started a thread named [reactor-http-nio-6] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ java.base@17.0.1/sun.nio.ch.KQueue.poll(Native Method)
+ java.base@17.0.1/sun.nio.ch.KQueueSelectorImpl.doSelect(KQueueSelectorImpl.java:122)
+ java.base@17.0.1/sun.nio.ch.SelectorImpl.lockAndDoSelect(SelectorImpl.java:129)
+ java.base@17.0.1/sun.nio.ch.SelectorImpl.select(SelectorImpl.java:146)
+ app//io.netty.channel.nio.SelectedSelectionKeySetSelector.select(SelectedSelectionKeySetSelector.java:68)
+ app//io.netty.channel.nio.NioEventLoop.select(NioEventLoop.java:879)
+ app//io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:526)
+ app//io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+ app//io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+ app//io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+ java.base@17.0.1/java.lang.Thread.run(Thread.java:833)
+2023-10-30 13:08:41 [Thread-11] WARN  o.a.c.loader.WebappClassLoaderBase - The web application [konnect-wallet] appears to have started a thread named [reactor-http-nio-7] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ java.base@17.0.1/sun.nio.ch.KQueue.poll(Native Method)
+ java.base@17.0.1/sun.nio.ch.KQueueSelectorImpl.doSelect(KQueueSelectorImpl.java:122)
+ java.base@17.0.1/sun.nio.ch.SelectorImpl.lockAndDoSelect(SelectorImpl.java:129)
+ java.base@17.0.1/sun.nio.ch.SelectorImpl.select(SelectorImpl.java:146)
+ app//io.netty.channel.nio.SelectedSelectionKeySetSelector.select(SelectedSelectionKeySetSelector.java:68)
+ app//io.netty.channel.nio.NioEventLoop.select(NioEventLoop.java:879)
+ app//io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:526)
+ app//io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+ app//io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+ app//io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+ java.base@17.0.1/java.lang.Thread.run(Thread.java:833)
+2023-10-30 13:08:41 [Thread-11] WARN  o.a.c.loader.WebappClassLoaderBase - The web application [konnect-wallet] appears to have started a thread named [reactor-http-nio-8] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ java.base@17.0.1/sun.nio.ch.KQueue.poll(Native Method)
+ java.base@17.0.1/sun.nio.ch.KQueueSelectorImpl.doSelect(KQueueSelectorImpl.java:122)
+ java.base@17.0.1/sun.nio.ch.SelectorImpl.lockAndDoSelect(SelectorImpl.java:129)
+ java.base@17.0.1/sun.nio.ch.SelectorImpl.select(SelectorImpl.java:146)
+ app//io.netty.channel.nio.SelectedSelectionKeySetSelector.select(SelectedSelectionKeySetSelector.java:68)
+ app//io.netty.channel.nio.NioEventLoop.select(NioEventLoop.java:879)
+ app//io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:526)
+ app//io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+ app//io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+ app//io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+ java.base@17.0.1/java.lang.Thread.run(Thread.java:833)
+2023-10-30 13:08:41 [Thread-11] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2023-10-30 13:08:41 [Thread-11] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Shutdown initiated...
+2023-10-30 13:08:41 [Thread-11] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Shutdown completed.
+2023-10-30 13:08:42 [restartedMain] INFO  n.s.wallet.WalletApplication - Starting WalletApplication using Java 17.0.1 with PID 65346 (/Users/davidkiarie/Document/eclipse/wallet-backend/bin/main started by davidkiarie in /Users/davidkiarie/Document/eclipse/wallet-backend)
+2023-10-30 13:08:42 [restartedMain] INFO  n.s.wallet.WalletApplication - No active profile set, falling back to 1 default profile: "default"
+2023-10-30 13:08:42 [pool-6-thread-1] DEBUG n.s.wallet.provider.SmsManager - Candidate Provider found
+2023-10-30 13:08:43 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2023-10-30 13:08:43 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-10-30 13:08:43 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 65 ms. Found 14 JPA repository interfaces.
+2023-10-30 13:08:43 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2023-10-30 13:08:43 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2023-10-30 13:08:43 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.BankRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-30 13:08:43 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.CurrencyRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-30 13:08:43 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.OtpRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-30 13:08:43 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.PermissionRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-30 13:08:43 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.RolePermissionRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-30 13:08:43 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.RoleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-30 13:08:43 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.TransactionRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-30 13:08:43 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.UserPinRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-30 13:08:43 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-30 13:08:43 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.UserRoleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-30 13:08:43 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.UserWalletRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-30 13:08:43 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.WalletClientAccountRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-30 13:08:43 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.WalletClientRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-30 13:08:43 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.WalletRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-10-30 13:08:43 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 15 ms. Found 0 Redis repository interfaces.
+2023-10-30 13:08:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'jpa.named-queries#0' of type [org.springframework.data.repository.config.PropertiesBasedNamedQueriesFactoryBean] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-30 13:08:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'jpa.named-queries#0' of type [org.springframework.data.repository.core.support.PropertiesBasedNamedQueries] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-30 13:08:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.boot.autoconfigure.sql.init.DataSourceInitializationConfiguration' of type [org.springframework.boot.autoconfigure.sql.init.DataSourceInitializationConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-30 13:08:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.boot.autoconfigure.jdbc.DataSourceConfiguration$Hikari' of type [org.springframework.boot.autoconfigure.jdbc.DataSourceConfiguration$Hikari] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-30 13:08:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'spring.datasource-org.springframework.boot.autoconfigure.jdbc.DataSourceProperties' of type [org.springframework.boot.autoconfigure.jdbc.DataSourceProperties] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-30 13:08:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration$PooledDataSourceConfiguration' of type [org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration$PooledDataSourceConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-30 13:08:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'jdbcConnectionDetails' of type [org.springframework.boot.autoconfigure.jdbc.PropertiesJdbcConnectionDetails] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-30 13:08:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'dataSource' of type [com.zaxxer.hikari.HikariDataSource] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-30 13:08:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'spring.sql.init-org.springframework.boot.autoconfigure.sql.init.SqlInitializationProperties' of type [org.springframework.boot.autoconfigure.sql.init.SqlInitializationProperties] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-30 13:08:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'dataSourceScriptDatabaseInitializer' of type [org.springframework.boot.autoconfigure.sql.init.SqlDataSourceScriptDatabaseInitializer] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-30 13:08:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.boot.devtools.autoconfigure.DevToolsDataSourceAutoConfiguration' of type [org.springframework.boot.devtools.autoconfigure.DevToolsDataSourceAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-30 13:08:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'inMemoryDatabaseShutdownExecutor' of type [org.springframework.boot.devtools.autoconfigure.DevToolsDataSourceAutoConfiguration$NonEmbeddedInMemoryDatabaseShutdownExecutor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-30 13:08:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'spring.jpa-org.springframework.boot.autoconfigure.orm.jpa.JpaProperties' of type [org.springframework.boot.autoconfigure.orm.jpa.JpaProperties] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-30 13:08:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'spring.jpa.hibernate-org.springframework.boot.autoconfigure.orm.jpa.HibernateProperties' of type [org.springframework.boot.autoconfigure.orm.jpa.HibernateProperties] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-30 13:08:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.boot.autoconfigure.jdbc.metadata.DataSourcePoolMetadataProvidersConfiguration$HikariPoolDataSourceMetadataProviderConfiguration' of type [org.springframework.boot.autoconfigure.jdbc.metadata.DataSourcePoolMetadataProvidersConfiguration$HikariPoolDataSourceMetadataProviderConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-30 13:08:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'hikariPoolDataSourceMetadataProvider' of type [org.springframework.boot.autoconfigure.jdbc.metadata.DataSourcePoolMetadataProvidersConfiguration$HikariPoolDataSourceMetadataProviderConfiguration$$Lambda$743/0x0000000801146e10] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-30 13:08:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaConfiguration' of type [org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-30 13:08:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'jpaVendorAdapter' of type [org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-30 13:08:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'entityManagerFactoryBuilder' of type [org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-30 13:08:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'persistenceManagedTypes' of type [org.springframework.orm.jpa.persistenceunit.SimplePersistenceManagedTypes] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-10-30 13:08:45 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2023-10-30 13:08:45 [restartedMain] INFO  o.h.b.i.BytecodeProviderInitiator - HHH000021: Bytecode provider name : bytebuddy
+2023-10-30 13:08:45 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2023-10-30 13:08:45 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Starting...
+2023-10-30 13:08:45 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-4 - Added connection com.mysql.cj.jdbc.ConnectionImpl@39cd715c
+2023-10-30 13:08:45 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Start completed.
+2023-10-30 13:08:45 [restartedMain] INFO  o.h.b.i.BytecodeProviderInitiator - HHH000021: Bytecode provider name : bytebuddy
+2023-10-30 13:08:45 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2023-10-30 13:08:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table bank 
+       modify column created_at  datetime(6)
+2023-10-30 13:08:46 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table bank 
+       modify column deleted_at  datetime(6)
+2023-10-30 13:08:46 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table bank 
+       modify column updated_at  datetime(6)
+2023-10-30 13:08:47 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table currency 
+       modify column created_at  datetime(6)
+2023-10-30 13:08:48 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table currency 
+       modify column deleted_at  datetime(6)
+2023-10-30 13:08:48 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table currency 
+       modify column updated_at  datetime(6)
+2023-10-30 13:08:48 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table device 
+       modify column created_at  datetime(6)
+2023-10-30 13:08:48 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table device 
+       modify column deleted_at  datetime(6)
