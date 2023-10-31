@@ -230,6 +230,7 @@ public class UserService extends RestClientService implements UserDetailsService
 			Map<String, String> map = new HashMap<String, String>();
 			map.put("message", "Account State Valid");
 			map.put("success", "true");
+			map.put("code", "KWEC000");
 			return ResponseEntity.ok(map);
 		} else {
 			Map<String, String> map = new HashMap<String, String>();

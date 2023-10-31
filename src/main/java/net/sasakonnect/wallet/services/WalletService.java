@@ -645,7 +645,9 @@ public class WalletService extends JwtService {
 			map.put("success", "false");
 
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(map);
-		} else if (res.getStatusCode() == HttpStatus.OK) {
+		}
+
+		else if (res.getStatusCode() == HttpStatus.OK) {
 			return res;
 		} else {
 			return res;
