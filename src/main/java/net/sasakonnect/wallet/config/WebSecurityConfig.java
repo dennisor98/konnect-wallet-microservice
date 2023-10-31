@@ -189,24 +189,4 @@ public class WebSecurityConfig {
 		return objectMapper;
 	}
 
-//	@Bean
-//	FirebaseWrapper getFirebaseBean() {
-//		FirebaseOptions options;
-//
-//		// Check if the file exists
-//		Resource resource = resourceLoader.getResource("classpath:" + firebaseconfig_file);
-//
-//		if (!resource.exists()) {
-//			throw new RuntimeException("Firebase service account JSON file not found: " + firebaseconfig_file);
-//		}
-//
-//		try (InputStream serviceAccount = resource.getInputStream()) {
-//			options = FirebaseOptions.builder().setCredentials(GoogleCredentials.fromStream(serviceAccount)).build();
-//			return FirebaseWrapper.builder().firebaseApp(FirebaseApp.initializeApp(options)).build();
-//		} catch (IOException e) {
-//			// Handle the exception here, e.g., log the error or throw a custom exception
-//			e.printStackTrace();
-//			throw new RuntimeException("Error initializing Firebase", e);
-//		}
-//	}
 }
