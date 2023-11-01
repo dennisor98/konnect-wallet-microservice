@@ -403,10 +403,10 @@ public class WalletService extends JwtService {
 	}
 
 	private Object callBackContentResolver(JsonObject body) {
-		var notification_Type = body.get("notificationType").getAsString();
-		var params = body.getAsJsonObject("params");
-
 		try {
+			var notification_Type = body.get("notificationType").getAsString();
+			var params = body.getAsJsonObject("params");
+
 			NotificationBody notificationBody = new Gson().fromJson(params, NotificationBody.class);
 
 			if (notification_Type.equalsIgnoreCase(NotificationType.ONBOARD.getCode())) {
@@ -483,7 +483,7 @@ public class WalletService extends JwtService {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("message", "Got You!");
 		map.put("success", true);
-		return ResponseEntity.status(HttpStatus.OK).body(map);
+		return ResponseEntity.status(HttpStatus.OK).body("ok");
 	}
 
 	public Object confirmOnboardingOtp(@Valid OnboardingOtp otp) {
