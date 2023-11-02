@@ -26,7 +26,7 @@ public class UserLogin {
 	@Schema(hidden = true) // Exclude this property from documentation
 
 	public String getFullPhone() {
-		return this.countryCode + this.phoneNumber;
+		return this.countryCode + this.getSerchablePhone();
 	}
 
 	public String getSerchablePhone() {

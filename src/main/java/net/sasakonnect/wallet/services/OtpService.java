@@ -33,6 +33,7 @@ public class OtpService {
 
 	public String canSendSms(String phone) {
 		var phone_length = phone.length();
+		var original_phone = phone;
 		if (phone_length > 9) {
 			phone = phone.substring(phone_length - 9);
 		}
@@ -42,7 +43,7 @@ public class OtpService {
 			return "Phone number entered is wrong";
 		}
 
-		Optional<Otp> smsOptional = otpRepository.findFirstByPhoneNumberOrderByCreatedAtDesc(phone);
+		Optional<Otp> smsOptional = otpRepository.findFirstByPhoneNumberOrderByCreatedAtDesc(original_phone);
 
 		if (smsOptional.isPresent()) {
 			System.out.println(smsOptional.get().getHash());
