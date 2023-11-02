@@ -103,7 +103,7 @@ public class UserService extends RestClientService implements UserDetailsService
 
 	public ResponseEntity<ObjectNode> userLogin(UserLogin userLogin) {
 
-		var user = this.userRepository.findByMobileAndCountryCode(userLogin.getPhoneNumber(),
+		var user = this.userRepository.findByMobileAndCountryCode(userLogin.getSerchablePhone(),
 				Integer.valueOf(userLogin.getCountryCode()));
 
 		if (user.isEmpty()) {

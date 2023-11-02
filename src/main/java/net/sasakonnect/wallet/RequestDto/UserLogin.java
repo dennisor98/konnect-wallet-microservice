@@ -29,4 +29,11 @@ public class UserLogin {
 		return this.countryCode + this.phoneNumber;
 	}
 
+	public String getSerchablePhone() {
+		var phone_length = phoneNumber.length();
+		if (phone_length > 9) {
+			return phoneNumber.substring(phone_length - 9);
+		}
+		return this.phoneNumber;
+	}
 }

@@ -11,10 +11,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.domain.Otp;
 import net.sasakonnect.wallet.repository.OtpRepository;
 
 @Service
+@Slf4j
 public class OtpService {
 
 	private final OtpRepository otpRepository;
@@ -30,6 +32,11 @@ public class OtpService {
 	}
 
 	public String canSendSms(String phone) {
+		var phone_length = phone.length();
+		if (phone_length > 9) {
+			phone = phone.substring(phone_length - 9);
+		}
+		log.debug(phone);
 		String phoneRegex = "^(?:254|\\+254|0)?([17][0-9]{8})$";
 		if (!Pattern.matches(phoneRegex, phone)) {
 			return "Phone number entered is wrong";

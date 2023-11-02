@@ -138,7 +138,7 @@ public class WebSecurityConfig {
 
 	@Bean
 	OpenAPI openApiInformation() {
-		Server localServer = new Server().url("http://localhost:8080/konnect-wallet")
+		Server localServer = new Server().url("http://localhost:8081/konnect-wallet")
 				.description("Localhost Server URL");
 		Server gatewayServer = new Server().url("https://gw.sasakonnect.net/konnect-wallet")
 				.description("Gateway Server Server URL(Dev)");
