@@ -333,10 +333,11 @@ public class WalletService extends JwtService {
 					.middleName(easyOnboarding.getMiddleName()).lastName(easyOnboarding.getLastName())
 					.birthday(easyOnboarding.parseBithDay()).address(easyOnboarding.getAddress())
 					.gender(easyOnboarding.getGenderVerbal())
-					.countryCode(Integer.parseInt(easyOnboarding.getCountryCode())).mobile(easyOnboarding.getMobile())
-					.idType(easyOnboarding.getIdTypeEnum()).monthlyIncome(easyOnboarding.monthlyIncomeType())
-					.kraPin(easyOnboarding.getKraPin()).employmentStatus(easyOnboarding.getEmploymentStatusType())
-					.idNumber(easyOnboarding.getIdNumber()).build();
+					.countryCode(Integer.parseInt(easyOnboarding.getCountryCode()))
+					.mobile(easyOnboarding.getSerchablePhone()).idType(easyOnboarding.getIdTypeEnum())
+					.monthlyIncome(easyOnboarding.monthlyIncomeType()).kraPin(easyOnboarding.getKraPin())
+					.employmentStatus(easyOnboarding.getEmploymentStatusType()).idNumber(easyOnboarding.getIdNumber())
+					.build();
 
 			final User savedUser = this.userService.createUser(user);
 			savedUser.setPins(null);

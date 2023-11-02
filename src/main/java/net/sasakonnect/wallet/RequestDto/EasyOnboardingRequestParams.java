@@ -166,4 +166,12 @@ public class EasyOnboardingRequestParams {
 		// TODO Auto-generated method stub
 		return EmploymentStatus.UNEMPLOYED;
 	}
+
+	public String getSerchablePhone() {
+		var phone_length = mobile.length();
+		if (phone_length > 9) {
+			return mobile.substring(phone_length - 9);
+		}
+		return this.mobile;
+	}
 }
