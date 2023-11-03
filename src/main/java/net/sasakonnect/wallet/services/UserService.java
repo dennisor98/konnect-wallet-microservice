@@ -404,7 +404,7 @@ public class UserService extends RestClientService implements UserDetailsService
 
 	@Transactional
 	public void deletUserByOnboardingRequestId(String onboardingRequestId) {
-		var user = this.userRepository.findByByOnboardingRequestId(onboardingRequestId);
+		var user = this.userRepository.findByOnboardingRequestId(onboardingRequestId);
 		if (user.isPresent()) {
 			this.userPinRepository.deleteByUser_Id(user.get().getId());
 			this.userRepository.deleteByOnboardingRequestId(onboardingRequestId);
