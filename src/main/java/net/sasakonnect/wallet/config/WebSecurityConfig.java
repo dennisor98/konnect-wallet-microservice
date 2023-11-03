@@ -99,8 +99,8 @@ public class WebSecurityConfig {
 				"/swagger-resources/**", // Swagger resources like JS and CSS
 				"/webjars/**").permitAll()
 
-				.requestMatchers("/user/userLogin", "/user/confirmOtp", "/konnect/callBack").permitAll()
-				.requestMatchers("/wallet").permitAll().anyRequest().authenticated()
+				.requestMatchers("/user/userLogin", "/user/confirmOtp", "/konnect/callBack", "/user/refresh/token")
+				.permitAll().requestMatchers("/wallet").permitAll().anyRequest().authenticated()
 
 		// require authentication for any endpoint that's not
 		// whitelisted
@@ -160,7 +160,7 @@ public class WebSecurityConfig {
 
 		)
 
-				.info(info).addServersItem(gatewayServer).addServersItem(nginxServer).addServersItem(localServer);
+				.info(info).addServersItem(nginxServer).addServersItem(gatewayServer).addServersItem(localServer);
 
 		return openApi;
 	}
@@ -172,10 +172,21 @@ public class WebSecurityConfig {
 	@Bean
 	GlobalOpenApiCustomizer globalOpenApiConstomizer() {
 		Object example_token = "bearertoken";
-		return openApi -> openApi.getPaths().values().stream().flatMap(pathItem -> pathItem.readOperations().stream())
-				.forEach(operation -> operation
-						.addParametersItem(new HeaderParameter().name(KonnectHeader.X_TRANSACTION_HEADER.toString())
-								.allowEmptyValue(false).example(example_token).required(false)));
+		return openApi -> {
+			openApi.getPaths().forEach((path, pathItem) -> {
+				pathItem.readOperations().forEach(operation -> {
+					if ("/user/refresh/token".equals(path)) {
+						operation.addParametersItem(
+								new HeaderParameter().name(KonnectHeader.REFRESH_TOKEN_HEADER.toString())
+										.allowEmptyValue(false).example("ej....").required(false));
+						return;
+					}
+					operation
+							.addParametersItem(new HeaderParameter().name(KonnectHeader.X_TRANSACTION_HEADER.toString())
+									.allowEmptyValue(false).example(example_token).required(false));
+				});
+			});
+		};
 
 	}
 

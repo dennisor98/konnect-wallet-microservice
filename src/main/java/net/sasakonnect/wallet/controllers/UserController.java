@@ -19,6 +19,7 @@ import jakarta.validation.Valid;
 import net.sasakonnect.wallet.CustomController;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
 import net.sasakonnect.wallet.RequestDto.UserLogin;
+import net.sasakonnect.wallet.annotations.RefreshMiddleware;
 import net.sasakonnect.wallet.provider.FirebaseMessage;
 import net.sasakonnect.wallet.provider.FirebaseWrapper;
 import net.sasakonnect.wallet.services.TransactionService;
@@ -58,6 +59,13 @@ public class UserController {
 	@PostMapping("confirmOtp")
 	public ResponseEntity confirmOtp(@Valid @RequestBody ConfirmOtp confirmOtp) {
 		return userService.verifyOtp(confirmOtp);
+	}
+
+	@PostMapping("refresh/token")
+	@RefreshMiddleware()
+	public ResponseEntity refreshToken() {
+
+		return userService.createRefreshToken();
 	}
 
 	@GetMapping("financialContact")

@@ -134,6 +134,7 @@ public class UserService extends RestClientService implements UserDetailsService
 		return true;
 	}
 
+	@Transactional
 	public ResponseEntity<Object> verifyOtp(@Valid ConfirmOtp confirmOtp) {
 		var opt = this.smsService.verifyOtp(confirmOtp);
 		if (opt.isPresent()) {
@@ -430,5 +431,21 @@ public class UserService extends RestClientService implements UserDetailsService
 //		// TODO Auto-generated method stub
 //
 //	}
+
+	public ResponseEntity createRefreshToken() {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		var token = this.jwtService.generateToken(user);
+		var refresh = this.jwtService.generateRefreshToken(user);
+
+		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> payload = new HashMap<String, Object>();
+		payload.put("token", token);
+		payload.put("refreshToken", refresh);
+
+		map.put("payload", payload);
+
+		map.put("success", false);
+		return ResponseEntity.status(HttpStatus.OK).body(map);
+	}
 
 }

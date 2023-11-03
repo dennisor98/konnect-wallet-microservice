@@ -16,10 +16,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
+import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import net.sasakonnect.wallet.enums.JwtType;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.tools.JwtService;
 
@@ -32,7 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter implements Han
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-			throws ServletException, IOException {
+			throws ServletException, IOException, UnsupportedJwtException {
 		System.out.println("hello");
 		String authHeader = request.getHeader("Authorization");
 		String token = null;
@@ -41,10 +43,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter implements Han
 			token = authHeader.substring(7);
 			if (token != null) {
 				try {
-					id = jwtService.extractUsername(token);
+					id = jwtService.extractUsername(token, JwtType.ACCESS_TOKEN);
 
+				} catch (UnsupportedJwtException e) {
+					throw e;
 				} catch (Exception e) {
-					e.printStackTrace();
+					throw e;
 				}
 
 			}
@@ -55,7 +59,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter implements Han
 			try {
 //				Optional<User> user = this.userService.findUserWallet(id);
 				UserDetails userDetails = userService.loadUserByUsername(id);
-				if (userDetails != null && this.jwtService.validateToken(token, userDetails)) {
+				if (userDetails != null && this.jwtService.validateToken(token, userDetails, JwtType.ACCESS_TOKEN)) {
 					System.out.println("this is do internal");
 
 					UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
@@ -97,7 +101,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter implements Han
 			try {
 //				Optional<User> user = this.userService.findUserWallet(id);
 				UserDetails userDetails = userService.loadUserByUsername(id);
-				if (userDetails != null && this.jwtService.validateToken(token, userDetails)) {
+				if (userDetails != null && this.jwtService.validateToken(token, userDetails, JwtType.ACCESS_TOKEN)) {
 					System.out.println("this is do internal");
 					attributes.put("principal", userDetails);
 					return true;

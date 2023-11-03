@@ -100,7 +100,7 @@ public class OtpService {
 		// TODO Auto-generated method stub
 		var otp = otpRepository.findByHashAndCodeWithUser(hash, code);
 		System.out.print("otp is present" + otp.isPresent());
-		if (otp.isPresent() && !otp.isEmpty()) {
+		if (otp.isPresent()) {
 
 			otp.get().setDeletedAt(new Date());
 
@@ -110,4 +110,5 @@ public class OtpService {
 			return Optional.empty();
 		}
 	}
+
 }

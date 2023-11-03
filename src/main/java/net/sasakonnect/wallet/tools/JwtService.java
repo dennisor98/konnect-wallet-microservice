@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import javax.crypto.spec.SecretKeySpec;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -15,10 +16,20 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.UnsupportedJwtException;
+import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.enums.JwtType;
 
+@Slf4j
 @Service
 public class JwtService {
+	@Value("${JWT_EXPIRY_TIME:5184000}")
+	Long jwtExpiryTime;
+
+	@Value("${REFRESH_JWT_EXPIRY_TIME:604800}")
+	Long jwtRefreshExpiryTime;
+
 	byte[] decodedKey = Base64.getDecoder().decode("579e6ba03d08e5f57c4ec2dd9b4a8ea9ac3168f5518d1909206e46f405f32a49");
 	SecretKeySpec secretKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "HMACSHA256");
 
@@ -26,9 +37,13 @@ public class JwtService {
 		try {
 			Map<String, Object> claims = new HashMap<>();
 			claims.put("id", user.getId());
+			claims.put("token_type", "access_token");
+
 			claims.put("firstName", user.getFirstName());
 			return Jwts.builder().setClaims(claims).setSubject(user.getId().toString()).setIssuedAt(new Date())
-					.setExpiration(new Date(System.currentTimeMillis() + 864000000))// 10 days validity
+					.setExpiration(new Date(System.currentTimeMillis() + jwtExpiryTime))// 10
+																						// days
+																						// validity
 					.setId(UUID.randomUUID().toString())
 
 					.signWith(secretKey, SignatureAlgorithm.HS256).compact();
@@ -44,6 +59,8 @@ public class JwtService {
 		try {
 			Map<String, Object> claims = new HashMap<>();
 			claims.put("id", user.getId());
+			claims.put("token_type", "access_token");
+
 			claims.put("firstName", user.getFirstName());
 			return Jwts.builder().setClaims(claims).setSubject(user.getId().toString()).setIssuedAt(new Date())
 					.setExpiration(new Date(System.currentTimeMillis() + 60000))// 10 days validity
@@ -62,9 +79,10 @@ public class JwtService {
 		try {
 			Map<String, Object> claims = new HashMap<>();
 			claims.put("id", user.getId());
+			claims.put("token_type", "refresh_token");
 			claims.put("firstName", user.getFirstName());
 			return Jwts.builder().setClaims(claims).setSubject(user.getId().toString()).setIssuedAt(new Date())
-					.setExpiration(new Date(System.currentTimeMillis() + 10000))// 10 days validity
+					.setExpiration(new Date(System.currentTimeMillis() + jwtRefreshExpiryTime))// validity
 					.setId(UUID.randomUUID().toString())
 
 					.signWith(secretKey, SignatureAlgorithm.HS256).compact();
@@ -90,10 +108,45 @@ public class JwtService {
 
 	}
 
+	public boolean validateToken(String token, UserDetails userDetails, JwtType jwt) {
+		try {
+			final String username = extractUsername(token, jwt);
+			System.out.println(username);
+			System.out.println(userDetails.getUsername());
+			User user = (User) userDetails;
+			return (username.equals(user.getId()) && !isTokenExpired(token));
+		} catch (MalformedJwtException e) {
+			e.printStackTrace();
+		}
+		return false;
+
+	}
+
 	public String extractUsername(String token) throws MalformedJwtException {
 		try {
 			if (Jwts.parserBuilder().setSigningKey(secretKey).build().isSigned(token)) {
 				Claims claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
+
+				return claims.getSubject();
+
+			} else {
+				return null;
+			}
+
+		} catch (MalformedJwtException e) {
+			throw e;
+		}
+
+	}
+
+	public String extractUsername(String token, JwtType jwt) throws MalformedJwtException, UnsupportedJwtException {
+		try {
+			if (Jwts.parserBuilder().setSigningKey(secretKey).build().isSigned(token)) {
+
+				Claims claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
+				if (claims.get("token_type") == jwt.getToken()) {
+					throw new UnsupportedJwtException("jwt supplied is not suppored ");
+				}
 				return claims.getSubject();
 
 			} else {
