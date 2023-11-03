@@ -68,6 +68,7 @@ public class UserService extends RestClientService implements UserDetailsService
 	private UserRoleRepository userRoleRepository;
 	@Autowired
 	private UserPinRepository userPinRepository;
+
 	@Autowired
 	private RoleRepository roleRepository;
 	@Autowired
@@ -401,8 +402,14 @@ public class UserService extends RestClientService implements UserDetailsService
 
 	}
 
+	@Transactional
 	public void deletUserByOnboardingRequestId(String onboardingRequestId) {
-		this.userRepository.deleteByOnboardingRequestId(onboardingRequestId);
+		var user = this.userRepository.findByByOnboardingRequestId(onboardingRequestId);
+		if (user.isPresent()) {
+			this.userPinRepository.deleteByUser_Id(user.get().getId());
+			this.userRepository.deleteByOnboardingRequestId(onboardingRequestId);
+
+		}
 		// TODO Auto-generated method stub
 
 	}
