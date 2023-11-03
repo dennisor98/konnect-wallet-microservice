@@ -25,7 +25,8 @@ wallet.log.*
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
-
+wallet.log.*
+wallet.log
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
