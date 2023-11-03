@@ -1,5 +1,6 @@
 package net.sasakonnect.wallet.services;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,5 +28,10 @@ public class PermissionService {
 			// Permission does not exist, save the provided permission
 			return permissionRepository.save(permission);
 		}
+	}
+
+	public List<Permission> findAll() {
+		// TODO Auto-generated method stub
+		return this.permissionRepository.findAll();
 	}
 }

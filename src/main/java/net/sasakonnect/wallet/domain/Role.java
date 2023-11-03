@@ -8,10 +8,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import lombok.Builder;
 import lombok.Data;
 
 @Entity
 @Data
+@Builder
 public class Role extends BaseWalletDomain implements Serializable {
 
 	@Column(name = "role_name", unique = true)

@@ -1,6 +1,7 @@
 package net.sasakonnect.wallet.repository;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -21,4 +22,7 @@ public interface RoleRepository extends JpaRepository<Role, String> {
 	@Query("INSERT INTO Role r (r.roleName) SELECT :name FROM Role r WHERE NOT EXISTS (SELECT 1 FROM Role r2 WHERE r2.roleName IN :names)")
 
 	void insertRoles(@Param("names") Collection<String> names);
+
+	Optional<Role> findByRoleName(String roleName);
+
 }

@@ -1,7 +1,10 @@
 package net.sasakonnect.wallet.jobs;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -13,10 +16,18 @@ import net.sasakonnect.wallet.constant.GlobalPermissionConstants;
 import net.sasakonnect.wallet.domain.Bank;
 import net.sasakonnect.wallet.domain.Currency;
 import net.sasakonnect.wallet.domain.Permission;
+import net.sasakonnect.wallet.domain.Role;
+import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.enums.EmploymentStatus;
+import net.sasakonnect.wallet.enums.Gender;
+import net.sasakonnect.wallet.enums.IdType;
+import net.sasakonnect.wallet.enums.MonthlyIncome;
 import net.sasakonnect.wallet.repository.BankRepository;
 import net.sasakonnect.wallet.repository.CurrencyRepository;
 import net.sasakonnect.wallet.services.ChatService;
 import net.sasakonnect.wallet.services.PermissionService;
+import net.sasakonnect.wallet.services.RoleService;
+import net.sasakonnect.wallet.services.UserService;
 
 @Component
 public class AppBootLoader implements ApplicationListener<ApplicationReadyEvent> {
@@ -259,18 +270,42 @@ public class AppBootLoader implements ApplicationListener<ApplicationReadyEvent>
 	CurrencyRepository currencyRepository;
 	@Autowired
 	BankRepository bankRepository;
+	@Autowired
+	UserService userService;
+	@Autowired
+	RoleService roleService;
 
 	@Override
 	@Transactional
 	public void onApplicationEvent(ApplicationReadyEvent event) {
+		long fortyYearsInMilliseconds = 40L * 365 * 24 * 60 * 60 * 1000;
+
 		var permssions = GlobalPermissionConstants.scan();
 		permssions.forEach((permmsion, desc) -> {
 			var permission = Permission.builder().description(desc).name(permmsion).build();
 			this.permissionService.insertPermissionIfNotExistsOrUpdateDescription(permission);
 		});
+		Optional<User> user = this.userService.findUserByPhoneNumber("7999999999");
+		if (user.isEmpty()) {
+			var u = User.builder().firstName("AI").lastName("Billfold").middleName("Buddy").address("Zimmerman")
+					.birthday(new Date(fortyYearsInMilliseconds)).employmentStatus(EmploymentStatus.OTHERS)
+					.countryCode(254).gender(Gender.FEMALE).idNumber("00000000").idType(IdType.KENYA_ID)
+					.kraPin("A0000000000").mobile("7999999999").onboardingRequestId("0000000000000000000")
+					.monthlyIncome(MonthlyIncome.TWENTY_FIVE_THOUSAND_AND_ABOVE)
+
+					.build();
+			user = Optional.of(this.userService.createUser(u));
+		}
+
 		// this.currencyRepository.deleteAll();
 		// this.currencyRepository.saveAll(currencyEntities);
 		this.bankRepository.saveAll(this.banks);
+		var role = Role.builder().roleName("SUPER_ADMIN").description("Has All permermission in the system")
+				.user(user.get()).build();
+		var savedRole = this.roleService.insertRole(role);
+		var allpermsions = this.permissionService.findAll().stream().map((data) -> data.getId())
+				.collect(Collectors.toList());
+		this.roleService.insertPermissionsNotAttachedToRole(savedRole, user.get(), allpermsions);
 		// Your custom logic here
 
 	}
