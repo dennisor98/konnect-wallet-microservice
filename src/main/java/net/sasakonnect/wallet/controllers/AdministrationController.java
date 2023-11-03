@@ -14,9 +14,11 @@ import jakarta.validation.Valid;
 import net.sasakonnect.wallet.CustomController;
 import net.sasakonnect.wallet.RequestDto.WalletClientAccountDto;
 import net.sasakonnect.wallet.RequestDto.WalletClientDTO;
+import net.sasakonnect.wallet.RequestDto.admin.CheckUserAccount;
 import net.sasakonnect.wallet.annotations.RequirePermission;
 import net.sasakonnect.wallet.constant.GlobalPermissionConstants;
 import net.sasakonnect.wallet.services.WalletClientService;
+import net.sasakonnect.wallet.services.WalletService;
 
 @RequestMapping("/administration")
 @Tag(name = "Administration", description = "Back Office  routes")
@@ -24,6 +26,8 @@ import net.sasakonnect.wallet.services.WalletClientService;
 public class AdministrationController {
 	@Autowired
 	WalletClientService walletClientService;
+	@Autowired
+	WalletService walletService;
 
 	@GetMapping("/upload/app")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CreateSuperApp.PERMISSION + "')")
@@ -46,5 +50,12 @@ public class AdministrationController {
 	@RequirePermission(GlobalPermissionConstants.CreateWalletClient.PERMISSION)
 	public Object attachPaymentAccount(@Valid @RequestBody() WalletClientAccountDto walletClientAccount) {
 		return this.walletClientService.createWalletClientAccount(walletClientAccount);
+	}
+
+	@PostMapping("/check/account/status")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION)
+	public Object checkUserAccountStatus(@Valid @RequestBody() CheckUserAccount checkUserAccount) {
+		return this.walletService.checkUserAccountStatus(checkUserAccount);
 	}
 }
