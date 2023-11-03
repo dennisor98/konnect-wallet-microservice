@@ -29,6 +29,7 @@ public class UserLogin {
 		return this.countryCode + this.getSerchablePhone();
 	}
 
+	@Schema(hidden = true)
 	public String getSerchablePhone() {
 		var phone_length = phoneNumber.length();
 		if (phone_length > 9) {
