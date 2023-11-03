@@ -41,6 +41,7 @@ import net.sasakonnect.wallet.RequestDto.PayUtility;
 import net.sasakonnect.wallet.RequestDto.SdkPayDto;
 import net.sasakonnect.wallet.RequestDto.TransactionPeriod;
 import net.sasakonnect.wallet.RequestDto.TransferToMpesa;
+import net.sasakonnect.wallet.RequestDto.admin.CheckUserAccount;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
 import net.sasakonnect.wallet.domain.User;
@@ -887,5 +888,35 @@ public class WalletService extends JwtService {
 
 		// TODO Auto-generated method stub
 
+	}
+
+	public Object checkUserAccountStatus(@Valid CheckUserAccount checkUserAccount) {
+		var results = this.userService.findUserByPhoneNumber(checkUserAccount.getPhoneNumber());
+		if (results.isPresent()) {
+			var reqId = new HashMap<String, Object>();
+			reqId.put("userId", results.get().getId());
+			var reqs = requestSigner.signRequest(reqId);
+
+			Mono<String> responseMono = this.bankClientBean.webClient.post()
+					.uri(ChoiceEndpointsConstants.GET_WALLET_INFO).contentType(MediaType.APPLICATION_JSON)
+					.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+					.bodyToMono(String.class);
+
+			String responseJson = responseMono.block();
+
+			if (responseJson != null) {
+				return new Gson().fromJson(responseJson, Object.class);
+
+			}
+		} else {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("message", "user with phone " + checkUserAccount.getPhoneNumber() + "not found");
+
+			map.put("success", "false");
+
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(map);
+		}
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

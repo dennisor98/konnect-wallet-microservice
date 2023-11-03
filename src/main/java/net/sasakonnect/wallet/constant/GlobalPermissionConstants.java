@@ -51,6 +51,21 @@ public final class GlobalPermissionConstants {
 		}
 	}
 
+	public static class CheckUserAccountStatus extends PermissionEntry {
+		public static final String PERMISSION = "can.check.user.account";
+		public static final String DESCRIPTION = "can check account status eg.why account was rejected";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
+
 	public static Map<String, String> scan() {
 		Class<?>[] innerClasses = GlobalPermissionConstants.class.getDeclaredClasses();
 

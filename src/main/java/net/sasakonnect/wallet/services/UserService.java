@@ -448,4 +448,10 @@ public class UserService extends RestClientService implements UserDetailsService
 		return ResponseEntity.status(HttpStatus.OK).body(map);
 	}
 
+	public Optional<User> findUserByPhoneNumber(String phoneNumber) {
+		return this.userRepository.findByMobileAndCountryCode(phoneNumber, 254);
+		// TODO Auto-generated method stub
+
+	}
+
 }
