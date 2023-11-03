@@ -65058,3 +65058,203 @@ Caused by: java.lang.InterruptedException: null
     where
         u1_0.user_id=?
 2023-11-03 16:12:24 [http-nio-8081-exec-3] DEBUG o.s.security.web.FilterChainProxy - Secured POST /user/refresh/token
+2023-11-03 16:14:44 [restartedMain] INFO  n.s.wallet.WalletApplication - Starting WalletApplication using Java 17.0.1 with PID 81497 (/Users/davidkiarie/Document/eclipse/wallet-backend/bin/main started by davidkiarie in /Users/davidkiarie/Document/eclipse/wallet-backend)
+2023-11-03 16:14:44 [restartedMain] INFO  n.s.wallet.WalletApplication - The following 1 profile is active: "dev"
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 24 ms. Found 14 JPA repository interfaces.
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.BankRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.CurrencyRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.OtpRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.PermissionRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.RolePermissionRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.RoleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.TransactionRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.UserPinRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.UserRoleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.UserWalletRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.WalletClientAccountRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.WalletClientRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface net.sasakonnect.wallet.repository.WalletRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 5 ms. Found 0 Redis repository interfaces.
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'jpa.named-queries#2' of type [org.springframework.data.repository.config.PropertiesBasedNamedQueriesFactoryBean] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'jpa.named-queries#2' of type [org.springframework.data.repository.core.support.PropertiesBasedNamedQueries] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.boot.autoconfigure.sql.init.DataSourceInitializationConfiguration' of type [org.springframework.boot.autoconfigure.sql.init.DataSourceInitializationConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.boot.autoconfigure.jdbc.DataSourceConfiguration$Hikari' of type [org.springframework.boot.autoconfigure.jdbc.DataSourceConfiguration$Hikari] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'spring.datasource-org.springframework.boot.autoconfigure.jdbc.DataSourceProperties' of type [org.springframework.boot.autoconfigure.jdbc.DataSourceProperties] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration$PooledDataSourceConfiguration' of type [org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration$PooledDataSourceConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'jdbcConnectionDetails' of type [org.springframework.boot.autoconfigure.jdbc.PropertiesJdbcConnectionDetails] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'dataSource' of type [com.zaxxer.hikari.HikariDataSource] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'spring.sql.init-org.springframework.boot.autoconfigure.sql.init.SqlInitializationProperties' of type [org.springframework.boot.autoconfigure.sql.init.SqlInitializationProperties] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'dataSourceScriptDatabaseInitializer' of type [org.springframework.boot.autoconfigure.sql.init.SqlDataSourceScriptDatabaseInitializer] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.boot.devtools.autoconfigure.DevToolsDataSourceAutoConfiguration' of type [org.springframework.boot.devtools.autoconfigure.DevToolsDataSourceAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'inMemoryDatabaseShutdownExecutor' of type [org.springframework.boot.devtools.autoconfigure.DevToolsDataSourceAutoConfiguration$NonEmbeddedInMemoryDatabaseShutdownExecutor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'spring.jpa-org.springframework.boot.autoconfigure.orm.jpa.JpaProperties' of type [org.springframework.boot.autoconfigure.orm.jpa.JpaProperties] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'spring.jpa.hibernate-org.springframework.boot.autoconfigure.orm.jpa.HibernateProperties' of type [org.springframework.boot.autoconfigure.orm.jpa.HibernateProperties] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.boot.autoconfigure.jdbc.metadata.DataSourcePoolMetadataProvidersConfiguration$HikariPoolDataSourceMetadataProviderConfiguration' of type [org.springframework.boot.autoconfigure.jdbc.metadata.DataSourcePoolMetadataProvidersConfiguration$HikariPoolDataSourceMetadataProviderConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'hikariPoolDataSourceMetadataProvider' of type [org.springframework.boot.autoconfigure.jdbc.metadata.DataSourcePoolMetadataProvidersConfiguration$HikariPoolDataSourceMetadataProviderConfiguration$$Lambda$748/0x0000000801149290] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaConfiguration' of type [org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'jpaVendorAdapter' of type [org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'entityManagerFactoryBuilder' of type [org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'persistenceManagedTypes' of type [org.springframework.orm.jpa.persistenceunit.SimplePersistenceManagedTypes] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-11-03 16:14:44 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2023-11-03 16:14:44 [restartedMain] INFO  o.h.b.i.BytecodeProviderInitiator - HHH000021: Bytecode provider name : bytebuddy
+2023-11-03 16:14:44 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2023-11-03 16:14:44 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-55 - Starting...
+2023-11-03 16:14:44 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-55 - Added connection com.mysql.cj.jdbc.ConnectionImpl@1d9ead70
+2023-11-03 16:14:44 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-55 - Start completed.
+2023-11-03 16:14:44 [restartedMain] INFO  o.h.b.i.BytecodeProviderInitiator - HHH000021: Bytecode provider name : bytebuddy
+2023-11-03 16:14:45 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2023-11-03 16:14:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table bank 
+       modify column created_at  datetime(6)
+2023-11-03 16:14:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table bank 
+       modify column deleted_at  datetime(6)
+2023-11-03 16:14:45 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table bank 
+       modify column updated_at  datetime(6)
+2023-11-03 16:14:46 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table currency 
+       modify column created_at  datetime(6)
+2023-11-03 16:14:46 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table currency 
+       modify column deleted_at  datetime(6)
+2023-11-03 16:14:47 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table currency 
+       modify column updated_at  datetime(6)
+2023-11-03 16:14:47 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table device 
+       modify column created_at  datetime(6)
+2023-11-03 16:14:47 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table device 
+       modify column deleted_at  datetime(6)
+2023-11-03 16:14:48 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table device 
+       modify column updated_at  datetime(6)
+2023-11-03 16:14:48 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table financial_contact 
+       modify column created_at  datetime(6)
+2023-11-03 16:14:48 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table financial_contact 
+       modify column deleted_at  datetime(6)
+2023-11-03 16:14:49 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table financial_contact 
+       modify column updated_at  datetime(6)
+2023-11-03 16:14:49 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table firebase_token 
+       modify column created_at  datetime(6)
+2023-11-03 16:14:49 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table firebase_token 
+       modify column deleted_at  datetime(6)
+2023-11-03 16:14:49 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table firebase_token 
+       modify column updated_at  datetime(6)
+2023-11-03 16:14:50 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table meta_mask 
+       modify column created_at  datetime(6)
+2023-11-03 16:14:50 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table meta_mask 
+       modify column deleted_at  datetime(6)
+2023-11-03 16:14:50 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table meta_mask 
+       modify column updated_at  datetime(6)
+2023-11-03 16:14:51 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table notification 
+       modify column created_at  datetime(6)
+2023-11-03 16:14:51 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table notification 
+       modify column deleted_at  datetime(6)
+2023-11-03 16:14:51 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table notification 
+       modify column updated_at  datetime(6)
+2023-11-03 16:14:51 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table otp 
+       modify column created_at  datetime(6)
+2023-11-03 16:14:52 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table otp 
+       modify column deleted_at  datetime(6)
+2023-11-03 16:14:52 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table otp 
+       modify column updated_at  datetime(6)
+2023-11-03 16:14:52 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table permission 
+       modify column created_at  datetime(6)
+2023-11-03 16:14:52 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table permission 
+       modify column deleted_at  datetime(6)
+2023-11-03 16:14:53 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table permission 
+       modify column updated_at  datetime(6)
+2023-11-03 16:14:53 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table role 
+       modify column created_at  datetime(6)
+2023-11-03 16:14:53 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table role 
+       modify column deleted_at  datetime(6)
+2023-11-03 16:14:54 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table role 
+       modify column updated_at  datetime(6)
+2023-11-03 16:14:54 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table role_permission 
+       modify column created_at  datetime(6)
+2023-11-03 16:14:54 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table role_permission 
+       modify column deleted_at  datetime(6)
+2023-11-03 16:14:55 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table role_permission 
+       modify column updated_at  datetime(6)
+2023-11-03 16:14:55 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table transaction 
+       modify column created_at  datetime(6)
+2023-11-03 16:14:55 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table transaction 
+       modify column deleted_at  datetime(6)
+2023-11-03 16:14:56 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table transaction 
+       modify column updated_at  datetime(6)
+2023-11-03 16:14:56 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table user 
+       modify column created_at  datetime(6)
+2023-11-03 16:14:56 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table user 
+       modify column deleted_at  datetime(6)
+2023-11-03 16:14:57 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table user 
+       modify column updated_at  datetime(6)
+2023-11-03 16:14:57 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table user 
+       modify column birthday  datetime(6) not null
+2023-11-03 16:14:57 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table user 
+       modify column employment_status  enum ('EMPLOYEE','EMPLOYER','OTHERS','SELF_EMPLOYEE','STUDENT','UNEMPLOYED') not null
+2023-11-03 16:14:58 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table user 
+       modify column gender  enum ('FEMALE','MALE') not null
+2023-11-03 16:14:58 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table user 
+       modify column id_type  enum ('ALIEN_KENYA_ID','KENYA_ID') not null
+2023-11-03 16:14:58 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table user 
+       modify column monthly_income  enum ('FIFTEEN_THOUSAND_TO_TWENTY_FIVE_THOUSAND','FIVE_THOUSAND_TO_TEN_THOUSAND','LESS_THAN_FIVE_THOUSAND','TEN_THOUSAND_TO_FIFTEEN_THOUSAND','TWENTY_FIVE_THOUSAND_AND_ABOVE') not null
+2023-11-03 16:14:59 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table user_notified 
+       modify column created_at  datetime(6)
+2023-11-03 16:14:59 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table user_notified 
+       modify column deleted_at  datetime(6)
+2023-11-03 16:14:59 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table user_notified 
+       modify column updated_at  datetime(6)
+2023-11-03 16:14:59 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table user_role 
+       modify column created_at  datetime(6)
+2023-11-03 16:15:00 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table user_role 
+       modify column deleted_at  datetime(6)
+2023-11-03 16:15:00 [restartedMain] DEBUG org.hibernate.SQL - 
+    alter table user_role 
+       modify column updated_at  datetime(6)
