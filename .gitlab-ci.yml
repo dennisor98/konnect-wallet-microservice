@@ -11,7 +11,7 @@ build:
     - ssh -p 22 david@172.26.0.41  "mkdir -p cd /home/david/application/wallet-dev/ && cd /home/david/application/wallet-dev/ && chmod +x ./gradlew && ./gradlew clean && ./gradlew build -x test"
     - echo "Source code built on remote server"
   only:
-    - dev
+    - main
 
 move:
   stage: move
@@ -22,4 +22,4 @@ move:
     - scp   -P 22 -r ./*  david@172.26.0.41:/home/david/application/wallet-dev/ 
     - echo "Artifacts uploaded to GitLab CI/CD."
   only:
-    - dev
+    - main
