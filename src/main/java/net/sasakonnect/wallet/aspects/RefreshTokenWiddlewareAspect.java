@@ -2,6 +2,7 @@ package net.sasakonnect.wallet.aspects;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -9,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -20,7 +20,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.config.KonnectHeader;
+import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.enums.JwtType;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.services.WalletClientService;
@@ -28,6 +30,7 @@ import net.sasakonnect.wallet.tools.JwtService;
 
 @Aspect
 @Component
+@Slf4j
 public class RefreshTokenWiddlewareAspect {
 	private WalletClientService walletclientService;
 	private JwtService jwtService;
@@ -41,7 +44,7 @@ public class RefreshTokenWiddlewareAspect {
 	}
 
 	@Before("@annotation(net.sasakonnect.wallet.annotations.RefreshMiddleware)")
-	public void beforeControllerMethodExecution() {
+	public void beforeControllerMethodExecution() throws Exception {
 		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
 				.getRequest();
 		var refreshTokenHeader = request.getHeader(KonnectHeader.REFRESH_TOKEN_HEADER.toString());
@@ -61,26 +64,37 @@ public class RefreshTokenWiddlewareAspect {
 
 		} else {
 			var id = this.jwtService.extractUsername(refreshTokenHeader, JwtType.REFRESH_TOKEN);
+			log.error("refreshTokenHeader" + id);
 
-			if (id != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-				try {
+			// try {
 //					Optional<User> user = this.userService.findUserWallet(id);
-					UserDetails userDetails = userService.loadUserByUsername(id);
-					if (userDetails != null
-							&& this.jwtService.validateToken(refreshTokenHeader, userDetails, JwtType.REFRESH_TOKEN)) {
-						System.out.println("this is do internal");
+			Optional<User> userDetails = userService.getUserById(id);
+			log.error("userDetails" + userDetails.get().getFirstName());
+			if (this.jwtService.validateToken(refreshTokenHeader, userDetails.get(), JwtType.REFRESH_TOKEN)) {
+				Optional<User> clonedUserDetails = Optional.of(userDetails.get());
 
-						UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-								userDetails, null, null);
-						authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-						SecurityContextHolder.getContext().setAuthentication(authToken);
-					}
-				} catch (Exception e) {
-					System.err.println(e.getMessage());
-
-				}
-
+				UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+						clonedUserDetails.get(), null, null);
+				authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+				SecurityContextHolder.getContext().setAuthentication(authToken);
 			}
+			;
+			// throw new Exception("");
+
+//			if (userDetails != null
+//					&& this.jwtService.validateToken(refreshTokenHeader, userDetails.get(), JwtType.REFRESH_TOKEN)) {
+//				System.out.println("this is do internal");
+//
+//				UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
+//						null, null);
+//				authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+//				SecurityContextHolder.getContext().setAuthentication(authToken);
+//			}
+//			} catch (Exception e) {
+//				System.err.println(e.getMessage());
+//
+//			}
+
 //			var walletclient = this.walletclientService.findMerchantByClientAppByKey(client_app_key);
 //			if (walletclient.isPresent()) {
 //				var clients = walletclient.get();

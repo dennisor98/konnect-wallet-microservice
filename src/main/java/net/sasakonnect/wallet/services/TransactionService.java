@@ -7,9 +7,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.BodyInserters;
 
+import com.google.gson.Gson;
+
+import net.sasakonnect.wallet.beans.BankWebClientBean;
+import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
 import net.sasakonnect.wallet.domain.Transaction;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.Wallet;
@@ -17,6 +23,8 @@ import net.sasakonnect.wallet.notification.NotificationResult;
 import net.sasakonnect.wallet.notification.TransactionResultNotification;
 import net.sasakonnect.wallet.repository.TransactionRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
+import net.sasakonnect.wallet.tools.RequestSigner;
+import reactor.core.publisher.Mono;
 
 @Service
 public class TransactionService {
@@ -24,6 +32,10 @@ public class TransactionService {
 	TransactionRepository transactionRepository;
 	@Autowired
 	WalletRepository walletRepository;
+	@Autowired
+	BankWebClientBean bankClientBean;
+	@Autowired
+	RequestSigner requestSigner;
 
 	public Transaction saveTransaction(NotificationResult<TransactionResultNotification> results) {
 		var trans = results.getParams();
@@ -73,6 +85,26 @@ public class TransactionService {
 		}
 		return List.of();
 
+	}
+
+	public Object getTrasactionStatus(String id) {
+		var reqId = new HashMap<String, Object>();
+		reqId.put("txId", id);
+		var reqs = requestSigner.signRequest(reqId);
+
+		Mono<String> responseMono = this.bankClientBean.webClient.post()
+				.uri(ChoiceEndpointsConstants.GET_TRANSACTION_STATUS).contentType(MediaType.APPLICATION_JSON)
+				.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+				.bodyToMono(String.class);
+
+		String responseJson = responseMono.block();
+
+		if (responseJson != null) {
+			return new Gson().fromJson(responseJson, Object.class);
+
+		}
+
+		return null;
 	}
 
 }

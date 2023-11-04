@@ -300,8 +300,10 @@ public class AppBootLoader implements ApplicationListener<ApplicationReadyEvent>
 		// this.currencyRepository.deleteAll();
 		// this.currencyRepository.saveAll(currencyEntities);
 		this.bankRepository.saveAll(this.banks);
-		var role = Role.builder().roleName("SUPER_ADMIN").description("Has All permermission in the system")
-				.user(user.get()).build();
+		var role = new Role();
+		role.setRoleName("SUPER_ADMIN");
+		role.setDescription("Has All permermission in the system");
+		role.setUser(user.get());
 		var savedRole = this.roleService.insertRole(role);
 		var allpermsions = this.permissionService.findAll().stream().map((data) -> data.getId())
 				.collect(Collectors.toList());

@@ -18,6 +18,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
@@ -73,7 +74,7 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 	@Column(nullable = false)
 	private Date birthday;
 
-	@Column(nullable = false, length = 50)
+	@Column(nullable = true, length = 50)
 	private String kraPin;
 
 	@Enumerated(EnumType.STRING)
@@ -105,7 +106,8 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 
 	@OneToMany(mappedBy = "user")
 	private List<UserDevice> userDevices;
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+
 	private List<UserPin> userPins;
 
 	public Map<String, Object> toBankPayload() {
@@ -167,6 +169,14 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 	public boolean isEnabled() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public String toString() {
+		return "User{" + "id=" + id + ", firstName='" + firstName + '\'' + ", lastName='" + lastName + '\''
+				+ ", address='" + address + '\'' +
+				// Include other non-lazy attributes here
+				'}';
 	}
 
 }

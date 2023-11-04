@@ -325,7 +325,10 @@ public class WalletService extends JwtService {
 		userMap.put("mobile", easyOnboarding.getMobile());
 		userMap.put("idType", easyOnboarding.getIdTypeVerbal());
 		userMap.put("idNumber", easyOnboarding.getIdNumber());
-		userMap.put("kraPin", easyOnboarding.getKraPin());
+		if (easyOnboarding.getKraPin() != null) {
+			userMap.put("kraPin", easyOnboarding.getKraPin());
+
+		}
 		userMap.put("address", easyOnboarding.getMobile());
 		userMap.put("employmentStatus", easyOnboarding.getEmploymentStatusType().getCode());
 		userMap.put("monthlyIncome", easyOnboarding.monthlyIncomeType().getCode());
@@ -617,6 +620,29 @@ public class WalletService extends JwtService {
 
 		var reqId = new HashMap<String, Object>();
 		reqId.put("onboardingRequestId", user.getOnboardingRequestId());
+
+		var reqs = this.requestSigner.signRequest(reqId);
+
+		Mono<String> responseMono = this.bankClientBean.webClient.post()
+				.uri(ChoiceEndpointsConstants.GET_ONBOARDING_STATUS).contentType(MediaType.APPLICATION_JSON)
+				.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+				.bodyToMono(String.class);
+
+		String responseJson = responseMono.block();
+
+		if (responseJson != null) {
+			return new Gson().fromJson(responseJson, Object.class);
+
+		}
+
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Object getOnboardingStatus(String onBoardingId) {
+
+		var reqId = new HashMap<String, Object>();
+		reqId.put("onboardingRequestId", onBoardingId);
 
 		var reqs = this.requestSigner.signRequest(reqId);
 

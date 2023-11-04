@@ -11,14 +11,18 @@ import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class Role extends BaseWalletDomain implements Serializable {
+
+	private static final long serialVersionUID = -8087130723469587015L;
+
+	public Role() {
+
+	}
 
 	@Column(name = "role_name", unique = true)
 	private String roleName;
