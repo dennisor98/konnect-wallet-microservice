@@ -36,7 +36,6 @@ public class SdkMiddlewareAspect {
 	}
 
 	@Before("@annotation(net.sasakonnect.wallet.annotations.SdkMiddleware)")
-
 	public void beforeControllerMethodExecution() {
 		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
 				.getRequest();
