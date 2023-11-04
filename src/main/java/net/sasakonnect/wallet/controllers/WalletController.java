@@ -17,6 +17,7 @@ import net.sasakonnect.wallet.RequestDto.ChoiceTransferDto;
 import net.sasakonnect.wallet.RequestDto.EasyOnboardingRequestParams;
 import net.sasakonnect.wallet.RequestDto.Mpesa;
 import net.sasakonnect.wallet.RequestDto.MpesaBilling;
+import net.sasakonnect.wallet.RequestDto.OnBoardingStatusById;
 import net.sasakonnect.wallet.RequestDto.OnboardingOtp;
 import net.sasakonnect.wallet.RequestDto.OtpTransfer;
 import net.sasakonnect.wallet.RequestDto.PayUtility;
@@ -188,6 +189,11 @@ public class WalletController {
 	@GetMapping("getOnboardingStatus")
 	public Object getOnboardingStatus() {
 		return this.walletService.getOnboardingStatus();
+	}
+
+	@PostMapping("getOnboardingStatusById")
+	public Object getOnboardingStatus(@RequestBody() @Valid() OnBoardingStatusById onBoarding) {
+		return this.walletService.getOnboardingStatus(onBoarding.getOnBoardingId());
 	}
 
 }

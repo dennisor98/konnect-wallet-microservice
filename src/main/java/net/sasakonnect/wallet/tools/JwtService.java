@@ -108,12 +108,11 @@ public class JwtService {
 
 	}
 
-	public boolean validateToken(String token, UserDetails userDetails, JwtType jwt) {
+	public boolean validateToken(String token, User userDetails, JwtType jwt) {
 		try {
 			final String username = extractUsername(token, jwt);
-			System.out.println(username);
-			System.out.println(userDetails.getUsername());
-			User user = (User) userDetails;
+
+			User user = userDetails;
 			return (username.equals(user.getId()) && !isTokenExpired(token));
 		} catch (MalformedJwtException e) {
 			e.printStackTrace();
@@ -166,9 +165,7 @@ public class JwtService {
 
 	private boolean isTokenExpired(String token) {
 		Claims claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
-		System.out.println(claims.getExpiration());
-		System.out.println(new Date());
-		System.out.println(claims.getExpiration().after(new Date()));
+
 		return claims.getExpiration().before(new Date());
 	}
 

@@ -99,7 +99,8 @@ public class WebSecurityConfig {
 				"/swagger-resources/**", // Swagger resources like JS and CSS
 				"/webjars/**").permitAll()
 
-				.requestMatchers("/user/userLogin", "/user/confirmOtp", "/konnect/callBack", "/user/refresh/token")
+				.requestMatchers("/user/userLogin", "/user/confirmOtp", "/konnect/callBack", "/user/refresh/token",
+						"/wallet/getOnboardingStatusById", "/sdk/transaction/{id}")
 				.permitAll().requestMatchers("/wallet").permitAll().anyRequest().authenticated()
 
 		// require authentication for any endpoint that's not

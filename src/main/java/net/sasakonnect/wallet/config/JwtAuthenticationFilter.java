@@ -9,7 +9,6 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -21,6 +20,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.enums.JwtType;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.tools.JwtService;
@@ -58,7 +58,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter implements Han
 		if (id != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 			try {
 //				Optional<User> user = this.userService.findUserWallet(id);
-				UserDetails userDetails = userService.loadUserByUsername(id);
+				User userDetails = (User) userService.loadUserByUsername(id);
 				if (userDetails != null && this.jwtService.validateToken(token, userDetails, JwtType.ACCESS_TOKEN)) {
 					System.out.println("this is do internal");
 
@@ -100,7 +100,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter implements Han
 		if (id != null) {
 			try {
 //				Optional<User> user = this.userService.findUserWallet(id);
-				UserDetails userDetails = userService.loadUserByUsername(id);
+				User userDetails = (User) userService.loadUserByUsername(id);
 				if (userDetails != null && this.jwtService.validateToken(token, userDetails, JwtType.ACCESS_TOKEN)) {
 					System.out.println("this is do internal");
 					attributes.put("principal", userDetails);

@@ -36,6 +36,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.ChangePin;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
 import net.sasakonnect.wallet.RequestDto.PinDto;
@@ -55,6 +56,7 @@ import net.sasakonnect.wallet.repository.UserRoleRepository;
 import net.sasakonnect.wallet.tools.JwtService;
 
 @Service
+@Slf4j
 public class UserService extends RestClientService implements UserDetailsService {
 	@Autowired
 	private UserRepository userRepository;
@@ -440,6 +442,7 @@ public class UserService extends RestClientService implements UserDetailsService
 //	}
 
 	public ResponseEntity createRefreshToken() {
+		log.warn("principal " + SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		var token = this.jwtService.generateToken(user);
 		var refresh = this.jwtService.generateRefreshToken(user);

@@ -55,7 +55,7 @@ public class EasyOnboardingRequestParams {
 	String address;
 	@Nullable()
 	String employmentStatus;
-	@NotBlank
+	@Nullable()
 	String kraPin;
 
 	@JsonIgnore
@@ -167,6 +167,7 @@ public class EasyOnboardingRequestParams {
 		return EmploymentStatus.UNEMPLOYED;
 	}
 
+	@JsonIgnore
 	public String getSerchablePhone() {
 		var phone_length = mobile.length();
 		if (phone_length > 9) {
