@@ -23,6 +23,7 @@ import net.sasakonnect.wallet.repository.TransactionRepository;
 import net.sasakonnect.wallet.services.TransactionService;
 import net.sasakonnect.wallet.services.WalletClientService;
 import net.sasakonnect.wallet.tools.RequestSigner;
+import net.sasakonnect.wallet.workers.MerchantWoker;
 
 @RequestMapping("/sdk")
 @Tag(name = "Software Kits", description = "Api's to talk with sdks")
@@ -39,6 +40,8 @@ public class SdkController {
 	@Autowired
 	RequestSigner requestSigner;
 	private final TransactionService transactionService;
+	@Autowired
+	MerchantWoker merchantWorker;
 
 	public SdkController(TransactionService transactionService) {
 		this.transactionService = transactionService;
@@ -51,7 +54,10 @@ public class SdkController {
 			@Parameter(example = "37c8043a43adca4368607e5742a10d501c0cb990a26906603818f18ad8d15882", name = "app-key", description = "Provide app key of the app you created on dashboard", in = ParameterIn.HEADER, required = true) @RequestHeader("app-key") String appKey,
 
 			@RequestBody() @Valid SdkPayDto sdkpayDto) {
-		return this.walletClientService.payThroughSdk(sdkpayDto);
+		var walletClientService = this.walletClientService.payThroughSdk(sdkpayDto);
+		// System.out.print(walletClientService.);
+		merchantWorker.notifyMerchantIncomingPayment(walletClientService, sdkpayDto);
+		return walletClientService;
 	}
 
 	@PostMapping("merchant")

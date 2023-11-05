@@ -46,8 +46,9 @@ public class WalletClientService {
 		user.setUserPins(null);
 
 		var wallectClientApp = WalletClient.builder().appName(walleClientDto.getAppName())
-				.appDescription(walleClientDto.getAppDescription()).appKey(Helper.generateHashBasedUUID())
-				.appSecret(Helper.generateHashBasedUUID().substring(12)).user(user).build();
+				.callBackUrl(walleClientDto.getCallBackUrl()).appDescription(walleClientDto.getAppDescription())
+				.appKey(Helper.generateHashBasedUUID()).appSecret(Helper.generateHashBasedUUID().substring(12))
+				.user(user).build();
 		return this.wallectClientRepository.save(wallectClientApp);
 
 	}

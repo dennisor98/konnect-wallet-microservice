@@ -103,6 +103,9 @@ public class JwtService {
 			return (username.equals(user.getId()) && !isTokenExpired(token));
 		} catch (MalformedJwtException e) {
 			e.printStackTrace();
+		} catch (Exception e) {
+			log.error(e.getMessage());
+
 		}
 		return false;
 
