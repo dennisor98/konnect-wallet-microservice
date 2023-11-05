@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 public class ChoiceEndpointsConstants {
 ///production url https://baas.choicedigitalbank.com
 	// development https://baas-pilot.choicebankapi.com/
-	public static final String BASE_URL = "https://baas.choicedigitalbank.com";
+	public static final String BASE_URL = "https://baas-pilot.choicedigitalbank.com";
 	public static final String ON_BOARDING = "/onboarding/submitOnboardingRequest";
 	public static final String BANK_CODES = "/staticData/getBankCodes";
 	public static final String UPLOAD_ID_CARDS = "/onboarding/uploadIdCardPhoto";
