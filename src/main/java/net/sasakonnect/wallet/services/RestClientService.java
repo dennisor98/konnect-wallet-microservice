@@ -6,6 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import jakarta.annotation.PostConstruct;
 import net.sasakonnect.wallet.tools.JwtService;
 
 @Service
@@ -15,10 +16,10 @@ public class RestClientService extends JwtService {
 	protected WebClient webClient;
 	protected Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-	public RestClientService() {
+	@PostConstruct
+	public void initializeWebClient() {
 		this.webClient = WebClient.builder().baseUrl(baseUrl).build();
 	}
-
 //	    public Mono<String> fetchData() {
 //	        return webClient.get()
 //	            .uri("/your-endpoint") // Replace with your API endpoint
