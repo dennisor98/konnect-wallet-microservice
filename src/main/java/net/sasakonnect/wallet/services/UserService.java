@@ -465,4 +465,9 @@ public class UserService extends RestClientService implements UserDetailsService
 
 	}
 
+	public Optional<User> findUserByWalletAccountId(String receiverAccount) {
+		return this.userRepository.findUserByWalletAccountId(receiverAccount);
+
+	}
+
 }

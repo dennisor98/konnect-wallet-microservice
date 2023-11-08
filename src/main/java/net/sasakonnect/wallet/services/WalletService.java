@@ -777,9 +777,16 @@ public class WalletService extends JwtService {
 		if (!userWallets.isEmpty()) {
 			var userwallet = userWallets.get(0);
 			reqId.put("payerAccountId", userwallet.getAccountId());
-
 		}
 
+		var otpUser = this.userService.findUserByWalletAccountId(choiceTransfer.getReceiverAccount());
+		if (otpUser.isPresent()) {
+			reqId.put("payeeMobileForNotification", otpUser.get().getMobile());
+
+		} else {
+			reqId.put("payeeMobileForNotification", choiceTransfer.getPayeeMobileForNotification());
+
+		}
 		reqId.put("payeeBankCode", choiceTransfer.getBankCode());
 
 		reqId.put("payeeAccountId", choiceTransfer.getReceiverAccount());
@@ -789,7 +796,6 @@ public class WalletService extends JwtService {
 		reqId.put("amount", choiceTransfer.getAmount());
 		reqId.put("otpMobile", user.getMobile());
 		reqId.put("otpType", choiceTransfer.getOtpType());
-		reqId.put("payeeMobileForNotification", choiceTransfer.getPayeeMobileForNotification());
 
 		var reqs = this.requestSigner.signRequest(reqId);
 
