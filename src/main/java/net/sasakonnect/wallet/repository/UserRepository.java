@@ -28,4 +28,6 @@ public interface UserRepository extends JpaRepository<User, String> {
 	@Query("SELECT u FROM User u WHERE u.onboardingRequestId = :onboardingRequestId")
 	Optional<User> findByOnboardingRequestId(@Param("onboardingRequestId") String onboardingRequestId);
 
+	Optional<User> findByMobile(String mobile); // Return an Optional<User>
+
 }

@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import net.sasakonnect.wallet.CustomController;
 import net.sasakonnect.wallet.RequestDto.BuyAirtime;
 import net.sasakonnect.wallet.RequestDto.ChangePin;
 import net.sasakonnect.wallet.RequestDto.ChoiceTransferDto;
@@ -24,6 +23,8 @@ import net.sasakonnect.wallet.RequestDto.PayUtility;
 import net.sasakonnect.wallet.RequestDto.PinDto;
 import net.sasakonnect.wallet.RequestDto.TransactionPeriod;
 import net.sasakonnect.wallet.RequestDto.TransferToMpesa;
+import net.sasakonnect.wallet.RequestDto.WalletTransferDto;
+import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.TransactionMiddleware;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.services.UserService;
@@ -178,6 +179,13 @@ public class WalletController {
 	@TransactionMiddleware()
 	public Object sendToOtherWallet(@RequestBody() @Valid() ChoiceTransferDto choiceTransfer) {
 		return this.walletService.applyForTransfer(choiceTransfer);
+	}
+
+	@PostMapping("sendToWallet")
+	@TransactionMiddleware()
+	public Object sendToWallet(@RequestBody() @Valid() WalletTransferDto choiceTransfer) {
+		// return "error";
+		return this.walletService.applyFoWalletToWallet(choiceTransfer);
 	}
 
 	@PostMapping("pay/utility")

@@ -459,6 +459,7 @@ public class UserService extends RestClientService implements UserDetailsService
 	}
 
 	public Optional<User> findUserByPhoneNumber(String phoneNumber) {
+		// log.error(phoneNumber);
 		return this.userRepository.findByMobileAndCountryCode(phoneNumber, 254);
 		// TODO Auto-generated method stub
 

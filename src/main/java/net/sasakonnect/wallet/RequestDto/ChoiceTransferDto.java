@@ -9,16 +9,16 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+
 public class ChoiceTransferDto {
 	String bankCode;
 	String receiverName;
 	String receiverAccount;
 	@Builder.Default
-	String currencyCode = "KSH";
+	String currencyCode = "KES";
 	String amount;
 	String remarks;
 	@Builder.Default
-
 	String otpType = "OTP";
 	String payeeMobileForNotification;
 }

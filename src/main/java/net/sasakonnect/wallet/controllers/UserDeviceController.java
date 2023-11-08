@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import net.sasakonnect.wallet.CustomController;
+import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.services.UserService;
 

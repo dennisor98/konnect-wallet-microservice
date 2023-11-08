@@ -19,8 +19,8 @@ import com.google.gson.JsonSyntaxException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import net.sasakonnect.wallet.CustomController;
 import net.sasakonnect.wallet.RequestDto.OnboardingStatus;
+import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.services.WalletService;

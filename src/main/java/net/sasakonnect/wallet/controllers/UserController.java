@@ -16,9 +16,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import net.sasakonnect.wallet.CustomController;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
 import net.sasakonnect.wallet.RequestDto.UserLogin;
+import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.RefreshMiddleware;
 import net.sasakonnect.wallet.provider.FirebaseMessage;
 import net.sasakonnect.wallet.provider.FirebaseWrapper;
