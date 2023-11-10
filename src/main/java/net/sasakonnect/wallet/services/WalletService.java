@@ -1023,7 +1023,7 @@ public class WalletService extends JwtService {
 				Map<String, Object> map = new HashMap<String, Object>();
 				Map<String, String> payload = new HashMap<String, String>();
 				payload.put("account", userwallet.getAccountId());
-				payload.put("name", user.getFirstName() + " " + user.getLastName() + " " + user.getLastName());
+				payload.put("name", user.getFirstName() + " " + user.getMiddleName() + " " + user.getLastName());
 				map.put("payload", payload);
 				map.put("success", "true");
 				return ResponseEntity.status(HttpStatus.OK).body(map);
