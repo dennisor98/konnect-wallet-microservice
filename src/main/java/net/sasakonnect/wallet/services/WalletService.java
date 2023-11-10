@@ -38,6 +38,7 @@ import net.sasakonnect.wallet.RequestDto.OnboardingOtp;
 import net.sasakonnect.wallet.RequestDto.OnboardingStatus;
 import net.sasakonnect.wallet.RequestDto.OtpTransfer;
 import net.sasakonnect.wallet.RequestDto.PayUtility;
+import net.sasakonnect.wallet.RequestDto.PhoneCheckDto;
 import net.sasakonnect.wallet.RequestDto.SdkPayDto;
 import net.sasakonnect.wallet.RequestDto.TransactionPeriod;
 import net.sasakonnect.wallet.RequestDto.TransferToMpesa;
@@ -1001,6 +1002,45 @@ public class WalletService extends JwtService {
 
 			map.put("success", "false");
 
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(map);
+		}
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Object checkUserPublicAccount(@Valid PhoneCheckDto phoneCheck) {
+		var phoneNumber = phoneCheck.getPhoneNumber().substring(phoneCheck.getPhoneNumber().length() - 9);
+		// return phoneNumber;
+		var userop = this.userService.findUserByPhoneNumber(phoneNumber);
+		if (userop.isPresent()) {
+			var user = userop.get();
+			var reqId = new HashMap<String, Object>();
+
+			var userWallets = this.walletRepository.findByUserWalletsUser(user);
+			if (!userWallets.isEmpty()) {
+				var userwallet = userWallets.get(0);
+				reqId.put("payerAccountId", userwallet.getAccountId());
+				Map<String, Object> map = new HashMap<String, Object>();
+				Map<String, String> payload = new HashMap<String, String>();
+				payload.put("account", userwallet.getAccountId());
+				payload.put("name", user.getFirstName() + " " + user.getMiddleName() + " " + user.getLastName());
+				map.put("payload", payload);
+				map.put("success", "true");
+				return ResponseEntity.status(HttpStatus.OK).body(map);
+			}
+			if (user.getUserWallets().size() > 0) {
+				reqId.put("payeeAccountId", user.getUserWallets().get(0).getWallet().getAccountId());
+			} else {
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("message", "user with phone " + phoneCheck.getPhoneNumber() + " not found");
+				map.put("success", "false");
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(map);
+
+			}
+		} else {
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("message", "user with phone " + phoneCheck.getPhoneNumber() + " not found");
+			map.put("success", "false");
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(map);
 		}
 		// TODO Auto-generated method stub
