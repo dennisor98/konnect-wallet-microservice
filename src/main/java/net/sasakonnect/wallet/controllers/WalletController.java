@@ -20,6 +20,7 @@ import net.sasakonnect.wallet.RequestDto.OnBoardingStatusById;
 import net.sasakonnect.wallet.RequestDto.OnboardingOtp;
 import net.sasakonnect.wallet.RequestDto.OtpTransfer;
 import net.sasakonnect.wallet.RequestDto.PayUtility;
+import net.sasakonnect.wallet.RequestDto.PhoneCheckDto;
 import net.sasakonnect.wallet.RequestDto.PinDto;
 import net.sasakonnect.wallet.RequestDto.TransactionPeriod;
 import net.sasakonnect.wallet.RequestDto.TransferToMpesa;
@@ -186,6 +187,13 @@ public class WalletController {
 	public Object sendToWallet(@RequestBody() @Valid() WalletTransferDto choiceTransfer) {
 		// return "error";
 		return this.walletService.applyFoWalletToWallet(choiceTransfer);
+	}
+
+	@PostMapping("checkAccount")
+
+	public Object checkAccount(@RequestBody() @Valid() PhoneCheckDto phoneCheck) {
+		// return "error";
+		return this.walletService.checkUserPublicAccount(phoneCheck);
 	}
 
 	@PostMapping("pay/utility")
