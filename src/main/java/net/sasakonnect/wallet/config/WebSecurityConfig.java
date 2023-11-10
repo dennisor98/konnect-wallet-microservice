@@ -40,15 +40,19 @@ import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
+import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.services.UserService;
 
 @Configuration
 @EnableMethodSecurity
+@Slf4j
 
 public class WebSecurityConfig {
 
 	UserService userService;
 	JwtAuthenticationFilter jwtAuthenticationFilter;
+	@Value("${spring.profiles.active}")
+	String profileActive;
 
 	WebSecurityConfig(UserService userService, JwtAuthenticationFilter jwtAuthenticationFilter) {
 		this.userService = userService;
@@ -139,13 +143,14 @@ public class WebSecurityConfig {
 	}
 
 	@Bean
-	OpenAPI openApiInformation() {
+	OpenAPI openApiInformation() throws Exception {
 		Server localServer = new Server().url("http://localhost:8081/konnect-wallet")
 				.description("Localhost Server URL");
 		Server gatewayServer = new Server().url("https://gw.sasakonnect.net/konnect-wallet")
 				.description("Gateway Server Server URL(Dev)");
 		Server nginxServer = new Server().url("https://wallet.sasakonnect.net/konnect-wallet")
 				.description("Production env");
+
 		Contact contact = new Contact().email("devops@gmail.com").name("DevOps");
 		Info info = new Info().contact(contact).description("Wallet Based implementation Through Choice Bank")
 				.summary("Easy way to Buy").title("Konnect Wallet").version("V1.0.0")
@@ -160,9 +165,19 @@ public class WebSecurityConfig {
 		var openApi = new OpenAPI();
 		openApi.addSecurityItem(new SecurityRequirement().addList("Bearer Authentication")).components(components
 
-		)
+		);
 
-				.info(info).addServersItem(nginxServer).addServersItem(gatewayServer).addServersItem(localServer);
+		switch (profileActive) {
+		case "dev": {
+			openApi.info(info).addServersItem(gatewayServer).addServersItem(nginxServer).addServersItem(localServer);
+
+		}
+		default: {
+			openApi.info(info).addServersItem(nginxServer).addServersItem(gatewayServer).addServersItem(localServer);
+
+		}
+
+		}
 
 		return openApi;
 	}
