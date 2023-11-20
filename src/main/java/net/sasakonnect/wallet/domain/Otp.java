@@ -54,6 +54,8 @@ public class Otp extends BaseWalletDomain implements Serializable {
 
 	public boolean isValid() {
 		if (this.getDeletedAt() != null) {
+			System.out.println("otp already soft deleted");
+
 			return false;
 		}
 		Instant utcNow = Instant.now();
