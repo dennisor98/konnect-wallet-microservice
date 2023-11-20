@@ -162,7 +162,7 @@ public class UserService extends RestClientService implements UserDetailsService
 		if (opt.isPresent()) {
 			log.error("otp not there");
 
-			if (!(opt.get().isValid())) {
+			if ((opt.get().isValid())) {
 
 				ObjectNode json = JsonNodeFactory.instance.objectNode();
 				json.put("message", "otp code is Invalid");
