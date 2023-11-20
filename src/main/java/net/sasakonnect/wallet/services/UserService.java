@@ -125,6 +125,9 @@ public class UserService extends RestClientService implements UserDetailsService
 				user = this.userRepository.findByMobileAndCountryCode(userLogin.getSerchablePhone(),
 						Integer.valueOf(userLogin.getCountryCode()));
 			}
+		} else {
+			user = this.userRepository.findByMobileAndCountryCode(userLogin.getSerchablePhone(),
+					Integer.valueOf(userLogin.getCountryCode()));
 		}
 
 		if (user.isEmpty()) {
