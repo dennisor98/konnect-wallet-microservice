@@ -158,8 +158,11 @@ public class UserService extends RestClientService implements UserDetailsService
 	@Transactional
 	public ResponseEntity<Object> verifyOtp(@Valid ConfirmOtp confirmOtp) {
 		var opt = this.smsService.verifyOtp(confirmOtp);
+
 		if (opt.isPresent()) {
-			if (opt.get().isValid()) {
+			log.error("otp not there");
+
+			if (!(opt.get().isValid())) {
 
 				ObjectNode json = JsonNodeFactory.instance.objectNode();
 				json.put("message", "otp code is Invalid");
@@ -191,6 +194,7 @@ public class UserService extends RestClientService implements UserDetailsService
 
 			}
 		} else {
+
 			ObjectNode json = JsonNodeFactory.instance.objectNode();
 			json.put("message", "otp code is Invalid");
 			return ResponseEntity.badRequest().body(json);

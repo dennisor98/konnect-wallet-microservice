@@ -12,11 +12,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Data;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 @Entity
 @Data
 @ToString
-
+@Slf4j
 public class Otp extends BaseWalletDomain implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -66,8 +67,11 @@ public class Otp extends BaseWalletDomain implements Serializable {
 
 		// Check if the expiration time is before the current local time
 		if (expirationInstant.isAfter(utcNow)) {
+			log.warn("otp is valid");
 			return true;
 		}
+		log.warn("otp is not valid ");
+
 		return false;
 
 	}
