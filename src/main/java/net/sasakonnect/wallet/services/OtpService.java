@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,8 @@ import net.sasakonnect.wallet.repository.OtpRepository;
 public class OtpService {
 
 	private final OtpRepository otpRepository;
+	@Value("${spring.profiles.active}")
+	String profileActive;
 
 	@Autowired
 	public OtpService(OtpRepository otpRepository) {
@@ -101,10 +104,12 @@ public class OtpService {
 		var otp = otpRepository.findByHashAndCodeWithUser(hash, code);
 		System.out.print("otp is present" + otp.isPresent());
 		if (otp.isPresent()) {
+			if (!(profileActive.equalsIgnoreCase("dev") && code.equalsIgnoreCase("1234"))) {
+				otp.get().setDeletedAt(new Date());
+				this.otpRepository.save(otp.get());
 
-			otp.get().setDeletedAt(new Date());
+			}
 
-			this.otpRepository.save(otp.get());
 			return Optional.of(otp.get());
 		} else {
 			return Optional.empty();

@@ -79,6 +79,9 @@ public class UserService extends RestClientService implements UserDetailsService
 	BankWebClientBean bankClientBean;
 	@Value("${MAX_PIN_ATTEMPT:3}")
 	private int maxpinattempt;
+
+	@Value("${spring.profiles.active}")
+	String profileActive;
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneOffset.UTC);
 
 	public Optional<User> getUserById(String id) {
@@ -105,9 +108,24 @@ public class UserService extends RestClientService implements UserDetailsService
 	}
 
 	public ResponseEntity<ObjectNode> userLogin(UserLogin userLogin) {
+		/**
+		 * This is to allow Google to have a test account if you find a better way why
+		 * not change? so google play team will use 700000000 as phone number and 1234
+		 * as otp
+		 */
+		Optional<User> user = Optional.empty();
 
-		var user = this.userRepository.findByMobileAndCountryCode(userLogin.getSerchablePhone(),
-				Integer.valueOf(userLogin.getCountryCode()));
+		if (profileActive.equalsIgnoreCase("dev")) {
+			if (userLogin.getPhoneNumber().equalsIgnoreCase("700000000")) {
+				log.debug("fing this phone 703454954 and country code" + userLogin.getCountryCode());
+
+				user = this.userRepository.findByMobileAndCountryCode("703454954",
+						Integer.valueOf(userLogin.getCountryCode()));
+			} else {
+				user = this.userRepository.findByMobileAndCountryCode(userLogin.getSerchablePhone(),
+						Integer.valueOf(userLogin.getCountryCode()));
+			}
+		}
 
 		if (user.isEmpty()) {
 			ObjectMapper objectMapper = new ObjectMapper();
@@ -361,9 +379,21 @@ public class UserService extends RestClientService implements UserDetailsService
 
 				return ResponseEntity.status(HttpStatus.OK).body(map);
 			} else {
+				// var userPins =
 				this.userPinRepository.incrementPinAttempts(user);
+//				if (userPins.isPresent()) {
+//					var updatedpin = userPins.get();
+//					Map<String, Object> map = new HashMap<String, Object>();
+//					map.put("message", "Pin Entered does not match");
+//					map.put("attempt_remaining", maxpinattempt - updatedpin.getPinAttempts());
+//					map.put("success", false);
+//					return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
+//
+//				}
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("message", "Pin Entered does not match");
+				map.put("attempt_remaining", maxpinattempt - (userPinRepository.get().get(0).getPinAttempts() + 1));
+
 				map.put("success", false);
 				return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
 			}
