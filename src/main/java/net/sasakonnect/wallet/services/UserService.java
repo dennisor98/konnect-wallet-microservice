@@ -172,6 +172,7 @@ public class UserService extends RestClientService implements UserDetailsService
 				return ResponseEntity.badRequest().body(json);
 			}
 			var u = opt.get().getUser();
+			this.smsService.deleteOtp(opt.get());
 			if (u != null) {
 				System.out.println(u.getCreatedAt());
 				var response = UserResponseDTO.builder().token(jwtService.generateToken(u))
