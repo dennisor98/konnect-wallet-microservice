@@ -19,7 +19,11 @@ move:
     - echo "Copying  from remote server to GitLab CI/CD..."
     - hostname
     - pwd
+<<<<<<< HEAD
     - scp -o StrictHostKeyChecking=no   -P 22 -r ./*  david@172.26.0.41:/home/david/application/wallet-dev/ 
+=======
+    - scp  -v  -P 22 -r ./*  david@172.26.0.41:/home/david/application/wallet-dev/ 
+>>>>>>> de929d6b0e53270869f00229ce107e3b3edc5b35
     - echo "Artifacts uploaded to GitLab CI/CD."
   only:
     - main
