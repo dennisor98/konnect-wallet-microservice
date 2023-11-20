@@ -163,9 +163,9 @@ public class UserService extends RestClientService implements UserDetailsService
 		var opt = this.smsService.verifyOtp(confirmOtp);
 
 		if (opt.isPresent()) {
-			log.error("otp not there");
 
 			if (!(opt.get().isValid())) {
+				log.error("otp not valid");
 
 				ObjectNode json = JsonNodeFactory.instance.objectNode();
 				json.put("message", "otp code is Invalid");
@@ -197,6 +197,7 @@ public class UserService extends RestClientService implements UserDetailsService
 
 			}
 		} else {
+			log.error("otp not there");
 
 			ObjectNode json = JsonNodeFactory.instance.objectNode();
 			json.put("message", "otp code is Invalid");
