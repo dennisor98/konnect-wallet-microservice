@@ -70,20 +70,15 @@ public class SmsService {
 			 * not change? so google play team will use 700000000 as phone number and 1234
 			 * as otp
 			 */
-			switch (profileActive) {
-			case "dev": {
+			if (profileActive.equalsIgnoreCase("dev")) {
 				log.error("edv " + otp + " phone is" + userLogin.getPhoneNumber());
 
 				if (userLogin.getPhoneNumber().equalsIgnoreCase("700000000")) {
 					otp = 1234;
 					userLogin.setPhoneNumber("703454954");
 				}
+			}
 
-			}
-			default: {
-
-			}
-			}
 			Otp otpEntity = new Otp();
 			otpEntity.setCode(String.valueOf(otp));
 			otpEntity.setPhoneNumber(userLogin.getFullPhone());
