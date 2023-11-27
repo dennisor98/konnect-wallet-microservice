@@ -54,25 +54,27 @@ public class Otp extends BaseWalletDomain implements Serializable {
 
 	public boolean isValid() {
 		if (this.getDeletedAt() != null) {
+			System.out.println("otp already soft deleted");
+
 			return false;
 		}
 		Instant utcNow = Instant.now();
-		log.debug("current time in utc" + utcNow.getEpochSecond());
+		log.warn("current time in utc" + utcNow.getEpochSecond());
 
 		// Convert createdAt to an Instant (assuming createdAt is in milliseconds since
 		// epoch)
 		Instant createdAtInstant = Instant.ofEpochMilli(this.getCreatedAt().getTime());
-		log.debug("time created" + utcNow.getEpochSecond());
+		log.warn("time created" + utcNow.getEpochSecond());
 
 		// Add ttl seconds to createdAt
 		Instant expirationInstant = createdAtInstant.plusSeconds(this.getTtl());
-		log.debug("time after adding  ttl " + expirationInstant.getEpochSecond());
-		log.debug("expiry is after current time ? " + expirationInstant.isAfter(utcNow));
+		log.warn("time after adding  ttl " + expirationInstant.getEpochSecond());
+		log.warn("expiry is after current time ? " + expirationInstant.isAfter(utcNow));
 
 		// Check if the expiration time is before the current local time
 		if (expirationInstant.isAfter(utcNow)) {
 			log.warn("otp is valid");
-			log.debug("expiry is after current time ? " + expirationInstant.isAfter(utcNow));
+			log.warn("expiry is after current time ? " + expirationInstant.isAfter(utcNow));
 
 			return true;
 		}

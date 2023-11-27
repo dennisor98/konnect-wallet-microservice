@@ -104,16 +104,17 @@ public class OtpService {
 		var otp = otpRepository.findByHashAndCodeWithUser(hash, code);
 		System.out.print("otp is present" + otp.isPresent());
 		if (otp.isPresent()) {
-			if (!(profileActive.equalsIgnoreCase("dev") && code.equalsIgnoreCase("1234"))) {
-				otp.get().setDeletedAt(new Date());
-				this.otpRepository.save(otp.get());
-
-			}
 
 			return Optional.of(otp.get());
 		} else {
 			return Optional.empty();
 		}
+	}
+
+	public void deleteOtp(Otp otp) {
+		otp.setDeletedAt(new Date());
+		this.otpRepository.save(otp);
+
 	}
 
 }

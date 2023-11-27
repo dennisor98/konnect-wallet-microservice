@@ -129,6 +129,9 @@ public class UserService extends RestClientService implements UserDetailsService
 				user = this.userRepository.findByMobileAndCountryCode(userLogin.getSerchablePhone(),
 						Integer.valueOf(userLogin.getCountryCode()));
 			}
+		} else {
+			user = this.userRepository.findByMobileAndCountryCode(userLogin.getSerchablePhone(),
+					Integer.valueOf(userLogin.getCountryCode()));
 		}
 
 		if (user.isEmpty()) {
@@ -164,15 +167,16 @@ public class UserService extends RestClientService implements UserDetailsService
 		var opt = this.smsService.verifyOtp(confirmOtp);
 
 		if (opt.isPresent()) {
-			log.error("otp not there");
 
 			if (!(opt.get().isValid())) {
+				log.error("otp not valid");
 
 				ObjectNode json = JsonNodeFactory.instance.objectNode();
 				json.put("message", "otp code is Invalid");
 				return ResponseEntity.badRequest().body(json);
 			}
 			var u = opt.get().getUser();
+			this.smsService.deleteOtp(opt.get());
 			if (u != null) {
 				System.out.println(u.getCreatedAt());
 				var response = UserResponseDTO.builder().token(jwtService.generateToken(u))
@@ -198,6 +202,7 @@ public class UserService extends RestClientService implements UserDetailsService
 
 			}
 		} else {
+			log.error("otp not there");
 
 			ObjectNode json = JsonNodeFactory.instance.objectNode();
 			json.put("message", "otp code is Invalid");

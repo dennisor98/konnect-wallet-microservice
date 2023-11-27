@@ -121,4 +121,11 @@ public class SmsService {
 
 	}
 
+	public void deleteOtp(Otp opt) {
+		this.otpService.deleteOtp(opt);
+
+		// TODO Auto-generated method stub
+
+	}
+
 }
