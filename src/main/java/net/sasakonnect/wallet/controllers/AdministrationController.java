@@ -2,6 +2,7 @@ package net.sasakonnect.wallet.controllers;
 
 import javax.security.auth.login.AccountNotFoundException;
 
+import net.sasakonnect.wallet.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +21,8 @@ import net.sasakonnect.wallet.constant.GlobalPermissionConstants;
 import net.sasakonnect.wallet.services.WalletClientService;
 import net.sasakonnect.wallet.services.WalletService;
 
+import java.util.List;
+
 @RequestMapping("/administration")
 @Tag(name = "Administration", description = "Back Office  routes")
 @CustomController()
@@ -28,6 +31,9 @@ public class AdministrationController {
 	WalletClientService walletClientService;
 	@Autowired
 	WalletService walletService;
+
+	@Autowired
+	UserService userService;
 
 	@GetMapping("/upload/app")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CreateSuperApp.PERMISSION + "')")
@@ -58,4 +64,12 @@ public class AdministrationController {
 	public Object checkUserAccountStatus(@Valid @RequestBody() CheckUserAccount checkUserAccount) {
 		return this.walletService.checkUserAccountStatus(checkUserAccount);
 	}
+
+	@PostMapping("/users/getAll")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION)
+	public Object getAllUsers(){
+		return  userService.getAllUsers();
+	}
+
 }
