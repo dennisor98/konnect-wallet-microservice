@@ -1,10 +1,12 @@
 package net.sasakonnect.wallet.services;
 
+
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -85,8 +87,55 @@ public class UserService extends RestClientService implements UserDetailsService
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneOffset.UTC);
 
 
-	public Optional getAllUsers(){
-		return this.userRepository.findAllUsers();
+	public Object getAllUsers(){
+		Map<String,Object> resObject = new HashMap<String,Object>();
+		try {
+			Optional<List<User>> user = this.userRepository.findAllUsers();
+			List<Map<String, Object>> userMaps = user.orElse(Collections.emptyList()).stream()
+			        .map(u -> {
+			            Map<String, Object> map = new HashMap<>();
+			            map.put("firstname", u.getFirstName());
+			            map.put("lastname", u.getLastName());
+			            map.put("user_id",u.getId());
+			            map.put("phone",u.getMobile());
+			            // Add other mappings as needed
+			            return map;
+			        })
+			        .collect(Collectors.toList());
+			resObject.put("success","true");
+			resObject.put("payload",userMaps);
+			return ResponseEntity.status(HttpStatus.ACCEPTED).body(resObject);
+		}catch(Exception e) {
+		    resObject.put("success","false");
+			resObject.put("message","An error occured")	;		
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resObject);
+		}
+			
+	}
+	
+	public Object getCorporateUsers(){
+		Map<String,Object> resObject = new HashMap<String,Object>();
+		try {
+			Optional<List<User>> user = this.userRepository.getCorporateUsers();
+			List<Map<String, Object>> userMaps = user.orElse(Collections.emptyList()).stream()
+					.map(u->{
+			            Map<String, Object> map = new HashMap<>();
+			            map.put("firstname", u.getFirstName());
+			            map.put("lastname", u.getLastName());
+			            map.put("user_id",u.getId());
+			            map.put("phone",u.getMobile());
+			          return map;
+					})
+					.collect(Collectors.toList());
+			resObject.put("success","true");
+			resObject.put("payload",userMaps);
+			return resObject;
+		}catch(Exception ex) {
+			 resObject.put("success","false");
+				resObject.put("message","An error occured")	;		
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resObject);  
+		}
+//			  return this.userRepository.getCorporateUsers();	  
 	}
 	public Optional<User> getUserById(String id) {
 		return this.userRepository.findById(id);
@@ -382,7 +431,7 @@ public class UserService extends RestClientService implements UserDetailsService
 		var bycryp = new BCryptPasswordEncoder();
 		var userPinRepository = this.userPinRepository.getUserPinThatIsNotArchived(user);
 		if (userPinRepository.isPresent() && userPinRepository.get().size() > 0
-				&& !(userPinRepository.get().get(0).getPinAttempts() >= maxpinattempt)) {
+				&& !(userPinRepository.get().get(0).getPinAttempts() >= this.maxpinattempt)) {
 			if (bycryp.matches(user.getId() + setPin.getPin(), userPinRepository.get().get(0).getPin())) {
 				var token = this.jwtService.generateTokenForWindow(user);
 				Map<String, Object> map = new HashMap<String, Object>();

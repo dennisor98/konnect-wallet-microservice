@@ -13,6 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Retention(RetentionPolicy.RUNTIME)
 @RestController
 @Validated
-@CrossOrigin
+@CrossOrigin(origins = "*")
 public @interface CustomController {
 }
