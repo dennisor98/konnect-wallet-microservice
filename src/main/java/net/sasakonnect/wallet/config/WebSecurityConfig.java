@@ -105,7 +105,7 @@ public class WebSecurityConfig {
 				"/webjars/**").permitAll()
 
 				.requestMatchers("/user/userLogin", "/user/confirmOtp", "/konnect/callBack", "/user/refresh/token",
-						"/wallet/getOnboardingStatusById", "/sdk/transaction/{id}")
+						"/wallet/getOnboardingStatusById", "/sdk/transaction/{id}","user/corporateLogin")
 
 				.permitAll().requestMatchers("/wallet").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Permit OPTIONS requests

@@ -41,14 +41,17 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.ChangePin;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
+import net.sasakonnect.wallet.RequestDto.CorporateLoginDTO;
 import net.sasakonnect.wallet.RequestDto.PinDto;
 import net.sasakonnect.wallet.RequestDto.UserLogin;
 import net.sasakonnect.wallet.ResponseDto.UserResponseDTO;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
+import net.sasakonnect.wallet.domain.CorporateDetails;
 import net.sasakonnect.wallet.domain.Permission;
 import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.UserPin;
+import net.sasakonnect.wallet.repository.CorporateDetailsRepository;
 import net.sasakonnect.wallet.repository.PermissionRepository;
 import net.sasakonnect.wallet.repository.RolePermissionRepository;
 import net.sasakonnect.wallet.repository.RoleRepository;
@@ -72,7 +75,8 @@ public class UserService extends RestClientService implements UserDetailsService
 	private UserRoleRepository userRoleRepository;
 	@Autowired
 	private UserPinRepository userPinRepository;
-
+	@Autowired
+	CorporateDetailsRepository corporateRepository;
 	@Autowired
 	private RoleRepository roleRepository;
 	@Autowired
@@ -201,6 +205,49 @@ public class UserService extends RestClientService implements UserDetailsService
 		}
 
 	}
+	
+	public ResponseEntity<ObjectNode> corporateLogin(CorporateLoginDTO login) {
+		
+		Optional<CorporateDetails> corporate  = this.corporateRepository.findCorporateDetailsByCorporateEmail(login.getEmail());		
+		if(corporate.isEmpty() ) {
+		
+			ObjectMapper objectMapper = new ObjectMapper();
+			ObjectNode json = JsonNodeFactory.instance.objectNode();
+			ArrayNode arrayNode = objectMapper.createArrayNode();
+			arrayNode.add("User Not Found");
+			json.put("success", "false");
+			json.put("message", "Account not found");
+		  return ResponseEntity.status(HttpStatus.OK).body(json);
+		}
+		else {
+			var cop = corporate.get();
+			Optional<User> user = this.userRepository.getUserByCorporateId(cop);
+			
+				
+			
+             if(cop.getIsActive()==true && cop.getIsVerified()==true&& user.isPresent()) {
+            	ObjectMapper objectMapper = new ObjectMapper();
+         		ObjectNode json = JsonNodeFactory.instance.objectNode();
+         		ArrayNode arrayNode = objectMapper.createArrayNode();
+         		arrayNode.add("Account found");
+         		json.put("success", "false");
+         		json.put("message", "Proceed to login");
+         	  return ResponseEntity.status(HttpStatus.OK).body(json);
+             }else {
+            	ObjectMapper objectMapper = new ObjectMapper();
+          		ObjectNode json = JsonNodeFactory.instance.objectNode();
+          		ArrayNode arrayNode = objectMapper.createArrayNode();
+          		arrayNode.add("Inactive account");
+          		json.put("success", "false");
+          		json.put("message", "Inactive/unverifed account");
+          	  return ResponseEntity.status(HttpStatus.OK).body(json);
+             }
+			
+			}
+		
+		
+		
+	}
 
 	public boolean findPermissionByRoleName(Optional<Role> role, Object permission) {
 		List<Permission> permissions = this.rolePermissionRepository.findPermissionsByRoleAndPermissionName(role.get(),
@@ -218,8 +265,6 @@ public class UserService extends RestClientService implements UserDetailsService
 		if (opt.isPresent()) {
 
 			if (!(opt.get().isValid())) {
-				log.error("otp not valid");
-
 				ObjectNode json = JsonNodeFactory.instance.objectNode();
 				json.put("message", "otp code is Invalid");
 				return ResponseEntity.badRequest().body(json);

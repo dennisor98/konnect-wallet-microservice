@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import net.sasakonnect.wallet.RequestDto.Corporate;
+import net.sasakonnect.wallet.RequestDto.VerifyCorporate;
 import net.sasakonnect.wallet.RequestDto.Corporate.CorporateBuilder;
 import net.sasakonnect.wallet.RequestDto.VerifyEmailDTO;
 import net.sasakonnect.wallet.RequestDto.WalletClientAccountDto;
@@ -100,7 +101,7 @@ public class AdministrationController {
 	@RequirePermission(GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION)
 	public Object createCorporateDetails(@Valid @RequestBody Corporate param) {	
 		CorporateDetails corporate = CorporateDetails.builder()
-				.corporate_email(param.getCorporateEmail())
+				.corporateEmail(param.getCorporateEmail())
 				.phone(param.getPhone())
 				.isVerified(param.getIsVerified())
 				.isEmailVerified(param.getIsEmailVerified())
@@ -123,7 +124,7 @@ public class AdministrationController {
 	@PostMapping("/user/corporate/account/activate")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION)
-	public Object activateCorporateAccount(@Valid @RequestBody Map<String,Object> request) {
+	public Object activateCorporateAccount(@Valid @RequestBody VerifyCorporate  request) {
 		return this.corporateService.activateCorporateAccount(request);
 	}
 	

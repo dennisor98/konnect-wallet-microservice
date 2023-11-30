@@ -10,17 +10,21 @@ import org.springframework.data.repository.query.Param;
 
 
 import jakarta.transaction.Transactional;
+import net.sasakonnect.wallet.domain.CorporateDetails;
 import net.sasakonnect.wallet.domain.User;
 
 public interface UserRepository extends JpaRepository<User, String> {
 
 //	get all users
 	@Query("SELECT u  FROM User u")
-	 Optional<List<User>> findAllUsers();
-	
+	 Optional<List<User>> findAllUsers();	
 	//get corporate users
 	@Query("SELECT u FROM User u WHERE u.corporate IS NOT NULL")
 	Optional <List<User>> getCorporateUsers();
+	
+	@Query("SELECT u FROM User u WHERE u.corporate = :corporateId")
+	Optional<User> getUserByCorporateId(@Param("corporateId") CorporateDetails corporateId);
+
 
 	@Query("SELECT u FROM User u WHERE u.mobile = :mobile AND u.countryCode=:country_code ")
 	Optional<User> findByMobileAndCountryCode(@Param("mobile") String mobile, @Param("country_code") int countryCode);

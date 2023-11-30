@@ -18,7 +18,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CorporateDetails extends BaseWalletDomain implements Serializable {  
     @Column
-    private String  corporate_email;
+    private String  corporateEmail;
 
     @Column(name = "phone")
     private  String phone;
