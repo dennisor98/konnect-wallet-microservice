@@ -66,22 +66,26 @@ public class CorporateService {
   public Object activateCorporateAccount(VerifyCorporate corporate){
 	 Optional <CorporateDetails> corpAccount = this.corporateRepository.findById(corporate.getCorporateId());
 	 Map<String,Object> map =  new HashMap<>();
+	 Map<String,Object> responseObject = new HashMap<>();
 	 if(corpAccount.isEmpty()) {
 		 map.put("message","Account not found");
 		 map.put("success","false");
-		 return ResponseEntity.status(HttpStatus.OK).body(map);
+		 responseObject.put("payload", map);
+		 return ResponseEntity.status(HttpStatus.OK).body(responseObject);
 	 }else {
 		 Optional<User> user = this.userRepository.getUserByCorporateId(corpAccount.get());
 		 if(user.isEmpty()) {
 			 map.put("message","Not active user found for the corporate account");
 			 map.put("success","false");
-			 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
+			 responseObject.put("payload", map);
+			 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(responseObject);
 		 }else {
 			 var cop = corpAccount.get();
 			 if(corporate.getIsActive() == cop.getIsActive() || corporate.getIsVerified() == cop.getIsVerified()) {
-				 map.put("message","Account already in this state");
+				 map.put("message","Account already in this status");
 				 map.put("success","false");
-				 return ResponseEntity.status(HttpStatus.OK).body(map);
+				 responseObject.put("payload", map);
+				 return ResponseEntity.status(HttpStatus.OK).body(responseObject);
 			 }else {
 				 try {
 					 cop.setIsActive(corporate.getIsActive());
@@ -89,11 +93,13 @@ public class CorporateService {
 					 this.corporateRepository.save(cop);
 					 map.put("message","Account status modified");
 					 map.put("success","true");
-					 return ResponseEntity.status(HttpStatus.OK).body(map);
+					 responseObject.put("payload", map);
+					 return ResponseEntity.status(HttpStatus.OK).body(responseObject);
 				 }catch(Exception ex) {
 					 map.put("message", "A system error occured while processing request");
 					 map.put("success","false");
-					 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+					 responseObject.put("payload", map);
+					 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseObject);
 				 }
 			 }
 		 }
@@ -108,7 +114,21 @@ public class CorporateService {
 //  
 //  
   public Object getCorporateAccounts() {
-	  return this.corporateRepository.findAll();
+	  Map<String,Object> map = new HashMap<>();
+	  Map<String,Object> responseObject = new HashMap<>();
+	  try {
+		  var users =  this.corporateRepository.findAll();
+		  map.put("message", "Request successfull");
+		  map.put("success","true");
+		  map.put("users",users);
+		  responseObject.put("payload",map);
+		return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+	  }catch(Exception ex) {
+		  map.put("success","false");
+		  map.put("message","Internal Server Error");
+		  return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseObject);
+	  }
+	  
   }
   
   

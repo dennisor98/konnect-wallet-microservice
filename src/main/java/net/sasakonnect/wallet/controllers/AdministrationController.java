@@ -3,11 +3,14 @@ package net.sasakonnect.wallet.controllers;
 import javax.security.auth.login.AccountNotFoundException;
 
 import net.sasakonnect.wallet.services.CorporateService;
+import net.sasakonnect.wallet.services.PermissionService;
+import net.sasakonnect.wallet.services.RoleService;
 import net.sasakonnect.wallet.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +22,8 @@ import jakarta.validation.Valid;
 import net.sasakonnect.wallet.RequestDto.Corporate;
 import net.sasakonnect.wallet.RequestDto.VerifyCorporate;
 import net.sasakonnect.wallet.RequestDto.Corporate.CorporateBuilder;
+import net.sasakonnect.wallet.RequestDto.PermissionsToRoleDTO;
+import net.sasakonnect.wallet.RequestDto.RoleDTO;
 import net.sasakonnect.wallet.RequestDto.VerifyEmailDTO;
 import net.sasakonnect.wallet.RequestDto.WalletClientAccountDto;
 import net.sasakonnect.wallet.RequestDto.WalletClientDTO;
@@ -28,11 +33,16 @@ import net.sasakonnect.wallet.annotations.RequirePermission;
 import net.sasakonnect.wallet.constant.GlobalPermissionConstants;
 import net.sasakonnect.wallet.domain.CorporateDetails;
 import net.sasakonnect.wallet.domain.CorporateDetails.CorporateDetailsBuilder;
+import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.repository.PermissionRepository;
+import net.sasakonnect.wallet.repository.RolePermissionRepository;
+import net.sasakonnect.wallet.repository.RoleRepository;
 import net.sasakonnect.wallet.services.WalletClientService;
 import net.sasakonnect.wallet.services.WalletService;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 @RequestMapping("/administration")
 @Tag(name = "Administration", description = "Back Office  routes")
 @CustomController()
@@ -48,6 +58,17 @@ public class AdministrationController {
 	
 	@Autowired
 	CorporateService corporateService;
+	
+	@Autowired
+	RoleService roleService;
+	
+	@Autowired
+	PermissionService permissionService;
+	
+	@Autowired
+	RoleRepository roleRepository;
+	
+
 
 	@GetMapping("/upload/app")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CreateSuperApp.PERMISSION + "')")
@@ -139,5 +160,51 @@ public class AdministrationController {
 	public Object getCorporateEmails() {
 		return this.corporateService.getCorporateAccounts();
 	}
+  
+	@PostMapping("/role/create")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CreateUserRole.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.CreateUserRole.PERMISSION)
+	public Object createPermission(@Valid @RequestBody RoleDTO role) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		var rol=Role.builder().roleName(role.getRolename()).description(role.getRoleDescription()).user(user).build();
+		var resObject = this.roleService.insertRole(rol);
+		resObject.setUser(null);
+		return ResponseEntity.status(HttpStatus.OK).body(resObject);
+	}
+	
+	@GetMapping("role/getAll")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAllRoles.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.ViewAllRoles.PERMISSION)
+	public Object getAllRoles() {
+		return this.roleService.getAllRoles();
+	}
+	
+	@GetMapping("permissions/getAll")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAllPermissions.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.ViewAllPermissions.PERMISSION)
+	public Object getAllPermissions() {
+		return this.permissionService.getAllPermissions();
+	}
+	
+	@PostMapping("/role/assignPermissions")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.AssignRolePermissions.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.AssignRolePermissions.PERMISSION)
+	public Object assignPermissionsToRole(@Valid @RequestBody PermissionsToRoleDTO rolePermission) {
+		 Role role = this.roleRepository.getById(rolePermission.getRoleId());
+		 User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		return this.roleService.insertPermissionsNotAttachedToRole(role,user,rolePermission.getPermissionIds());
+		
+	}
+	
+	
+	@GetMapping("/user/permissions")
+	public Object getUserPermissions() {
+		 User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();                            
+         return this.roleService.getRolePermissions(user);            		   
+	}
+	
+	
 
 }

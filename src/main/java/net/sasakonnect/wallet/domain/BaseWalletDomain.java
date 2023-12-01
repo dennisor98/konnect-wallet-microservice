@@ -26,7 +26,7 @@ public abstract class BaseWalletDomain {
 	@Id
 	@UuidGenerator(style = UuidGenerator.Style.RANDOM)
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	protected String id;
+	public String id;
 
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
 	@JsonSerialize(using = CustomDateSerializer.class)

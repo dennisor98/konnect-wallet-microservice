@@ -273,7 +273,8 @@ public class UserService extends RestClientService implements UserDetailsService
 			this.smsService.deleteOtp(opt.get());
 			if (u != null) {
 				System.out.println(u.getCreatedAt());
-				var response = UserResponseDTO.builder().token(jwtService.generateToken(u))
+				var response = UserResponseDTO.builder()
+						.token(jwtService.generateToken(u))
 						.refreshToken(jwtService.generateRefreshToken(u)).middleName(u.getMiddleName())
 						.gender(u.getGender().name()).idType(u.getIdType().name()).idNumber(u.getIdNumber())
 						.onboardingRequestId(u.getOnboardingRequestId())

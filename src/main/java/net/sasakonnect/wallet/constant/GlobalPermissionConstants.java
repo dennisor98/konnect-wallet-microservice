@@ -7,8 +7,97 @@ import java.util.stream.Collectors;
 
 public final class GlobalPermissionConstants {
 	public static class CreateSuperApp extends PermissionEntry {
-		public static final String PERMISSION = "can.creat.super.app";
+		public static final String PERMISSION = "can.create.super.app";
 		public static final String DESCRIPTION = "user can create new super app";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
+	public static class CreateUserRole extends PermissionEntry {
+		public static final String PERMISSION = "can.create.user.role";
+		public static final String DESCRIPTION = "Can create any role in the system(use with caution)";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
+	
+	public static class AssignRolePermissions extends PermissionEntry {
+		public static final String PERMISSION = "can.assign.role.permissions";
+		public static final String DESCRIPTION = "Can assign permissions to an existing role)";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
+	
+	public static class ViewAllRoles extends PermissionEntry {
+		public static final String PERMISSION = "can.read.role.all";
+		public static final String DESCRIPTION = "Can read all the existing system roles)";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
+	
+	public static class EditRole extends PermissionEntry {
+		public static final String PERMISSION = "can.edit.role";
+		public static final String DESCRIPTION = "Can edit an existing system role)";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
+	
+	public static class EditPermission extends PermissionEntry {
+		public static final String PERMISSION = "can.edit.permission";
+		public static final String DESCRIPTION = "Can edit existing system permission)";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
+	
+	public static class ViewAllPermissions extends PermissionEntry {
+		public static final String PERMISSION = "can.read.permissions.all";
+		public static final String DESCRIPTION = "Can read all the existing system permissions)";
 
 		@Override
 		public String getPERMISSION() {
