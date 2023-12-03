@@ -8,7 +8,7 @@ build:
     - echo "Building the application on SSH server..."
     - hostname
     - pwd
-    - ssh -p 22 david@172.26.0.41  "mkdir -p cd /home/david/application/wallet-dev/ && cd /home/david/application/wallet-dev/ && chmod +x ./gradlew && ./gradlew clean && ./gradlew build -x test"
+    - ssh -p 22 ahdev@172.26.0.56  "mkdir -p  /home/ahdev/application/wallet-dev/ && cd /home/ahdev/application/wallet-dev/ && chmod +x ./gradlew && ./gradlew clean && ./gradlew build -x test"
     - echo "Source code built on remote server"
   only:
     - dev
@@ -19,7 +19,7 @@ move:
     - echo "Copying  from remote server to GitLab CI/CD..."
     - hostname
     - pwd
-    - scp -o StrictHostKeyChecking=no   -P 22 -r ./*  david@172.26.0.41:/home/david/application/wallet-dev/ 
+    - scp -o StrictHostKeyChecking=no   -P 22 -r ./*  ahdev@172.26.0.56:/home/ahdev/application/wallet-dev/ 
     - echo "Artifacts uploaded to GitLab CI/CD."
   only:
     - dev
