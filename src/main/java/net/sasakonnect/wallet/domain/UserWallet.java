@@ -21,7 +21,6 @@ public class UserWallet extends BaseWalletDomain implements Serializable {
 
 	@ManyToOne(fetch = FetchType.LAZY) // Add fetch = FetchType.LAZY
 	@JoinColumn(name = "user_id")
-
 	private User user;
 
 	@Override

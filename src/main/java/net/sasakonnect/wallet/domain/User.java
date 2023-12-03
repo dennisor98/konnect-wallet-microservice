@@ -23,6 +23,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrimaryKeyJoinColumn;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -67,6 +68,11 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 
 	@Column(nullable = false, unique = true, length = 50)
 	private String idNumber;
+	
+	
+	 @OneToOne
+     @JoinColumn(name="corporate_id",referencedColumnName="id",nullable=true)
+	private CorporateDetails corporate;
 
 	@Column(length = 50, unique = true)
 	private String onboardingRequestId;
@@ -103,7 +109,7 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 
 	@OneToOne(mappedBy = "user")
 	private UserRole userRole;
-
+	
 	@OneToMany(mappedBy = "user")
 	private List<UserDevice> userDevices;
 	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
+import net.sasakonnect.wallet.RequestDto.CorporateLoginDTO;
 import net.sasakonnect.wallet.RequestDto.UserLogin;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.RefreshMiddleware;
@@ -54,6 +55,11 @@ public class UserController {
 //		this.jobProducer.enqueueJob("firebase", myBean);
 
 		return userService.userLogin(loginDto);
+	}
+	
+	@PostMapping("corporateLogin")
+	public ResponseEntity<ObjectNode> corporateSignin(@Valid @RequestBody CorporateLoginDTO loginDTO) {
+		return userService.corporateLogin(loginDTO);
 	}
 
 	@PostMapping("confirmOtp")

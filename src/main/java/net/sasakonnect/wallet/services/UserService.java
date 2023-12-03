@@ -1,10 +1,12 @@
 package net.sasakonnect.wallet.services;
 
+
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -39,14 +41,17 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.ChangePin;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
+import net.sasakonnect.wallet.RequestDto.CorporateLoginDTO;
 import net.sasakonnect.wallet.RequestDto.PinDto;
 import net.sasakonnect.wallet.RequestDto.UserLogin;
 import net.sasakonnect.wallet.ResponseDto.UserResponseDTO;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
+import net.sasakonnect.wallet.domain.CorporateDetails;
 import net.sasakonnect.wallet.domain.Permission;
 import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.UserPin;
+import net.sasakonnect.wallet.repository.CorporateDetailsRepository;
 import net.sasakonnect.wallet.repository.PermissionRepository;
 import net.sasakonnect.wallet.repository.RolePermissionRepository;
 import net.sasakonnect.wallet.repository.RoleRepository;
@@ -70,7 +75,8 @@ public class UserService extends RestClientService implements UserDetailsService
 	private UserRoleRepository userRoleRepository;
 	@Autowired
 	private UserPinRepository userPinRepository;
-
+	@Autowired
+	CorporateDetailsRepository corporateRepository;
 	@Autowired
 	private RoleRepository roleRepository;
 	@Autowired
@@ -84,6 +90,57 @@ public class UserService extends RestClientService implements UserDetailsService
 	String profileActive;
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneOffset.UTC);
 
+
+	public Object getAllUsers(){
+		Map<String,Object> resObject = new HashMap<String,Object>();
+		try {
+			Optional<List<User>> user = this.userRepository.findAllUsers();
+			List<Map<String, Object>> userMaps = user.orElse(Collections.emptyList()).stream()
+			        .map(u -> {
+			            Map<String, Object> map = new HashMap<>();
+			            map.put("firstname", u.getFirstName());
+			            map.put("lastname", u.getLastName());
+			            map.put("user_id",u.getId());
+			            map.put("phone",u.getMobile());
+			            // Add other mappings as needed
+			            return map;
+			        })
+			        .collect(Collectors.toList());
+			resObject.put("success","true");
+			resObject.put("payload",userMaps);
+			return ResponseEntity.status(HttpStatus.ACCEPTED).body(resObject);
+		}catch(Exception e) {
+		    resObject.put("success","false");
+			resObject.put("message","An error occured")	;		
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resObject);
+		}
+			
+	}
+	
+	public Object getCorporateUsers(){
+		Map<String,Object> resObject = new HashMap<String,Object>();
+		try {
+			Optional<List<User>> user = this.userRepository.getCorporateUsers();
+			List<Map<String, Object>> userMaps = user.orElse(Collections.emptyList()).stream()
+					.map(u->{
+			            Map<String, Object> map = new HashMap<>();
+			            map.put("firstname", u.getFirstName());
+			            map.put("lastname", u.getLastName());
+			            map.put("user_id",u.getId());
+			            map.put("phone",u.getMobile());
+			          return map;
+					})
+					.collect(Collectors.toList());
+			resObject.put("success","true");
+			resObject.put("payload",userMaps);
+			return resObject;
+		}catch(Exception ex) {
+			 resObject.put("success","false");
+				resObject.put("message","An error occured")	;		
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resObject);  
+		}
+//			  return this.userRepository.getCorporateUsers();	  
+	}
 	public Optional<User> getUserById(String id) {
 		return this.userRepository.findById(id);
 
@@ -148,6 +205,49 @@ public class UserService extends RestClientService implements UserDetailsService
 		}
 
 	}
+	
+	public ResponseEntity<ObjectNode> corporateLogin(CorporateLoginDTO login) {
+		
+		Optional<CorporateDetails> corporate  = this.corporateRepository.findCorporateDetailsByCorporateEmail(login.getEmail());		
+		if(corporate.isEmpty() ) {
+		
+			ObjectMapper objectMapper = new ObjectMapper();
+			ObjectNode json = JsonNodeFactory.instance.objectNode();
+			ArrayNode arrayNode = objectMapper.createArrayNode();
+			arrayNode.add("User Not Found");
+			json.put("success", "false");
+			json.put("message", "Account not found");
+		  return ResponseEntity.status(HttpStatus.OK).body(json);
+		}
+		else {
+			var cop = corporate.get();
+			Optional<User> user = this.userRepository.getUserByCorporateId(cop);
+			
+				
+			
+             if(cop.getIsActive()==true && cop.getIsVerified()==true&& user.isPresent()) {
+            	ObjectMapper objectMapper = new ObjectMapper();
+         		ObjectNode json = JsonNodeFactory.instance.objectNode();
+         		ArrayNode arrayNode = objectMapper.createArrayNode();
+         		arrayNode.add("Account found");
+         		json.put("success", "false");
+         		json.put("message", "Proceed to login");
+         	  return ResponseEntity.status(HttpStatus.OK).body(json);
+             }else {
+            	ObjectMapper objectMapper = new ObjectMapper();
+          		ObjectNode json = JsonNodeFactory.instance.objectNode();
+          		ArrayNode arrayNode = objectMapper.createArrayNode();
+          		arrayNode.add("Inactive account");
+          		json.put("success", "false");
+          		json.put("message", "Inactive/unverifed account");
+          	  return ResponseEntity.status(HttpStatus.OK).body(json);
+             }
+			
+			}
+		
+		
+		
+	}
 
 	public boolean findPermissionByRoleName(Optional<Role> role, Object permission) {
 		List<Permission> permissions = this.rolePermissionRepository.findPermissionsByRoleAndPermissionName(role.get(),
@@ -165,8 +265,6 @@ public class UserService extends RestClientService implements UserDetailsService
 		if (opt.isPresent()) {
 
 			if (!(opt.get().isValid())) {
-				log.error("otp not valid");
-
 				ObjectNode json = JsonNodeFactory.instance.objectNode();
 				json.put("message", "otp code is Invalid");
 				return ResponseEntity.badRequest().body(json);
@@ -175,7 +273,8 @@ public class UserService extends RestClientService implements UserDetailsService
 			this.smsService.deleteOtp(opt.get());
 			if (u != null) {
 				System.out.println(u.getCreatedAt());
-				var response = UserResponseDTO.builder().token(jwtService.generateToken(u))
+				var response = UserResponseDTO.builder()
+						.token(jwtService.generateToken(u))
 						.refreshToken(jwtService.generateRefreshToken(u)).middleName(u.getMiddleName())
 						.gender(u.getGender().name()).idType(u.getIdType().name()).idNumber(u.getIdNumber())
 						.onboardingRequestId(u.getOnboardingRequestId())
@@ -378,7 +477,7 @@ public class UserService extends RestClientService implements UserDetailsService
 		var bycryp = new BCryptPasswordEncoder();
 		var userPinRepository = this.userPinRepository.getUserPinThatIsNotArchived(user);
 		if (userPinRepository.isPresent() && userPinRepository.get().size() > 0
-				&& !(userPinRepository.get().get(0).getPinAttempts() >= maxpinattempt)) {
+				&& !(userPinRepository.get().get(0).getPinAttempts() >= this.maxpinattempt)) {
 			if (bycryp.matches(user.getId() + setPin.getPin(), userPinRepository.get().get(0).getPin())) {
 				var token = this.jwtService.generateTokenForWindow(user);
 				Map<String, Object> map = new HashMap<String, Object>();

@@ -25,7 +25,6 @@ public class Bank extends BaseWalletDomain implements Serializable {
 
 	@Column(name = "bank_name")
 	private String bankName;
-
 	@Column(name = "bank_code")
 	private String bankCode;
 	@Column
@@ -35,6 +34,7 @@ public class Bank extends BaseWalletDomain implements Serializable {
 	@Column
 	private String formerName;
 	@Column
+//  
 	@NotNull
 	private String imageurl;
 
