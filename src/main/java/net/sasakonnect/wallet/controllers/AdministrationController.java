@@ -42,6 +42,7 @@ import net.sasakonnect.wallet.services.WalletClientService;
 import net.sasakonnect.wallet.services.WalletService;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 @RequestMapping("/administration")
 @Tag(name = "Administration", description = "Back Office  routes")
@@ -191,18 +192,14 @@ public class AdministrationController {
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.AssignRolePermissions.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.AssignRolePermissions.PERMISSION)
 	public Object assignPermissionsToRole(@Valid @RequestBody PermissionsToRoleDTO rolePermission) {
-		 Role role = this.roleRepository.getById(rolePermission.getRoleId());
-		 User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-		return this.roleService.insertPermissionsNotAttachedToRole(role,user,rolePermission.getPermissionIds());
+		return this.roleService.insertPermissionsNotAttachedToRole(rolePermission);
 		
 	}
 	
 	
 	@GetMapping("/user/permissions")
-	public Object getUserPermissions() {
-		 User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();                            
-         return this.roleService.getRolePermissions(user);            		   
+	public Object getUserPermissions() {                           
+         return this.roleService.getUserPermissions();            		   
 	}
 	
 	

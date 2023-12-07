@@ -2,6 +2,8 @@ package net.sasakonnect.wallet.domain;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.IdClass;
@@ -16,11 +18,12 @@ public class UserWallet extends BaseWalletDomain implements Serializable {
 
 	@ManyToOne(fetch = FetchType.LAZY) // Add fetch = FetchType.LAZY
 	@JoinColumn(name = "wallet_id")
-
+    @JsonIgnore()
 	private Wallet wallet;
 
 	@ManyToOne(fetch = FetchType.LAZY) // Add fetch = FetchType.LAZY
 	@JoinColumn(name = "user_id")
+	 @JsonIgnore()
 	private User user;
 
 	@Override

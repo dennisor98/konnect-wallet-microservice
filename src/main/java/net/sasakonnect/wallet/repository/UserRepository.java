@@ -16,8 +16,8 @@ import net.sasakonnect.wallet.domain.User;
 public interface UserRepository extends JpaRepository<User, String> {
 
 //	get all users
-	@Query("SELECT u  FROM User u")
-	 Optional<List<User>> findAllUsers();	
+//	@Query("SELECT u  FROM User u")
+//	 Optional<List<User>> findAllUsers();	
 	//get corporate users
 	@Query("SELECT u FROM User u WHERE u.corporate IS NOT NULL")
 	Optional <List<User>> getCorporateUsers();
@@ -31,6 +31,9 @@ public interface UserRepository extends JpaRepository<User, String> {
 
 	@Query("SELECT u FROM User u JOIN FETCH u.userWallets uw JOIN FETCH uw.wallet WHERE u.id = :userId")
 	Optional<User> findUserWithUserWalletsById(@Param("userId") String userId);
+	
+	@Query("SELECT u FROM User u LEFT JOIN FETCH u.userRole ur LEFT JOIN FETCH ur.role r  LEFT JOIN FETCH u.userWallets uw LEFT JOIN FETCH uw.wallet ")
+	Optional<List<User>> findAllusers();
 
 	@Query("SELECT u FROM User u JOIN u.userWallets uw WHERE uw.wallet.accountId = :accountId")
 	Optional<User> findUserByWalletAccountId(@Param("accountId") String accountId);;
