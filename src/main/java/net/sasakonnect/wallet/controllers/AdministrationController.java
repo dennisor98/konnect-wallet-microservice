@@ -108,7 +108,7 @@ public class AdministrationController {
 		return  this.userService.getAllUsers();
 	}
 	
-	@GetMapping("/users/corporate/getAll")
+	@GetMapping("/user/corporate")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION)
 	public Object getAllCorporateUser(){
