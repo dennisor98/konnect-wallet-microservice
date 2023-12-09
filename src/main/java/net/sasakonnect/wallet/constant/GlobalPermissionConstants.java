@@ -109,6 +109,21 @@ public final class GlobalPermissionConstants {
 			return DESCRIPTION;
 		}
 	}
+	
+	public static class CanSearchUsers extends PermissionEntry {
+		public static final String PERMISSION = "can.search.user";
+		public static final String DESCRIPTION = "Can search users by the specified parameter)";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
 
 	public static class DisableSuperApp extends PermissionEntry {
 		public static final String PERMISSION = "can.disable.super.app";

@@ -151,7 +151,14 @@ public class UserService extends RestClientService implements UserDetailsService
 			            map.put("lastname", u.getLastName());
 			            map.put("user_id",u.getId());
 			            map.put("phone",u.getMobile());
-			            map.put("corporate", u.getCorporate());          
+			            map.put("corporate", u.getCorporate());
+			            if(u.getUserRole()!=null){
+				            map.put("role", u.getUserRole().getRole());
+
+			        	}else {
+				            map.put("role",null);
+
+			        	}
 			           return map;
 					})
 					.collect(Collectors.toList());
@@ -269,6 +276,42 @@ public class UserService extends RestClientService implements UserDetailsService
 			
 			}
 		
+		
+		
+	}
+	
+	
+	public Object getUseByPhone(String phone) {
+		Map<String,Object> map = new HashMap<>();
+		
+		
+		try {
+			var user = this.userRepository.findByMobile(phone);
+			if(user.isPresent()) {
+				var u  = user.get();
+				Map<String,Object> userMap  = new HashMap<>();
+				userMap.put("firstname",u.getFirstName());
+				userMap.put("lastname",u.getLastName());
+				userMap.put("id", u.getId());
+				
+				map.put("user",userMap);
+				map.put("message", "Request successful");
+				map.put("success", "true");
+				Map<String,Object> responseMap =  new HashMap<>();
+				responseMap.put("payload",map);
+				
+				return ResponseEntity.status(HttpStatus.OK).body(responseMap);
+			}else {
+				map.put("message","User not found");
+				map.put("success","false");
+				return ResponseEntity.status(HttpStatus.OK).body(map);
+			}
+		}catch(Exception ex) {
+			map.put("message","Unable to process request");
+		    map.put("error",ex);
+			map.put("success","false");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
 		
 		
 	}
