@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -42,6 +43,7 @@ import net.sasakonnect.wallet.services.WalletClientService;
 import net.sasakonnect.wallet.services.WalletService;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 @RequestMapping("/administration")
 @Tag(name = "Administration", description = "Back Office  routes")
@@ -107,11 +109,18 @@ public class AdministrationController {
 		return  this.userService.getAllUsers();
 	}
 	
-	@GetMapping("/users/corporate/getAll")
+	@GetMapping("/user/corporate")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION)
 	public Object getAllCorporateUser(){
 		return  this.userService.getCorporateUsers();
+	}
+	
+	@GetMapping("/user/phone/search")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanSearchUsers.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.CanSearchUsers.PERMISSION)
+	public Object searchUserbyPhone(@RequestParam("phone") String phone){
+		return  this.userService.getUseByPhone(phone);
 	}
 	
 	
@@ -191,18 +200,14 @@ public class AdministrationController {
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.AssignRolePermissions.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.AssignRolePermissions.PERMISSION)
 	public Object assignPermissionsToRole(@Valid @RequestBody PermissionsToRoleDTO rolePermission) {
-		 Role role = this.roleRepository.getById(rolePermission.getRoleId());
-		 User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-		return this.roleService.insertPermissionsNotAttachedToRole(role,user,rolePermission.getPermissionIds());
+		return this.roleService.insertPermissionsNotAttachedToRole(rolePermission);
 		
 	}
 	
 	
 	@GetMapping("/user/permissions")
-	public Object getUserPermissions() {
-		 User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();                            
-         return this.roleService.getRolePermissions(user);            		   
+	public Object getUserPermissions() {                           
+         return this.roleService.getUserPermissions();            		   
 	}
 	
 	

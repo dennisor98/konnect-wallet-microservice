@@ -93,25 +93,48 @@ public class UserService extends RestClientService implements UserDetailsService
 
 	public Object getAllUsers(){
 		Map<String,Object> resObject = new HashMap<String,Object>();
+		Map<String,Object> payloadMap = new HashMap<>();
 		try {
-			Optional<List<User>> user = this.userRepository.findAllUsers();
-			List<Map<String, Object>> userMaps = user.orElse(Collections.emptyList()).stream()
-			        .map(u -> {
-			            Map<String, Object> map = new HashMap<>();
-			            map.put("firstname", u.getFirstName());
-			            map.put("lastname", u.getLastName());
-			            map.put("user_id",u.getId());
-			            map.put("phone",u.getMobile());
-			            // Add other mappings as needed
-			            return map;
-			        })
-			        .collect(Collectors.toList());
-			resObject.put("success","true");
-			resObject.put("payload",userMaps);
+			Optional<List<User>> user = this.userRepository.findAllusers();
+			var us=user.get();
+			log.error("users" +us.size());
+			
+		var usermaps=	us.stream().map(u->{
+	            Map<String, Object> map = new HashMap<>();
+	            map.put("id",u.getId());
+	            map.put("firstname", u.getFirstName());
+	            map.put("lastname", u.getLastName());
+	            map.put("user_id",u.getId());
+	            map.put("phone",u.getMobile());
+//	            map.put("wallet", u.getUserWallets());
+	            map.put("corporate",u.getCorporate());		
+	            if(u.getUserRole()!=null){
+		            map.put("role", u.getUserRole().getRole());
+
+	        	}else {
+		            map.put("role",null);
+
+	        	}
+	        	if(u.getUserWallets() !=null && !u.getUserWallets().isEmpty()) {
+	        		map.put("wallet", u.getUserWallets().get(0).getWallet());
+	        	}else {
+	        		map.put("wallet","null");
+	        	}
+	            // Add other mappings as needed
+	            return map;
+	            
+			}).collect(Collectors.toList());
+			
+			
+			payloadMap.put("success","true");
+			payloadMap.put("users",usermaps);
+			resObject.put("payload",payloadMap);
 			return ResponseEntity.status(HttpStatus.ACCEPTED).body(resObject);
 		}catch(Exception e) {
-		    resObject.put("success","false");
-			resObject.put("message","An error occured")	;		
+			payloadMap.put("success","false");
+			payloadMap.put("message","A system error occured");
+			payloadMap.put("error",e.getMessage());
+			resObject.put("payload",payloadMap);
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resObject);
 		}
 			
@@ -128,7 +151,15 @@ public class UserService extends RestClientService implements UserDetailsService
 			            map.put("lastname", u.getLastName());
 			            map.put("user_id",u.getId());
 			            map.put("phone",u.getMobile());
-			          return map;
+			            map.put("corporate", u.getCorporate());
+			            if(u.getUserRole()!=null){
+				            map.put("role", u.getUserRole().getRole());
+
+			        	}else {
+				            map.put("role",null);
+
+			        	}
+			           return map;
 					})
 					.collect(Collectors.toList());
 			resObject.put("success","true");
@@ -245,6 +276,42 @@ public class UserService extends RestClientService implements UserDetailsService
 			
 			}
 		
+		
+		
+	}
+	
+	
+	public Object getUseByPhone(String phone) {
+		Map<String,Object> map = new HashMap<>();
+		
+		
+		try {
+			var user = this.userRepository.findByMobile(phone);
+			if(user.isPresent()) {
+				var u  = user.get();
+				Map<String,Object> userMap  = new HashMap<>();
+				userMap.put("firstname",u.getFirstName());
+				userMap.put("lastname",u.getLastName());
+				userMap.put("id", u.getId());
+				
+				map.put("user",userMap);
+				map.put("message", "Request successful");
+				map.put("success", "true");
+				Map<String,Object> responseMap =  new HashMap<>();
+				responseMap.put("payload",map);
+				
+				return ResponseEntity.status(HttpStatus.OK).body(responseMap);
+			}else {
+				map.put("message","User not found");
+				map.put("success","false");
+				return ResponseEntity.status(HttpStatus.OK).body(map);
+			}
+		}catch(Exception ex) {
+			map.put("message","Unable to process request");
+		    map.put("error",ex);
+			map.put("success","false");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
 		
 		
 	}

@@ -1,6 +1,7 @@
 package net.sasakonnect.wallet.domain;
 
 import java.io.Serializable;
+import java.util.Optional;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
