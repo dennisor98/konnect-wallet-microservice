@@ -9,7 +9,7 @@ build:
     - hostname
     - pwd
 
-    - ssh -p 22 ahdev@172.26.0.41  "mkdir -p  /home/ahdev/application/wallet/ && cd /home/ahdev/application/wallet/ && chmod +x ./gradlew && ./gradlew clean && ./gradlew build -x test"
+    - ssh wallet  "mkdir -p  /home/ahdev/application/wallet/ && cd /home/ahdev/application/wallet/ && chmod +x ./gradlew && ./gradlew clean && ./gradlew build -x test"
 
 
     - echo "Source code built on remote server"
@@ -24,7 +24,7 @@ move:
     - pwd
 
 
-    - scp -o StrictHostKeyChecking=no   -P 22 -r ./*  ahdev@172.26.0.41:/home/ahdev/application/wallet/ 
+    - scp -o StrictHostKeyChecking=no   -r ./*  wallet:/home/ahdev/application/wallet/ 
 
     - echo "Artifacts uploaded to GitLab CI/CD."
   only:
