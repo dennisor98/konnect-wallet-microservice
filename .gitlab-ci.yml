@@ -8,7 +8,6 @@ build:
     - echo "Building the application on SSH server..."
     - hostname
     - pwd
-
     - ssh wallet  "mkdir -p  /home/ahdev/application/wallet/ && cd /home/ahdev/application/wallet/ && chmod +x ./gradlew && ./gradlew clean && ./gradlew build -x test"
 
 
