@@ -1,6 +1,6 @@
 stages:
-  - move
   - build
+  - move
 
 build:
   stage: build
