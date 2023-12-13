@@ -283,8 +283,6 @@ public class UserService extends RestClientService implements UserDetailsService
 	
 	public Object getUseByPhone(String phone) {
 		Map<String,Object> map = new HashMap<>();
-		
-		
 		try {
 			var user = this.userRepository.findByMobile(phone);
 			if(user.isPresent()) {
