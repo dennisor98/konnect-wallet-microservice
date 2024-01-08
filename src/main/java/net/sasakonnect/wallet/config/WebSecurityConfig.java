@@ -81,8 +81,7 @@ public class WebSecurityConfig {
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE","OPTIONS"));
 
 		// Specify the allowed headers (e.g., Content-Type, Authorization)
-		configuration.setAllowedHeaders(Arrays.asList("Content-Type", "Authorization"));
-
+		configuration.setAllowedHeaders(Arrays.asList("Content-Type", "Authorization", "X-Custom-Header"));
 		// Allow credentials (e.g., cookies)
 		configuration.setAllowCredentials(true);
 

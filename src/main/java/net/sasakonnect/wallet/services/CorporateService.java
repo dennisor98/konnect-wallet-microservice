@@ -29,39 +29,7 @@ public class CorporateService {
 	  return this.corporateRepository.save(corporate);
   }
   
-//  public Object activateCorporateAccount(Map<String,Object> request) {
-//	  Map<String,Object> resMap = new HashMap<>(); 
-//	  if(request.get("id")!=null) {
-//		var corporateAccount=  this.corporateRepository.findById(request.get("id").toString());
-//		if (corporateAccount.isPresent()) {
-//			var account = corporateAccount.get();
-//			account.setIsActive(true);
-//			try {
-//				this.corporateRepository.save(account);
-//				resMap.put("success", "true");
-//				resMap.put("message", "Account activated");
-//				return ResponseEntity.status(HttpStatus.OK).body(resMap);
-//			} catch (Exception ex) {
-//				resMap.put("success", "false");
-//				resMap.put("message", "Failed");
-//				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resMap);
-//			}
-//			
-//		}else {
-//			resMap.put("success", "false");
-//			resMap.put("message","User not found");
-//			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resMap);
-//		}
-//	  }else {
-//		    resMap.put("success", "false");
-//			resMap.put("message","Required fields are empty");
-//			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resMap);
-//	  }
-//	
-//	  
-//	 
-//	  
-//  }
+
   
   public Object activateCorporateAccount(VerifyCorporate corporate){
 	 Optional <CorporateDetails> corpAccount = this.corporateRepository.findById(corporate.getCorporateId());

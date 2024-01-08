@@ -288,10 +288,10 @@ public class UserService extends RestClientService implements UserDetailsService
 			if(user.isPresent()) {
 				var u  = user.get();
 				Map<String,Object> userMap  = new HashMap<>();
+				userMap.put("id", u.getId());
 				userMap.put("firstname",u.getFirstName());
 				userMap.put("lastname",u.getLastName());
-				userMap.put("id", u.getId());
-				
+				userMap.put("phone",u.getMobile());
 				map.put("user",userMap);
 				map.put("message", "Request successful");
 				map.put("success", "true");
