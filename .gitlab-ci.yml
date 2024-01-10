@@ -24,7 +24,7 @@ move:
 
 
 
-    - scp -o StrictHostKeyChecking=no   -r ./*  wallet:/home/ahdev/application/wallet-dev/ 
+    - scp -o StrictHostKeyChecking=no   -r ./*  wallet-dev:/home/ahdev/application/wallet-dev/ 
 
 
     - echo "Artifacts uploaded to GitLab CI/CD."
