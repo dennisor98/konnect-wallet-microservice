@@ -75,10 +75,11 @@ public class WebSecurityConfig {
 		CorsConfiguration configuration = new CorsConfiguration();
 
 		// Specify the allowed origins (replace "*" with your specific origin)
-		configuration.setAllowedOrigins(Arrays.asList("https://gw.sasakonnect.net","http://localhost:4200","https://wallet.sasakonnect.net"));
+		configuration.setAllowedOrigins(
+				Arrays.asList("https://gw.sasakonnect.net", "http://localhost:4200", "https://wallet.sasakonnect.net"));
 
 		// Specify the allowed HTTP methods (e.g., GET, POST, PUT, DELETE)
-		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE","OPTIONS"));
+		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
 		// Specify the allowed headers (e.g., Content-Type, Authorization)
 		configuration.setAllowedHeaders(Arrays.asList("Content-Type", "Authorization"));
@@ -105,10 +106,10 @@ public class WebSecurityConfig {
 				"/webjars/**").permitAll()
 
 				.requestMatchers("/user/userLogin", "/user/confirmOtp", "/konnect/callBack", "/user/refresh/token",
-						"/wallet/getOnboardingStatusById", "/sdk/transaction/{id}","user/corporateLogin")
+						"/wallet/getOnboardingStatusById", "/sdk/transaction/{id}", "user/corporateLogin")
 
-				.permitAll().requestMatchers("/wallet").permitAll()
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Permit OPTIONS requests
+				.permitAll().requestMatchers("/wallet").permitAll().requestMatchers(HttpMethod.OPTIONS, "/**")
+				.permitAll() // Permit OPTIONS requests
 
 				.anyRequest().authenticated()
 
@@ -118,6 +119,7 @@ public class WebSecurityConfig {
 		);
 		http.httpBasic(basic -> basic.disable());
 		http.csrf(csrf -> csrf.disable());
+		http.cors(cors -> cors.disable());
 		http.headers(headers -> headers.disable());
 
 		http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

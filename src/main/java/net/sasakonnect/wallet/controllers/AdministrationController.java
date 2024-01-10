@@ -127,9 +127,10 @@ public class AdministrationController {
 	
 	
 	@PostMapping("/user/corporate/create")
-	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION + "')")
-	@RequirePermission(GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION)
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CreateCorporateAccount.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.CreateCorporateAccount.PERMISSION)
 	public Object createCorporateDetails(@Valid @RequestBody Corporate param) {	
+		Map<String,Object> map =  new HashMap<>();
 		CorporateDetails corporate = CorporateDetails.builder()
 				.corporateEmail(param.getCorporateEmail())
 				.phone(param.getPhone())
@@ -140,9 +141,13 @@ public class AdministrationController {
 		User user =  userService.getUserById(param.getUserId()).get();
 		if(user !=null) {
 			user.setCorporate(corporate);
-			return this.corporateService.createCorporateDetails(corporate);
+		    if(user.getCorporate() !=null) {
+		    	map.put("message","User already has corporate account");
+		    	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		    }else {
+		    	return this.corporateService.createCorporateDetails(corporate);
+		    }
 		}else {
-			Map<String,Object> map =  new HashMap<>();
 			map.put("message","User Not found");
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(map);
 		}
