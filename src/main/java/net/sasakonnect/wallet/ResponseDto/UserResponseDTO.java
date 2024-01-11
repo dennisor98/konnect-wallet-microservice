@@ -28,5 +28,6 @@ public class UserResponseDTO {
 	private String monthlyIncome;
 	private String refreshToken;
 	private String token;
+	private String open_id;
 
 }
