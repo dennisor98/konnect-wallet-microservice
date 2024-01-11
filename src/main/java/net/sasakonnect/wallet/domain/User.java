@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -23,7 +24,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.PrimaryKeyJoinColumn;
+import jakarta.persistence.PrePersist;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -42,6 +43,16 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 	Set<SimpleGrantedAuthority> simple = new HashSet<SimpleGrantedAuthority>();
 	@Column(nullable = false)
 	private String firstName;
+	@Column(nullable = false, unique = true)
+	private String openId;
+
+	@PrePersist
+	private void generateOpenId() {
+		if (this.openId == null) {
+			// Generate your formatted openId here
+			this.openId = generateFormattedOpenId();
+		}
+	}
 
 	@Column
 	private String middleName;
@@ -68,10 +79,9 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 
 	@Column(nullable = false, unique = true, length = 50)
 	private String idNumber;
-	
-	
-	 @OneToOne
-     @JoinColumn(name="corporate_id",referencedColumnName="id",nullable=true)
+
+	@OneToOne
+	@JoinColumn(name = "corporate_id", referencedColumnName = "id", nullable = true)
 	private CorporateDetails corporate;
 
 	@Column(length = 50, unique = true)
@@ -109,7 +119,7 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 
 	@OneToOne(mappedBy = "user")
 	private UserRole userRole;
-	
+
 	@OneToMany(mappedBy = "user")
 	private List<UserDevice> userDevices;
 	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -178,10 +188,16 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 
 	@Override
 	public String toString() {
-		return "User{" + "id=" + id + ", firstName='" + firstName + '\'' + ", lastName='" + lastName + '\''
-				+ ", address='" + address + '\'' +
+		return "User{" + "openId=" + openId + "," + "id=" + id + ", firstName='" + firstName + '\'' + ", lastName='"
+				+ lastName + '\'' + ", address='" + address + '\'' +
 				// Include other non-lazy attributes here
 				'}';
+	}
+
+	private String generateFormattedOpenId() {
+		// Implement your logic to generate the formatted openId
+		// For example, using UUID.randomUUID() and formatting it
+		return "w_oid" + UUID.randomUUID().toString();
 	}
 
 }
