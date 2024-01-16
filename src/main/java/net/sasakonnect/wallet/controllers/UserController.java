@@ -33,11 +33,14 @@ import net.sasakonnect.wallet.tools.redis.Queueable;
 @Tag(name = "User", description = "User routes")
 
 public class UserController {
+
 	private final UserService userService;
 	@Autowired
 	private TransactionService transactionService;
+
 	@Autowired
 	private JobProducer<Queueable<List<FirebaseMessage>>> jobProducer;
+
 	@Autowired
 	FirebaseWrapper firebaseWrapper;
 
@@ -56,7 +59,7 @@ public class UserController {
 
 		return userService.userLogin(loginDto);
 	}
-	
+
 	@PostMapping("corporateLogin")
 	public ResponseEntity<ObjectNode> corporateSignin(@Valid @RequestBody CorporateLoginDTO loginDTO) {
 		return userService.corporateLogin(loginDTO);

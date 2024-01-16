@@ -1,6 +1,5 @@
 package net.sasakonnect.wallet.services;
 
-
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -90,88 +89,85 @@ public class UserService extends RestClientService implements UserDetailsService
 	String profileActive;
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneOffset.UTC);
 
-
-	public Object getAllUsers(){
-		Map<String,Object> resObject = new HashMap<String,Object>();
-		Map<String,Object> payloadMap = new HashMap<>();
+	public Object getAllUsers() {
+		Map<String, Object> resObject = new HashMap<String, Object>();
+		Map<String, Object> payloadMap = new HashMap<>();
 		try {
 			Optional<List<User>> user = this.userRepository.findAllusers();
-			var us=user.get();
-			log.error("users" +us.size());
-			
-		var usermaps=	us.stream().map(u->{
-	            Map<String, Object> map = new HashMap<>();
-	            map.put("id",u.getId());
-	            map.put("firstname", u.getFirstName());
-	            map.put("lastname", u.getLastName());
-	            map.put("user_id",u.getId());
-	            map.put("phone",u.getMobile());
+			var us = user.get();
+			log.error("users" + us.size());
+
+			var usermaps = us.stream().map(u -> {
+				Map<String, Object> map = new HashMap<>();
+				map.put("id", u.getId());
+				map.put("firstname", u.getFirstName());
+				map.put("lastname", u.getLastName());
+				map.put("user_id", u.getId());
+				map.put("phone", u.getMobile());
 //	            map.put("wallet", u.getUserWallets());
-	            map.put("corporate",u.getCorporate());		
-	            if(u.getUserRole()!=null){
-		            map.put("role", u.getUserRole().getRole());
+				map.put("corporate", u.getCorporate());
+				if (u.getUserRole() != null) {
+					map.put("role", u.getUserRole().getRole());
 
-	        	}else {
-		            map.put("role",null);
+				} else {
+					map.put("role", null);
 
-	        	}
-	        	if(u.getUserWallets() !=null && !u.getUserWallets().isEmpty()) {
-	        		map.put("wallet", u.getUserWallets().get(0).getWallet());
-	        	}else {
-	        		map.put("wallet","null");
-	        	}
-	            // Add other mappings as needed
-	            return map;
-	            
+				}
+				if (u.getUserWallets() != null && !u.getUserWallets().isEmpty()) {
+					map.put("wallet", u.getUserWallets().get(0).getWallet());
+				} else {
+					map.put("wallet", "null");
+				}
+				// Add other mappings as needed
+				return map;
+
 			}).collect(Collectors.toList());
-			
-			
-			payloadMap.put("success","true");
-			payloadMap.put("users",usermaps);
-			resObject.put("payload",payloadMap);
+
+			payloadMap.put("success", "true");
+			payloadMap.put("users", usermaps);
+			resObject.put("payload", payloadMap);
 			return ResponseEntity.status(HttpStatus.ACCEPTED).body(resObject);
-		}catch(Exception e) {
-			payloadMap.put("success","false");
-			payloadMap.put("message","A system error occured");
-			payloadMap.put("error",e.getMessage());
-			resObject.put("payload",payloadMap);
+		} catch (Exception e) {
+			payloadMap.put("success", "false");
+			payloadMap.put("message", "A system error occured");
+			payloadMap.put("error", e.getMessage());
+			resObject.put("payload", payloadMap);
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resObject);
 		}
-			
+
 	}
-	
-	public Object getCorporateUsers(){
-		Map<String,Object> resObject = new HashMap<String,Object>();
+
+	public Object getCorporateUsers() {
+		Map<String, Object> resObject = new HashMap<String, Object>();
 		try {
 			Optional<List<User>> user = this.userRepository.getCorporateUsers();
-			List<Map<String, Object>> userMaps = user.orElse(Collections.emptyList()).stream()
-					.map(u->{
-			            Map<String, Object> map = new HashMap<>();
-			            map.put("firstname", u.getFirstName());
-			            map.put("lastname", u.getLastName());
-			            map.put("user_id",u.getId());
-			            map.put("phone",u.getMobile());
-			            map.put("corporate", u.getCorporate());
-			            if(u.getUserRole()!=null){
-				            map.put("role", u.getUserRole().getRole());
+			List<Map<String, Object>> userMaps = user.orElse(Collections.emptyList()).stream().map(u -> {
+				Map<String, Object> map = new HashMap<>();
+				map.put("firstname", u.getFirstName());
+				map.put("lastname", u.getLastName());
+				map.put("user_id", u.getId());
+				map.put("phone", u.getMobile());
+				map.put("corporate", u.getCorporate());
+				if (u.getUserRole() != null) {
+					map.put("role", u.getUserRole().getRole());
 
-			        	}else {
-				            map.put("role",null);
+				} else {
+					map.put("role", null);
 
-			        	}
-			           return map;
-					})
-					.collect(Collectors.toList());
-			resObject.put("success","true");
-			resObject.put("payload",userMaps);
+				}
+				return map;
+			}).collect(Collectors.toList());
+			resObject.put("success", "true");
+			resObject.put("payload", userMaps);
 			return resObject;
-		}catch(Exception ex) {
-			 resObject.put("success","false");
-				resObject.put("message","An error occured")	;		
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resObject);  
+		} catch (Exception ex) {
+			resObject.put("success", "false");
+			resObject.put("message", "An error occured");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resObject);
 		}
 //			  return this.userRepository.getCorporateUsers();	  
 	}
+
 	public Optional<User> getUserById(String id) {
 		return this.userRepository.findById(id);
 
@@ -236,82 +232,76 @@ public class UserService extends RestClientService implements UserDetailsService
 		}
 
 	}
-	
+
 	public ResponseEntity<ObjectNode> corporateLogin(CorporateLoginDTO login) {
-		
-		Optional<CorporateDetails> corporate  = this.corporateRepository.findCorporateDetailsByCorporateEmail(login.getEmail());		
-		if(corporate.isEmpty() ) {
-		
+
+		Optional<CorporateDetails> corporate = this.corporateRepository
+				.findCorporateDetailsByCorporateEmail(login.getEmail());
+		if (corporate.isEmpty()) {
+
 			ObjectMapper objectMapper = new ObjectMapper();
 			ObjectNode json = JsonNodeFactory.instance.objectNode();
 			ArrayNode arrayNode = objectMapper.createArrayNode();
 			arrayNode.add("User Not Found");
 			json.put("success", "false");
 			json.put("message", "Account not found");
-		  return ResponseEntity.status(HttpStatus.OK).body(json);
-		}
-		else {
+			return ResponseEntity.status(HttpStatus.OK).body(json);
+		} else {
 			var cop = corporate.get();
 			Optional<User> user = this.userRepository.getUserByCorporateId(cop);
-			
-				
-			
-             if(cop.getIsActive()==true && cop.getIsVerified()==true&& user.isPresent()) {
-            	ObjectMapper objectMapper = new ObjectMapper();
-         		ObjectNode json = JsonNodeFactory.instance.objectNode();
-         		ArrayNode arrayNode = objectMapper.createArrayNode();
-         		arrayNode.add("Account found");
-         		json.put("success", "false");
-         		json.put("message", "Proceed to login");
-         	  return ResponseEntity.status(HttpStatus.OK).body(json);
-             }else {
-            	ObjectMapper objectMapper = new ObjectMapper();
-          		ObjectNode json = JsonNodeFactory.instance.objectNode();
-          		ArrayNode arrayNode = objectMapper.createArrayNode();
-          		arrayNode.add("Inactive account");
-          		json.put("success", "false");
-          		json.put("message", "Inactive/unverifed account");
-          	  return ResponseEntity.status(HttpStatus.OK).body(json);
-             }
-			
+
+			if (cop.getIsActive() == true && cop.getIsVerified() == true && user.isPresent()) {
+				ObjectMapper objectMapper = new ObjectMapper();
+				ObjectNode json = JsonNodeFactory.instance.objectNode();
+				ArrayNode arrayNode = objectMapper.createArrayNode();
+				arrayNode.add("Account found");
+				json.put("success", "false");
+				json.put("message", "Proceed to login");
+				return ResponseEntity.status(HttpStatus.OK).body(json);
+			} else {
+				ObjectMapper objectMapper = new ObjectMapper();
+				ObjectNode json = JsonNodeFactory.instance.objectNode();
+				ArrayNode arrayNode = objectMapper.createArrayNode();
+				arrayNode.add("Inactive account");
+				json.put("success", "false");
+				json.put("message", "Inactive/unverifed account");
+				return ResponseEntity.status(HttpStatus.OK).body(json);
 			}
-		
-		
-		
+
+		}
+
 	}
-	
-	
+
 	public Object getUseByPhone(String phone) {
-		Map<String,Object> map = new HashMap<>();
+		Map<String, Object> map = new HashMap<>();
 		try {
 			var user = this.userRepository.findByMobile(phone);
-			if(user.isPresent()) {
-				var u  = user.get();
-				Map<String,Object> userMap  = new HashMap<>();
+			if (user.isPresent()) {
+				var u = user.get();
+				Map<String, Object> userMap = new HashMap<>();
 				userMap.put("id", u.getId());
-				userMap.put("firstname",u.getFirstName());
-				userMap.put("lastname",u.getLastName());
-				userMap.put("phone",u.getMobile());
-				map.put("user",userMap);
+				userMap.put("firstname", u.getFirstName());
+				userMap.put("lastname", u.getLastName());
+				userMap.put("phone", u.getMobile());
+				map.put("user", userMap);
 				map.put("message", "Request successful");
 				map.put("success", "true");
-				Map<String,Object> responseMap =  new HashMap<>();
-				responseMap.put("payload",map);
-				
+				Map<String, Object> responseMap = new HashMap<>();
+				responseMap.put("payload", map);
+
 				return ResponseEntity.status(HttpStatus.OK).body(responseMap);
-			}else {
-				map.put("message","User not found");
-				map.put("success","false");
+			} else {
+				map.put("message", "User not found");
+				map.put("success", "false");
 				return ResponseEntity.status(HttpStatus.OK).body(map);
 			}
-		}catch(Exception ex) {
-			map.put("message","Unable to process request");
-		    map.put("error",ex);
-			map.put("success","false");
+		} catch (Exception ex) {
+			map.put("message", "Unable to process request");
+			map.put("error", ex);
+			map.put("success", "false");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 		}
-		
-		
+
 	}
 
 	public boolean findPermissionByRoleName(Optional<Role> role, Object permission) {
@@ -338,11 +328,10 @@ public class UserService extends RestClientService implements UserDetailsService
 			this.smsService.deleteOtp(opt.get());
 			if (u != null) {
 				System.out.println(u.getCreatedAt());
-				var response = UserResponseDTO.builder()
-						.token(jwtService.generateToken(u))
+				var response = UserResponseDTO.builder().token(jwtService.generateToken(u))
 						.refreshToken(jwtService.generateRefreshToken(u)).middleName(u.getMiddleName())
 						.gender(u.getGender().name()).idType(u.getIdType().name()).idNumber(u.getIdNumber())
-						.onboardingRequestId(u.getOnboardingRequestId())
+						.onboardingRequestId(u.getOnboardingRequestId()).open_id(u.getOpenId())
 						.birthday(formatter.format(u.getBirthday().toInstant())).updatedAt(u.getUpdatedAt())
 						.kraPin(u.getKraPin()).employmentStatus(u.getEmploymentStatus().name())
 						.monthlyIncome(u.getMonthlyIncome().toString()).createdAt(u.getCreatedAt()).id(u.getId())

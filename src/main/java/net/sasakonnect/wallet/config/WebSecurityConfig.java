@@ -25,6 +25,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -75,13 +77,15 @@ public class WebSecurityConfig {
 		CorsConfiguration configuration = new CorsConfiguration();
 
 		// Specify the allowed origins (replace "*" with your specific origin)
-		configuration.setAllowedOrigins(Arrays.asList("https://gw.sasakonnect.net","https://wallet-admin-henna.vercel.app","http://localhost:4200","https://wallet.sasakonnect.net"));
+		configuration.setAllowedOrigins(
+				Arrays.asList("https://gw.sasakonnect.net", "http://localhost:4200", "https://wallet.sasakonnect.net"));
 
 		// Specify the allowed HTTP methods (e.g., GET, POST, PUT, DELETE)
-		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE","OPTIONS"));
+		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
 		// Specify the allowed headers (e.g., Content-Type, Authorization)
-		configuration.setAllowedHeaders(Arrays.asList("Content-Type", "Authorization", "X-Custom-Header"));
+		configuration.setAllowedHeaders(Arrays.asList("Content-Type", "Authorization"));
+
 		// Allow credentials (e.g., cookies)
 		configuration.setAllowCredentials(true);
 
@@ -104,10 +108,10 @@ public class WebSecurityConfig {
 				"/webjars/**").permitAll()
 
 				.requestMatchers("/user/userLogin", "/user/confirmOtp", "/konnect/callBack", "/user/refresh/token",
-						"/wallet/getOnboardingStatusById", "/sdk/transaction/{id}","user/corporateLogin")
+						"/wallet/getOnboardingStatusById", "/sdk/transaction/{id}", "user/corporateLogin")
 
-				.permitAll().requestMatchers("/wallet").permitAll()
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Permit OPTIONS requests
+				.permitAll().requestMatchers("/wallet").permitAll().requestMatchers(HttpMethod.OPTIONS, "/**")
+				.permitAll() // Permit OPTIONS requests
 
 				.anyRequest().authenticated()
 
@@ -117,6 +121,7 @@ public class WebSecurityConfig {
 		);
 		http.httpBasic(basic -> basic.disable());
 		http.csrf(csrf -> csrf.disable());
+		http.cors(cors -> cors.disable());
 		http.headers(headers -> headers.disable());
 
 		http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -187,6 +192,17 @@ public class WebSecurityConfig {
 
 	private SecurityScheme createAPIKeyScheme() {
 		return new SecurityScheme().type(SecurityScheme.Type.HTTP).bearerFormat("JWT").scheme("bearer");
+	}
+
+	@Bean
+	public WebMvcConfigurer corsConfigurer() {
+		return new WebMvcConfigurer() {
+			@Override
+			public void addCorsMappings(CorsRegistry registry) {
+				registry.addMapping("/**").allowedMethods("GET", "POST", "PUT", "DELETE").allowedOrigins("*")
+						.allowedHeaders("*");
+			}
+		};
 	}
 
 	@Bean
