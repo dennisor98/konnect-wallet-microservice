@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -105,6 +106,52 @@ public class TransactionService {
 		}
 
 		return null;
+	}
+	
+	
+	public Object getTransactionHistory(Integer pageNumber,Integer pageSize) {
+		
+		var transactions =  transactionRepository.findAll(PageRequest.of(pageNumber ==null?0:pageNumber,pageSize ==null?100:pageSize));
+//		transactions.nextPageable().
+		//var transactionsPayload:TransactionHistory = 
+//		Integer pageSize;
+//		   Integer currentPage;
+//		   Integer nextPage;
+//		   Boolean hasNextPage;
+//		   Boolean hasPreviousPage;
+		Map transactionsMap = new HashMap<String,Object>();
+		transactionsMap.put("transactions", transactions.get().collect(Collectors.toList()));
+		transactionsMap.put("pageSize", transactions.getSize());
+		transactionsMap.put("currentPage",transactions.getNumber());
+		transactionsMap.put("nextPage",transactions.hasNext()?transactions.nextPageable().getPageNumber() : null);
+		transactionsMap.put("hasNextPage",transactions.hasNext());
+		transactionsMap.put("hasPreviousPage",transactions.hasPrevious());
+		transactionsMap.put("totalItems", transactions.getTotalElements());
+		return transactionsMap;
+		
+	}
+	
+public Object getTransactionHistoryByAccountNumber(String accountNumber,Integer pageNumber,Integer pageSize) {
+		
+		var transactions =  transactionRepository
+			.findByAccountId(accountNumber,PageRequest.of(pageNumber ==null?0:pageNumber,pageSize ==null?100:pageSize));
+//		transactions.nextPageable().
+		//var transactionsPayload:TransactionHistory = 
+//		Integer pageSize;
+//		   Integer currentPage;
+//		   Integer nextPage;
+//		   Boolean hasNextPage;
+//		   Boolean hasPreviousPage;
+		Map<String, Object> transactionsMap = new HashMap<>();
+		transactionsMap.put("transactions", transactions.get().collect(Collectors.toList()));
+		transactionsMap.put("pageSize", transactions.getSize());
+		transactionsMap.put("currentPage",transactions.getNumber());
+		transactionsMap.put("nextPage",transactions.hasNext()?transactions.nextPageable().getPageNumber() : null);
+		transactionsMap.put("hasNextPage",transactions.hasNext());
+		transactionsMap.put("hasPreviousPage",transactions.hasPrevious());
+		transactionsMap.put("totalItems", transactions.getTotalElements());
+		return transactionsMap;
+		
 	}
 
 }

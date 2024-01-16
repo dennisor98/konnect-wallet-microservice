@@ -3,6 +3,8 @@ package net.sasakonnect.wallet.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,7 +15,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
 
 	@Query("SELECT t FROM Transaction t WHERE t.txId = :txId")
 	Optional<Transaction> findByTxId(@Param("txId") String txId);
-
 	@Query(nativeQuery = true, value = "SELECT DISTINCT account1 as account, account2 as name, u.id " + "FROM ( "
 			+ "    SELECT " + "        CASE " + "            WHEN t.account_id = :accountId THEN t.oppo_account_id "
 			+ "            ELSE t.account_id " + "        END AS account1, " + "        CASE "
@@ -32,5 +33,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
 			+ "AND (account1 IS NOT NULL AND account2 IS NOT NULL) "
 			+ "AND (account1 != 'string' AND account2 != 'string')")
 	List<Object[]> findDistinctInteractions(@Param("accountId") String accountId);
+	
+	@Query("SELECT t FROM Transaction t WHERE t.accountId =:accountId")
+    Page<Transaction> findByAccountId(@Param("accountId") String accountId,Pageable pageable);
 
 }

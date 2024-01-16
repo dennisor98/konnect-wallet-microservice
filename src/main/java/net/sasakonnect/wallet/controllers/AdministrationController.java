@@ -5,6 +5,7 @@ import javax.security.auth.login.AccountNotFoundException;
 import net.sasakonnect.wallet.services.CorporateService;
 import net.sasakonnect.wallet.services.PermissionService;
 import net.sasakonnect.wallet.services.RoleService;
+import net.sasakonnect.wallet.services.TransactionService;
 import net.sasakonnect.wallet.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -66,6 +67,9 @@ public class AdministrationController {
 	
 	@Autowired
 	PermissionService permissionService;
+	
+	@Autowired
+	TransactionService transactionService;
 	
 	@Autowired
 	RoleRepository roleRepository;
@@ -215,6 +219,29 @@ public class AdministrationController {
          return this.roleService.getUserPermissions();            		   
 	}
 	
+	
+	@GetMapping("/transactions/history")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION)
+	public Object getTransactionHistory(
+			@RequestParam(name="pageSize",defaultValue="20") Integer pageSize,
+			@RequestParam(name="pageNumber",defaultValue="0") Integer pageNumber
+
+			) {
+		return transactionService.getTransactionHistory(pageNumber,pageSize);
+	}
+	
+	@GetMapping("/transactions/history/user")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION)
+	public Object getTransactionHistoryByAccountNumber(
+			@RequestParam(name="acccountNumber") String acccountNumber,
+			@RequestParam(name="pageSize",defaultValue="20") Integer pageSize,
+			@RequestParam(name="pageNumber",defaultValue="0") Integer pageNumber
+
+			) {
+		return transactionService.getTransactionHistoryByAccountNumber(acccountNumber, pageNumber, pageSize);
+	}
 	
 
 }
