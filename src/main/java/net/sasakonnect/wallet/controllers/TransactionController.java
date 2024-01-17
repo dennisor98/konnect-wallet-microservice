@@ -7,6 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import net.sasakonnect.wallet.annotations.CustomController;
@@ -32,6 +33,15 @@ public class TransactionController {
 	@GetMapping("")
 	public ResponseEntity<Optional<User>> getTransactions() {
 		return ResponseEntity.ok(userService.getUserById("0"));
+	}
+	
+	@GetMapping("user/history")
+	public Object getTransactionHistory(
+			@RequestParam(name="pageNumber" ,defaultValue="0" ) Integer pageNumber,
+			@RequestParam(name="pageSize" ,defaultValue="10" ) Integer pageSize
+			) {
+		
+	    return transactionService.getUserTransactionHistory(pageNumber, pageSize);
 	}
 	
 	

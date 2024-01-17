@@ -235,7 +235,7 @@ public class AdministrationController {
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION)
 	public Object getTransactionHistoryByAccountNumber(
-			@RequestParam(name="acccountNumber") String acccountNumber,
+			@RequestParam(name="acccountNumber",required=true) String acccountNumber,
 			@RequestParam(name="pageSize",defaultValue="20") Integer pageSize,
 			@RequestParam(name="pageNumber",defaultValue="0") Integer pageNumber
 

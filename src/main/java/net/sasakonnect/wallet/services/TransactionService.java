@@ -1,13 +1,18 @@
 package net.sasakonnect.wallet.services;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -109,9 +114,76 @@ public class TransactionService {
 	}
 	
 	
+	public Object getUserTransactionHistory(Integer pageSize,Integer pageNumber) {
+		var user =  (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		
+		List<Wallet> wallets = this.walletRepository.findByUserWalletsUser(user);
+		if(!wallets.isEmpty()) {
+			
+			Page<Transaction> transactions =  transactionRepository.findByAccountId(wallets.get(0).getAccountId(),PageRequest.of(pageSize,pageNumber));
+			Map<String,Object> payload =  new HashMap<>();
+			payload.put("code", "");
+			payload.put("msg","Request succesfull");
+			payload.put("sender", "apigw.baas.konnect");
+			payload.put("requestId",UUID.randomUUID().toString());
+			payload.put("locale","en_KE");
+			
+		   Map<String,Object> resultData = new HashMap<>();
+		   if(!transactions.isEmpty()) {
+			   transactions.forEach(transaction -> {
+				   resultData.put("txId",transaction.getExternalTxId());
+				   resultData.put("txType",transaction.getTxType());
+				   resultData.put("accountId",transaction.getAccountId());
+				   resultData.put("oppoBankCode",transaction.getOppoBankCode());
+				   resultData.put("oppoBankName",transaction.getOppoAccountName());
+				   resultData.put("oppoAccountId",transaction.getOppoAccountId());
+				   resultData.put("oppoAccountName",transaction.getOppoAccountName());
+				   resultData.put("thirdPartyTxType",transaction.getThirdPartyTxType());
+				   resultData.put("currency", transaction.getCurrency());
+				   resultData.put("amount",transaction.getAmount());
+				   resultData.put("txStatus",transaction.getTxStatus());
+				   resultData.put("createTime",transaction.getCreatedAt().getTime());
+				   resultData.put("updateTime",transaction.getUpdatedAt().getTime());
+				   resultData.put("feeAmount",transaction.getFeeAmount());
+				   
+			   });
+		   }else {
+			   resultData.put("txId",null);
+			   resultData.put("txType",null);
+			   resultData.put("accountId",null);
+			   resultData.put("oppoBankCode",null);
+			   resultData.put("oppoBankName",null);
+			   resultData.put("oppoAccountId",null);
+			   resultData.put("oppoAccountName",null);
+			   resultData.put("thirdPartyTxType",null);
+			   resultData.put("currency",null);
+			   resultData.put("amount",null);
+			   resultData.put("txStatus",null);
+			   resultData.put("createTime",null);
+			   resultData.put("updateTime",null);
+			   resultData.put("feeAmount",null);
+		   }
+//		   resultData.put("txId", transactions.)
+		   List<Object> result = new ArrayList<Object>(); 
+			result.add(resultData);
+			Map<String,Object> data =  new HashMap<>();
+			data.put("result",result);
+			data.put("totalRows",transactions.getTotalElements());
+			data.put("pageSize", transactions.getSize());
+			data.put("currentPage",transactions.getNumber());
+			data.put("nextPage",transactions.hasNext()?transactions.nextPageable().getPageNumber() : null);
+			data.put("hasNextPage",transactions.hasNext());
+			data.put("hasPreviousPage",transactions.hasPrevious());
+			payload.put("data",data);
+			return payload;
+		}
+		
+		return null;
+	}
+	
 	public Object getTransactionHistory(Integer pageNumber,Integer pageSize) {
 		
-		var transactions =  transactionRepository.findAll(PageRequest.of(pageNumber ==null?0:pageNumber,pageSize ==null?100:pageSize));
+		var transactions =  transactionRepository.findAll(PageRequest.of(pageNumber,pageSize));
 //		transactions.nextPageable().
 		//var transactionsPayload:TransactionHistory = 
 //		Integer pageSize;
@@ -119,7 +191,7 @@ public class TransactionService {
 //		   Integer nextPage;
 //		   Boolean hasNextPage;
 //		   Boolean hasPreviousPage;
-		Map transactionsMap = new HashMap<String,Object>();
+		Map<String,Object> transactionsMap = new HashMap<String,Object>();
 		transactionsMap.put("transactions", transactions.get().collect(Collectors.toList()));
 		transactionsMap.put("pageSize", transactions.getSize());
 		transactionsMap.put("currentPage",transactions.getNumber());
