@@ -2,11 +2,13 @@ package net.sasakonnect.wallet.controllers;
 
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -28,6 +30,7 @@ import net.sasakonnect.wallet.RequestDto.WalletTransferDto;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.TransactionMiddleware;
 import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.services.TransactionService;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.services.WalletService;
 
@@ -39,7 +42,10 @@ import net.sasakonnect.wallet.services.WalletService;
 public class WalletController {
 	private final UserService userService;
 	private final WalletService walletService;
-
+   
+	@Autowired
+	TransactionService transactionService;
+	
 	public WalletController(UserService userService, WalletService walletService) {
 		this.userService = userService;
 		this.walletService = walletService;
@@ -152,10 +158,19 @@ public class WalletController {
 	}
 
 	@GetMapping("/transactionhistory")
-	public ResponseEntity<Object> transactionHistory() {
-		return ResponseEntity.ok(this.walletService.getTransactionHistory());
+	public Object getTransactionHistory(
+			@RequestParam(name="pageNumber" ,defaultValue="0" ) Integer pageNumber,
+			@RequestParam(name="pageSize" ,defaultValue="10" ) Integer pageSize
+			) {
+		
+		return ResponseEntity.ok(transactionService.getUserTransactionHistory(pageNumber, pageSize));
 	}
+//	public ResponseEntity<Object> transactionHistory() {
+//		return ResponseEntity.ok(this.walletService.getTransactionHistory());
+//	}
 
+	
+	
 	@PostMapping("/transactionhistory/any")
 	public Object transactionHistoryAny(@Valid @RequestBody TransactionPeriod changePin) {
 		return walletService.getTransactionHistoryAsOf(changePin);
