@@ -243,5 +243,16 @@ public class AdministrationController {
 		return transactionService.getTransactionHistoryByAccountNumber(acccountNumber, pageNumber, pageSize);
 	}
 	
+	
+	@GetMapping("/role/permissions")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAllRoles.PERMISSION+ "')")
+	@RequirePermission(GlobalPermissionConstants.ViewAllRoles.PERMISSION)
+	public Object getRolePermissionsByRoleId(
+			@RequestParam(name="roleId",required=true) String roleId
+			) {
+		
+		return this.roleService.getRolePermissionsByRoleId(roleId);
+	}
+	
 
 }

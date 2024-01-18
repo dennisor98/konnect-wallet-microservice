@@ -136,7 +136,7 @@ public class RoleService {
 		try {
 			 var role =  user.getUserRole().getRole();
 			 if(role !=null) {
-				 var permissions = this.rolePermissionRepository.findPermissionsByRole(null);
+				 var permissions = this.rolePermissionRepository.findPermissionsByRole(role);
 				 map.put("message","Request successful");
 				 map.put("success", "true");
 				 map.put("permissions",permissions);
@@ -155,6 +155,25 @@ public class RoleService {
 			 resMap.put("payload",map);
 			 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(resMap);
 		}
+	}
+	
+	public Object getRolePermissionsByRoleId(String roleId) {
+		Optional<Role> role =  this.roleRepository.findById(roleId);
+		Map<String,Object> map = new HashMap<>();
+		Map<String,Object> resMap = new HashMap<>();
+	  if(!role.isEmpty()) {
+		  var permissions = this.rolePermissionRepository.findPermissionsByRole(role.get());
+		  map.put("message","Request successful");
+		  map.put("success", "true");
+		  map.put("permissions",permissions);
+		  resMap.put("payload",map);
+		  return ResponseEntity.status(HttpStatus.OK).body(resMap);
+	  }else {
+		  map.put("message","Role Not Found");
+		  map.put("success", "true");
+		  resMap.put("payload",map);
+		  return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resMap);
+   	  }
 	}
 
 
