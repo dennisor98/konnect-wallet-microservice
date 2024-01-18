@@ -114,13 +114,14 @@ public class TransactionService {
 	}
 	
 	
-	public Object getUserTransactionHistory(Integer pageSize,Integer pageNumber) {
+	public Object getUserTransactionHistory(Integer pageNumber,Integer pageSize) {
 		var user =  (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		
+		Map<String,Object> data =  new HashMap<>();
+
 		List<Wallet> wallets = this.walletRepository.findByUserWalletsUser(user);
 		if(!wallets.isEmpty()) {
 			
-			Page<Transaction> transactions =  transactionRepository.findByAccountId(wallets.get(0).getAccountId(),PageRequest.of(pageSize,pageNumber));
+			Page<Transaction> transactions =  transactionRepository.findByAccountId(wallets.get(0).getAccountId(),PageRequest.of(pageNumber,pageSize));
 			Map<String,Object> payload =  new HashMap<>();
 			payload.put("code", "");
 			payload.put("msg","Request succesfull");
@@ -128,46 +129,37 @@ public class TransactionService {
 			payload.put("requestId",UUID.randomUUID().toString());
 			payload.put("locale","en_KE");
 			
-		   Map<String,Object> resultData = new HashMap<>();
+		  // Map<Object> result = new ArrayList<Object>(); 
 		   if(!transactions.isEmpty()) {
-			   transactions.forEach(transaction -> {
-				   resultData.put("txId",transaction.getExternalTxId());
-				   resultData.put("txType",transaction.getTxType());
-				   resultData.put("accountId",transaction.getAccountId());
-				   resultData.put("oppoBankCode",transaction.getOppoBankCode());
-				   resultData.put("oppoBankName",transaction.getOppoAccountName());
-				   resultData.put("oppoAccountId",transaction.getOppoAccountId());
-				   resultData.put("oppoAccountName",transaction.getOppoAccountName());
-				   resultData.put("thirdPartyTxType",transaction.getThirdPartyTxType());
-				   resultData.put("currency", transaction.getCurrency());
-				   resultData.put("amount",transaction.getAmount());
-				   resultData.put("txStatus",transaction.getTxStatus());
-				   resultData.put("createTime",transaction.getCreatedAt().getTime());
-				   resultData.put("updateTime",transaction.getUpdatedAt().getTime());
-				   resultData.put("feeAmount",transaction.getFeeAmount());
-				   
-			   });
+			   List<Map<String, Object>> transactionCollection = transactions.get().map(transaction -> {
+				   Map<String,Object> resultData = new HashMap<>();
+				    resultData.put("txId", transaction.getTxId());
+				    resultData.put("txType", transaction.getTxType());
+				    resultData.put("accountId", transaction.getAccountId());
+				    resultData.put("oppoBankCode", transaction.getOppoBankCode());
+				    resultData.put("oppoBankName", transaction.getOppoAccountName());
+				    resultData.put("oppoAccountId", transaction.getOppoAccountId());
+				    resultData.put("oppoAccountName", transaction.getOppoAccountName());
+				    resultData.put("thirdPartyTxType", transaction.getThirdPartyTxType());
+				    resultData.put("currency", transaction.getCurrency());
+				    resultData.put("amount", transaction.getAmount().toString());
+				    resultData.put("txStatus", Double.valueOf(transaction.getTxStatus().toString()));
+				    resultData.put("createTime", Double.valueOf(transaction.getCreatedAt().getTime()));
+				    resultData.put("updateTime", Double.valueOf(transaction.getUpdatedAt().getTime()));
+				    resultData.put("feeAmount", transaction.getFeeAmount() == null ? "0" : transaction.getFeeAmount().toString());
+
+				    return resultData;
+				}).collect(Collectors.toList());
+				data.put("result",transactionCollection);
+
+//			   transactions.forEach();
 		   }else {
-			   resultData.put("txId",null);
-			   resultData.put("txType",null);
-			   resultData.put("accountId",null);
-			   resultData.put("oppoBankCode",null);
-			   resultData.put("oppoBankName",null);
-			   resultData.put("oppoAccountId",null);
-			   resultData.put("oppoAccountName",null);
-			   resultData.put("thirdPartyTxType",null);
-			   resultData.put("currency",null);
-			   resultData.put("amount",null);
-			   resultData.put("txStatus",null);
-			   resultData.put("createTime",null);
-			   resultData.put("updateTime",null);
-			   resultData.put("feeAmount",null);
+				data.put("result", new ArrayList());
+
 		   }
 //		   resultData.put("txId", transactions.)
-		   List<Object> result = new ArrayList<Object>(); 
-			result.add(resultData);
-			Map<String,Object> data =  new HashMap<>();
-			data.put("result",result);
+		  
+			
 			data.put("totalRows",transactions.getTotalElements());
 			data.put("pageSize", transactions.getSize());
 			data.put("currentPage",transactions.getNumber());

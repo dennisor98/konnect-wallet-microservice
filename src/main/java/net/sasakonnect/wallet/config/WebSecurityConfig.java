@@ -158,6 +158,9 @@ public class WebSecurityConfig {
 				.description("Gateway Server Server URL(Dev)");
 		Server nginxServer = new Server().url("https://wallet.sasakonnect.net/konnect-wallet")
 				.description("Production env");
+		
+		Server ngrokServer = new Server().url("https://328c-105-29-165-232.ngrok-free.app")
+				.description("Ngrok env");
 
 		Contact contact = new Contact().email("devops@gmail.com").name("DevOps");
 		Info info = new Info().contact(contact).description("Wallet Based implementation Through Choice Bank")
@@ -177,11 +180,12 @@ public class WebSecurityConfig {
 
 		switch (profileActive) {
 		case "dev": {
-			openApi.info(info).addServersItem(gatewayServer).addServersItem(nginxServer).addServersItem(localServer);
+			openApi.info(info).addServersItem(gatewayServer).addServersItem(nginxServer).addServersItem(localServer).addServersItem(ngrokServer);
 
 		}
 		default: {
-			openApi.info(info).addServersItem(nginxServer).addServersItem(gatewayServer).addServersItem(localServer);
+			openApi.info(info).addServersItem(nginxServer).addServersItem(gatewayServer).addServersItem(localServer).addServersItem(ngrokServer);
+			
 
 		}
 

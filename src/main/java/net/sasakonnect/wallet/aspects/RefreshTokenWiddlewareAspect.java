@@ -32,9 +32,9 @@ import net.sasakonnect.wallet.tools.JwtService;
 @Component
 @Slf4j
 public class RefreshTokenWiddlewareAspect {
+	
 	private WalletClientService walletclientService;
 	private JwtService jwtService;
-	@Autowired
 	private UserService userService;
 
 	public RefreshTokenWiddlewareAspect(UserService userService, JwtService jwtService) {

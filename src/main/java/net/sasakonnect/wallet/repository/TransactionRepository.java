@@ -34,7 +34,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
 			+ "AND (account1 != 'string' AND account2 != 'string')")
 	List<Object[]> findDistinctInteractions(@Param("accountId") String accountId);
 	
-	@Query("SELECT t FROM Transaction t WHERE t.accountId =:accountId")
+	@Query("SELECT t FROM Transaction t WHERE t.accountId =:accountId OR t.oppoAccountId =:accountId")
     Page<Transaction> findByAccountId(@Param("accountId") String accountId,Pageable pageable);
 
 }
