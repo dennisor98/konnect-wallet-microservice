@@ -160,7 +160,7 @@ public class TransactionService {
 //		   resultData.put("txId", transactions.)
 		  
 			
-			data.put("totalRows",transactions.getTotalElements());
+			data.put("totalRows",Double.valueOf(transactions.getTotalElements()));
 			data.put("pageSize", transactions.getSize());
 			data.put("currentPage",transactions.getNumber());
 			data.put("nextPage",transactions.hasNext()?transactions.nextPageable().getPageNumber() : null);
