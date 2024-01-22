@@ -67,11 +67,11 @@ public class RoleService {
 
 					rolePermissionRepository.save(rolePermission);
 	            }
-				// Handle the case where the permission with the provided ID does not exist.
-				map.put("messaage","Permissions assigned to role");
+				
+			}
+	        	map.put("messaage","Permissions assigned to role");
 				map.put("success","true");
 				map.put("role",role);
-			}
 	        }catch(Exception ex) {
 	        	map.put("message", "Internal server.Something went wrong");
 	        	map.put("success","true");
@@ -98,6 +98,8 @@ public class RoleService {
 				rolePermission.setRole(role);
 				rolePermission.setPermission(permission);
 				rolePermission.setUser(creator);
+				
+//				this.rolePermissionRepository
 
 				rolePermissionRepository.save(rolePermission);
 			}
