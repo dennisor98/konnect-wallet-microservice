@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,6 +27,7 @@ import jakarta.validation.constraints.NotEmpty;
 import net.sasakonnect.wallet.RequestDto.Corporate;
 import net.sasakonnect.wallet.RequestDto.VerifyCorporate;
 import net.sasakonnect.wallet.RequestDto.Corporate.CorporateBuilder;
+import net.sasakonnect.wallet.RequestDto.PermissionDTO;
 import net.sasakonnect.wallet.RequestDto.PermissionsToRoleDTO;
 import net.sasakonnect.wallet.RequestDto.RoleDTO;
 import net.sasakonnect.wallet.RequestDto.VerifyEmailDTO;
@@ -262,6 +264,17 @@ public class AdministrationController {
 			) {
 		
 		return this.roleService.getRolePermissionsByRoleId(roleId);
+	}
+	
+	@PutMapping("/permission")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.EditPermission.PERMISSION+ "')")
+	@RequirePermission(GlobalPermissionConstants.EditPermission.PERMISSION)
+	public Object editPermission(
+			@Valid @RequestBody PermissionDTO payload,
+			@RequestParam(name="permissionId",required=true) String permissionId
+			) {
+		
+		return this.permissionService.editPermission(permissionId,payload);
 	}
 	
 
