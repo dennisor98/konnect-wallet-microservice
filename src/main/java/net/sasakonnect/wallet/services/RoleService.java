@@ -48,42 +48,72 @@ public class RoleService {
 
 	@Transactional
 	public Object insertPermissionsNotAttachedToRole(@Valid PermissionsToRoleDTO rolePerm) {
-		// Call the custom repository method to insert permissions not attached to the
-		Map<String,Object> map = new HashMap<>();
-		Map<String,Object> resMap = new HashMap<>();
-		Optional<Role> role = this.roleRepository.findById(rolePerm.getRoleId());
-		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); 
-		if(role.isPresent()) {
-			var rol =  role.get();
-			try {
-	        	for (String permissionId : rolePerm.getPermissionIds()) {
-				Permission permission = this.permissionRepository.findById(permissionId).orElse(null);
+	    Map<String, Object> map = new HashMap<>();
+	    Map<String, Object> resMap = new HashMap<>();
 
-				if (permission != null) {
-					RolePermission rolePermission = new RolePermission();
-					rolePermission.setRole(rol);
-					rolePermission.setPermission(permission);
-					rolePermission.setUser(user);
+	    Optional<Role> role = this.roleRepository.findById(rolePerm.getRoleId());
+	    User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-					rolePermissionRepository.save(rolePermission);
+	    if (role.isPresent()) {
+	        Role rol = role.get();
+
+	        try {
+	            // Iterate through existing RolePermission records for the role
+	            for (RolePermission existingRolePermission : rol.getRolePermissions()) {
+	                Permission permission = existingRolePermission.getPermission();
+
+	                // Check if the permission is still in the list to be associated with the role
+	                if (!rolePerm.getPermissionIds().contains(permission.getId())) {
+	                    // Permission has been removed, so delete the RolePermission record
+	                    rolePermissionRepository.delete(existingRolePermission);
+	                }
 	            }
-				
-			}
-	        	map.put("messaage","Permissions assigned to role");
-				map.put("success","true");
-				map.put("role",role);
-	        }catch(Exception ex) {
-	        	map.put("message", "Internal server.Something went wrong");
-	        	map.put("success","true");
-	        	
+
+	            // Iterate through new permissions to associate
+	            for (String permissionId : rolePerm.getPermissionIds()) {
+	                Permission permission = this.permissionRepository.findById(permissionId).orElse(null);
+
+	                if (permission != null) {
+	                    // Check if the RolePermission already exists for this role and permission
+	                    List<Permission> existingRolePermission = rolePermissionRepository.findPermissionsByRoleAndPermissionName(rol, permission.getName());
+//	                        .findByRoleAndPermission(rol, permission);
+
+	                    if (existingRolePermission.get(0) !=null) {
+	                        // Update the existing RolePermission
+	                        RolePermission rolePermission = new RolePermission();
+	                        rolePermission.setRole(rol);
+	                        rolePermission.setPermission(permission);
+	                        rolePermission.setUser(user);
+	                        // Optionally, update other fields if needed
+	                        rolePermissionRepository.save(rolePermission);
+	                    } else {
+	                        // Insert a new RolePermission
+	                        RolePermission rolePermission = new RolePermission();
+	                        rolePermission.setRole(rol);
+	                        rolePermission.setPermission(permission);
+	                        rolePermission.setUser(user);
+	                        // Optionally, set other fields if needed
+	                        rolePermissionRepository.save(rolePermission);
+	                    }
+	                }
+	            }
+
+	            map.put("message", "Permissions assigned to role");
+	            map.put("success", true);
+	            map.put("role", rol);
+	        } catch (Exception ex) {
+	            map.put("message", "Internal server error. Something went wrong");
+	            map.put("success", false);
 	        }
-		}
-        
-        map.put("message","Role not found");
-        resMap.put("payload",map);
-        return resMap;
-	
+	    } else {
+	        map.put("message", "Role not found");
+	        map.put("success", false);
+	    }
+
+	    resMap.put("payload", map);
+	    return resMap;
 	}
+
 	
 	@Transactional
 	public void insertPermissionsNotAttachedToRole(Role role, User creator, List<String> permissionIds) {
