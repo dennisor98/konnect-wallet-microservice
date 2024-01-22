@@ -218,7 +218,7 @@ public class AdministrationController {
 	@DeleteMapping("/role")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.DeleteRole.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.DeleteRole.PERMISSION)
-	public Object assignPermissionsToRole(@NotEmpty @RequestParam("roleId") String roleId) {
+	public Object assignPermissionsToRole(@RequestParam(name="roleId",required=true) String roleId) {
 		return this.roleService.deleteRoleByid(roleId);
 		
 	}
