@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import net.sasakonnect.wallet.RequestDto.Corporate;
 import net.sasakonnect.wallet.RequestDto.VerifyCorporate;
 import net.sasakonnect.wallet.RequestDto.Corporate.CorporateBuilder;
@@ -215,9 +216,9 @@ public class AdministrationController {
 	}
 	
 	@DeleteMapping("/role")
-	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.AssignRolePermissions.PERMISSION + "')")
-	@RequirePermission(GlobalPermissionConstants.AssignRolePermissions.PERMISSION)
-	public Object assignPermissionsToRole(@RequestParam("roleId") String roleId) {
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.DeleteRole.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.DeleteRole.PERMISSION)
+	public Object assignPermissionsToRole(@NotEmpty @RequestParam("roleId") String roleId) {
 		return this.roleService.deleteRoleByid(roleId);
 		
 	}

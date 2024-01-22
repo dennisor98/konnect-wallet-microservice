@@ -204,7 +204,25 @@ public class RoleService {
 	}
 	
   public Object deleteRoleByid(String roleId) {
-	   return null;
+	Optional<Role> role =  this.roleRepository.findById(roleId);
+	Map<String,Object> map = new HashMap<>();
+	Map<String,Object> payload  = new HashMap<>();
+	if(role.isPresent()) {
+		try {
+			map.put("success", "true");
+			map.put("message", "Role deleted successfully");
+			payload.put("payload", map);
+			this.roleRepository.delete(role.get());
+			return ResponseEntity.status(HttpStatus.OK).body(payload);
+		}catch(Exception ex) {
+			map.put("success", "false");
+			map.put("message", "Oops!Something went wrong");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+		}
+	}else {
+		map.put("message", "Role not found");
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(map);
+	}
   }
   
 
