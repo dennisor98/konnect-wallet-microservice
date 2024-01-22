@@ -62,7 +62,7 @@ public class RoleService {
 	                // Check if the permission is still in the list to be associated with the role
 	                if (!rolePerm.getPermissionIds().contains(permission.getId())) {
 	                    // Permission has been removed, so delete the RolePermission record
-	                    rolePermissionRepository.delete(existingRolePermission);
+	                    rolePermissionRepository.deleteById(existingRolePermission.getId());;
 	                }
 	            }
 	        	for (String permissionId : rolePerm.getPermissionIds()) {
