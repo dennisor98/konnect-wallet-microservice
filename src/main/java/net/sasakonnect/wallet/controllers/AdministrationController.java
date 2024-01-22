@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -210,6 +211,14 @@ public class AdministrationController {
 	@RequirePermission(GlobalPermissionConstants.AssignRolePermissions.PERMISSION)
 	public Object assignPermissionsToRole(@Valid @RequestBody PermissionsToRoleDTO rolePermission) {
 		return this.roleService.insertPermissionsNotAttachedToRole(rolePermission);
+		
+	}
+	
+	@DeleteMapping("/role")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.AssignRolePermissions.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.AssignRolePermissions.PERMISSION)
+	public Object assignPermissionsToRole(@RequestParam("roleId") String roleId) {
+		return this.roleService.deleteRoleByid(roleId);
 		
 	}
 	

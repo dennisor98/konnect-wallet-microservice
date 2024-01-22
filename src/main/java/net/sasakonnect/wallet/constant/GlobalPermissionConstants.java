@@ -65,6 +65,21 @@ public final class GlobalPermissionConstants {
 		}
 	}
 	
+	public static class DeleteRole extends PermissionEntry {
+		public static final String PERMISSION = "can.delete.role";
+		public static final String DESCRIPTION = "Can read and delete a role)";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	
+	}
 	public static class EditRole extends PermissionEntry {
 		public static final String PERMISSION = "can.edit.role";
 		public static final String DESCRIPTION = "Can edit an existing system role)";

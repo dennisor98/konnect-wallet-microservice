@@ -92,7 +92,7 @@ public class RoleService {
 			}
 	        	map.put("messaage","Permissions assigned to role");
 				map.put("success","true");
-				map.put("role",role);
+				map.put("role",role.get());
 	        }catch(Exception ex) {
 	        	map.put("message", "Internal server.Something went wrong");
 	        	map.put("success","true");
@@ -202,6 +202,11 @@ public class RoleService {
 		  return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resMap);
    	  }
 	}
+	
+  public Object deleteRoleByid(String roleId) {
+	   return null;
+  }
+  
 
 
 	
