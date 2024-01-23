@@ -1,3 +1,34 @@
+# stages:
+#   - move
+#   - build
+
+# build:
+#   stage: build
+#   script:
+#     - echo "Building the application on SSH server..."
+#     - hostname
+#     - pwd
+#     - ssh wallet-dev  "mkdir -p  /home/david/application/wallet-dev/ && cd /home/david/application/wallet-dev/ && chmod +x ./gradlew && ./gradlew clean && ./gradlew build -x test"
+
+#     - echo "Source code built on remote server"
+#   only:
+#     - dev
+
+# move:
+#   stage: move
+#   script:
+#     - echo "Copying  from remote server to GitLab CI/CD..."
+#     - hostname
+#     - pwd
+
+
+
+#     - scp -o StrictHostKeyChecking=no   -r ./*  wallet-dev:/home/david/application/wallet-dev/ 
+
+
+#     - echo "Artifacts uploaded to GitLab CI/CD."
+#   only:
+#     - dev
 stages:
   - move
   - build

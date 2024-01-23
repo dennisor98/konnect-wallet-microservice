@@ -30,6 +30,7 @@ import net.sasakonnect.wallet.RequestDto.Corporate.CorporateBuilder;
 import net.sasakonnect.wallet.RequestDto.PermissionDTO;
 import net.sasakonnect.wallet.RequestDto.PermissionsToRoleDTO;
 import net.sasakonnect.wallet.RequestDto.RoleDTO;
+import net.sasakonnect.wallet.RequestDto.UserRoleDTO;
 import net.sasakonnect.wallet.RequestDto.VerifyEmailDTO;
 import net.sasakonnect.wallet.RequestDto.WalletClientAccountDto;
 import net.sasakonnect.wallet.RequestDto.WalletClientDTO;
@@ -194,6 +195,28 @@ public class AdministrationController {
 		resObject.setUser(null);
 		return ResponseEntity.status(HttpStatus.OK).body(resObject);
 	}
+	
+	
+	@PutMapping("/role/edit")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.EditRole.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.EditRole.PERMISSION)
+	public Object editRole(
+			@Valid @RequestBody RoleDTO role,
+			@RequestParam(name="roleId",required=true) String roleId
+			) {
+		return this.roleService.editRole(roleId,role);
+	}
+	
+	@PostMapping("/user/attachRole")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.AssignUserRole.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.AssignUserRole.PERMISSION)
+	public Object attachUserToRole(
+			@Valid @RequestBody UserRoleDTO userRole
+			) {
+		return this.roleService.attachUserToRole(userRole);
+	}
+	
+	
 	
 	@GetMapping("role/getAll")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAllRoles.PERMISSION + "')")

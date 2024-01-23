@@ -14,13 +14,18 @@ import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import net.sasakonnect.wallet.RequestDto.PermissionsToRoleDTO;
+import net.sasakonnect.wallet.RequestDto.RoleDTO;
+import net.sasakonnect.wallet.RequestDto.UserRoleDTO;
 import net.sasakonnect.wallet.domain.Permission;
 import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.RolePermission;
 import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.domain.UserRole;
 import net.sasakonnect.wallet.repository.PermissionRepository;
 import net.sasakonnect.wallet.repository.RolePermissionRepository;
 import net.sasakonnect.wallet.repository.RoleRepository;
+import net.sasakonnect.wallet.repository.UserRepository;
+import net.sasakonnect.wallet.repository.UserRoleRepository;
 
 @Service
 public class RoleService {
@@ -30,6 +35,12 @@ public class RoleService {
 	RolePermissionRepository rolePermissionRepository;
 	@Autowired
 	PermissionRepository permissionRepository;
+	
+	@Autowired
+	UserRepository userRepository;
+	
+	@Autowired
+	UserRoleRepository userRoleRepository;
 	
 	@Transactional
 	public Role insertRole(Role role) {
@@ -226,8 +237,89 @@ public class RoleService {
   }
   
 
+	public Object editRole(String roleId,RoleDTO payload) {
+		Optional<Role> role = this.roleRepository.findById(roleId);
+		Map<String,Object> map = new HashMap<>();
+		Map<String,Object> resMap = new HashMap<>();
+		if(role.isPresent()) {
+			Role rol = role.get();
+			rol.setRoleName(payload.getRolename());
+			rol.setDescription(payload.getRoleDescription());
+			try {
+			this.roleRepository.save(rol);
+			map.put("success","true");
+			map.put("message","Role edit successfull");
+			resMap.put("paylod",map);
+			return ResponseEntity.status(HttpStatus.OK).body(resMap);
+			}catch(Exception ex) {
+				map.put("succcess","false");
+				map.put("message","Oops!Something went wrong");
+				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+			}
+			
+		}else {
+			map.put("succcess","true");
+			map.put("message","Role Not found");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(map);
+			
+		}
+	}
+	
+	public Object attachUserToRole(UserRoleDTO userRole) {
+		User loggedInUsr = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); 
+
+		Optional<Role> role  = this.roleRepository.findById(userRole.getRoleId());
+		Optional<User> user = this.userRepository.findById(userRole.getUserId());
+		Map<String,Object> map  = new HashMap<>();
+		Map<String,Object> resMap = new HashMap<>();
+		if(user.isEmpty()) {
+		   map.put("success", "false");
+		   map.put("message","User Not found");
+		   
+		   return ResponseEntity.status(HttpStatus.NOT_FOUND).body(map);
+		}
+		
+		if(role.isEmpty()) {
+			 map.put("success", "false");
+			 map.put("message","Role Not found");
+			 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(map);
+		}
+	
+		if(user.isPresent() && role.isPresent()) {
+			
+			User usr = user.get();
+			Role rol =  role.get();
+			Optional<UserRole> userRoleExists = this.userRoleRepository.findUserRoleByUserIdAndRoleId(usr.getId(),rol.getId());
+			if(userRoleExists.isPresent()) {
+				map.put("success","false");
+				map.put("message","Role already assigned to user");
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+			}else {
+				var userRol= UserRole.builder().roleId(rol.id).userId(usr.id).assigner(loggedInUsr).build();
+				try {
+					this.userRoleRepository.save(userRol);
+					map.put("success","true");
+					map.put("message","Role assigned to user");
+					resMap.put("payload",map);
+					return ResponseEntity.status(HttpStatus.OK).body(resMap);
+			}catch(Exception ex) {
+					map.put("success","false");
+					map.put("message","Oops!Something went wrong");
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+				}
+			    
+			}
+			
+		}else {
+			map.put("success","false");
+			map.put("message","Role and user not found");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		
+	}
 
 	
   
 
 }
+ 
