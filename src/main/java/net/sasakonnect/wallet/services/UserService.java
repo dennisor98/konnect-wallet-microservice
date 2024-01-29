@@ -234,21 +234,10 @@ public class UserService extends RestClientService implements UserDetailsService
 	}
 
 	public ResponseEntity<ObjectNode> corporateLogin(UserLogin userLogin) {
-		
-		Optional<CorporateDetails> corporate = this.corporateRepository
-				.findCorporateDetailsByPhone(userLogin.getPhoneNumber());
 		Map<String,Object> map = new HashMap<>();
 		Map<String,Object> payloadMap = new HashMap<>();
-		if (corporate.isEmpty()) {
-			ObjectMapper objectMapper = new ObjectMapper();
-			ObjectNode json = JsonNodeFactory.instance.objectNode();
-			ArrayNode arrayNode = objectMapper.createArrayNode();
-			arrayNode.add("Forbiden");
-			json.put("message","User not allowed");
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
-		} else {
-			var cop = corporate.get();
-			Optional<User> user = this.userRepository.getUserByCorporateId(cop);
+		
+			Optional<User> user = this.userRepository.findByMobile(userLogin.getPhoneNumber());
 			
 			if (user.isPresent()) {
 				UserRole userRole  = user.get().getUserRole();
@@ -258,19 +247,20 @@ public class UserService extends RestClientService implements UserDetailsService
             		ArrayNode arrayNode = objectMapper.createArrayNode();
                 	Optional<Role> role =  this.roleRepository.findById(userRole.getRoleId());
                 	if(role.isPresent()) {
-                		if(role.get().getRoleName() == "CORPORATE") {
+                		if(role.get().getRoleName().toString().equalsIgnoreCase("CORPORATE")) { 
                 			map.put("success", true);
                 			map.put("message", "proceed to login");
                 			payloadMap.put("payload",map);
                 		return this.userLogin(userLogin);
                 		}else {
                 			arrayNode.add("User not allowed");
-                			json.put("message", "Unauthorized");
+                			System.out.println("role"+role.get().getRoleName());
+                			json.put("message", "Access denied");
                 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
                 		}
                 	}else {
                 		arrayNode.add("User not allowed");
-            			json.put("message", "Unauthorized");
+            			json.put("message", "Role not found");
             			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
                 	}
                 }else {
@@ -278,21 +268,21 @@ public class UserService extends RestClientService implements UserDetailsService
             		ObjectNode json = JsonNodeFactory.instance.objectNode();
             		ArrayNode arrayNode = objectMapper.createArrayNode();
                 	arrayNode.add("User not allowed");
-        			json.put("message", "Unauthorized");
+        			json.put("message", "3");
         			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
                 }
-				
-			} else {
-				ObjectMapper objectMapper = new ObjectMapper();
-				ObjectNode json = JsonNodeFactory.instance.objectNode();
-				ArrayNode arrayNode = objectMapper.createArrayNode();
-				arrayNode.add("User not allowed");
-    			json.put("message", "Unauthorized");
-    			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
-
+			}else {
+                	ObjectMapper objectMapper = new ObjectMapper();
+            		ObjectNode json = JsonNodeFactory.instance.objectNode();
+            		ArrayNode arrayNode = objectMapper.createArrayNode();
+                	arrayNode.add("User not allowed");
+        			json.put("message", "");
+        			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
+              
 			}
-
-		}
+				
+			
+		
 
 	}
 	

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import net.sasakonnect.wallet.RequestDto.Corporate;
 import net.sasakonnect.wallet.RequestDto.Corporate.CorporateBuilder;
@@ -34,7 +35,10 @@ public class CorporateService {
 	@Autowired
 	RoleService roleService;
 
- public Object createCorporateDetails(CorporateDetails corporate) {
+	@Transactional
+ public Object createCorporateDetails(Corporate corporate) {
+	 Map<String, Object> map = new HashMap<>();
+	 Map<String, Object> payloadMap = new HashMap<>();
 	  Optional<Role> role = this.roleRepository.findByRoleName("CORPORATE");
 	  Optional<User> user = this.userRepository.findByMobile(corporate.getPhone());
 	  if(role.isPresent() && user.isPresent()) {
@@ -42,11 +46,36 @@ public class CorporateService {
 				  .roleId(role.get().getId())
 				  .userId(user.get().getId())
 				  .build();
+		  try {
+			   this.roleService.attachUserToRole(userRole);
+		  }catch(Exception ex) {
+			 System.out.println("ERROR"+ex);	
+		  }
 		  
-		  this.roleService.attachUserToRole(userRole);
-		  return this.corporateRepository.save(corporate);
+		  CorporateDetails cop  =  CorporateDetails.builder()
+				  .phone(corporate.getPhone())
+				  .corporateEmail(corporate.getEmail())
+				  .isActive(corporate.getIsActive())
+				  .larkOpenId(corporate.getLark_open_id())
+				  .build();
+		  try {
+			  this.corporateRepository.save(cop);
+			  user.get().setCorporate(cop);
+              this.userRepository.save(user.get());
+			  
+		  }catch(Exception ex) {
+			  System.out.println("ERROR"+ex);
+		  }
+		  
+		 
+		 map.put("success",true);
+		 map.put("message","User Role updated");
+		 payloadMap.put("payload",map);
+		 return ResponseEntity.status(HttpStatus.OK).body(payloadMap);
 	  }else {
-		  return ResponseEntity.status(HttpStatus.BAD_REQUEST);
+		     map.put("success",false);
+			 map.put("message","Unable to process Request");
+		  return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 	  }
 	  
   }
@@ -71,7 +100,7 @@ public class CorporateService {
 			 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(responseObject);
 		 }else {
 			 var cop = corpAccount.get();
-			 if(corporate.getIsActive() == cop.getIsActive() || corporate.getIsVerified() == cop.getIsVerified()) {
+			 if(corporate.getIsActive() == cop.getIsActive()) {
 				 map.put("message","Account already in this status");
 				 map.put("success","false");
 				 responseObject.put("payload", map);
@@ -79,7 +108,6 @@ public class CorporateService {
 			 }else {
 				 try {
 					 cop.setIsActive(corporate.getIsActive());
-					 cop.setIsVerified(corporate.getIsVerified());
 					 this.corporateRepository.save(cop);
 					 map.put("message","Account status modified");
 					 map.put("success","true");

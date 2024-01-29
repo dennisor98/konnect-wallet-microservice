@@ -13,20 +13,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Corporate {
 	@NotNull(message="userId param is required")
-	private String userId;
+	private String lark_open_id;
 	
     @NotBlank(message = "Corporate email cannot be blank")
     @Email(message = "Invalid corporate email format")
-    private String corporateEmail;
+    private String email;
   
     @NotBlank(message = "Phone cannot be blank")
     private String phone;
-
-    @NotNull(message = "isVerified cannot be null")
-    private Boolean isVerified;
-
-    @NotNull(message = "isEmailVerified cannot be null")
-    private Boolean isEmailVerified;
 
     @NotNull(message = "isActive cannot be null")
     private Boolean isActive;

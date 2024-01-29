@@ -22,19 +22,13 @@ public class CorporateDetails extends BaseWalletDomain implements Serializable {
 
     @Column(name = "phone")
     private  String phone;
-
-    @Column(name = "isVerified")
-    private Boolean isVerified;
+ 
     
-    @Column(name="password",nullable=true)
-    private String password;
-
-    @Column(name = "isEmailVerified")
-    private Boolean isEmailVerified;
+    @Column(name="lark_open_id")
+    private String larkOpenId;
 
     @Column(name = "isActive")
     private Boolean isActive;
  
-   
-
+ 
 }
