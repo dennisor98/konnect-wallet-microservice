@@ -30,7 +30,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.sasakonnect.wallet.RequestDto.lark.user.*;
 import net.sasakonnect.wallet.RequestDto.lark.LarkDTO;
-import net.sasakonnect.wallet.RequestDto.lark.user.UserDTO;
 import net.sasakonnect.wallet.domain.LarkDepartment;
 import net.sasakonnect.wallet.domain.LarkUser;
 import net.sasakonnect.wallet.repository.LarkUserRepository;
@@ -128,8 +127,8 @@ public class LarkUsersSync {
 	
 	
 	@Transactional
-//	@Scheduled(fixedRate = 2000)  //execute job after every one week
-	public Object getLarkDepartments() {
+@Scheduled(fixedDelay = 604800000)	
+public Object getLarkDepartments() {
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -272,8 +271,8 @@ public class LarkUsersSync {
 	        }
 	  }
 	
-//   @Scheduled(fixedRate=6000)
-	public void syncLarkDeptUsers() {
+	  @Scheduled(fixedDelay = 604800000)	
+	  public void syncLarkDeptUsers() {
 	   var depIds =   this.getDepartmentIds().stream().map(depId -> {
 			return depId;
 		}).collect(Collectors.toList());
