@@ -23,35 +23,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
 import net.sasakonnect.wallet.RequestDto.Corporate;
 import net.sasakonnect.wallet.RequestDto.VerifyCorporate;
-import net.sasakonnect.wallet.RequestDto.Corporate.CorporateBuilder;
 import net.sasakonnect.wallet.RequestDto.PermissionDTO;
 import net.sasakonnect.wallet.RequestDto.PermissionsToRoleDTO;
 import net.sasakonnect.wallet.RequestDto.RoleDTO;
 import net.sasakonnect.wallet.RequestDto.UserRoleDTO;
-import net.sasakonnect.wallet.RequestDto.VerifyEmailDTO;
 import net.sasakonnect.wallet.RequestDto.WalletClientAccountDto;
 import net.sasakonnect.wallet.RequestDto.WalletClientDTO;
 import net.sasakonnect.wallet.RequestDto.admin.CheckUserAccount;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.RequirePermission;
 import net.sasakonnect.wallet.constant.GlobalPermissionConstants;
-import net.sasakonnect.wallet.domain.CorporateDetails;
-import net.sasakonnect.wallet.domain.CorporateDetails.CorporateDetailsBuilder;
 import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.User;
-import net.sasakonnect.wallet.repository.PermissionRepository;
-import net.sasakonnect.wallet.repository.RolePermissionRepository;
 import net.sasakonnect.wallet.repository.RoleRepository;
 import net.sasakonnect.wallet.services.WalletClientService;
 import net.sasakonnect.wallet.services.WalletService;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RequestMapping("/administration")
 @Tag(name = "Administration", description = "Back Office  routes")
@@ -83,6 +73,9 @@ public class AdministrationController {
 
 	@Autowired
 	RoleRepository roleRepository;
+
+	@Autowired
+
 
 	
 	@GetMapping("/upload/app")
@@ -275,5 +268,24 @@ public class AdministrationController {
 
 		return this.permissionService.editPermission(permissionId, payload);
 	}
+
+	@Hidden()
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.SyncLark.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.SyncLark.PERMISSION)
+	@GetMapping("/lark/user/sync")
+	public void syncLarkUsers() {
+	     this.larkService.syncLarkUsers();
+	}
+	
+	@Hidden()
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.SyncLark.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.SyncLark.PERMISSION)
+	@GetMapping("/lark/dept/sync")
+	public void syncLarkDepartments() {
+	     this.larkService.synLarkDepartments();
+	}
+
+	
+	
 
 }
