@@ -50,9 +50,40 @@ public final class GlobalPermissionConstants {
 		}
 	}
 	
+	public static class ViewCorporateUsers extends PermissionEntry {
+		public static final String PERMISSION = "can.view.user.corporate";
+		public static final String DESCRIPTION = "Can view corporate users";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
+	
+	
+	public static class ViewLarkUsers extends PermissionEntry {
+		public static final String PERMISSION = "can.view.user.lark";
+		public static final String DESCRIPTION = "Can view lark users";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
+	
 	public static class AssignRolePermissions extends PermissionEntry {
 		public static final String PERMISSION = "can.assign.role.permissions";
-		public static final String DESCRIPTION = "Can assign permissions to an existing role)";
+		public static final String DESCRIPTION = "Can assign permissions to an existing role";
 
 		@Override
 		public String getPERMISSION() {
@@ -67,7 +98,7 @@ public final class GlobalPermissionConstants {
 	
 	public static class ViewAllRoles extends PermissionEntry {
 		public static final String PERMISSION = "can.read.role.all";
-		public static final String DESCRIPTION = "Can read all the existing system roles)";
+		public static final String DESCRIPTION = "Can read all the existing system roles";
 
 		@Override
 		public String getPERMISSION() {
@@ -82,7 +113,7 @@ public final class GlobalPermissionConstants {
 	
 	public static class DeleteRole extends PermissionEntry {
 		public static final String PERMISSION = "can.delete.role";
-		public static final String DESCRIPTION = "Can read and delete a role)";
+		public static final String DESCRIPTION = "Can read and delete a role";
 
 		@Override
 		public String getPERMISSION() {
@@ -97,7 +128,7 @@ public final class GlobalPermissionConstants {
 	}
 	public static class EditRole extends PermissionEntry {
 		public static final String PERMISSION = "can.edit.role";
-		public static final String DESCRIPTION = "Can edit an existing system role)";
+		public static final String DESCRIPTION = "Can edit an existing system role";
 
 		@Override
 		public String getPERMISSION() {
@@ -142,7 +173,7 @@ public final class GlobalPermissionConstants {
 	
 	public static class CanSearchUsers extends PermissionEntry {
 		public static final String PERMISSION = "can.search.user";
-		public static final String DESCRIPTION = "Can search users by the specified parameter)";
+		public static final String DESCRIPTION = "Can search users by the specified parameter";
 
 		@Override
 		public String getPERMISSION() {

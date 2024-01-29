@@ -11,11 +11,14 @@ import org.springframework.stereotype.Service;
 
 import net.sasakonnect.wallet.RequestDto.Corporate;
 import net.sasakonnect.wallet.RequestDto.Corporate.CorporateBuilder;
+import net.sasakonnect.wallet.RequestDto.UserRoleDTO;
 import net.sasakonnect.wallet.RequestDto.VerifyCorporate;
 import net.sasakonnect.wallet.domain.CorporateDetails;
 import net.sasakonnect.wallet.domain.CorporateDetails.CorporateDetailsBuilder;
+import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.repository.CorporateDetailsRepository;
+import net.sasakonnect.wallet.repository.RoleRepository;
 import net.sasakonnect.wallet.repository.UserRepository;
 
 @Service
@@ -25,8 +28,27 @@ public class CorporateService {
 	@Autowired
 	UserRepository userRepository;
 	
-  public Object createCorporateDetails(CorporateDetails corporate) {
-	  return this.corporateRepository.save(corporate);
+	@Autowired
+	RoleRepository roleRepository;
+	
+	@Autowired
+	RoleService roleService;
+
+ public Object createCorporateDetails(CorporateDetails corporate) {
+	  Optional<Role> role = this.roleRepository.findByRoleName("CORPORATE");
+	  Optional<User> user = this.userRepository.findByMobile(corporate.getPhone());
+	  if(role.isPresent() && user.isPresent()) {
+		  UserRoleDTO userRole = UserRoleDTO.builder()
+				  .roleId(role.get().getId())
+				  .userId(user.get().getId())
+				  .build();
+		  
+		  this.roleService.attachUserToRole(userRole);
+		  return this.corporateRepository.save(corporate);
+	  }else {
+		  return ResponseEntity.status(HttpStatus.BAD_REQUEST);
+	  }
+	  
   }
   
 

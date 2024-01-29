@@ -61,7 +61,7 @@ public class UserController {
 	}
 
 	@PostMapping("corporateLogin")
-	public ResponseEntity<ObjectNode> corporateSignin(@Valid @RequestBody CorporateLoginDTO loginDTO) {
+	public ResponseEntity<ObjectNode> corporateSignin(@Valid @RequestBody UserLogin loginDTO) {
 		return userService.corporateLogin(loginDTO);
 	}
 

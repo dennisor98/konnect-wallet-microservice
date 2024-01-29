@@ -124,6 +124,9 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 	private List<UserDevice> userDevices;
 	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<UserPin> userPins;
+	
+	@Column(nullable=true)
+	private String status;
 
 	public Map<String, Object> toBankPayload() {
 		Map<String, Object> payload = new HashMap<>();

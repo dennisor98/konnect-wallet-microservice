@@ -433,12 +433,22 @@ public class WalletService extends JwtService {
 						this.userWalletRepository.save(userWallet);
 					}
 
-				} else {
+				}else if(notificationBody.getStatus() == 4 && user.isPresent()) {
 					var onboardingRequestId = params.get("onboardingRequestId").getAsString();
 					System.out.println(onboardingRequestId);
 					this.userService.deletUserByOnboardingRequestId(onboardingRequestId);
-
+				}else {
+					if(user.isPresent()) {
+						user.get().setStatus(params.get("status").getAsString());
+						this.userService.save(user.get());
+						
+					}
 				}
+				
+//				else {
+//					
+//
+//				}
 			} else if (notification_Type == NotificationType.ACCOUNT_STATEMENT.getCode()) {
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.TRANSACTION.getCode())) {

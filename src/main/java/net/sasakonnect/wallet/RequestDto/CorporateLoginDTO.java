@@ -14,5 +14,6 @@ import lombok.NoArgsConstructor;
 public class CorporateLoginDTO {
   @NotNull(message="email cannot be empty")
   @Email(message="email must be valid")
-   String email;
+   String phone;
+  
 }

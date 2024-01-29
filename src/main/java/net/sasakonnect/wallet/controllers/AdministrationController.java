@@ -3,6 +3,7 @@ package net.sasakonnect.wallet.controllers;
 import javax.security.auth.login.AccountNotFoundException;
 
 import net.sasakonnect.wallet.services.CorporateService;
+import net.sasakonnect.wallet.services.LarkService;
 import net.sasakonnect.wallet.services.PermissionService;
 import net.sasakonnect.wallet.services.RoleService;
 import net.sasakonnect.wallet.services.TransactionService;
@@ -51,6 +52,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 @RequestMapping("/administration")
 @Tag(name = "Administration", description = "Back Office  routes")
 @CustomController()
@@ -63,24 +65,26 @@ public class AdministrationController {
 
 	@Autowired
 	UserService userService;
-	
+
 	@Autowired
 	CorporateService corporateService;
-	
+
 	@Autowired
 	RoleService roleService;
-	
+
+	@Autowired
+	LarkService larkService;
+
 	@Autowired
 	PermissionService permissionService;
-	
+
 	@Autowired
 	TransactionService transactionService;
-	
+
 	@Autowired
 	RoleRepository roleRepository;
+
 	
-
-
 	@GetMapping("/upload/app")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CreateSuperApp.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CreateSuperApp.PERMISSION)
@@ -114,191 +118,178 @@ public class AdministrationController {
 	@GetMapping("/users/getAll")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION)
-	public Object getAllUsers(){
-		return  this.userService.getAllUsers();
+	public Object getAllUsers() {
+		return this.userService.getAllUsers();
 	}
-	
+
 	@GetMapping("/user/corporate")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION)
-	public Object getAllCorporateUser(){
-		return  this.userService.getCorporateUsers();
+	public Object getAllCorporateUser() {
+		return this.userService.getCorporateUsers();
 	}
-	
+
 	@GetMapping("/user/phone/search")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanSearchUsers.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CanSearchUsers.PERMISSION)
-	public Object searchUserbyPhone(@RequestParam("phone") String phone){
-		return  this.userService.getUseByPhone(phone);
+	public Object searchUserbyPhone(@RequestParam("phone") String phone) {
+		return this.userService.getUseByPhone(phone);
 	}
-	
-	
-	
-	
+
 	@PostMapping("/user/corporate/create")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CreateCorporateAccount.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CreateCorporateAccount.PERMISSION)
-	public Object createCorporateDetails(@Valid @RequestBody Corporate param) {	
-		Map<String,Object> map =  new HashMap<>();
-		CorporateDetails corporate = CorporateDetails.builder()
-				.corporateEmail(param.getCorporateEmail())
-				.phone(param.getPhone())
-				.isVerified(param.getIsVerified())
-				.isEmailVerified(param.getIsEmailVerified())
-				.isActive(param.getIsActive())
-				.build();
-		User user =  userService.getUserById(param.getUserId()).get();
-		if(user !=null) {
+	public Object createCorporateDetails(@Valid @RequestBody Corporate param) {
+		Map<String, Object> map = new HashMap<>();
+		CorporateDetails corporate = CorporateDetails.builder().corporateEmail(param.getCorporateEmail())
+				.phone(param.getPhone()).isVerified(param.getIsVerified()).isEmailVerified(param.getIsEmailVerified())
+				.isActive(param.getIsActive()).build();
+		User user = userService.getUserById(param.getUserId()).get();
+		if (user != null) {
 			user.setCorporate(corporate);
-		    if(user.getCorporate() !=null) {
-		    	map.put("message","User already has corporate account");
-		    	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
-		    }else {
-		    	return this.corporateService.createCorporateDetails(corporate);
-		    }
-		}else {
-			map.put("message","User Not found");
+			if (user.getCorporate() != null) {
+				map.put("message", "User already has corporate account");
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+			} else {
+				return this.corporateService.createCorporateDetails(corporate);
+			}
+		} else {
+			map.put("message", "User Not found");
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(map);
 		}
-		
-	    
+
 	}
-	
-	
+
 	@PostMapping("/user/corporate/account/activate")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION)
-	public Object activateCorporateAccount(@Valid @RequestBody VerifyCorporate  request) {
+	public Object activateCorporateAccount(@Valid @RequestBody VerifyCorporate request) {
 		return this.corporateService.activateCorporateAccount(request);
 	}
-	
+
 //	@PostMapping("/user/corporate/email/verify")
 //	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION + "')")
 //	@RequirePermission(GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION)
 //    public Object verifyCorporateEmail(@RequestBody  VerifyEmailDTO request) {
 //		return this.corporateService.verifyEmail(request.getEmail(),true);
 //	}
-	
+
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewCorporateUsers.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.ViewCorporateUsers.PERMISSION)
 	@GetMapping("/user/corporate/get")
 	public Object getCorporateEmails() {
 		return this.corporateService.getCorporateAccounts();
 	}
-  
+
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewLarkUsers.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.ViewLarkUsers.PERMISSION)
+	@GetMapping("/users/lark")
+	public Object getLarkUsers(@RequestParam(name = "pageSize", defaultValue = "20") Integer pageSize,
+			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber) {
+		return this.larkService.getLarkUsers(pageNumber, pageSize);
+	}
+
 	@PostMapping("/role/create")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CreateUserRole.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CreateUserRole.PERMISSION)
 	public Object createPermission(@Valid @RequestBody RoleDTO role) {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-		var rol=Role.builder().roleName(role.getRolename()).description(role.getRoleDescription()).user(user).build();
+		var rol = Role.builder().roleName(role.getRolename()).description(role.getRoleDescription()).user(user).build();
 		var resObject = this.roleService.insertRole(rol);
 		resObject.setUser(null);
 		return ResponseEntity.status(HttpStatus.OK).body(resObject);
 	}
-	
-	
+
 	@PutMapping("/role/edit")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.EditRole.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.EditRole.PERMISSION)
-	public Object editRole(
-			@Valid @RequestBody RoleDTO role,
-			@RequestParam(name="roleId",required=true) String roleId
-			) {
-		return this.roleService.editRole(roleId,role);
+	public Object editRole(@Valid @RequestBody RoleDTO role,
+			@RequestParam(name = "roleId", required = true) String roleId) {
+		return this.roleService.editRole(roleId, role);
 	}
-	
+
 	@PostMapping("/user/attachRole")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.AssignUserRole.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.AssignUserRole.PERMISSION)
-	public Object attachUserToRole(
-			@Valid @RequestBody UserRoleDTO userRole
-			) {
+	public Object attachUserToRole(@Valid @RequestBody UserRoleDTO userRole) {
 		return this.roleService.attachUserToRole(userRole);
 	}
-	
-	
-	
+
 	@GetMapping("role/getAll")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAllRoles.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.ViewAllRoles.PERMISSION)
 	public Object getAllRoles() {
 		return this.roleService.getAllRoles();
 	}
-	
+
 	@GetMapping("permissions/getAll")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAllPermissions.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.ViewAllPermissions.PERMISSION)
 	public Object getAllPermissions() {
 		return this.permissionService.getAllPermissions();
 	}
-	
+
 	@PostMapping("/role/assignPermissions")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.AssignRolePermissions.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.AssignRolePermissions.PERMISSION)
 	public Object assignPermissionsToRole(@Valid @RequestBody PermissionsToRoleDTO rolePermission) {
 		return this.roleService.insertPermissionsNotAttachedToRole(rolePermission);
-		
+
 	}
-	
+
 	@DeleteMapping("/role")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.DeleteRole.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.DeleteRole.PERMISSION)
-	public Object assignPermissionsToRole(@RequestParam(name="roleId",required=true) String roleId) {
+	public Object assignPermissionsToRole(@RequestParam(name = "roleId", required = true) String roleId) {
 		return this.roleService.deleteRoleByid(roleId);
-		
-	}
-	
-	
-	@GetMapping("/user/permissions")
-	public Object getUserPermissions() {                           
-         return this.roleService.getUserPermissions();            		   
-	}
-	
-	
-	@GetMapping("/transactions/history")
-	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION + "')")
-	@RequirePermission(GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION)
-	public Object getTransactionHistory(
-			@RequestParam(name="pageSize",defaultValue="20") Integer pageSize,
-			@RequestParam(name="pageNumber",defaultValue="0") Integer pageNumber
 
-			) {
-		return transactionService.getTransactionHistory(pageNumber,pageSize);
 	}
-	
+
+	@GetMapping("/user/permissions")
+	public Object getUserPermissions() {
+		return this.roleService.getUserPermissions();
+	}
+
+	@GetMapping("/transactions/history")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION)
+	public Object getTransactionHistory(@RequestParam(name = "pageSize", defaultValue = "20") Integer pageSize,
+			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber
+
+	) {
+		return transactionService.getTransactionHistory(pageNumber, pageSize);
+	}
+
 	@GetMapping("/transactions/history/user")
-	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION + "')")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION
+			+ "')")
 	@RequirePermission(GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION)
 	public Object getTransactionHistoryByAccountNumber(
-			@RequestParam(name="acccountNumber",required=true) String acccountNumber,
-			@RequestParam(name="pageSize",defaultValue="20") Integer pageSize,
-			@RequestParam(name="pageNumber",defaultValue="0") Integer pageNumber
+			@RequestParam(name = "acccountNumber", required = true) String acccountNumber,
+			@RequestParam(name = "pageSize", defaultValue = "20") Integer pageSize,
+			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber
 
-			) {
+	) {
 		return transactionService.getTransactionHistoryByAccountNumber(acccountNumber, pageNumber, pageSize);
 	}
-	
-	
+
 	@GetMapping("/role/permissions")
-	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAllRoles.PERMISSION+ "')")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAllRoles.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.ViewAllRoles.PERMISSION)
-	public Object getRolePermissionsByRoleId(
-			@RequestParam(name="roleId",required=true) String roleId
-			) {
-		
+	public Object getRolePermissionsByRoleId(@RequestParam(name = "roleId", required = true) String roleId) {
+
 		return this.roleService.getRolePermissionsByRoleId(roleId);
 	}
-	
+
 	@PutMapping("/permission")
-	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.EditPermission.PERMISSION+ "')")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.EditPermission.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.EditPermission.PERMISSION)
-	public Object editPermission(
-			@Valid @RequestBody PermissionDTO payload,
-			@RequestParam(name="permissionId",required=true) String permissionId
-			) {
-		
-		return this.permissionService.editPermission(permissionId,payload);
+	public Object editPermission(@Valid @RequestBody PermissionDTO payload,
+			@RequestParam(name = "permissionId", required = true) String permissionId) {
+
+		return this.permissionService.editPermission(permissionId, payload);
 	}
-	
 
 }

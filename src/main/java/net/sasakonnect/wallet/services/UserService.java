@@ -58,7 +58,7 @@ import net.sasakonnect.wallet.repository.UserPinRepository;
 import net.sasakonnect.wallet.repository.UserRepository;
 import net.sasakonnect.wallet.repository.UserRoleRepository;
 import net.sasakonnect.wallet.tools.JwtService;
-
+import net.sasakonnect.wallet.domain.UserRole;
 @Service
 @Slf4j
 public class UserService extends RestClientService implements UserDetailsService {
@@ -233,45 +233,69 @@ public class UserService extends RestClientService implements UserDetailsService
 
 	}
 
-	public ResponseEntity<ObjectNode> corporateLogin(CorporateLoginDTO login) {
-
+	public ResponseEntity<ObjectNode> corporateLogin(UserLogin userLogin) {
+		
 		Optional<CorporateDetails> corporate = this.corporateRepository
-				.findCorporateDetailsByCorporateEmail(login.getEmail());
+				.findCorporateDetailsByPhone(userLogin.getPhoneNumber());
+		Map<String,Object> map = new HashMap<>();
+		Map<String,Object> payloadMap = new HashMap<>();
 		if (corporate.isEmpty()) {
-
 			ObjectMapper objectMapper = new ObjectMapper();
 			ObjectNode json = JsonNodeFactory.instance.objectNode();
 			ArrayNode arrayNode = objectMapper.createArrayNode();
-			arrayNode.add("User Not Found");
-			json.put("success", "false");
-			json.put("message", "Account not found");
-			return ResponseEntity.status(HttpStatus.OK).body(json);
+			arrayNode.add("Forbiden");
+			json.put("message","User not allowed");
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
 		} else {
 			var cop = corporate.get();
 			Optional<User> user = this.userRepository.getUserByCorporateId(cop);
-
-			if (cop.getIsActive() == true && cop.getIsVerified() == true && user.isPresent()) {
-				ObjectMapper objectMapper = new ObjectMapper();
-				ObjectNode json = JsonNodeFactory.instance.objectNode();
-				ArrayNode arrayNode = objectMapper.createArrayNode();
-				arrayNode.add("Account found");
-				json.put("success", "false");
-				json.put("message", "Proceed to login");
-				return ResponseEntity.status(HttpStatus.OK).body(json);
+			
+			if (user.isPresent()) {
+				UserRole userRole  = user.get().getUserRole();
+                if(userRole != null) {
+                	ObjectMapper objectMapper = new ObjectMapper();
+            		ObjectNode json = JsonNodeFactory.instance.objectNode();
+            		ArrayNode arrayNode = objectMapper.createArrayNode();
+                	Optional<Role> role =  this.roleRepository.findById(userRole.getRoleId());
+                	if(role.isPresent()) {
+                		if(role.get().getRoleName() == "CORPORATE") {
+                			map.put("success", true);
+                			map.put("message", "proceed to login");
+                			payloadMap.put("payload",map);
+                		return this.userLogin(userLogin);
+                		}else {
+                			arrayNode.add("User not allowed");
+                			json.put("message", "Unauthorized");
+                			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
+                		}
+                	}else {
+                		arrayNode.add("User not allowed");
+            			json.put("message", "Unauthorized");
+            			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
+                	}
+                }else {
+                	ObjectMapper objectMapper = new ObjectMapper();
+            		ObjectNode json = JsonNodeFactory.instance.objectNode();
+            		ArrayNode arrayNode = objectMapper.createArrayNode();
+                	arrayNode.add("User not allowed");
+        			json.put("message", "Unauthorized");
+        			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
+                }
+				
 			} else {
 				ObjectMapper objectMapper = new ObjectMapper();
 				ObjectNode json = JsonNodeFactory.instance.objectNode();
 				ArrayNode arrayNode = objectMapper.createArrayNode();
-				arrayNode.add("Inactive account");
-				json.put("success", "false");
-				json.put("message", "Inactive/unverifed account");
-				return ResponseEntity.status(HttpStatus.OK).body(json);
+				arrayNode.add("User not allowed");
+    			json.put("message", "Unauthorized");
+    			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
+
 			}
 
 		}
 
 	}
-
+	
 	public Object getUseByPhone(String phone) {
 		Map<String, Object> map = new HashMap<>();
 		try {
@@ -660,6 +684,10 @@ public class UserService extends RestClientService implements UserDetailsService
 	public Optional<User> findUserByWalletAccountId(String receiverAccount) {
 		return this.userRepository.findUserByWalletAccountId(receiverAccount);
 
+	}
+	
+	public void save(User user) {
+		this.userRepository.save(user);
 	}
 
 }

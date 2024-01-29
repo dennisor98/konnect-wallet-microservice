@@ -23,6 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 @Transactional
 public interface CorporateDetailsRepository extends JpaRepository<CorporateDetails,String>{	
-	Optional<CorporateDetails> findCorporateDetailsByCorporateEmail(@Param("corporate_email") String email);
+	Optional<CorporateDetails> findCorporateDetailsByPhone(@Param("phone") String phone);
     
 }
