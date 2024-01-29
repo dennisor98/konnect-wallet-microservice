@@ -35,6 +35,21 @@ public final class GlobalPermissionConstants {
 		}
 	}
 	
+	public static class SyncLark extends PermissionEntry {
+		public static final String PERMISSION = "can.sync.lark";
+		public static final String DESCRIPTION = "Can trigger sync of lark users into database(Use with caution)";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
+	
 	public static class AssignUserRole extends PermissionEntry {
 		public static final String PERMISSION = "can.assign.user.role";
 		public static final String DESCRIPTION = "Can assign any user any role in the system(use with caution)";

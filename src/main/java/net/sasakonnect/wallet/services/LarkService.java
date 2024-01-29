@@ -18,6 +18,7 @@ import net.sasakonnect.wallet.domain.LarkDepartment;
 import net.sasakonnect.wallet.domain.LarkUser;
 import net.sasakonnect.wallet.domain.Transaction;
 import net.sasakonnect.wallet.domain.Wallet;
+import net.sasakonnect.wallet.jobs.LarkUsersSync;
 import net.sasakonnect.wallet.repository.LarkUserRepository;
 import net.sasakonnect.wallet.repository.lark.DepartmentRepository;
 
@@ -28,6 +29,9 @@ public class LarkService {
 	
 	@Autowired
 	LarkUserRepository   larkUserRepository;
+
+	@Autowired
+	LarkUsersSync larkSync;
 	
 	
    public List<LarkDepartment> getAllDepartments(){
@@ -71,6 +75,12 @@ public class LarkService {
 			return payload;
 		
 		   }
+      public void syncLarkUsers() {
+    	  this.larkSync.syncLarkDeptUsers();
+      }
       
+      public void synLarkDepartments() {
+    	  this.larkSync.getLarkDepartments();
+    }
   
 }
