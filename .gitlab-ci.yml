@@ -8,11 +8,11 @@ build:
     - echo "Building the application on SSH server..."
     - hostname
     - pwd
-    - ssh wallet  "mkdir -p  /home/ahdev/application/wallet/ && cd /home/ahdev/application/wallet/ && chmod +x ./gradlew && ./gradlew clean && ./gradlew build -x test"
+    - ssh wallet  "mkdir -p  /home/ahdev/application/wallet-dev/ && cd /home/ahdev/application/wallet-dev/ && chmod +x ./gradlew && ./gradlew clean && ./gradlew build -x test"
 
     - echo "Source code built on remote server"
   only:
-    - main
+    - dev
 
 move:
   stage: move
@@ -23,9 +23,9 @@ move:
 
 
 
-    - scp -o StrictHostKeyChecking=no   -r ./*  wallet:/home/ahdev/application/wallet/ 
+    - scp -o StrictHostKeyChecking=no   -r ./*  wallet-dev:/home/ahdev/application/wallet-dev/ 
 
 
     - echo "Artifacts uploaded to GitLab CI/CD."
   only:
-    - main
+    - dev
