@@ -1,31 +1,19 @@
 package net.sasakonnect.wallet.services;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
-import net.sasakonnect.wallet.domain.LarkDepartment;
 import net.sasakonnect.wallet.domain.LarkUser;
-import net.sasakonnect.wallet.domain.Transaction;
-import net.sasakonnect.wallet.domain.Wallet;
 import net.sasakonnect.wallet.jobs.LarkUsersSync;
 import net.sasakonnect.wallet.repository.LarkUserRepository;
-import net.sasakonnect.wallet.repository.lark.DepartmentRepository;
 
 @Service
 public class LarkService {
-	@Autowired
-	DepartmentRepository departmentRepository;
 	
 	@Autowired
 	LarkUserRepository   larkUserRepository;
@@ -34,17 +22,7 @@ public class LarkService {
 	LarkUsersSync larkSync;
 	
 	
-   public List<LarkDepartment> getAllDepartments(){
-	   List<LarkDepartment> departments  = this.departmentRepository.findAll();
-	   
-	   if(!departments.isEmpty()) {
-		   return departments;
-	   }else {
-		   return null;
-	   }
-	  
-   }
-   
+  
    
    public Object getLarkUsers(Integer pageNumber,Integer pageSize) {
 	   

@@ -57,15 +57,26 @@ public class LarkUsersSync {
 	 DepartmentRepository larkDepRepository;
 	 
 	 @Autowired
-	 LarkService larkService;
+	 LarkUserRepository larkUserRepository;
 	 
 	 @Autowired
-	 LarkUserRepository larkUserRepository;
+		DepartmentRepository departmentRepository;
 //	
 //	public LarkUsersSync() {
 //		this.botId = botId;
 //		this.botSecret = botSecret;
 //	}
+	 public List<LarkDepartment> getAllDepartments(){
+		   List<LarkDepartment> departments  = this.departmentRepository.findAll();
+		   
+		   if(!departments.isEmpty()) {
+			   return departments;
+		   }else {
+			   return null;
+		   }
+		  
+	   }
+	   
 	
 	public String getBotToken(String appId,String appSecret) {
 		RestTemplate restTemplate = new RestTemplate();
@@ -164,7 +175,7 @@ public Object getLarkDepartments() {
 	}
 	
 	 public List<String> getDepartmentIds() {
-		   List<LarkDepartment> deps = this.larkService.getAllDepartments();
+		   List<LarkDepartment> deps = this.getAllDepartments();
 		   var depIds =  deps.stream().map(dep -> {
 			 return  dep.getDepartmentId();
 			   
