@@ -261,6 +261,54 @@ public final class GlobalPermissionConstants {
 		}
 	}
 	
+	public static class ViewRecenttransactionHistory extends PermissionEntry {
+		public static final String PERMISSION = "can.view.transactions.recent";
+		public static final String DESCRIPTION = "can view recent transactions in the system";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
+	
+	public static class ViewAccountAnalyticsSummary extends PermissionEntry {
+		public static final String PERMISSION = "can.view.accounts.analytics.summary";
+		public static final String DESCRIPTION = "can view account analytics summary in the system";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
+	
+	public static class ViewAllAnalytics extends PermissionEntry {
+		public static final String PERMISSION = "can.view.accounts.analytics.all";
+		public static final String DESCRIPTION = "can view all analytics summary in the system";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
+	
+	
+		
+	
 	public static class CreateCorporateAccount extends PermissionEntry {
 		public static final String PERMISSION = "can.create.corporate.account";
 		public static final String DESCRIPTION = "can create a corporate account";

@@ -36,5 +36,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
 	
 	@Query("SELECT t FROM Transaction t WHERE t.accountId =:accountId OR t.oppoAccountId =:accountId ORDER BY t.createdAt DESC")
     Page<Transaction> findByAccountId(@Param("accountId") String accountId,Pageable pageable);
+	
+	@Query("SELECT t FROM Transaction t ORDER BY t.createdAt DESC LIMIT 100")
+	List<Transaction> findRecentTransactions();
 
 }

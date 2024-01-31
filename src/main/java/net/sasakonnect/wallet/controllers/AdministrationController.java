@@ -2,6 +2,7 @@ package net.sasakonnect.wallet.controllers;
 
 import javax.security.auth.login.AccountNotFoundException;
 
+import net.sasakonnect.wallet.services.AnalyticsService;
 import net.sasakonnect.wallet.services.CorporateService;
 import net.sasakonnect.wallet.services.LarkService;
 import net.sasakonnect.wallet.services.PermissionService;
@@ -70,6 +71,9 @@ public class AdministrationController {
 
 	@Autowired
 	TransactionService transactionService;
+	
+	@Autowired
+	AnalyticsService  analyticsService;
 
 	@Autowired
 	RoleRepository roleRepository;
@@ -285,7 +289,19 @@ public class AdministrationController {
 	     this.larkService.synLarkDepartments();
 	}
 
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION)
+	@GetMapping("/analytics/summary")
+	public Object getSummary() {
+	     return this.analyticsService.getSummary();
+	}
 	
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION)
+	@GetMapping("/analytics/transactions/recent")
+	public Object getRecenTransactions() {
+	  return   this.analyticsService.getRecentTransactions();
+	}
 	
 
 }
