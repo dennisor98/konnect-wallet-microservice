@@ -12,7 +12,7 @@ build:
 
     - echo "Source code built on remote server"
   only:
-    - main
+    - dev
 
 move:
   stage: move
@@ -28,4 +28,4 @@ move:
 
     - echo "Artifacts uploaded to GitLab CI/CD."
   only:
-    - main
+    - dev
