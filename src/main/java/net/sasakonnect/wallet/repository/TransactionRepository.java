@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import net.sasakonnect.wallet.domain.Transaction;
+import net.sasakonnect.wallet.domain.Wallet;
 
 public interface TransactionRepository extends JpaRepository<Transaction, String> {
 
@@ -39,5 +40,14 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
 	
 	@Query("SELECT t FROM Transaction t ORDER BY t.createdAt DESC LIMIT 100")
 	List<Transaction> findRecentTransactions();
+	
+	@Query("SELECT COUNT(t) FROM Transaction t WHERE t.txStatus = 8 AND t.oppoAccountId =:accountId")
+	Long findAllReceived(@Param("accountId") String accountId);
+	
+	@Query("SELECT COUNT(t)  FROM Transaction t WHERE t.txStatus = 8 AND t.accountId =:accountId ")
+	Long findAllSent(@Param("accountId") String accountId);
+	
+	@Query("SELECT COUNT(t) FROM Transaction t WHERE (t.accountId =:accountId OR t.oppoAccountId =:accountId) AND t.txStatus = 8 ")
+	Long findCountByAccountId(@Param("accountId") String accountId);
 
 }

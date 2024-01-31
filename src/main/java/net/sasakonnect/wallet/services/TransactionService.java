@@ -13,7 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -216,6 +218,26 @@ public Object getTransactionHistoryByAccountNumber(String accountNumber,Integer 
 		transactionsMap.put("totalItems", transactions.getTotalElements());
 		return transactionsMap;
 		
+}
+public ResponseEntity<Object> getWalletTransactionBreakdown() {
+	var user =  (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	List<Wallet> wallet =  this.walletRepository.findByUserWalletsUser(user);
+	Map<String,Object> transMap = new HashMap<>();
+	if(!wallet.isEmpty()) {
+	Long totalTransactions = this.transactionRepository.findCountByAccountId(wallet.get(0).getAccountId());
+	Long totalReceived = this.transactionRepository.findAllReceived(wallet.get(0).getAccountId());
+	Long totalSent = this.transactionRepository.findAllSent(wallet.get(0).getAccountId());
+	Map<String,Object> map = new HashMap<>();
+	map.put("sent", totalSent);
+	map.put("received",totalReceived);
+	map.put("totalTransactions",totalTransactions);
+	transMap.put("transactions",map);
+	}else {
+		transMap.put("transactions",new ArrayList());
+	}
+	
+
+	return ResponseEntity.status(HttpStatus.OK).body(transMap);
 }
 
 

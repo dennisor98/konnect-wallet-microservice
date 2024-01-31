@@ -211,7 +211,7 @@ public Object getLarkDepartments() {
 	        if(responseBody.getData().hasMore == true) {
 	        	   this.fetchMoreUsers(responseBody.getData().page_token, departmentId);
 	           }
-	        if(responseBody.getData().items.size() > 0) {
+	        if(responseBody.getData().getItems() !=null && responseBody.getData().getItems().size() > 0) {
 	        	List<LarkUser> users =  responseBody.getData().items.stream().map(item -> {
 	        		return LarkUser.builder()
 	        				.email(item.getEmail())
@@ -263,7 +263,7 @@ public Object getLarkDepartments() {
 	        
 	        UserResponseDTO responseBody  =  responseEntity.getBody();
 	        System.out.println("message" + responseEntity.getBody().getMsg());
-	        if(responseBody.getData().items.size() > 0) {
+	        if(responseBody.getData().getItems() !=null && responseBody.getData().getItems().size() > 0) {
 	        	List<LarkUser> users =  responseBody.getData().items.stream().map(item -> {
 	        		return LarkUser.builder()
 	        				.email(item.getEmail())

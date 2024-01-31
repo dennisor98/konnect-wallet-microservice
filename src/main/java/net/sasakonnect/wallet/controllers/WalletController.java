@@ -226,5 +226,10 @@ public class WalletController {
 	public Object getOnboardingStatus(@RequestBody() @Valid() OnBoardingStatusById onBoarding) {
 		return this.walletService.getOnboardingStatus(onBoarding.getOnBoardingId());
 	}
+	
+	@GetMapping("transaction/summary")
+	public ResponseEntity<Object> getTransactionsSummary(){
+		return this.transactionService.getWalletTransactionBreakdown();
+	}
 
 }
