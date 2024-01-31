@@ -247,7 +247,7 @@ public class UserService extends RestClientService implements UserDetailsService
             		ArrayNode arrayNode = objectMapper.createArrayNode();
                 	Optional<Role> role =  this.roleRepository.findById(userRole.getRoleId());
                 	if(role.isPresent()) {
-                		if(role.get().getRoleName().toString().equalsIgnoreCase("CORPORATE")) { 
+                		if(role.get().getRoleName().toString().equalsIgnoreCase("CORPORATE") || role.get().getRoleName().toString().equalsIgnoreCase("SUPER_ADMIN") || role.get().getRoleName().toString().equalsIgnoreCase("ADMIN")) { 
                 			map.put("success", true);
                 			map.put("message", "proceed to login");
                 			payloadMap.put("payload",map);
