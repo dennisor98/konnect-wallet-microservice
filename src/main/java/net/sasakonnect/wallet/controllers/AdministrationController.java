@@ -299,9 +299,23 @@ public class AdministrationController {
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION)
 	@GetMapping("/analytics/transactions/recent")
-	public Object getRecenTransactions() {
-	  return   this.analyticsService.getRecentTransactions();
+	public Object getRecenTransactions(
+			@RequestParam(name = "pageSize", defaultValue = "20") Integer pageSize,
+			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber
+			) {
+	  return   this.analyticsService.getRecentTransactions(pageNumber, pageSize);
 	}
+	
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION)
+	@GetMapping("/analytics/wallet/transaction/rank")
+	public ResponseEntity<Object> getWalletTransactionRanks(
+			@RequestParam(name = "pageSize", defaultValue = "20") Integer pageSize,
+			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber
+			) {
+	  return   this.transactionService.getWalletTransactionRanks(pageNumber, pageSize);
+	}
+	
 	
 
 }

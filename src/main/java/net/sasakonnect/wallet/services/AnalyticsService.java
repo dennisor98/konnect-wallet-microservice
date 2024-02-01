@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -35,8 +37,8 @@ public class AnalyticsService {
 	  return resMap;
   }
   
-  public Object getRecentTransactions() {
-	  List<Transaction> latestTransactions = this.transactionRepository.findRecentTransactions();
+  public Object getRecentTransactions(Integer pageNumber,Integer pageSize) {
+	  Page<Transaction> latestTransactions =  this.transactionRepository.findRecentTransactions(PageRequest.of(pageNumber,pageSize));
 	  Map<String,Object> resMap = new HashMap<>();
 	  if(latestTransactions !=null) {
 		var ltransactions =   latestTransactions.stream().map(transaction ->{

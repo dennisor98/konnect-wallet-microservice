@@ -22,6 +22,8 @@ import org.springframework.web.reactive.function.BodyInserters;
 
 import com.google.gson.Gson;
 
+import lombok.Data;
+import net.sasakonnect.wallet.RequestDto.admin.WalletRank;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
 import net.sasakonnect.wallet.domain.Transaction;
@@ -34,6 +36,7 @@ import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.tools.RequestSigner;
 import reactor.core.publisher.Mono;
 
+
 @Service
 public class TransactionService {
 	@Autowired
@@ -44,6 +47,8 @@ public class TransactionService {
 	BankWebClientBean bankClientBean;
 	@Autowired
 	RequestSigner requestSigner;
+	
+	
 
 	public Transaction saveTransaction(NotificationResult<TransactionResultNotification> results) {
 		var trans = results.getParams();
@@ -233,12 +238,30 @@ public ResponseEntity<Object> getWalletTransactionBreakdown() {
 	map.put("totalTransactions",totalTransactions);
 	transMap.put("transactions",map);
 	}else {
-		transMap.put("transactions",new ArrayList());
+		transMap.put("transactions",new ArrayList<Object>());
 	}
 	
 
 	return ResponseEntity.status(HttpStatus.OK).body(transMap);
 }
 
+public ResponseEntity<Object> getWalletTransactionRanks(Integer pageNumber,Integer pageSize) {
+	Map<String,Object> map = new HashMap<>();
+	var transactionRank = this.transactionRepository.findWalletRank(pageNumber,pageSize);
+	if(!transactionRank.isEmpty() ) {
+		var rank = transactionRank.stream().map(r->{
+			Map<String,Object> tmap = new HashMap<>();
+			tmap.put("account_name",r[0]);
+			tmap.put("account_id",r[1]);
+			tmap.put("total_transactions",r[2]);
+			tmap.put("account_amount",r[3]);
+			return tmap;
+		}).collect(Collectors.toList());
+	   map.put("success", true);
+	   map.put("message","Request successful");
+	   map.put("wallet_rank",rank);
+	   }
+	return ResponseEntity.status(HttpStatus.OK).body(map);
+}
 
 }
