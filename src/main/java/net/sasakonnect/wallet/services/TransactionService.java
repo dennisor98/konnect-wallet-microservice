@@ -57,6 +57,7 @@ public class TransactionService {
 			var transaction = Transaction.builder().txId(trans.getTxId()).txType(trans.getTxType())
 					.externalTxId(trans.getExternalTxId()).accountId(trans.getAccountId())
 					.accountName(trans.getAccountName()).oppoSubAccount(trans.getOppoSubAccount())
+					.feeAmount(new BigDecimal(trans.getFeeAmount()))
 					// .mpesaBusinessPayType(trans.getMpesaBusinessPayType())
 					.txStatus(trans.getTxStatus()).oppoAccountId(trans.getOppoAccountId())
 					.oppoChannelId(trans.getOppoChannelId()).oppoAccountName(trans.getOppoAccountName())
@@ -262,6 +263,11 @@ public ResponseEntity<Object> getWalletTransactionRanks(Integer pageNumber,Integ
 	   map.put("wallet_rank",rank);
 	   }
 	return ResponseEntity.status(HttpStatus.OK).body(map);
+}
+
+public ResponseEntity<Object> getDailyTransactionTrend(Integer year,Integer month) {
+	Object trends = this.transactionRepository.findTransactionTrend(month,year);
+	return ResponseEntity.status(HttpStatus.OK).body(trends);
 }
 
 }
