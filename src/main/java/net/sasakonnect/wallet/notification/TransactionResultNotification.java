@@ -18,6 +18,7 @@ public class TransactionResultNotification {
 	private String thirdPartyTxType;
 	private String currency;
 	private String amount; // Updated to String
+	private String feeAmount;
 	private int txStatus; // Updated to int
 	private long createTime; // Updated to long
 	private long updateTime; // Updated to long

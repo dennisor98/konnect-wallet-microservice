@@ -43,6 +43,7 @@ import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.repository.RoleRepository;
 import net.sasakonnect.wallet.services.WalletClientService;
 import net.sasakonnect.wallet.services.WalletService;
+import java.time.LocalDate;
 
 @RequestMapping("/administration")
 @Tag(name = "Administration", description = "Back Office  routes")
@@ -314,6 +315,16 @@ public class AdministrationController {
 			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber
 			) {
 	  return   this.transactionService.getWalletTransactionRanks(pageNumber, pageSize);
+	}
+	
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION)
+	@GetMapping("/analytics/transaction/daily_trend")
+	public ResponseEntity<Object> getDailyTransactionTrends(
+			@RequestParam(name = "month", defaultValue = "#{T(LocalDate.now().getMonth()}") Integer month ,
+			@RequestParam(name = "year", defaultValue = "#{T(LocalDate.now().getMonth())}") Integer year
+			) {
+	  return   this.transactionService.getDailyTransactionTrend(year, month);
 	}
 	
 	

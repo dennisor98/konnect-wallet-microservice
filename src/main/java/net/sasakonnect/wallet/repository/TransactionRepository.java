@@ -53,5 +53,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
 	
 	@Query(value="SELECT DISTINCT CONCAT(u.first_name, ' ', u.last_name) AS name, w.account_id, COALESCE(ts.transaction_count, 0) AS transaction_count, COALESCE(ts.totalAmount, 0) AS totalAmount FROM (SELECT account_id, COUNT(*) AS transaction_count, SUM(ABS(amount)) AS totalAmount FROM transaction WHERE tx_status = 8 GROUP BY account_id) ts LEFT JOIN wallet w ON ts.account_id = w.account_id LEFT JOIN user_wallet uw ON uw.wallet_id = w.id LEFT JOIN (SELECT id, first_name, last_name FROM user) AS u ON u.id = uw.user_id GROUP BY w.account_id, name, transaction_count, totalAmount ORDER BY totalAmount DESC LIMIT :pageSize OFFSET :pageNumber",nativeQuery=true)
 	List<Object[]> findWalletRank(@Param("pageNumber") Integer pageNumber,@Param("pageSize") Integer pageSize);
+	
+	@Query("SELECT DATE(t.createdAt) as date_created,COUNT(*) total_transactions,SUM(ABS(t.amount)) as total_transacted FROM Transaction t WHERE MONTH(t.createdAt) =:month AND YEAR(t.createdAt) =:year GROUP BY DATE(createdAt) ORDER BY DATE(createdAt)ASC")
+	List<Object> findTransactionTrend(@Param("month") Integer month,@Param("year") Integer yaer);
+	
+	
 
 }
