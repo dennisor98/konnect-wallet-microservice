@@ -10,6 +10,7 @@ import net.sasakonnect.wallet.services.RoleService;
 import net.sasakonnect.wallet.services.TransactionService;
 import net.sasakonnect.wallet.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -44,6 +45,8 @@ import net.sasakonnect.wallet.repository.RoleRepository;
 import net.sasakonnect.wallet.services.WalletClientService;
 import net.sasakonnect.wallet.services.WalletService;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 
 @RequestMapping("/administration")
 @Tag(name = "Administration", description = "Back Office  routes")
@@ -319,12 +322,31 @@ public class AdministrationController {
 	
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION)
-	@GetMapping("/analytics/transaction/daily_trend")
+	@GetMapping("/analytics/transaction/trend")
 	public ResponseEntity<Object> getDailyTransactionTrends(
-			@RequestParam(name = "month", defaultValue = "#{T(LocalDate.now().getMonth()}") Integer month ,
-			@RequestParam(name = "year", defaultValue = "#{T(LocalDate.now().getMonth())}") Integer year
+			@RequestParam(name="filter",defaultValue="daily") String filter,
+			@RequestParam(name = "month", defaultValue = "#{T(java.time.LocalDate).now().getMonthValue()}")
+	        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) int month,
+	        @RequestParam(name = "year", defaultValue = "#{T(java.time.LocalDate).now().getYear()}")
+	        int year
 			) {
-	  return   this.transactionService.getDailyTransactionTrend(year, month);
+		if(filter.equalsIgnoreCase("daily")) {
+			return    this.transactionService.getDailyTransactionTrend(year, month);
+		}
+		
+		else if(filter.equalsIgnoreCase("monthly") ) {
+			return   this.transactionService.getMonthlyTransactionTrend(year);	
+		}
+		
+		else if(filter.equalsIgnoreCase("annual")) {
+			return   this.transactionService.getAnnualTransactionTrend();	
+		}else {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success", false);
+			map.put("message","Invalid filter value");	
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+	  
 	}
 	
 	

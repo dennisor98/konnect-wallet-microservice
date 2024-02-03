@@ -266,8 +266,69 @@ public ResponseEntity<Object> getWalletTransactionRanks(Integer pageNumber,Integ
 }
 
 public ResponseEntity<Object> getDailyTransactionTrend(Integer year,Integer month) {
-	Object trends = this.transactionRepository.findTransactionTrend(month,year);
-	return ResponseEntity.status(HttpStatus.OK).body(trends);
+	List<Object[]> trends = this.transactionRepository.findTransactionTrend(month,year);
+	Map<String,Object> resmap = new HashMap<>();
+	if(trends.isEmpty()) {
+		resmap.put("success",true);
+		resmap.put("transaction_trends",trends);
+		return ResponseEntity.status(HttpStatus.OK).body(resmap);
+	}else {
+		var trendMap = trends.stream().map(t->{
+			Map<String,Object> map = new HashMap<>();
+			map.put("date",t[0]);
+			map.put("total_transactions",t[1]);
+			map.put("total_transacted",t[2]);
+			return map;
+			}).collect(Collectors.toList());
+		resmap.put("success",true);
+		resmap.put("transaction_trends",trendMap);
+		return ResponseEntity.status(HttpStatus.OK).body(resmap);
+	}
+	
+}
+
+public ResponseEntity<Object> getMonthlyTransactionTrend(Integer year) {
+	List<Object[]> trends = this.transactionRepository.findMonthlyTransactionTrend(year);
+	Map<String,Object> resmap = new HashMap<>();
+	if(trends.isEmpty()) {
+		resmap.put("success",true);
+		resmap.put("transaction_trends",trends);
+		return ResponseEntity.status(HttpStatus.OK).body(resmap);
+	}else {
+		var trendMap = trends.stream().map(t->{
+			Map<String,Object> map = new HashMap<>();
+			map.put("month",t[0]);
+			map.put("total_transactions",t[1]);
+			map.put("total_transacted",t[2]);
+			return map;
+			}).collect(Collectors.toList());
+		resmap.put("success",true);
+		resmap.put("transaction_trends",trendMap);
+		return ResponseEntity.status(HttpStatus.OK).body(resmap);
+	}
+	
+}
+
+public ResponseEntity<Object> getAnnualTransactionTrend() {
+	List<Object[]> trends = this.transactionRepository.findAnnualTransactionTrend();
+	Map<String,Object> resmap = new HashMap<>();
+	if(trends.isEmpty()) {
+		resmap.put("success",true);
+		resmap.put("transaction_trends",trends);
+		return ResponseEntity.status(HttpStatus.OK).body(resmap);
+	}else {
+		var trendMap = trends.stream().map(t->{
+			Map<String,Object> map = new HashMap<>();
+			map.put("year",t[0]);
+			map.put("total_transactions",t[1]);
+			map.put("total_transacted",t[2]);
+			return map;
+			}).collect(Collectors.toList());
+		resmap.put("success",true);
+		resmap.put("transaction_trends",trendMap);
+		return ResponseEntity.status(HttpStatus.OK).body(resmap);
+	}
+	
 }
 
 }
