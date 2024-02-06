@@ -479,6 +479,7 @@ public class WalletService {
 				log.info("transacttion {}", results);
 //				System.out.println(typeToken.getType().getTypeName());
 //				System.out.println(results.getNotificationType());
+				results.getParams().setTxStatus(TransactionStatus.SUCCESS.getValue());
 				var createdTransaction = this.transactionService.saveTransaction(results);
 				if (createdTransaction != null) {
 					log.info("publish transaction to socket {}", createdTransaction);

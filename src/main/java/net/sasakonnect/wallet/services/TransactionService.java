@@ -50,13 +50,17 @@ public class TransactionService {
 			var transaction = Transaction.builder().txId(trans.getTxId()).txType(trans.getTxType())
 					.externalTxId(trans.getExternalTxId()).accountId(trans.getAccountId())
 					.accountName(trans.getAccountName()).oppoSubAccount(trans.getOppoSubAccount())
+					.balance(new BigDecimal(trans.getBalance())).oppoBankCode(trans.getOppoBankCode())
 
+					// .extInfo(trans.getExtInfo().toString())
+					.notificationType(trans.getTxType())
 					.feeAmount(trans.getFeeAmount() != null ? new BigDecimal(trans.getFeeAmount()) : new BigDecimal(0))
 					// .mpesaBusinessPayType(trans.getMpesaBusinessPayType())
-					.txStatus(trans.getTxStatus()).oppoAccountId(trans.getOppoAccountId())
-					.oppoChannelId(trans.getOppoChannelId()).oppoAccountName(trans.getOppoAccountName())
-					.thirdPartyTxType(trans.getThirdPartyTxType()).currency(trans.getCurrency())
-					.amount(new BigDecimal(trans.getAmount())).build();
+					.txStatus(trans.getTxStatus())
+
+					.oppoAccountId(trans.getOppoAccountId()).oppoChannelId(trans.getOppoChannelId())
+					.oppoAccountName(trans.getOppoAccountName()).thirdPartyTxType(trans.getThirdPartyTxType())
+					.currency(trans.getCurrency()).amount(new BigDecimal(trans.getAmount())).build();
 			return this.transactionRepository.save(transaction);
 		} else {
 //			var transaction = Transaction.builder().txId(trans.getTxId()).txType(trans.getTxType())
