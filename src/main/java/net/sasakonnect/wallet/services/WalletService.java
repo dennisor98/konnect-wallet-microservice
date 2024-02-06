@@ -60,13 +60,12 @@ import net.sasakonnect.wallet.notification.TransactionResultNotification;
 import net.sasakonnect.wallet.repository.CurrencyRepository;
 import net.sasakonnect.wallet.repository.UserWalletRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
-import net.sasakonnect.wallet.tools.JwtService;
 import net.sasakonnect.wallet.tools.RequestSigner;
 import reactor.core.publisher.Mono;
 
 @Service
 @Slf4j
-public class WalletService extends JwtService {
+public class WalletService {
 	@Autowired
 	BankWebClientBean bankClientBean;
 	@Autowired
@@ -412,6 +411,7 @@ public class WalletService extends JwtService {
 	private Object callBackContentResolver(JsonObject body) {
 		try {
 			var notification_Type = body.get("notificationType").getAsString();
+
 			var params = body.getAsJsonObject("params");
 
 			NotificationBody notificationBody = new Gson().fromJson(params, NotificationBody.class);
@@ -433,18 +433,18 @@ public class WalletService extends JwtService {
 						this.userWalletRepository.save(userWallet);
 					}
 
-				}else if(notificationBody.getStatus() == 4 && user.isPresent()) {
+				} else if (notificationBody.getStatus() == 4 && user.isPresent()) {
 					var onboardingRequestId = params.get("onboardingRequestId").getAsString();
 					System.out.println(onboardingRequestId);
 					this.userService.deletUserByOnboardingRequestId(onboardingRequestId);
-				}else {
-					if(user.isPresent()) {
+				} else {
+					if (user.isPresent()) {
 						user.get().setStatus(params.get("status").getAsString());
 						this.userService.save(user.get());
-						
+
 					}
 				}
-				
+
 //				else {
 //					
 //
@@ -452,6 +452,7 @@ public class WalletService extends JwtService {
 			} else if (notification_Type == NotificationType.ACCOUNT_STATEMENT.getCode()) {
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.TRANSACTION.getCode())) {
+
 				log.info("payload {}", body.toString());
 //				TypeToken<NotificationResult<TransactionResultNotification>> typeToken = new TypeToken<NotificationResult<TransactionResultNotification>>() {
 //				};
@@ -470,8 +471,21 @@ public class WalletService extends JwtService {
 							.transaction(createdTransaction).build());
 				}
 
-			} else if (notification_Type == NotificationType.BALANCE.getCode()) {
+			} else if (notification_Type.equalsIgnoreCase(NotificationType.BALANCE.getCode())) {
+				NotificationResult<TransactionResultNotification> results = new Gson().fromJson(body.toString(),
+						new TypeToken<NotificationResult<TransactionResultNotification>>() {
+						}.getType());
 
+				log.info("transacttion {}", results);
+//				System.out.println(typeToken.getType().getTypeName());
+//				System.out.println(results.getNotificationType());
+				var createdTransaction = this.transactionService.saveTransaction(results);
+				if (createdTransaction != null) {
+					log.info("publish transaction to socket {}", createdTransaction);
+
+					this.publisher.publishEvent(TransactionEvent.builder().userService(userService)
+							.transaction(createdTransaction).build());
+				}
 			} else if (notification_Type == NotificationType.INTERNAL_BATCH_TRANSACTION.getCode()) {
 
 			} else if (notification_Type == NotificationType.WALLET_ACCOUNT_UPGRADE.getCode()) {
@@ -1056,7 +1070,5 @@ public class WalletService extends JwtService {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
-	
 
 }

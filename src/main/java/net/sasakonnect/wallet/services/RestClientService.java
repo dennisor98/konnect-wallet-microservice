@@ -7,10 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import jakarta.annotation.PostConstruct;
-import net.sasakonnect.wallet.tools.JwtService;
 
 @Service
-public class RestClientService extends JwtService {
+public class RestClientService {
 	@Value("${BASE_URL}")
 	private String baseUrl;
 	protected WebClient webClient;
