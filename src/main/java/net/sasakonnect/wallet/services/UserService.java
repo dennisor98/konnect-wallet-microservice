@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -692,7 +693,10 @@ public class UserService extends RestClientService implements UserDetailsService
 				map.put("success", false);
 				map.put("message","Invalid reset to value");
 				try (FileWriter writer = new FileWriter("pin_reset.txt")) {
-		            writer.write(loggedInUser.getFirstName()+""+loggedInUser.getLastName()+"failed to reset PIN attempts for user(Invalid count number)"
+					 LocalDateTime currentTime = LocalDateTime.now();
+			    	 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			    	 String formattedDateTime = currentTime.format(formatter);
+		            writer.write(formattedDateTime + " - " +loggedInUser.getFirstName()+"   "+loggedInUser.getLastName()+"failed to reset PIN attempts for user(Invalid count number)"
 				+user.get().getFirstName()+user.get().getLastName()+"of phone No"+user.get().getMobile());
 		        } catch (IOException e) {
 		            e.printStackTrace();
@@ -705,8 +709,11 @@ public class UserService extends RestClientService implements UserDetailsService
 					this.userPinRepository.save(userPin.get());
 					map.put("success", true);
 					map.put("message", "Pin attempts updated");
-					try (FileWriter writer = new FileWriter("pin_reset.txt")) {
-			            writer.write(loggedInUser.getFirstName()+""+loggedInUser.getLastName()+"succeeded to reset PIN attempts for user"
+					try (FileWriter writer = new FileWriter("pin_reset.txt",true)) {
+						 LocalDateTime currentTime = LocalDateTime.now();
+				    	 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+				    	 String formattedDateTime = currentTime.format(formatter);
+			            writer.write(formattedDateTime + " - " +loggedInUser.getFirstName()+""+loggedInUser.getLastName()+"succeeded to reset PIN attempts for user"
 					+user.get().getFirstName()+user.get().getLastName()+"of phone No"+user.get().getMobile());
 					}catch (IOException e) {
 			            e.printStackTrace();
@@ -719,8 +726,11 @@ public class UserService extends RestClientService implements UserDetailsService
 					return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
 				   }
 				}else {
-					try (FileWriter writer = new FileWriter("pin_reset.txt")) {
-			            writer.write(loggedInUser.getFirstName()+""+loggedInUser.getLastName()+"failed to reset PIN attempts for user(User does not exist)"
+					try (FileWriter writer = new FileWriter("pin_reset.txt",true)) {
+						 LocalDateTime currentTime = LocalDateTime.now();
+				    	 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+				    	 String formattedDateTime = currentTime.format(formatter);
+			            writer.write(formattedDateTime + " - " +loggedInUser.getFirstName()+""+loggedInUser.getLastName()+"failed to reset PIN attempts for user(User does not have a PIN set)"
 					     +userId);
 					
 					}catch (IOException e) {
@@ -735,6 +745,16 @@ public class UserService extends RestClientService implements UserDetailsService
 				
 			}
 		}else {
+			try (FileWriter writer = new FileWriter("pin_reset.txt")) {
+				 LocalDateTime currentTime = LocalDateTime.now();
+		    	 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		    	 String formattedDateTime = currentTime.format(formatter);
+	            writer.write(formattedDateTime + " - " +loggedInUser.getFirstName()+""+loggedInUser.getLastName()+"failed to reset PIN attempts for user(User does not exist)"
+			     +userId);
+			
+			}catch (IOException e) {
+	            e.printStackTrace();
+	        }
 			map.put("success",false);
 			map.put("message","User not found");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
@@ -750,12 +770,19 @@ public class UserService extends RestClientService implements UserDetailsService
 			Optional<UserPin> userPin = this.userPinRepository.getUserPinByUser(user.get());	
 			if(userPin.isPresent()) {
 				    try {
-				    	try (FileWriter writer = new FileWriter("pin_reset.txt")) {
-				            writer.write(loggedInUser.getFirstName()+""+loggedInUser.getLastName()+"succeeded to reset PIN  for user"
-						+user.get().getFirstName()+user.get().getLastName()+"of phone No"+user.get().getMobile());
-				        } catch (IOException e) {
-				            e.printStackTrace();
-				        }
+				    	try (FileWriter writer = new FileWriter("pin_reset.txt", true)) {
+				    	    LocalDateTime currentTime = LocalDateTime.now();
+				    	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+				    	    String formattedDateTime = currentTime.format(formatter);
+				    	    
+				    	    String logMessage = formattedDateTime + " - " + loggedInUser.getFirstName() + " " + loggedInUser.getLastName() +
+				    	            " succeeded to reset PIN for user " + user.get().getFirstName() + " " + user.get().getLastName() +
+				    	            " of phone No " + user.get().getMobile() + "\n";
+				    	    
+				    	    writer.write(logMessage);
+				    	} catch (IOException e) {
+				    	    e.printStackTrace();
+				    	}
 //				   user.get().setPins(null);
 				  this.userPinRepository.delete(userPin.get());
 					map.put("success", true);
@@ -768,8 +795,11 @@ public class UserService extends RestClientService implements UserDetailsService
 					return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
 				   }
 				}else {
-					try (FileWriter writer = new FileWriter("pin_reset.txt")) {
-			            writer.write(loggedInUser.getFirstName()+""+loggedInUser.getLastName()+"failed to reset PIN attempts for user(No PIN)"
+					try (FileWriter writer = new FileWriter("pin_reset.txt",true)) {
+						 LocalDateTime currentTime = LocalDateTime.now();
+				    	 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+				    	 String formattedDateTime = currentTime.format(formatter);
+			            writer.write(formattedDateTime + " - " +loggedInUser.getFirstName()+""+loggedInUser.getLastName()+"failed to reset PIN attempts for user(No PIN)"
 					+user.get().getFirstName()+user.get().getLastName()+"of phone No"+user.get().getMobile());
 			        } catch (IOException e) {
 			            e.printStackTrace();
@@ -781,8 +811,11 @@ public class UserService extends RestClientService implements UserDetailsService
 				
 				
 			}else {
-				try (FileWriter writer = new FileWriter("pin_reset.txt")) {
-		            writer.write(loggedInUser.getFirstName()+""+loggedInUser.getLastName()+"tried to reset PIN  for non existing user");
+				try (FileWriter writer = new FileWriter("pin_reset.txt",true)) {
+					 LocalDateTime currentTime = LocalDateTime.now();
+			    	 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			    	 String formattedDateTime = currentTime.format(formatter);
+		            writer.write(formattedDateTime + " - " +loggedInUser.getFirstName()+"  "+loggedInUser.getLastName()+"  tried to reset PIN  for non existing user");
 		        } catch (IOException e) {
 		            e.printStackTrace();
 		        }
