@@ -1,14 +1,10 @@
 package net.sasakonnect.wallet.controllers;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.security.auth.login.AccountNotFoundException;
 
-import net.sasakonnect.wallet.services.AnalyticsService;
-import net.sasakonnect.wallet.services.CorporateService;
-import net.sasakonnect.wallet.services.LarkService;
-import net.sasakonnect.wallet.services.PermissionService;
-import net.sasakonnect.wallet.services.RoleService;
-import net.sasakonnect.wallet.services.TransactionService;
-import net.sasakonnect.wallet.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -24,15 +20,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import net.sasakonnect.wallet.RequestDto.Corporate;
-import net.sasakonnect.wallet.RequestDto.VerifyCorporate;
 import net.sasakonnect.wallet.RequestDto.PermissionDTO;
 import net.sasakonnect.wallet.RequestDto.PermissionsToRoleDTO;
 import net.sasakonnect.wallet.RequestDto.RoleDTO;
 import net.sasakonnect.wallet.RequestDto.UserRoleDTO;
+import net.sasakonnect.wallet.RequestDto.VerifyCorporate;
 import net.sasakonnect.wallet.RequestDto.WalletClientAccountDto;
 import net.sasakonnect.wallet.RequestDto.WalletClientDTO;
 import net.sasakonnect.wallet.RequestDto.admin.CheckUserAccount;
@@ -43,11 +39,15 @@ import net.sasakonnect.wallet.constant.GlobalPermissionConstants;
 import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.repository.RoleRepository;
+import net.sasakonnect.wallet.services.AnalyticsService;
+import net.sasakonnect.wallet.services.CorporateService;
+import net.sasakonnect.wallet.services.LarkService;
+import net.sasakonnect.wallet.services.PermissionService;
+import net.sasakonnect.wallet.services.RoleService;
+import net.sasakonnect.wallet.services.TransactionService;
+import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.services.WalletClientService;
 import net.sasakonnect.wallet.services.WalletService;
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 
 @RequestMapping("/administration")
 @Tag(name = "Administration", description = "Back Office  routes")
@@ -76,16 +76,13 @@ public class AdministrationController {
 
 	@Autowired
 	TransactionService transactionService;
-	
+
 	@Autowired
-	AnalyticsService  analyticsService;
+	AnalyticsService analyticsService;
 
 	@Autowired
 	RoleRepository roleRepository;
 
-
-
-	
 	@GetMapping("/upload/app")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CreateSuperApp.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CreateSuperApp.PERMISSION)
@@ -237,7 +234,8 @@ public class AdministrationController {
 	}
 
 	@GetMapping("/transactions/history")
-	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION +"')")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION
+			+ "')")
 	@RequirePermission(GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION)
 	public Object getTransactionHistory(@RequestParam(name = "pageSize", defaultValue = "20") Integer pageSize,
 			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber
@@ -281,73 +279,71 @@ public class AdministrationController {
 	@RequirePermission(GlobalPermissionConstants.SyncLark.PERMISSION)
 	@GetMapping("/lark/user/sync")
 	public void syncLarkUsers() {
-	     this.larkService.syncLarkUsers();
+		this.larkService.syncLarkUsers();
 	}
-	
+
 	@Hidden()
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.SyncLark.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.SyncLark.PERMISSION)
 	@GetMapping("/lark/dept/sync")
 	public void syncLarkDepartments() {
-	     this.larkService.synLarkDepartments();
+		this.larkService.synLarkDepartments();
 	}
 
-	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION + "')")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION
+			+ "')")
 	@RequirePermission(GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION)
 	@GetMapping("/analytics/summary")
 	public Object getSummary() {
-	     return this.analyticsService.getSummary();
+		return this.analyticsService.getSummary();
 	}
-	
-	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION + "')")
+
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION
+			+ "')")
 	@RequirePermission(GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION)
 	@GetMapping("/analytics/transactions/recent")
-	public Object getRecenTransactions(
-			@RequestParam(name = "pageSize", defaultValue = "20") Integer pageSize,
-			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber
-			) {
-	  return   this.analyticsService.getRecentTransactions(pageNumber, pageSize);
+	public Object getRecenTransactions(@RequestParam(name = "pageSize", defaultValue = "20") Integer pageSize,
+			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber) {
+		return this.analyticsService.getRecentTransactions(pageNumber, pageSize);
 	}
-	
-	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION + "')")
+
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION
+			+ "')")
 	@RequirePermission(GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION)
 	@GetMapping("/analytics/wallet/transaction/rank")
 	public ResponseEntity<Object> getWalletTransactionRanks(
 			@RequestParam(name = "pageSize", defaultValue = "20") Integer pageSize,
-			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber
-			) {
-	  return   this.transactionService.getWalletTransactionRanks(pageNumber, pageSize);
+			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber) {
+		return this.transactionService.getWalletTransactionRanks(pageNumber, pageSize);
 	}
-	
-	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION + "')")
+
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION
+			+ "')")
 	@RequirePermission(GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION)
 	@GetMapping("/analytics/transaction/trend")
 	public ResponseEntity<Object> getDailyTransactionTrends(
-			@RequestParam(name="filter",defaultValue="daily") String filter,
-			@RequestParam(name = "month", defaultValue = "#{T(java.time.LocalDate).now().getMonthValue()}")
-	        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) int month,
-	        @RequestParam(name = "year", defaultValue = "#{T(java.time.LocalDate).now().getYear()}")
-	        int year
-			) {
-		if(filter.equalsIgnoreCase("daily")) {
-			return    this.transactionService.getDailyTransactionTrend(year, month);
+			@RequestParam(name = "filter", defaultValue = "daily") String filter,
+			@RequestParam(name = "month", defaultValue = "#{T(java.time.LocalDate).now().getMonthValue()}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) int month,
+			@RequestParam(name = "year", defaultValue = "#{T(java.time.LocalDate).now().getYear()}") int year) {
+		if (filter.equalsIgnoreCase("daily")) {
+			return this.transactionService.getDailyTransactionTrend(year, month);
 		}
-		
-		else if(filter.equalsIgnoreCase("monthly") ) {
-			return   this.transactionService.getMonthlyTransactionTrend(year);	
+
+		else if (filter.equalsIgnoreCase("monthly")) {
+			return this.transactionService.getMonthlyTransactionTrend(year);
 		}
-		
-		else if(filter.equalsIgnoreCase("annual")) {
-			return   this.transactionService.getAnnualTransactionTrend();	
-		}else {
-			Map<String,Object> map = new HashMap<>();
+
+		else if (filter.equalsIgnoreCase("annual")) {
+			return this.transactionService.getAnnualTransactionTrend();
+		} else {
+			Map<String, Object> map = new HashMap<>();
 			map.put("success", false);
-			map.put("message","Invalid filter value");	
+			map.put("message", "Invalid filter value");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 		}
-	  
+
 	}
-	
+
 	@PostMapping("/user/wallet/pin/resetAttempts")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanResetPintattempts.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CanResetPintattempts.PERMISSION)
@@ -355,22 +351,20 @@ public class AdministrationController {
 		return this.userService.resetPinAttempts(req.getCounter(), req.getUserId());
 
 	}
-	
+
 	@PostMapping("/user/wallet/pin/reset")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanResetUserPin.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CanResetUserPin.PERMISSION)
 	public Object resetWalletPin(@Valid @RequestBody PinReset req) {
 		return this.userService.resetUserPin(req.getUserId());
 	}
-	
+
 	@GetMapping("/wallet/balance")
-	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION + "')")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION
+			+ "')")
 	@RequirePermission(GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION)
-	public Object getWalletBalance(
-			@RequestParam(name = "accountNumber", required = true) String accountNumber
-	) {
+	public Object getWalletBalance(@RequestParam(name = "accountNumber", required = true) String accountNumber) {
 		return this.walletService.getWalletAccountBalance(accountNumber);
 	}
-	
 
 }
