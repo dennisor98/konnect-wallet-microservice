@@ -291,22 +291,41 @@ public class RoleService {
 			Role rol =  role.get();
 			Optional<UserRole> userRoleExists = this.userRoleRepository.findUserRoleByUserIdAndRoleId(usr.getId(),rol.getId());
 			if(userRoleExists.isPresent()) {
-				map.put("success","false");
+				map.put("success",false);
 				map.put("message","Role already assigned to user");
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 			}else {
-				var userRol= UserRole.builder().roleId(rol.id).userId(usr.id).assigner(loggedInUsr).build();
-				try {
-					this.userRoleRepository.save(userRol);
-					map.put("success","true");
-					map.put("message","Role assigned to user");
-					resMap.put("payload",map);
-					return ResponseEntity.status(HttpStatus.OK).body(resMap);
-			}catch(Exception ex) {
-					map.put("success","false");
-					map.put("message","Oops!Something went wrong");
-					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+//				List<Role> userHasRole = this.userRoleRepository.findRolesByUserId(user.get().getId());
+				Optional<UserRole> userHasRole  = this.userRoleRepository.findUserRoleByUserId(user.get().getId());
+				if(userHasRole.isEmpty()) {
+					var userRol= UserRole.builder().roleId(rol.id).userId(usr.id).assigner(loggedInUsr).build();
+				   try {
+					  this.userRoleRepository.save(userRol);
+					  map.put("success",true);
+					  map.put("message","Role assigned to user");
+					  resMap.put("payload",map);
+					    return ResponseEntity.status(HttpStatus.OK).body(resMap);
+		         	}catch(Exception ex) {
+					     map.put("success",false);
+					    map.put("message","Oops!Something went wrong");
+					    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+				   }
+				}else {
+					this.userRoleRepository.delete(userHasRole.get());//remove any other role associated to user and create a new one
+					var userRol= UserRole.builder().roleId(rol.id).userId(usr.id).assigner(loggedInUsr).build();
+					   try {
+						  this.userRoleRepository.save(userRol);
+						  map.put("success",true);
+						  map.put("message","User Role updated successfully");
+						  resMap.put("payload",map);
+						    return ResponseEntity.status(HttpStatus.OK).body(resMap);
+			         	}catch(Exception ex) {
+						     map.put("success","false");
+						    map.put("message","Oops!Something went wrong");
+						    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+					   }
 				}
+				
 			    
 			}
 			

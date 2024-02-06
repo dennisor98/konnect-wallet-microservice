@@ -36,6 +36,7 @@ import net.sasakonnect.wallet.RequestDto.UserRoleDTO;
 import net.sasakonnect.wallet.RequestDto.WalletClientAccountDto;
 import net.sasakonnect.wallet.RequestDto.WalletClientDTO;
 import net.sasakonnect.wallet.RequestDto.admin.CheckUserAccount;
+import net.sasakonnect.wallet.RequestDto.admin.PinReset;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.RequirePermission;
 import net.sasakonnect.wallet.constant.GlobalPermissionConstants;
@@ -349,6 +350,20 @@ public class AdministrationController {
 	  
 	}
 	
+	@PostMapping("/user/wallet/pin/resetAttempts")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanResetPintattempts.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.CanResetPintattempts.PERMISSION)
+	public Object resetWalletPinAttempts(@Valid @RequestBody PinReset req) {
+		return this.userService.resetPinAttempts(req.getCounter(), req.getUserId());
+
+	}
+	
+	@PostMapping("/user/wallet/pin/reset")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanResetUserPin.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.CanResetUserPin.PERMISSION)
+	public Object resetWalletPin(@Valid @RequestBody PinReset req) {
+		return this.userService.resetUserPin(req.getUserId());
+	}
 	
 
 }

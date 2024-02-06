@@ -20,7 +20,10 @@ public interface UserPinRepository extends JpaRepository<UserPin, String> {
 
 	@Query("SELECT up FROM UserPin up WHERE up.user = :user AND up.deletedAt IS  NULL ")
 	Optional<List<UserPin>> getUserPinThatIsNotArchived(@Param("user") User user);
-
+	
+	@Query("SELECT up FROM UserPin up WHERE up.user =:user AND up.deletedAt IS   NULL")
+    Optional<UserPin> getUserPinByUser(@Param("user") User user);
+	
 	@Query("SELECT u FROM UserPin u WHERE u.user.id = :userId AND u.createdAt >= :startDate")
 
 	Optional<List<UserPin>> findPinsUsedWithinLastThreeMonths(@Param("userId") String String,
