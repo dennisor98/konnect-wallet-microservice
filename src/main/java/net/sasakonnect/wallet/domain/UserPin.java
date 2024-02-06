@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserPin extends BaseWalletDomain implements Serializable {
 
-	@ManyToOne(cascade = CascadeType.REMOVE)
+	@ManyToOne(cascade = CascadeType.DETACH)
 	private User user;
 
 	@Column(nullable = false)

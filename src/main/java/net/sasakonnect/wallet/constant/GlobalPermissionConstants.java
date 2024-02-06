@@ -200,6 +200,36 @@ public final class GlobalPermissionConstants {
 			return DESCRIPTION;
 		}
 	}
+	
+	public static class CanResetPintattempts extends PermissionEntry {
+		public static final String PERMISSION = "can.reset.user.pin.attempts.counts";
+		public static final String DESCRIPTION = "Can reset user pin attempts count (Only to be used by super admins and admins)";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
+	
+	public static class CanResetUserPin extends PermissionEntry {
+		public static final String PERMISSION = "can.reset.user.pin";
+		public static final String DESCRIPTION = "Can reset user pin(Only to be used by super admins and admins)";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
 
 	public static class DisableSuperApp extends PermissionEntry {
 		public static final String PERMISSION = "can.disable.super.app";

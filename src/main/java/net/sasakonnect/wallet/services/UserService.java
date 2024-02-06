@@ -1,5 +1,7 @@
 package net.sasakonnect.wallet.services;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -678,6 +680,117 @@ public class UserService extends RestClientService implements UserDetailsService
 	
 	public void save(User user) {
 		this.userRepository.save(user);
+	}
+	
+	public ResponseEntity<Object> resetPinAttempts(Integer counter,String userId){
+		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		Map<String,Object> map = new HashMap<>();
+		Optional<User> user =  this.userRepository.findById(userId);
+		if(user.isPresent()) {
+			Optional<UserPin> userPin = this.userPinRepository.getUserPinByUser(user.get());
+			if(counter >= maxpinattempt) {
+				map.put("success", false);
+				map.put("message","Invalid reset to value");
+				try (FileWriter writer = new FileWriter("pin_reset.txt")) {
+		            writer.write(loggedInUser.getFirstName()+""+loggedInUser.getLastName()+"failed to reset PIN attempts for user(Invalid count number)"
+				+user.get().getFirstName()+user.get().getLastName()+"of phone No"+user.get().getMobile());
+		        } catch (IOException e) {
+		            e.printStackTrace();
+		        }
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+			}else {
+				if(userPin.isPresent()) {
+					 userPin.get().setPinAttempts(counter);
+				    try {
+					this.userPinRepository.save(userPin.get());
+					map.put("success", true);
+					map.put("message", "Pin attempts updated");
+					try (FileWriter writer = new FileWriter("pin_reset.txt")) {
+			            writer.write(loggedInUser.getFirstName()+""+loggedInUser.getLastName()+"succeeded to reset PIN attempts for user"
+					+user.get().getFirstName()+user.get().getLastName()+"of phone No"+user.get().getMobile());
+					}catch (IOException e) {
+			            e.printStackTrace();
+			        }
+					return ResponseEntity.status(HttpStatus.OK).body(map);
+				   }catch(Exception ex) {
+					map.put("success",false);
+					map.put("message","Opps!!Something went wrong");
+					System.out.println("ERROR: "+ex);
+					return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+				   }
+				}else {
+					try (FileWriter writer = new FileWriter("pin_reset.txt")) {
+			            writer.write(loggedInUser.getFirstName()+""+loggedInUser.getLastName()+"failed to reset PIN attempts for user(User does not exist)"
+					     +userId);
+					
+					}catch (IOException e) {
+			            e.printStackTrace();
+			        }
+			          
+					map.put("success",false);
+					map.put("message","User does not have a PIN");
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+				}
+				
+				
+			}
+		}else {
+			map.put("success",false);
+			map.put("message","User not found");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		
+	}
+	
+	public ResponseEntity<Object> resetUserPin(String userId){
+		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		Map<String,Object> map = new HashMap<>();
+		Optional<User> user =  this.userRepository.findById(userId);
+		if(user.isPresent()) {
+			Optional<UserPin> userPin = this.userPinRepository.getUserPinByUser(user.get());	
+			if(userPin.isPresent()) {
+				    try {
+				    	try (FileWriter writer = new FileWriter("pin_reset.txt")) {
+				            writer.write(loggedInUser.getFirstName()+""+loggedInUser.getLastName()+"succeeded to reset PIN  for user"
+						+user.get().getFirstName()+user.get().getLastName()+"of phone No"+user.get().getMobile());
+				        } catch (IOException e) {
+				            e.printStackTrace();
+				        }
+//				   user.get().setPins(null);
+				  this.userPinRepository.delete(userPin.get());
+					map.put("success", true);
+					map.put("message", "PIN reset successfull");
+					return ResponseEntity.status(HttpStatus.OK).body(map);
+				   }catch(Exception ex) {
+					map.put("success",false);
+					map.put("message","Opps!!Something went wrong");
+					System.out.println("ERROR: "+ex);
+					return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+				   }
+				}else {
+					try (FileWriter writer = new FileWriter("pin_reset.txt")) {
+			            writer.write(loggedInUser.getFirstName()+""+loggedInUser.getLastName()+"failed to reset PIN attempts for user(No PIN)"
+					+user.get().getFirstName()+user.get().getLastName()+"of phone No"+user.get().getMobile());
+			        } catch (IOException e) {
+			            e.printStackTrace();
+			        }
+					map.put("success",false);
+					map.put("message","User does not have a PIN");
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+				}
+				
+				
+			}else {
+				try (FileWriter writer = new FileWriter("pin_reset.txt")) {
+		            writer.write(loggedInUser.getFirstName()+""+loggedInUser.getLastName()+"tried to reset PIN  for non existing user");
+		        } catch (IOException e) {
+		            e.printStackTrace();
+		        }
+				map.put("success",false);
+				map.put("message","User does not exist");
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+			}
+		
 	}
 
 }
