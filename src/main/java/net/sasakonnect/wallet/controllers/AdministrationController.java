@@ -83,7 +83,6 @@ public class AdministrationController {
 	@Autowired
 	RoleRepository roleRepository;
 
-	@Autowired
 
 
 	
@@ -238,8 +237,7 @@ public class AdministrationController {
 	}
 
 	@GetMapping("/transactions/history")
-	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION
-			+ "')")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION +"')")
 	@RequirePermission(GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION)
 	public Object getTransactionHistory(@RequestParam(name = "pageSize", defaultValue = "20") Integer pageSize,
 			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber
@@ -363,6 +361,15 @@ public class AdministrationController {
 	@RequirePermission(GlobalPermissionConstants.CanResetUserPin.PERMISSION)
 	public Object resetWalletPin(@Valid @RequestBody PinReset req) {
 		return this.userService.resetUserPin(req.getUserId());
+	}
+	
+	@GetMapping("/wallet/balance")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION)
+	public Object getWalletBalance(
+			@RequestParam(name = "accountNumber", required = true) String accountNumber
+	) {
+		return this.walletService.getWalletAccountBalance(accountNumber);
 	}
 	
 

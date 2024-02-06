@@ -201,6 +201,21 @@ public final class GlobalPermissionConstants {
 		}
 	}
 	
+	public static class CanViewAccountBalance extends PermissionEntry {
+		public static final String PERMISSION = "can.view.wallet.acc.balance";
+		public static final String DESCRIPTION = "Can check wallet account balance";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
+	
 	public static class CanResetPintattempts extends PermissionEntry {
 		public static final String PERMISSION = "can.reset.user.pin.attempts.counts";
 		public static final String DESCRIPTION = "Can reset user pin attempts count (Only to be used by super admins and admins)";

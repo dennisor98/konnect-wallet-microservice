@@ -155,6 +155,37 @@ public class WalletService {
 
 		return null;
 	}
+	
+	//overloaded function to get acc.balance by accountId
+	public Object getWalletAccountBalance(String accountId) {
+		
+		var user = this.userService.findUserByWalletAccountId(accountId);
+
+		if (user.isPresent()) {
+			var wallets = user.get().getUserWallets();
+
+			if (!wallets.isEmpty()) {
+				var oneWallet = wallets.get(0);
+				var reqId = new HashMap<String, Object>();
+				reqId.put("accountId", oneWallet.getWallet().getAccountId());
+				var reqs = requestSigner.signRequest(reqId);
+
+				Mono<String> responseMono = this.bankClientBean.webClient.post()
+						.uri(ChoiceEndpointsConstants.CHECK_BALANCE).contentType(MediaType.APPLICATION_JSON)
+						.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+						.bodyToMono(String.class);
+
+				String responseJson = responseMono.block();
+
+				if (responseJson != null) {
+					return new Gson().fromJson(responseJson, Object.class);
+
+				}
+			}
+		}
+
+		return null;
+	}
 
 	public Object getTransactionHistory() {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
