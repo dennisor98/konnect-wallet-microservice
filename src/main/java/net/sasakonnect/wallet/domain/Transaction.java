@@ -82,6 +82,8 @@ public class Transaction extends BaseWalletDomain implements Serializable {
 
 	@Column
 	private String notificationType;
+	@Column
+	private String requestId;
 
 	// Constructors, getters, and setters go here
 
