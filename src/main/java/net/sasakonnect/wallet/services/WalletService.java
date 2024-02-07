@@ -155,10 +155,10 @@ public class WalletService {
 
 		return null;
 	}
-	
-	//overloaded function to get acc.balance by accountId
+
+	// overloaded function to get acc.balance by accountId
 	public Object getWalletAccountBalance(String accountId) {
-		
+
 		var user = this.userService.findUserByWalletAccountId(accountId);
 
 		if (user.isPresent()) {
@@ -178,7 +178,7 @@ public class WalletService {
 				String responseJson = responseMono.block();
 
 				if (responseJson != null) {
-					return new Gson().fromJson(responseJson, Object.class);
+					return (new Gson().fromJson(responseJson, Object.class));
 
 				}
 			}

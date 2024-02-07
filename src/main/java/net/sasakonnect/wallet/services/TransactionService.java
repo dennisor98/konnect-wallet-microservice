@@ -51,7 +51,7 @@ public class TransactionService {
 					.externalTxId(trans.getExternalTxId()).accountId(trans.getAccountId())
 					.accountName(trans.getAccountName()).oppoSubAccount(trans.getOppoSubAccount())
 					.balance(new BigDecimal(trans.getBalance())).oppoBankCode(trans.getOppoBankCode())
-
+					.requestId(results.getRequestId())
 					// .extInfo(trans.getExtInfo().toString())
 					.notificationType(trans.getTxType())
 					.feeAmount(trans.getFeeAmount() != null ? new BigDecimal(trans.getFeeAmount()) : new BigDecimal(0))
