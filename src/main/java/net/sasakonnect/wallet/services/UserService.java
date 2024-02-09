@@ -495,6 +495,14 @@ public class UserService extends RestClientService implements UserDetailsService
 					return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(map);
 				} else {
 					var activeUserPin = userPins.get().get(0);
+					
+					//reject update of a blocked PIN
+				      if(activeUserPin.getPinAttempts() >= 5) {
+							Map<String, Object> map = new HashMap<String, Object>();
+				    	    map.put("success",false);
+				    	    map.put("message","Pin already blocked");
+				       return ResponseEntity.status(HttpStatus.OK).body(map);
+				   }
 					if (encoder.matches(user.getId() + setPin.getOldPin(), activeUserPin.getPin())) {
 						var passwordencoded = new BCryptPasswordEncoder().encode(user.getId() + setPin.getPin());
 						var userpin = new UserPin();
