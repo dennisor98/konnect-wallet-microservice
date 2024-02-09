@@ -366,5 +366,13 @@ public class AdministrationController {
 	public Object getWalletBalance(@RequestParam(name = "accountNumber", required = true) String accountNumber) {
 		return this.walletService.getWalletAccountBalance(accountNumber);
 	}
+	
+	@GetMapping("/wallet/pin/attempts")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION)
+	public Object getWalletPinAttempts(@RequestParam(name = "accountNumber", required = true) String accountNumber) {
+		return this.walletService.getWalletPinAttempts(accountNumber);
+	}
 
 }
