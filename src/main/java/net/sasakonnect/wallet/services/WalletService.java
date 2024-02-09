@@ -48,6 +48,7 @@ import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.UserWallet;
+import net.sasakonnect.wallet.domain.UserPin;
 import net.sasakonnect.wallet.domain.Wallet;
 import net.sasakonnect.wallet.domain.WalletClient;
 import net.sasakonnect.wallet.enums.NotificationBody;
@@ -1093,6 +1094,27 @@ public class WalletService {
 		}
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public ResponseEntity<Object> getWalletPinAttempts(String accountId){
+		Optional<User> user =  this.userService.findUserByAccountd(accountId);
+		Map<String,Object> map =  new HashMap<>();
+		Map<String,Object> resMap = new HashMap<>();
+		if(user.isPresent()) {
+			UserPin userPin = user.get().getPins().get(0);
+			if(userPin !=null) {
+				Integer attempts = userPin.getPinAttempts();
+				    map.put("attempts", attempts);
+					map.put("isBlocked", attempts >= 5 ? true : false);
+					resMap.put("success",true);
+					resMap.put("message", "Request successfull");
+					resMap.put("payload", map);
+					return ResponseEntity.status(HttpStatus.OK).body(resMap);
+			}
+		}
+		resMap.put("success", false);
+		resMap.put("message","Account not found");
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resMap);
 	}
 
 }
