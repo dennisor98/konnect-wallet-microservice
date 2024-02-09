@@ -29,5 +29,6 @@ public class ChoiceEndpointsConstants {
 	public static final String GET_ONBOARDING_STATUS = "/onboarding/getOnboardingStatus";
 	public static final String MPESA_TILL_AND_PAYBILL = "/trans/applyForMpesaBusinessTransfer";
 	public static final String GET_TRANSACTION_STATUS = "/query/getTransResult";
+	public static final String UPGRADE_ACCOUNT = "/onboarding/walletAccountUpgrade";
 
 }
