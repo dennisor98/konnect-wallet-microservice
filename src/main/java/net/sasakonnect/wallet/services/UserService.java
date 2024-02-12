@@ -129,6 +129,12 @@ public class UserService extends RestClientService implements UserDetailsService
 			}).collect(Collectors.toList());
 
 			payloadMap.put("success", "true");
+			payloadMap.put("totalRows", Double.valueOf(user.getTotalElements()));
+			payloadMap.put("pageSize", user.getSize());
+			payloadMap.put("currentPage", user.getNumber());
+			payloadMap.put("nextPage", user.hasNext() ? user.nextPageable().getPageNumber() : null);
+			payloadMap.put("hasNextPage", user.hasNext());
+			payloadMap.put("hasPreviousPage", user.hasPrevious());
 			payloadMap.put("users", usermaps);
 			resObject.put("payload", payloadMap);
 			return ResponseEntity.status(HttpStatus.ACCEPTED).body(resObject);
