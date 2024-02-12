@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -92,15 +94,15 @@ public class UserService extends RestClientService implements UserDetailsService
 	String profileActive;
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneOffset.UTC);
 
-	public Object getAllUsers() {
+	public ResponseEntity<Object> getAllUsers(Integer pageNumber,Integer pageSize) {
 		Map<String, Object> resObject = new HashMap<String, Object>();
 		Map<String, Object> payloadMap = new HashMap<>();
 		try {
-			Optional<List<User>> user = this.userRepository.findAllusers();
-			var us = user.get();
-			log.error("users" + us.size());
+			Page<User> user = this.userRepository.findAllusers(PageRequest.of(pageNumber, pageNumber));
+//			var us = user.get();
+//			log.error("users" + us.size());
 
-			var usermaps = us.stream().map(u -> {
+			var usermaps = user.stream().map(u -> {
 				Map<String, Object> map = new HashMap<>();
 				map.put("id", u.getId());
 				map.put("firstname", u.getFirstName());

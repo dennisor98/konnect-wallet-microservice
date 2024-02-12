@@ -116,8 +116,11 @@ public class AdministrationController {
 	@GetMapping("/users/getAll")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION)
-	public Object getAllUsers() {
-		return this.userService.getAllUsers();
+	public ResponseEntity<Object> getAllUsers(
+			@RequestParam(name = "pageSize", defaultValue = "100") Integer pageSize,
+			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber
+			) {
+		return this.userService.getAllUsers(pageNumber,pageSize);
 	}
 
 	@GetMapping("/user/corporate")
