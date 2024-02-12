@@ -26,6 +26,7 @@ import net.sasakonnect.wallet.RequestDto.PhoneCheckDto;
 import net.sasakonnect.wallet.RequestDto.PinDto;
 import net.sasakonnect.wallet.RequestDto.TransactionPeriod;
 import net.sasakonnect.wallet.RequestDto.TransferToMpesa;
+import net.sasakonnect.wallet.RequestDto.UpgradeWalletAccountDto;
 import net.sasakonnect.wallet.RequestDto.WalletTransferDto;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.TransactionMiddleware;
@@ -42,10 +43,10 @@ import net.sasakonnect.wallet.services.WalletService;
 public class WalletController {
 	private final UserService userService;
 	private final WalletService walletService;
-   
+
 	@Autowired
 	TransactionService transactionService;
-	
+
 	public WalletController(UserService userService, WalletService walletService) {
 		this.userService = userService;
 		this.walletService = walletService;
@@ -64,6 +65,11 @@ public class WalletController {
 	@PostMapping("confirm/onboarding/otp")
 	public Object confirmOnboardingOtp(@Valid @RequestBody OnboardingOtp easyOnboarding) {
 		return this.walletService.confirmOnboardingOtp(easyOnboarding);
+	}
+
+	@PostMapping("account/upgrade")
+	public Object upgradeFromWalletToAccount(@Valid @RequestBody UpgradeWalletAccountDto upgradeWalletAccount) {
+		return this.walletService.upgradeFromWalletToAccount(upgradeWalletAccount);
 	}
 
 	@GetMapping("resend/onboarding/otp")
@@ -158,19 +164,15 @@ public class WalletController {
 	}
 
 	@GetMapping("/transactionhistory")
-	public Object getTransactionHistory(
-			@RequestParam(name="pageNumber" ,defaultValue="0" ) Integer pageNumber,
-			@RequestParam(name="pageSize" ,defaultValue="10" ) Integer pageSize
-			) {
-		
+	public Object getTransactionHistory(@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
+			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+
 		return ResponseEntity.ok(transactionService.getUserTransactionHistory(pageNumber, pageSize));
 	}
 //	public ResponseEntity<Object> transactionHistory() {
 //		return ResponseEntity.ok(this.walletService.getTransactionHistory());
 //	}
 
-	
-	
 	@PostMapping("/transactionhistory/any")
 	public Object transactionHistoryAny(@Valid @RequestBody TransactionPeriod changePin) {
 		return walletService.getTransactionHistoryAsOf(changePin);
@@ -226,9 +228,9 @@ public class WalletController {
 	public Object getOnboardingStatus(@RequestBody() @Valid() OnBoardingStatusById onBoarding) {
 		return this.walletService.getOnboardingStatus(onBoarding.getOnBoardingId());
 	}
-	
+
 	@GetMapping("transaction/summary")
-	public ResponseEntity<Object> getTransactionsSummary(){
+	public ResponseEntity<Object> getTransactionsSummary() {
 		return this.transactionService.getWalletTransactionBreakdown();
 	}
 
