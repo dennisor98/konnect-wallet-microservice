@@ -98,7 +98,7 @@ public class UserService extends RestClientService implements UserDetailsService
 		Map<String, Object> resObject = new HashMap<String, Object>();
 		Map<String, Object> payloadMap = new HashMap<>();
 		try {
-			Page<User> user = this.userRepository.findAllusers(PageRequest.of(pageNumber, pageNumber));
+			Page<User> user = this.userRepository.findAllusers(PageRequest.of(pageNumber, pageSize));
 //			var us = user.get();
 //			log.error("users" + us.size());
 
