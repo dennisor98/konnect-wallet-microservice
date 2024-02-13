@@ -43,16 +43,17 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.ChangePin;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
-import net.sasakonnect.wallet.RequestDto.CorporateLoginDTO;
+import net.sasakonnect.wallet.RequestDto.OpenIdRequest;
 import net.sasakonnect.wallet.RequestDto.PinDto;
 import net.sasakonnect.wallet.RequestDto.UserLogin;
 import net.sasakonnect.wallet.ResponseDto.UserResponseDTO;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
-import net.sasakonnect.wallet.domain.CorporateDetails;
+import net.sasakonnect.wallet.beans.RedisBean;
 import net.sasakonnect.wallet.domain.Permission;
 import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.UserPin;
+import net.sasakonnect.wallet.domain.UserRole;
 import net.sasakonnect.wallet.repository.CorporateDetailsRepository;
 import net.sasakonnect.wallet.repository.PermissionRepository;
 import net.sasakonnect.wallet.repository.RolePermissionRepository;
@@ -60,8 +61,9 @@ import net.sasakonnect.wallet.repository.RoleRepository;
 import net.sasakonnect.wallet.repository.UserPinRepository;
 import net.sasakonnect.wallet.repository.UserRepository;
 import net.sasakonnect.wallet.repository.UserRoleRepository;
+import net.sasakonnect.wallet.repository.WalletClientRepository;
 import net.sasakonnect.wallet.tools.JwtService;
-import net.sasakonnect.wallet.domain.UserRole;
+
 @Service
 @Slf4j
 public class UserService extends RestClientService implements UserDetailsService {
@@ -82,6 +84,8 @@ public class UserService extends RestClientService implements UserDetailsService
 	@Autowired
 	private RoleRepository roleRepository;
 	@Autowired
+	private WalletClientRepository walletClientRepository;
+	@Autowired
 	private JwtService jwtService;
 	@Autowired
 	BankWebClientBean bankClientBean;
@@ -91,6 +95,8 @@ public class UserService extends RestClientService implements UserDetailsService
 	@Value("${spring.profiles.active}")
 	String profileActive;
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneOffset.UTC);
+	@Autowired
+	private RedisBean redisBean;
 
 	public Object getAllUsers() {
 		Map<String, Object> resObject = new HashMap<String, Object>();
@@ -237,58 +243,57 @@ public class UserService extends RestClientService implements UserDetailsService
 	}
 
 	public ResponseEntity<ObjectNode> corporateLogin(UserLogin userLogin) {
-		Map<String,Object> map = new HashMap<>();
-		Map<String,Object> payloadMap = new HashMap<>();
-		
-			Optional<User> user = this.userRepository.findByMobile(userLogin.getPhoneNumber());
-			
-			if (user.isPresent()) {
-				UserRole userRole  = user.get().getUserRole();
-                if(userRole != null) {
-                	ObjectMapper objectMapper = new ObjectMapper();
-            		ObjectNode json = JsonNodeFactory.instance.objectNode();
-            		ArrayNode arrayNode = objectMapper.createArrayNode();
-                	Optional<Role> role =  this.roleRepository.findById(userRole.getRoleId());
-                	if(role.isPresent()) {
-                		if(role.get().getRoleName().toString().equalsIgnoreCase("CORPORATE") || role.get().getRoleName().toString().equalsIgnoreCase("SUPER_ADMIN") || role.get().getRoleName().toString().equalsIgnoreCase("ADMIN")) { 
-                			map.put("success", true);
-                			map.put("message", "proceed to login");
-                			payloadMap.put("payload",map);
-                		return this.userLogin(userLogin);
-                		}else {
-                			arrayNode.add("User not allowed");
-                			System.out.println("role"+role.get().getRoleName());
-                			json.put("message", "Access denied");
-                			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
-                		}
-                	}else {
-                		arrayNode.add("User not allowed");
-            			json.put("message", "Role not found");
-            			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
-                	}
-                }else {
-                	ObjectMapper objectMapper = new ObjectMapper();
-            		ObjectNode json = JsonNodeFactory.instance.objectNode();
-            		ArrayNode arrayNode = objectMapper.createArrayNode();
-                	arrayNode.add("User not allowed");
-        			json.put("message", "3");
-        			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
-                }
-			}else {
-                	ObjectMapper objectMapper = new ObjectMapper();
-            		ObjectNode json = JsonNodeFactory.instance.objectNode();
-            		ArrayNode arrayNode = objectMapper.createArrayNode();
-                	arrayNode.add("User not allowed");
-        			json.put("message", "");
-        			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
-              
+		Map<String, Object> map = new HashMap<>();
+		Map<String, Object> payloadMap = new HashMap<>();
+
+		Optional<User> user = this.userRepository.findByMobile(userLogin.getPhoneNumber());
+
+		if (user.isPresent()) {
+			UserRole userRole = user.get().getUserRole();
+			if (userRole != null) {
+				ObjectMapper objectMapper = new ObjectMapper();
+				ObjectNode json = JsonNodeFactory.instance.objectNode();
+				ArrayNode arrayNode = objectMapper.createArrayNode();
+				Optional<Role> role = this.roleRepository.findById(userRole.getRoleId());
+				if (role.isPresent()) {
+					if (role.get().getRoleName().toString().equalsIgnoreCase("CORPORATE")
+							|| role.get().getRoleName().toString().equalsIgnoreCase("SUPER_ADMIN")
+							|| role.get().getRoleName().toString().equalsIgnoreCase("ADMIN")) {
+						map.put("success", true);
+						map.put("message", "proceed to login");
+						payloadMap.put("payload", map);
+						return this.userLogin(userLogin);
+					} else {
+						arrayNode.add("User not allowed");
+						System.out.println("role" + role.get().getRoleName());
+						json.put("message", "Access denied");
+						return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
+					}
+				} else {
+					arrayNode.add("User not allowed");
+					json.put("message", "Role not found");
+					return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
+				}
+			} else {
+				ObjectMapper objectMapper = new ObjectMapper();
+				ObjectNode json = JsonNodeFactory.instance.objectNode();
+				ArrayNode arrayNode = objectMapper.createArrayNode();
+				arrayNode.add("User not allowed");
+				json.put("message", "3");
+				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
 			}
-				
-			
-		
+		} else {
+			ObjectMapper objectMapper = new ObjectMapper();
+			ObjectNode json = JsonNodeFactory.instance.objectNode();
+			ArrayNode arrayNode = objectMapper.createArrayNode();
+			arrayNode.add("User not allowed");
+			json.put("message", "");
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
+
+		}
 
 	}
-	
+
 	public Object getUseByPhone(String phone) {
 		Map<String, Object> map = new HashMap<>();
 		try {
@@ -495,14 +500,14 @@ public class UserService extends RestClientService implements UserDetailsService
 					return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(map);
 				} else {
 					var activeUserPin = userPins.get().get(0);
-					
-					//reject update of a blocked PIN
-				      if(activeUserPin.getPinAttempts() >= 5) {
-							Map<String, Object> map = new HashMap<String, Object>();
-				    	    map.put("success",false);
-				    	    map.put("message","Pin already blocked");
-				       return ResponseEntity.status(HttpStatus.OK).body(map);
-				   }
+
+					// reject update of a blocked PIN
+					if (activeUserPin.getPinAttempts() >= 5) {
+						Map<String, Object> map = new HashMap<String, Object>();
+						map.put("success", false);
+						map.put("message", "Pin already blocked");
+						return ResponseEntity.status(HttpStatus.OK).body(map);
+					}
 					if (encoder.matches(user.getId() + setPin.getOldPin(), activeUserPin.getPin())) {
 						var passwordencoded = new BCryptPasswordEncoder().encode(user.getId() + setPin.getPin());
 						var userpin = new UserPin();
@@ -686,152 +691,182 @@ public class UserService extends RestClientService implements UserDetailsService
 		return this.userRepository.findUserByWalletAccountId(receiverAccount);
 
 	}
-	
+
 	public void save(User user) {
 		this.userRepository.save(user);
 	}
-	
-	public ResponseEntity<Object> resetPinAttempts(Integer counter,String userId){
+
+	public ResponseEntity<Object> resetPinAttempts(Integer counter, String userId) {
 		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		Map<String,Object> map = new HashMap<>();
-		Optional<User> user =  this.userRepository.findById(userId);
-		if(user.isPresent()) {
+		Map<String, Object> map = new HashMap<>();
+		Optional<User> user = this.userRepository.findById(userId);
+		if (user.isPresent()) {
 			Optional<UserPin> userPin = this.userPinRepository.getUserPinByUser(user.get());
-			if(counter >= maxpinattempt) {
+			if (counter >= maxpinattempt) {
 				map.put("success", false);
-				map.put("message","Invalid reset to value");
+				map.put("message", "Invalid reset to value");
 				try (FileWriter writer = new FileWriter("pin_reset.txt")) {
-					 LocalDateTime currentTime = LocalDateTime.now();
-			    	 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-			    	 String formattedDateTime = currentTime.format(formatter);
-		            writer.write(formattedDateTime + " - " +loggedInUser.getFirstName()+"   "+loggedInUser.getLastName()+"failed to reset PIN attempts for user(Invalid count number)"
-				+user.get().getFirstName()+user.get().getLastName()+"of phone No"+user.get().getMobile());
-		        } catch (IOException e) {
-		            e.printStackTrace();
-		        }
+					LocalDateTime currentTime = LocalDateTime.now();
+					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+					String formattedDateTime = currentTime.format(formatter);
+					writer.write(formattedDateTime + " - " + loggedInUser.getFirstName() + "   "
+							+ loggedInUser.getLastName() + "failed to reset PIN attempts for user(Invalid count number)"
+							+ user.get().getFirstName() + user.get().getLastName() + "of phone No"
+							+ user.get().getMobile());
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
-			}else {
-				if(userPin.isPresent()) {
-					 userPin.get().setPinAttempts(counter);
-				    try {
-					this.userPinRepository.save(userPin.get());
-					map.put("success", true);
-					map.put("message", "Pin attempts updated");
-					try (FileWriter writer = new FileWriter("pin_reset.txt",true)) {
-						 LocalDateTime currentTime = LocalDateTime.now();
-				    	 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-				    	 String formattedDateTime = currentTime.format(formatter);
-			            writer.write(formattedDateTime + " - " +loggedInUser.getFirstName()+""+loggedInUser.getLastName()+"succeeded to reset PIN attempts for user"
-					+user.get().getFirstName()+user.get().getLastName()+"of phone No"+user.get().getMobile());
-					}catch (IOException e) {
-			            e.printStackTrace();
-			        }
-					return ResponseEntity.status(HttpStatus.OK).body(map);
-				   }catch(Exception ex) {
-					map.put("success",false);
-					map.put("message","Opps!!Something went wrong");
-					System.out.println("ERROR: "+ex);
-					return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
-				   }
-				}else {
-					try (FileWriter writer = new FileWriter("pin_reset.txt",true)) {
-						 LocalDateTime currentTime = LocalDateTime.now();
-				    	 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-				    	 String formattedDateTime = currentTime.format(formatter);
-			            writer.write(formattedDateTime + " - " +loggedInUser.getFirstName()+""+loggedInUser.getLastName()+"failed to reset PIN attempts for user(User does not have a PIN set)"
-					     +userId);
-					
-					}catch (IOException e) {
-			            e.printStackTrace();
-			        }
-			          
-					map.put("success",false);
-					map.put("message","User does not have a PIN");
+			} else {
+				if (userPin.isPresent()) {
+					userPin.get().setPinAttempts(counter);
+					try {
+						this.userPinRepository.save(userPin.get());
+						map.put("success", true);
+						map.put("message", "Pin attempts updated");
+						try (FileWriter writer = new FileWriter("pin_reset.txt", true)) {
+							LocalDateTime currentTime = LocalDateTime.now();
+							DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+							String formattedDateTime = currentTime.format(formatter);
+							writer.write(formattedDateTime + " - " + loggedInUser.getFirstName() + ""
+									+ loggedInUser.getLastName() + "succeeded to reset PIN attempts for user"
+									+ user.get().getFirstName() + user.get().getLastName() + "of phone No"
+									+ user.get().getMobile());
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+						return ResponseEntity.status(HttpStatus.OK).body(map);
+					} catch (Exception ex) {
+						map.put("success", false);
+						map.put("message", "Opps!!Something went wrong");
+						System.out.println("ERROR: " + ex);
+						return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+					}
+				} else {
+					try (FileWriter writer = new FileWriter("pin_reset.txt", true)) {
+						LocalDateTime currentTime = LocalDateTime.now();
+						DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+						String formattedDateTime = currentTime.format(formatter);
+						writer.write(formattedDateTime + " - " + loggedInUser.getFirstName() + ""
+								+ loggedInUser.getLastName()
+								+ "failed to reset PIN attempts for user(User does not have a PIN set)" + userId);
+
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+
+					map.put("success", false);
+					map.put("message", "User does not have a PIN");
 					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 				}
-				
-				
+
 			}
-		}else {
+		} else {
 			try (FileWriter writer = new FileWriter("pin_reset.txt")) {
-				 LocalDateTime currentTime = LocalDateTime.now();
-		    	 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-		    	 String formattedDateTime = currentTime.format(formatter);
-	            writer.write(formattedDateTime + " - " +loggedInUser.getFirstName()+""+loggedInUser.getLastName()+"failed to reset PIN attempts for user(User does not exist)"
-			     +userId);
-			
-			}catch (IOException e) {
-	            e.printStackTrace();
-	        }
-			map.put("success",false);
-			map.put("message","User not found");
+				LocalDateTime currentTime = LocalDateTime.now();
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+				String formattedDateTime = currentTime.format(formatter);
+				writer.write(formattedDateTime + " - " + loggedInUser.getFirstName() + "" + loggedInUser.getLastName()
+						+ "failed to reset PIN attempts for user(User does not exist)" + userId);
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			map.put("success", false);
+			map.put("message", "User not found");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 		}
-		
+
 	}
-	
-	public ResponseEntity<Object> resetUserPin(String userId){
+
+	public ResponseEntity<Object> resetUserPin(String userId) {
 		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		Map<String,Object> map = new HashMap<>();
-		Optional<User> user =  this.userRepository.findById(userId);
-		if(user.isPresent()) {
-			Optional<UserPin> userPin = this.userPinRepository.getUserPinByUser(user.get());	
-			if(userPin.isPresent()) {
-				    try {
-				    	try (FileWriter writer = new FileWriter("pin_reset.txt", true)) {
-				    	    LocalDateTime currentTime = LocalDateTime.now();
-				    	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-				    	    String formattedDateTime = currentTime.format(formatter);
-				    	    
-				    	    String logMessage = formattedDateTime + " - " + loggedInUser.getFirstName() + " " + loggedInUser.getLastName() +
-				    	            " succeeded to reset PIN for user " + user.get().getFirstName() + " " + user.get().getLastName() +
-				    	            " of phone No " + user.get().getMobile() + "\n";
-				    	    
-				    	    writer.write(logMessage);
-				    	} catch (IOException e) {
-				    	    e.printStackTrace();
-				    	}
+		Map<String, Object> map = new HashMap<>();
+		Optional<User> user = this.userRepository.findById(userId);
+		if (user.isPresent()) {
+			Optional<UserPin> userPin = this.userPinRepository.getUserPinByUser(user.get());
+			if (userPin.isPresent()) {
+				try {
+					try (FileWriter writer = new FileWriter("pin_reset.txt", true)) {
+						LocalDateTime currentTime = LocalDateTime.now();
+						DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+						String formattedDateTime = currentTime.format(formatter);
+
+						String logMessage = formattedDateTime + " - " + loggedInUser.getFirstName() + " "
+								+ loggedInUser.getLastName() + " succeeded to reset PIN for user "
+								+ user.get().getFirstName() + " " + user.get().getLastName() + " of phone No "
+								+ user.get().getMobile() + "\n";
+
+						writer.write(logMessage);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 //				   user.get().setPins(null);
-				  this.userPinRepository.delete(userPin.get());
+					this.userPinRepository.delete(userPin.get());
 					map.put("success", true);
 					map.put("message", "PIN reset successfull");
 					return ResponseEntity.status(HttpStatus.OK).body(map);
-				   }catch(Exception ex) {
-					map.put("success",false);
-					map.put("message","Opps!!Something went wrong");
-					System.out.println("ERROR: "+ex);
+				} catch (Exception ex) {
+					map.put("success", false);
+					map.put("message", "Opps!!Something went wrong");
+					System.out.println("ERROR: " + ex);
 					return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
-				   }
-				}else {
-					try (FileWriter writer = new FileWriter("pin_reset.txt",true)) {
-						 LocalDateTime currentTime = LocalDateTime.now();
-				    	 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-				    	 String formattedDateTime = currentTime.format(formatter);
-			            writer.write(formattedDateTime + " - " +loggedInUser.getFirstName()+""+loggedInUser.getLastName()+"failed to reset PIN attempts for user(No PIN)"
-					+user.get().getFirstName()+user.get().getLastName()+"of phone No"+user.get().getMobile());
-			        } catch (IOException e) {
-			            e.printStackTrace();
-			        }
-					map.put("success",false);
-					map.put("message","User does not have a PIN");
-					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 				}
-				
-				
-			}else {
-				try (FileWriter writer = new FileWriter("pin_reset.txt",true)) {
-					 LocalDateTime currentTime = LocalDateTime.now();
-			    	 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-			    	 String formattedDateTime = currentTime.format(formatter);
-		            writer.write(formattedDateTime + " - " +loggedInUser.getFirstName()+"  "+loggedInUser.getLastName()+"  tried to reset PIN  for non existing user");
-		        } catch (IOException e) {
-		            e.printStackTrace();
-		        }
-				map.put("success",false);
-				map.put("message","User does not exist");
+			} else {
+				try (FileWriter writer = new FileWriter("pin_reset.txt", true)) {
+					LocalDateTime currentTime = LocalDateTime.now();
+					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+					String formattedDateTime = currentTime.format(formatter);
+					writer.write(
+							formattedDateTime + " - " + loggedInUser.getFirstName() + "" + loggedInUser.getLastName()
+									+ "failed to reset PIN attempts for user(No PIN)" + user.get().getFirstName()
+									+ user.get().getLastName() + "of phone No" + user.get().getMobile());
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				map.put("success", false);
+				map.put("message", "User does not have a PIN");
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 			}
-		
+
+		} else {
+			try (FileWriter writer = new FileWriter("pin_reset.txt", true)) {
+				LocalDateTime currentTime = LocalDateTime.now();
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+				String formattedDateTime = currentTime.format(formatter);
+				writer.write(formattedDateTime + " - " + loggedInUser.getFirstName() + "  " + loggedInUser.getLastName()
+						+ "  tried to reset PIN  for non existing user");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			map.put("success", false);
+			map.put("message", "User does not exist");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+
+	}
+
+	public ResponseEntity createUserOpenId(@Valid OpenIdRequest openId) {
+		var walletClient = this.walletClientRepository.findByAppKeyAnd(openId.getAppId());
+
+		var value = redisBean.getRecord(openId.getAppId() + openId.getPublicKey()).orElse("jsd");
+		Map<String, Object> map = new HashMap<>();
+
+		map.put("success", false);
+		map.put("message", "Open Id process failed or time out");
+
+		map.put("code", "unmet_authentication_requirements");
+		if (value != null && walletClient.isPresent()) {
+			User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+			var result = this.jwtService.generateOpenIdWithSecret(loggedInUser, (String) value);
+
+			return ResponseEntity.status(HttpStatus.OK).body(result);
+
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+
 	}
 
 }
