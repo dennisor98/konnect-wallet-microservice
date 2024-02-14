@@ -1,5 +1,6 @@
 package net.sasakonnect.wallet.services;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -492,7 +493,12 @@ public class WalletService {
 				NotificationResult<TransactionResultNotification> results = new Gson().fromJson(body.toString(),
 						new TypeToken<NotificationResult<TransactionResultNotification>>() {
 						}.getType());
+				var transaction = this.transactionService.getTransactionById(results.getParams().getTxId());
+				if (transaction.isPresent()) {
+					transaction.get().setTxStatus(results.getParams().getTxStatus());
+					var createdTransaction = this.transactionService.transactionRepository.save(transaction.get());
 
+				}
 				log.info("transacttion {}", results);
 //				System.out.println(typeToken.getType().getTypeName());
 //				System.out.println(results.getNotificationType());
@@ -505,21 +511,34 @@ public class WalletService {
 				}
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.BALANCE.getCode())) {
+
 				NotificationResult<TransactionResultNotification> results = new Gson().fromJson(body.toString(),
 						new TypeToken<NotificationResult<TransactionResultNotification>>() {
 						}.getType());
+				var transaction = this.transactionService.getTransactionById(results.getParams().getTxId());
+				if (transaction.isPresent()) {
+					transaction.get().setTxStatus(results.getParams().getTxStatus());
+					transaction.get().setBalance(new BigDecimal(results.getParams().getBalance()));
+					this.transactionService.transactionRepository.save(transaction.get());
 
+					this.publisher.publishEvent(
+							TransactionEvent.builder().userService(userService).transaction(transaction.get()).build());
+
+				} else {
+					var createdTransaction = this.transactionService.saveTransaction(results);
+					if (createdTransaction != null) {
+						log.info("publish transaction to socket {}", createdTransaction);
+
+						this.publisher.publishEvent(TransactionEvent.builder().userService(userService)
+								.transaction(createdTransaction).build());
+					}
+
+				}
 				log.info("transacttion {}", results);
 //				System.out.println(typeToken.getType().getTypeName());
 //				System.out.println(results.getNotificationType());
-				results.getParams().setTxStatus(TransactionStatus.SUCCESS.getValue());
-				var createdTransaction = this.transactionService.saveTransaction(results);
-				if (createdTransaction != null) {
-					log.info("publish transaction to socket {}", createdTransaction);
+				// results.getParams().setTxStatus(TransactionStatus.SUCCESS.getValue());
 
-					this.publisher.publishEvent(TransactionEvent.builder().userService(userService)
-							.transaction(createdTransaction).build());
-				}
 			} else if (notification_Type == NotificationType.INTERNAL_BATCH_TRANSACTION.getCode()) {
 
 			} else if (notification_Type == NotificationType.WALLET_ACCOUNT_UPGRADE.getCode()) {
