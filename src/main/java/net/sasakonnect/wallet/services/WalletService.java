@@ -479,17 +479,12 @@ public class WalletService {
 					}
 				}
 
-//				else {
-//					
-//
-//				}
 			} else if (notification_Type == NotificationType.ACCOUNT_STATEMENT.getCode()) {
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.TRANSACTION.getCode())) {
 
 				log.info("payload {}", body.toString());
-//				TypeToken<NotificationResult<TransactionResultNotification>> typeToken = new TypeToken<NotificationResult<TransactionResultNotification>>() {
-//				};
+
 				NotificationResult<TransactionResultNotification> results = new Gson().fromJson(body.toString(),
 						new TypeToken<NotificationResult<TransactionResultNotification>>() {
 						}.getType());
@@ -500,8 +495,6 @@ public class WalletService {
 
 				}
 				log.info("transacttion {}", results);
-//				System.out.println(typeToken.getType().getTypeName());
-//				System.out.println(results.getNotificationType());
 				var createdTransaction = this.transactionService.saveTransaction(results);
 				if (createdTransaction != null) {
 					log.info("publish transaction to socket {}", createdTransaction);
@@ -515,6 +508,8 @@ public class WalletService {
 				NotificationResult<TransactionResultNotification> results = new Gson().fromJson(body.toString(),
 						new TypeToken<NotificationResult<TransactionResultNotification>>() {
 						}.getType());
+				log.info("balance update {}", results);
+
 				var transaction = this.transactionService.getTransactionById(results.getParams().getTxId());
 				if (transaction.isPresent()) {
 					transaction.get().setTxStatus(results.getParams().getTxStatus());
@@ -534,10 +529,6 @@ public class WalletService {
 					}
 
 				}
-				log.info("transacttion {}", results);
-//				System.out.println(typeToken.getType().getTypeName());
-//				System.out.println(results.getNotificationType());
-				// results.getParams().setTxStatus(TransactionStatus.SUCCESS.getValue());
 
 			} else if (notification_Type == NotificationType.INTERNAL_BATCH_TRANSACTION.getCode()) {
 
