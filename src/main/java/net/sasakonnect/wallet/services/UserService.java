@@ -54,6 +54,8 @@ import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.UserPin;
 import net.sasakonnect.wallet.domain.UserRole;
+import net.sasakonnect.wallet.domain.WalletAccountUpgrade;
+import net.sasakonnect.wallet.notification.WalletAccountUpgradeResultNotification;
 import net.sasakonnect.wallet.repository.CorporateDetailsRepository;
 import net.sasakonnect.wallet.repository.PermissionRepository;
 import net.sasakonnect.wallet.repository.RolePermissionRepository;
@@ -61,6 +63,7 @@ import net.sasakonnect.wallet.repository.RoleRepository;
 import net.sasakonnect.wallet.repository.UserPinRepository;
 import net.sasakonnect.wallet.repository.UserRepository;
 import net.sasakonnect.wallet.repository.UserRoleRepository;
+import net.sasakonnect.wallet.repository.WalletAccountUpgradeRepository;
 import net.sasakonnect.wallet.repository.WalletClientRepository;
 import net.sasakonnect.wallet.tools.JwtService;
 
@@ -69,6 +72,9 @@ import net.sasakonnect.wallet.tools.JwtService;
 public class UserService extends RestClientService implements UserDetailsService {
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private WalletAccountUpgradeRepository walletAccountUpgradeRepository;
+
 	@Autowired
 	private SmsService smsService;
 	@Autowired
@@ -867,6 +873,14 @@ public class UserService extends RestClientService implements UserDetailsService
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 		}
 
+	}
+
+	public void pushUpgradeNotification(WalletAccountUpgradeResultNotification params) {
+		var walletAccount = WalletAccountUpgrade.builder().accountId(params.getAccountId())
+				.onboardingRequestId(params.getOnboardingRequestId()).accountType(params.getAccountType())
+				.rejectionReasonIds(params.getRejectionReasonIds()).rejectionReasonMsgs(params.getRejectionReasonMsgs())
+				.accountType(params.getAccountType()).status(params.getStatus()).build();
+		this.walletAccountUpgradeRepository.save(walletAccount);
 	}
 
 }

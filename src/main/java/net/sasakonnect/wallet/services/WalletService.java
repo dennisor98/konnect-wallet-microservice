@@ -60,6 +60,7 @@ import net.sasakonnect.wallet.enums.WalletTransactionType;
 import net.sasakonnect.wallet.events.TransactionEvent;
 import net.sasakonnect.wallet.notification.NotificationResult;
 import net.sasakonnect.wallet.notification.TransactionResultNotification;
+import net.sasakonnect.wallet.notification.WalletAccountUpgradeResultNotification;
 import net.sasakonnect.wallet.repository.CurrencyRepository;
 import net.sasakonnect.wallet.repository.UserWalletRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
@@ -534,6 +535,13 @@ public class WalletService {
 			} else if (notification_Type == NotificationType.INTERNAL_BATCH_TRANSACTION.getCode()) {
 
 			} else if (notification_Type == NotificationType.WALLET_ACCOUNT_UPGRADE.getCode()) {
+
+				//
+				NotificationResult<WalletAccountUpgradeResultNotification> results = new Gson().fromJson(
+						body.toString(), new TypeToken<NotificationResult<WalletAccountUpgradeResultNotification>>() {
+						}.getType());
+				log.info("balance update {}", results);
+				this.userService.pushUpgradeNotification(results.getParams());
 
 			} else if (notification_Type == NotificationType.SME_ACCOUNT_OPEN.getCode()) {
 
