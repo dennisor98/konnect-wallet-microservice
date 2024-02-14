@@ -493,15 +493,16 @@ public class WalletService {
 					transaction.get().setTxStatus(results.getParams().getTxStatus());
 					var createdTransaction = this.transactionService.transactionRepository.save(transaction.get());
 
+				} else {
+					var createdTransaction = this.transactionService.saveTransaction(results);
+					if (createdTransaction != null) {
+						log.info("publish transaction to socket {}", createdTransaction);
+
+						this.publisher.publishEvent(TransactionEvent.builder().userService(userService)
+								.transaction(createdTransaction).build());
+					}
 				}
 				log.info("transacttion {}", results);
-				var createdTransaction = this.transactionService.saveTransaction(results);
-				if (createdTransaction != null) {
-					log.info("publish transaction to socket {}", createdTransaction);
-
-					this.publisher.publishEvent(TransactionEvent.builder().userService(userService)
-							.transaction(createdTransaction).build());
-				}
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.BALANCE.getCode())) {
 
