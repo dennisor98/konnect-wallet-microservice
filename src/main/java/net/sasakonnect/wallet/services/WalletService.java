@@ -76,6 +76,10 @@ public class WalletService {
 	UserService userService;
 	@Autowired
 	ChatService chatService;
+	
+	@Autowired
+	LarkService larkService;
+	
 	@Autowired
 	WalletRepository walletRepository;
 	@Autowired
@@ -454,6 +458,8 @@ public class WalletService {
 				if (notificationBody.getStatus() == 7 && user.isPresent()) {
 					Optional<Wallet> existingWallet = walletRepository.findByAccountId(notificationBody.getAccountId());
 					if (existingWallet.isEmpty()) {
+						this.larkService.sendOnBoardingMessage("SUCCESSFUL ONBOARDING","orange",notificationBody);
+						//log creation of new wallet
 						var wallet = new Wallet();
 						wallet.setAccountId(notificationBody.getAccountId());
 						wallet.setAccountType(notificationBody.getAccountType());
@@ -465,12 +471,38 @@ public class WalletService {
 
 						this.userWalletRepository.save(userWallet);
 					}
-
-				} else if (notificationBody.getStatus() == 4 && user.isPresent()) {
+                   
+				}else if(notificationBody.getStatus() == 3 && user.isPresent()) {
+					this.larkService.sendOnBoardingMessage("ACCOUNT OPENING PASSED","green",notificationBody);
+				}else if (notificationBody.getStatus() == 4 && user.isPresent()) {
+					//log rejected account deletion
+					this.larkService.sendOnBoardingMessage("REJECTED ONBOARDING","red",notificationBody);
 					var onboardingRequestId = params.get("onboardingRequestId").getAsString();
 					System.out.println(onboardingRequestId);
 					this.userService.deletUserByOnboardingRequestId(onboardingRequestId);
-				} else {
+					
+				}else if(notificationBody.getStatus() == 5 && user.isPresent()) {
+					//log closed account
+					this.larkService.sendOnBoardingMessage("ACCOUNT CLOSED","red",notificationBody);
+					Optional<Wallet> existingWallet = walletRepository.findByAccountId(notificationBody.getAccountId());
+                    if(existingWallet.isPresent()) {
+                  }
+                   
+				}else if(notificationBody.getStatus() == 8 && user.isPresent()) {
+					//log failed account opening
+					this.larkService.sendOnBoardingMessage("ACCOUNT OPENING FAILED","red",notificationBody);
+					var onboardingRequestId = params.get("onboardingRequestId").getAsString();
+					System.out.println(onboardingRequestId);
+					//delete user from the system 
+					this.userService.deletUserByOnboardingRequestId(onboardingRequestId);
+				}else if(notificationBody.getStatus() == 9 && user.isPresent()) {
+				  //account under manual review
+					this.larkService.sendOnBoardingMessage("ACCOUNT UNDER MANUAL REVIEW","green",notificationBody);
+					
+				}
+				else {
+					
+					//log any other  onboarding account status 
 					if (user.isPresent()) {
 						user.get().setStatus(params.get("status").getAsString());
 						this.userService.save(user.get());

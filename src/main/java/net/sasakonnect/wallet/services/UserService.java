@@ -62,8 +62,10 @@ import net.sasakonnect.wallet.repository.RoleRepository;
 import net.sasakonnect.wallet.repository.UserPinRepository;
 import net.sasakonnect.wallet.repository.UserRepository;
 import net.sasakonnect.wallet.repository.UserRoleRepository;
+import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.tools.JwtService;
 import net.sasakonnect.wallet.domain.UserRole;
+import net.sasakonnect.wallet.domain.Wallet;
 @Service
 @Slf4j
 public class UserService extends RestClientService implements UserDetailsService {
@@ -85,6 +87,13 @@ public class UserService extends RestClientService implements UserDetailsService
 	private RoleRepository roleRepository;
 	@Autowired
 	private JwtService jwtService;
+	
+	@Autowired
+	private LarkService larkService;
+	
+	@Autowired
+	WalletRepository walletRepository;
+	
 	@Autowired
 	BankWebClientBean bankClientBean;
 	@Value("${MAX_PIN_ATTEMPT:3}")
@@ -132,6 +141,7 @@ public class UserService extends RestClientService implements UserDetailsService
 			payloadMap.put("totalRows", Double.valueOf(user.getTotalElements()));
 			payloadMap.put("pageSize", user.getSize());
 			payloadMap.put("currentPage", user.getNumber());
+			payloadMap.put("hasMore",user.hasNext() ? true : false);
 			payloadMap.put("nextPage", user.hasNext() ? user.nextPageable().getPageNumber() : null);
 			payloadMap.put("hasNextPage", user.hasNext());
 			payloadMap.put("hasPreviousPage", user.hasPrevious());
@@ -703,8 +713,10 @@ public class UserService extends RestClientService implements UserDetailsService
 		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		Map<String,Object> map = new HashMap<>();
 		Optional<User> user =  this.userRepository.findById(userId);
+		
 		if(user.isPresent()) {
 			Optional<UserPin> userPin = this.userPinRepository.getUserPinByUser(user.get());
+//			List<Wallet> wallet = this.walletRepository;
 			if(counter >= maxpinattempt) {
 				map.put("success", false);
 				map.put("message","Invalid reset to value");
@@ -714,6 +726,7 @@ public class UserService extends RestClientService implements UserDetailsService
 			    	 String formattedDateTime = currentTime.format(formatter);
 		            writer.write(formattedDateTime + " - " +loggedInUser.getFirstName()+"   "+loggedInUser.getLastName()+"failed to reset PIN attempts for user(Invalid count number)"
 				+user.get().getFirstName()+user.get().getLastName()+"of phone No"+user.get().getMobile());
+		            this.larkService.sendPinResetNotification(loggedInUser,user.get().getUserWallets().get(0).getWallet(),"ATTEMPTS","Failed");
 		        } catch (IOException e) {
 		            e.printStackTrace();
 		        }
@@ -731,6 +744,7 @@ public class UserService extends RestClientService implements UserDetailsService
 				    	 String formattedDateTime = currentTime.format(formatter);
 			            writer.write(formattedDateTime + " - " +loggedInUser.getFirstName()+""+loggedInUser.getLastName()+"succeeded to reset PIN attempts for user"
 					+user.get().getFirstName()+user.get().getLastName()+"of phone No"+user.get().getMobile());
+			            this.larkService.sendPinResetNotification(loggedInUser,user.get().getUserWallets().get(0).getWallet(),"ATTEMPTS","Succcess");
 					}catch (IOException e) {
 			            e.printStackTrace();
 			        }
@@ -748,7 +762,7 @@ public class UserService extends RestClientService implements UserDetailsService
 				    	 String formattedDateTime = currentTime.format(formatter);
 			            writer.write(formattedDateTime + " - " +loggedInUser.getFirstName()+""+loggedInUser.getLastName()+"failed to reset PIN attempts for user(User does not have a PIN set)"
 					     +userId);
-					
+			            this.larkService.sendPinResetNotification(loggedInUser,user.get().getUserWallets().get(0).getWallet(),"ATTEMPTS","Success");
 					}catch (IOException e) {
 			            e.printStackTrace();
 			        }
@@ -767,7 +781,7 @@ public class UserService extends RestClientService implements UserDetailsService
 		    	 String formattedDateTime = currentTime.format(formatter);
 	            writer.write(formattedDateTime + " - " +loggedInUser.getFirstName()+""+loggedInUser.getLastName()+"failed to reset PIN attempts for user(User does not exist)"
 			     +userId);
-			
+	            this.larkService.sendPinResetNotification(loggedInUser,user.get().getUserWallets().get(0).getWallet(),"ATTEMPTS","Failed");
 			}catch (IOException e) {
 	            e.printStackTrace();
 	        }
@@ -796,6 +810,9 @@ public class UserService extends RestClientService implements UserDetailsService
 				    	            " of phone No " + user.get().getMobile() + "\n";
 				    	    
 				    	    writer.write(logMessage);
+				            this.larkService.sendPinResetNotification(loggedInUser,user.get().getUserWallets().get(0).getWallet(),"RESET","Success");
+
+				    	 
 				    	} catch (IOException e) {
 				    	    e.printStackTrace();
 				    	}
@@ -817,11 +834,13 @@ public class UserService extends RestClientService implements UserDetailsService
 				    	 String formattedDateTime = currentTime.format(formatter);
 			            writer.write(formattedDateTime + " - " +loggedInUser.getFirstName()+""+loggedInUser.getLastName()+"failed to reset PIN attempts for user(No PIN)"
 					+user.get().getFirstName()+user.get().getLastName()+"of phone No"+user.get().getMobile());
+			          this.larkService.sendPinResetNotification(loggedInUser,user.get().getUserWallets().get(0).getWallet(),"RESET","Failed");
 			        } catch (IOException e) {
 			            e.printStackTrace();
 			        }
 					map.put("success",false);
 					map.put("message","User does not have a PIN");
+		            this.larkService.sendPinResetNotification(loggedInUser,user.get().getUserWallets().get(0).getWallet(),"RESET","Failed");
 					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 				}
 				
@@ -832,11 +851,13 @@ public class UserService extends RestClientService implements UserDetailsService
 			    	 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 			    	 String formattedDateTime = currentTime.format(formatter);
 		            writer.write(formattedDateTime + " - " +loggedInUser.getFirstName()+"  "+loggedInUser.getLastName()+"  tried to reset PIN  for non existing user");
+		            this.larkService.sendPinResetNotification(loggedInUser,user.get().getUserWallets().get(0).getWallet(),"RESET","Failed");
 		        } catch (IOException e) {
 		            e.printStackTrace();
 		        }
 				map.put("success",false);
 				map.put("message","User does not exist");
+//	            this.larkService.sendPinResetNotification(loggedInUser,user.get().getUserWallets().get(0).getWallet(),"RESET","Failed");
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 			}
 		
