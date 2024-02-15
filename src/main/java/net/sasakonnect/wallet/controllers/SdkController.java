@@ -15,10 +15,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import net.sasakonnect.wallet.RequestDto.MerchantKeyDto;
 import net.sasakonnect.wallet.RequestDto.SdkPayDto;
+import net.sasakonnect.wallet.RequestDto.SdkRequestOpenId;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.SdkMiddleware;
+import net.sasakonnect.wallet.annotations.ServiceInteractionMiddleware;
 import net.sasakonnect.wallet.annotations.TransactionMiddleware;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
+import net.sasakonnect.wallet.beans.ClientAppsBean;
 import net.sasakonnect.wallet.repository.TransactionRepository;
 import net.sasakonnect.wallet.services.TransactionService;
 import net.sasakonnect.wallet.services.WalletClientService;
@@ -43,8 +46,12 @@ public class SdkController {
 	@Autowired
 	MerchantWoker merchantWorker;
 
-	public SdkController(TransactionService transactionService) {
+	@Autowired
+	private ClientAppsBean clientDataService;
+
+	public SdkController(TransactionService transactionService, ClientAppsBean clientDataService) {
 		this.transactionService = transactionService;
+		this.clientDataService = clientDataService;
 	}
 
 	@PostMapping("pay")
@@ -76,4 +83,17 @@ public class SdkController {
 		}
 		return this.transactionService.getTrasactionStatus(id);
 	}
+
+	@PostMapping("openId")
+	@ServiceInteractionMiddleware
+	@Parameter(example = "37c8043a43adca4368607e5742a10d501c0cb990a26906603818f18ad8d15882", name = "secret-key", description = "Provide app secret of the app you created on dashboard", in = ParameterIn.HEADER, required = true)
+	public Object createOpenIdForUser(@Valid @RequestBody() SdkRequestOpenId sdkOpenRequest) {
+		var clientData = clientDataService.getWalletClient();
+		if (clientData.getEnabled() && clientData.getDeletedAt() == null) {
+			return this.walletClientService.createOpenidSession(sdkOpenRequest, clientData);
+		}
+		return null;
+
+	}
+
 }

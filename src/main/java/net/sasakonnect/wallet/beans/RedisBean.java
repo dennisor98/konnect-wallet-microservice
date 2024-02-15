@@ -25,7 +25,7 @@ public class RedisBean<T extends Serializable> {
 
 	public void storeRecord(String key, T value) {
 		ValueOperations<String, T> valueOps = redisTemplate.opsForValue();
-		valueOps.set(key, value, 5, TimeUnit.MINUTES);
+		valueOps.set(key, value, 30, TimeUnit.SECONDS);
 
 		// TODO Auto-generated method stub
 

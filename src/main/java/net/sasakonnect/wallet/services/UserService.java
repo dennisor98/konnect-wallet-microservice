@@ -102,7 +102,7 @@ public class UserService extends RestClientService implements UserDetailsService
 	String profileActive;
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneOffset.UTC);
 	@Autowired
-	private RedisBean redisBean;
+	private RedisBean<String> redisBean;
 
 	public Object getAllUsers() {
 		Map<String, Object> resObject = new HashMap<String, Object>();
@@ -853,23 +853,31 @@ public class UserService extends RestClientService implements UserDetailsService
 	}
 
 	public ResponseEntity createUserOpenId(@Valid OpenIdRequest openId) {
-		var walletClient = this.walletClientRepository.findByAppKeyAnd(openId.getAppId());
+		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-		var value = redisBean.getRecord(openId.getAppId() + openId.getPublicKey()).orElse("jsd");
+		var value = redisBean.getRecord(openId.getPublicKey());
 		Map<String, Object> map = new HashMap<>();
 
-		map.put("success", false);
-		map.put("message", "Open Id process failed or time out");
+		if (value.isEmpty()) {
+			map.put("success", false);
+			map.put("message", "Open Id process failed or time out");
 
-		map.put("code", "unmet_authentication_requirements");
+			map.put("code", "unmet_authentication_requirements");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		var walletClient = this.walletClientRepository.findById(value.get());
 		if (value != null && walletClient.isPresent()) {
-			User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-			var result = this.jwtService.generateOpenIdWithSecret(loggedInUser, (String) value);
+			var result = this.jwtService.generateOpenIdWithSecret(loggedInUser, value.get(), openId.getPublicKey(),
+					openId.getAppId());
 
 			return ResponseEntity.status(HttpStatus.OK).body(result);
 
 		} else {
+			map.put("success", false);
+			map.put("message", "Open Id process failed or time out");
+
+			map.put("code", "unmet_authentication_requirements");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 		}
 
@@ -881,6 +889,11 @@ public class UserService extends RestClientService implements UserDetailsService
 				.rejectionReasonIds(params.getRejectionReasonIds()).rejectionReasonMsgs(params.getRejectionReasonMsgs())
 				.accountType(params.getAccountType()).status(params.getStatus()).build();
 		this.walletAccountUpgradeRepository.save(walletAccount);
+	}
+
+	public Optional<User> findUserByOpenId(String open_id) {
+		// TODO Auto-generated method stub
+		return this.userRepository.findByOpenId(open_id);
 	}
 
 }

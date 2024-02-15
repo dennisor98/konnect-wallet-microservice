@@ -174,12 +174,17 @@ public class JwtService {
 		return claims.getExpiration().before(new Date());
 	}
 
-	public String generateOpenIdWithSecret(User user, String privateKey) {
-		byte[] decodedKey = Base64.getDecoder().decode(privateKey);
-		SecretKeySpec secretKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "HMACSHA256");
+	public String generateOpenIdWithSecret(User user, String privateKey, String publicKey, String consumerKey) {
+		System.err.println(privateKey);
+		SecretKeySpec secretKey = new SecretKeySpec(privateKey.getBytes(), "HMACSHA256");
 		Map<String, Object> claims = new HashMap<>();
-		claims.put("id", user.getId());
-		claims.put("token_type", "refresh_token");
+		claims.put("open_id", user.getOpenId());
+		claims.put("publicKey", publicKey);
+		claims.put("consumerKey", consumerKey);
+		claims.put("mobile", user.getMobile());
+		claims.put("lastName", user.getLastName());
+		claims.put("middleName", user.getMiddleName());
+		claims.put("token_type", "open_id");
 		claims.put("firstName", user.getFirstName());
 		return Jwts.builder().setClaims(claims).setSubject(user.getId().toString()).setIssuedAt(new Date())
 				.setExpiration(new Date(System.currentTimeMillis() + openIdJwtExpiryTime))// validity

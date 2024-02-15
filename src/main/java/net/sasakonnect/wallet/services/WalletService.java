@@ -1023,21 +1023,22 @@ public class WalletService {
 
 	public Object requestWalletDeduction(@Valid SdkPayDto sdkpayDto, WalletClient clientApp) {
 		var account = clientApp.getWalletClientAccount();
-		switch (account.getAccountType()) {
+		var activeAccount = account.stream().takeWhile(acc -> acc.getDeletedAt() == null).findFirst().get();
+		switch (activeAccount.getAccountType()) {
 		case BANK:
 			break;
 		case MPESA:
 			var mpesaBill = new MpesaBilling();
 			mpesaBill.amount = Integer.parseInt(sdkpayDto.getAmount());
-			if (account.getTillNumber() != null) {
-				mpesaBill.shortCode = account.getTillNumber();
+			if (activeAccount.getTillNumber() != null) {
+				mpesaBill.shortCode = activeAccount.getTillNumber();
 				mpesaBill.setBillType(MpesaBillType.TILL);
 				return this.mpesaTillAndByGoods(mpesaBill);
 
-			} else if (account.getPayBillAccountNo() != null && account.getPaybillNumber() != null) {
-				mpesaBill.shortCode = account.getPaybillNumber();
+			} else if (activeAccount.getPayBillAccountNo() != null && activeAccount.getPaybillNumber() != null) {
+				mpesaBill.shortCode = activeAccount.getPaybillNumber();
 				mpesaBill.setBillType(MpesaBillType.PAY_BILL);
-				mpesaBill.setReceivingAccount(account.getPayBillAccountNo());
+				mpesaBill.setReceivingAccount(activeAccount.getPayBillAccountNo());
 				return this.mpesaTillAndByGoods(mpesaBill);
 			}
 
@@ -1049,7 +1050,7 @@ public class WalletService {
 			break;
 
 		}
-		return clientApp.getWalletClientAccount().getAccountType().name();
+		return activeAccount.getAccountType().name();
 
 		// TODO Auto-generated method stub
 

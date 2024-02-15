@@ -25,29 +25,26 @@ import net.sasakonnect.wallet.tools.JwtService;
 @Aspect
 @Component
 @Scope(value = "request")
-public class SdkMiddlewareAspect {
+public class ServiceInteractionAspect {
 	private WalletClientService walletclientService;
 	private JwtService jwtService;
 	@Autowired
 	private ClientAppsBean clientDataService;
 
-	public SdkMiddlewareAspect(WalletClientService walletclientService, JwtService jwtService) {
+	public ServiceInteractionAspect(WalletClientService walletclientService, JwtService jwtService) {
 		this.walletclientService = walletclientService;
 
 		this.jwtService = jwtService;
 	}
 
-	@Before("@annotation(net.sasakonnect.wallet.annotations.SdkMiddleware)")
-	// @Before("@annotation(net.sasakonnect.wallet.annotations.TransactionMiddleware)")
-
+	@Before("@annotation(net.sasakonnect.wallet.annotations.ServiceInteractionMiddleware)")
 	public void beforeControllerMethodExecution() {
 		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
 				.getRequest();
-		System.err.print("called");
-		var client_app_key = request.getHeader(KonnectHeader.CLIENT_APP_KEY_HEADER.toString());
+		var client_app_key = request.getHeader(KonnectHeader.SECRET_APP_KEY_HEADER.toString());
 		if (client_app_key == null) {
 			Map<String, Object> map = new HashMap<String, Object>();
-			map.put("message", "merchant key  required");
+			map.put("message", "secret-key   required");
 			map.put("success", false);
 			ObjectMapper objectMapper = new ObjectMapper();
 			try {
@@ -60,7 +57,7 @@ public class SdkMiddlewareAspect {
 			}
 
 		} else {
-			var walletclient = this.walletclientService.findMerchantByClientAppByKey(client_app_key);
+			var walletclient = this.walletclientService.findMerchantByClientAppBySecret(client_app_key);
 			if (walletclient.isPresent()) {
 				var clients = walletclient.get();
 				if (!clients.isEmpty()) {
@@ -70,7 +67,7 @@ public class SdkMiddlewareAspect {
 				}
 			}
 			Map<String, Object> map = new HashMap<String, Object>();
-			map.put("message", "merchant key  required");
+			map.put("message", "secret-key   required");
 			map.put("success", false);
 			ObjectMapper objectMapper = new ObjectMapper();
 			try {
