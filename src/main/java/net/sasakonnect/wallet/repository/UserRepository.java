@@ -3,6 +3,8 @@ package net.sasakonnect.wallet.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -31,7 +33,7 @@ public interface UserRepository extends JpaRepository<User, String> {
 	Optional<User> findUserWithUserWalletsById(@Param("userId") String userId);
 
 	@Query("SELECT u FROM User u LEFT JOIN FETCH u.userRole ur LEFT JOIN FETCH ur.role r  LEFT JOIN FETCH u.userWallets uw LEFT JOIN FETCH uw.wallet ")
-	Optional<List<User>> findAllusers();
+	Page<User> findAllusers(Pageable page);
 
 	@Query("SELECT u FROM User u JOIN u.userWallets uw WHERE uw.wallet.accountId = :accountId")
 	Optional<User> findUserByWalletAccountId(@Param("accountId") String accountId);;

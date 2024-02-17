@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -65,6 +67,7 @@ import net.sasakonnect.wallet.repository.UserRepository;
 import net.sasakonnect.wallet.repository.UserRoleRepository;
 import net.sasakonnect.wallet.repository.WalletAccountUpgradeRepository;
 import net.sasakonnect.wallet.repository.WalletClientRepository;
+import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.tools.JwtService;
 
 @Service
@@ -93,6 +96,13 @@ public class UserService extends RestClientService implements UserDetailsService
 	private WalletClientRepository walletClientRepository;
 	@Autowired
 	private JwtService jwtService;
+
+	@Autowired
+	private LarkService larkService;
+
+	@Autowired
+	WalletRepository walletRepository;
+
 	@Autowired
 	BankWebClientBean bankClientBean;
 	@Value("${MAX_PIN_ATTEMPT:3}")
@@ -104,15 +114,15 @@ public class UserService extends RestClientService implements UserDetailsService
 	@Autowired
 	private RedisBean<String> redisBean;
 
-	public Object getAllUsers() {
+	public ResponseEntity<Object> getAllUsers(Integer pageNumber, Integer pageSize) {
 		Map<String, Object> resObject = new HashMap<String, Object>();
 		Map<String, Object> payloadMap = new HashMap<>();
 		try {
-			Optional<List<User>> user = this.userRepository.findAllusers();
-			var us = user.get();
-			log.error("users" + us.size());
+			Page<User> user = this.userRepository.findAllusers(PageRequest.of(pageNumber, pageSize));
+//			var us = user.get();
+//			log.error("users" + us.size());
 
-			var usermaps = us.stream().map(u -> {
+			var usermaps = user.stream().map(u -> {
 				Map<String, Object> map = new HashMap<>();
 				map.put("id", u.getId());
 				map.put("firstname", u.getFirstName());
@@ -139,6 +149,13 @@ public class UserService extends RestClientService implements UserDetailsService
 			}).collect(Collectors.toList());
 
 			payloadMap.put("success", "true");
+			payloadMap.put("totalRows", Double.valueOf(user.getTotalElements()));
+			payloadMap.put("pageSize", user.getSize());
+			payloadMap.put("currentPage", user.getNumber());
+			payloadMap.put("hasMore", user.hasNext() ? true : false);
+			payloadMap.put("nextPage", user.hasNext() ? user.nextPageable().getPageNumber() : null);
+			payloadMap.put("hasNextPage", user.hasNext());
+			payloadMap.put("hasPreviousPage", user.hasPrevious());
 			payloadMap.put("users", usermaps);
 			resObject.put("payload", payloadMap);
 			return ResponseEntity.status(HttpStatus.ACCEPTED).body(resObject);
@@ -706,8 +723,10 @@ public class UserService extends RestClientService implements UserDetailsService
 		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		Map<String, Object> map = new HashMap<>();
 		Optional<User> user = this.userRepository.findById(userId);
+
 		if (user.isPresent()) {
 			Optional<UserPin> userPin = this.userPinRepository.getUserPinByUser(user.get());
+//			List<Wallet> wallet = this.walletRepository;
 			if (counter >= maxpinattempt) {
 				map.put("success", false);
 				map.put("message", "Invalid reset to value");
@@ -719,6 +738,8 @@ public class UserService extends RestClientService implements UserDetailsService
 							+ loggedInUser.getLastName() + "failed to reset PIN attempts for user(Invalid count number)"
 							+ user.get().getFirstName() + user.get().getLastName() + "of phone No"
 							+ user.get().getMobile());
+					this.larkService.sendPinResetNotification(loggedInUser,
+							user.get().getUserWallets().get(0).getWallet(), "ATTEMPTS", "Failed");
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -738,6 +759,8 @@ public class UserService extends RestClientService implements UserDetailsService
 									+ loggedInUser.getLastName() + "succeeded to reset PIN attempts for user"
 									+ user.get().getFirstName() + user.get().getLastName() + "of phone No"
 									+ user.get().getMobile());
+							this.larkService.sendPinResetNotification(loggedInUser,
+									user.get().getUserWallets().get(0).getWallet(), "ATTEMPTS", "Succcess");
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
@@ -756,7 +779,8 @@ public class UserService extends RestClientService implements UserDetailsService
 						writer.write(formattedDateTime + " - " + loggedInUser.getFirstName() + ""
 								+ loggedInUser.getLastName()
 								+ "failed to reset PIN attempts for user(User does not have a PIN set)" + userId);
-
+						this.larkService.sendPinResetNotification(loggedInUser,
+								user.get().getUserWallets().get(0).getWallet(), "ATTEMPTS", "Success");
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -774,7 +798,8 @@ public class UserService extends RestClientService implements UserDetailsService
 				String formattedDateTime = currentTime.format(formatter);
 				writer.write(formattedDateTime + " - " + loggedInUser.getFirstName() + "" + loggedInUser.getLastName()
 						+ "failed to reset PIN attempts for user(User does not exist)" + userId);
-
+				this.larkService.sendPinResetNotification(loggedInUser, user.get().getUserWallets().get(0).getWallet(),
+						"ATTEMPTS", "Failed");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -804,6 +829,9 @@ public class UserService extends RestClientService implements UserDetailsService
 								+ user.get().getMobile() + "\n";
 
 						writer.write(logMessage);
+						this.larkService.sendPinResetNotification(loggedInUser,
+								user.get().getUserWallets().get(0).getWallet(), "RESET", "Success");
+
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -827,11 +855,15 @@ public class UserService extends RestClientService implements UserDetailsService
 							formattedDateTime + " - " + loggedInUser.getFirstName() + "" + loggedInUser.getLastName()
 									+ "failed to reset PIN attempts for user(No PIN)" + user.get().getFirstName()
 									+ user.get().getLastName() + "of phone No" + user.get().getMobile());
+					this.larkService.sendPinResetNotification(loggedInUser,
+							user.get().getUserWallets().get(0).getWallet(), "RESET", "Failed");
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 				map.put("success", false);
 				map.put("message", "User does not have a PIN");
+				this.larkService.sendPinResetNotification(loggedInUser, user.get().getUserWallets().get(0).getWallet(),
+						"RESET", "Failed");
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 			}
 
@@ -842,11 +874,14 @@ public class UserService extends RestClientService implements UserDetailsService
 				String formattedDateTime = currentTime.format(formatter);
 				writer.write(formattedDateTime + " - " + loggedInUser.getFirstName() + "  " + loggedInUser.getLastName()
 						+ "  tried to reset PIN  for non existing user");
+				this.larkService.sendPinResetNotification(loggedInUser, user.get().getUserWallets().get(0).getWallet(),
+						"RESET", "Failed");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 			map.put("success", false);
 			map.put("message", "User does not exist");
+//	            this.larkService.sendPinResetNotification(loggedInUser,user.get().getUserWallets().get(0).getWallet(),"RESET","Failed");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 		}
 

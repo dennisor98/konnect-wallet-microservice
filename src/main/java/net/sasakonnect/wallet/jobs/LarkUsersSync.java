@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -17,36 +15,26 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import jakarta.transaction.Transactional;
+import lombok.Data;
 
 import  org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import net.sasakonnect.wallet.RequestDto.lark.user.*;
 import net.sasakonnect.wallet.RequestDto.lark.LarkDTO;
 import net.sasakonnect.wallet.domain.LarkDepartment;
 import net.sasakonnect.wallet.domain.LarkUser;
 import net.sasakonnect.wallet.repository.LarkUserRepository;
 import net.sasakonnect.wallet.repository.lark.DepartmentRepository;
-import net.sasakonnect.wallet.services.LarkService;
 
 @Data
-class AccesTokenReponse {
+ class AccesTokenReponse {
 	Integer code;
-	Double expire;
-	String msg;
-	String tenant_access_token;
+ 	Double expire;
+ 	String msg;
+ 	String tenant_access_token;
 	
 }
-
-
-
 @Service
 public class LarkUsersSync {
 	private final String botId = "cli_a53a08afc8b8d00a";
@@ -138,7 +126,7 @@ public class LarkUsersSync {
 	
 	
 	@Transactional
-@Scheduled(fixedDelay = 604800000)	
+//@Scheduled(fixedDelay = 604800000)	
 public Object getLarkDepartments() {
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
@@ -282,7 +270,7 @@ public Object getLarkDepartments() {
 	        }
 	  }
 	
-	  @Scheduled(fixedDelay = 604800000)	
+//	  @Scheduled(fixedDelay = 604800000)	
 	  public void syncLarkDeptUsers() {
 	   var depIds =   this.getDepartmentIds().stream().map(depId -> {
 			return depId;
