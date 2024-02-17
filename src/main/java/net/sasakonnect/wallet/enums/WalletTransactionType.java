@@ -7,7 +7,11 @@ public enum WalletTransactionType {
 	TTID0004("TTID0004"), // Interest Income
 	TTID0005("TTID0005"), // M-PESA Pay Bill / Till
 	TTID0006("TTID0006"), // Utility Payment
-	TTID0007("TTID0007"); // Refund
+	TTID0007("TTID0007"), // Refund
+	TTID0008("TTID0008"), // FCY Deposit
+	TTID0009("TTID0009"), // FCY Transfer Out
+	TTID0010("TTID0010"), // FCY Exchange
+	TTID0011("TTID0011");// Reversal
 
 	private final String value;
 
