@@ -1054,6 +1054,7 @@ public class WalletService {
 
 	public Object requestWalletDeduction(@Valid SdkPayDto sdkpayDto, WalletClient clientApp) {
 		var account = clientApp.getWalletClientAccount();
+		System.out.println(account.get(0).getId());
 		var activeAccount = account.stream().takeWhile(acc -> acc.getDeletedAt() == null).findFirst().get();
 		switch (activeAccount.getAccountType()) {
 		case BANK:

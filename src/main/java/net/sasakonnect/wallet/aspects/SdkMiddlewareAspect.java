@@ -38,13 +38,13 @@ public class SdkMiddlewareAspect {
 	}
 
 	@Before("@annotation(net.sasakonnect.wallet.annotations.SdkMiddleware)")
-	// @Before("@annotation(net.sasakonnect.wallet.annotations.TransactionMiddleware)")
 
 	public void beforeControllerMethodExecution() {
 		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
 				.getRequest();
-		System.err.print("called");
 		var client_app_key = request.getHeader(KonnectHeader.CLIENT_APP_KEY_HEADER.toString());
+		System.err.print("merchant key " + client_app_key);
+
 		if (client_app_key == null) {
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("message", "merchant key  required");

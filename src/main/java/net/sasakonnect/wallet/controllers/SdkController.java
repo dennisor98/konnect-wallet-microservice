@@ -62,6 +62,7 @@ public class SdkController {
 
 			@RequestBody() @Valid SdkPayDto sdkpayDto) {
 		var walletClientService = this.walletClientService.payThroughSdk(sdkpayDto);
+
 		// System.out.print(walletClientService.);
 		merchantWorker.notifyMerchantIncomingPayment(walletClientService, sdkpayDto);
 		return walletClientService;

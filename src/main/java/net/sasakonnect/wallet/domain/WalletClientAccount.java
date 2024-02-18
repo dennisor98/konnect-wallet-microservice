@@ -4,7 +4,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,7 +35,6 @@ public class WalletClientAccount extends BaseWalletDomain {
 	private String bankCode;
 
 	@ManyToOne
-	@JoinColumn(name = "wallet_client", nullable = true)
 	WalletClient walletClient;
 
 }
