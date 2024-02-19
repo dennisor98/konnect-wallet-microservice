@@ -20,6 +20,8 @@ public class ChoiceEndpointsConstants {
 	public static final String DEPOSIT_FROM_MPESA = "/trans/depositFromMpesa";
 	public static final String GET_TRANSACTIONS = "/query/getTransList";
 	public static final String CONFIRM_OTP_TRANSFER = "/trans/confirmTransfer";
+	public static final String REQUEST_BANK_STATEMENT = "/statement/applyBankAccountStatement";
+
 	public static final String WITHDRAW = "/trans/applyForTransfer";
 	public static final String BUY_AIRTIME = "/utilityPayment/airtimePayment";
 	public static final String PAY_UTILITY = "/utilityPayment/billPayment";

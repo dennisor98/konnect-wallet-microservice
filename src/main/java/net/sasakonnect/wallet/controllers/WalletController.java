@@ -1,8 +1,10 @@
 package net.sasakonnect.wallet.controllers;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import net.sasakonnect.wallet.RequestDto.BuyAirtime;
@@ -232,6 +236,15 @@ public class WalletController {
 	@GetMapping("transaction/summary")
 	public ResponseEntity<Object> getTransactionsSummary() {
 		return this.transactionService.getWalletTransactionBreakdown();
+	}
+
+	@GetMapping("account/statement")
+	@Operation(summary = "Get account statement", description = "Get account statement between start and end dates")
+	public Object getAccountStatement(
+			@Parameter(description = "Start date (YYYY-MM-DD)", example = "2024-02-01") @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+			@Parameter(description = "End date (YYYY-MM-DD)", example = "2024-02-29") @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+		// Your implementation to get the account statement
+		return this.walletService.getAccountStatement(startDate, endDate);
 	}
 
 }
