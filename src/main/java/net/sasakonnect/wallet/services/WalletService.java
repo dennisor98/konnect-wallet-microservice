@@ -676,7 +676,7 @@ public class WalletService {
 			reqId.put("currency", mpesa.getCurrencyCode());
 			reqId.put("remark", mpesa.getRemarks());
 			reqId.put("otpType", "SMS");
-			reqId.put("payeeMobileForNotification", mpesa.getPayeeMobileForNotification());
+			reqId.put("payeeMobileForNotification", mpesa.getReceiverMobileNumber());
 
 			var reqs = this.requestSigner.signRequest(reqId);
 
