@@ -1,6 +1,8 @@
 package net.sasakonnect.wallet.services;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,6 +12,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -92,6 +95,8 @@ public class WalletService {
 	private TransactionService transactionService;
 	@Autowired
 	private ApplicationEventPublisher publisher;
+	@Value("${email.statements}")
+	private String emailStatement;
 
 	public Object getWalletInfo() {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -879,14 +884,7 @@ public class WalletService {
 			reqId.put("payerAccountId", userwallet.getAccountId());
 		}
 
-		var otpUser = this.userService.findUserByWalletAccountId(choiceTransfer.getReceiverAccount());
-		if (otpUser.isPresent()) {
-			reqId.put("payeeMobileForNotification", otpUser.get().getMobile());
-
-		} else {
-			reqId.put("payeeMobileForNotification", choiceTransfer.getPayeeMobileForNotification());
-
-		}
+		reqId.put("payeeMobileForNotification", choiceTransfer.getReceiverAccount());
 		reqId.put("payeeBankCode", choiceTransfer.getBankCode());
 
 		reqId.put("payeeAccountId", choiceTransfer.getReceiverAccount());
@@ -1195,6 +1193,36 @@ public class WalletService {
 
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public Object getAccountStatement(LocalDate startdate, LocalDate endDate) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		var userWallets = this.walletRepository.findByUserWalletsUser(user);
+
+		var reqId = new HashMap<String, Object>();
+
+		reqId.put("startTime", startdate.atStartOfDay().toInstant(ZoneOffset.UTC).getEpochSecond());
+		reqId.put("endTime", endDate.atStartOfDay().toInstant(ZoneOffset.UTC).getEpochSecond());
+		reqId.put("accountId", userWallets.get(0).getAccountId());
+		reqId.put("email", emailStatement);
+
+		var reqs = this.requestSigner.signRequest(reqId);
+
+		Mono<String> responseMono = this.bankClientBean.webClient.post()
+				.uri(ChoiceEndpointsConstants.REQUEST_BANK_STATEMENT).contentType(MediaType.APPLICATION_JSON)
+				.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+				.bodyToMono(String.class);
+
+		String responseJson = responseMono.block();
+
+		if (responseJson != null) {
+			return new Gson().fromJson(responseJson, Object.class);
+
+		}
+
+		// TODO Auto-generated method stub
+		return null;
+		// TODO Auto-generated method stub
 	}
 
 }
