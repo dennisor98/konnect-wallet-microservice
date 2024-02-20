@@ -1,12 +1,11 @@
 package net.sasakonnect.wallet.domain;
 
-import java.util.List;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,6 +34,8 @@ public class WalletClientAccount extends BaseWalletDomain {
 	private String walletAccountNo;
 	@Column(nullable = true)
 	private String bankCode;
-	@OneToMany(mappedBy = "walletClientAccount")
-	private List<WalletClient> walletClient;
+	@ManyToOne
+	@JoinColumn(name = "wallet_client_id", referencedColumnName = "id")
+	private WalletClient walletClient;
+
 }

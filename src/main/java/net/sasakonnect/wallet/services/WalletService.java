@@ -1042,7 +1042,7 @@ public class WalletService {
 	}
 
 	public Object requestWalletDeduction(@Valid SdkPayDto sdkpayDto, WalletClient clientApp) {
-		var account = clientApp.getWalletClientAccount();
+		var account = clientApp.getWalletClientAccounts().get(0);
 		switch (account.getAccountType()) {
 		case BANK:
 			break;
@@ -1069,7 +1069,7 @@ public class WalletService {
 			break;
 
 		}
-		return clientApp.getWalletClientAccount().getAccountType().name();
+		return clientApp.getWalletClientAccounts().get(0).getAccountType().name();
 
 		// TODO Auto-generated method stub
 
