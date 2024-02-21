@@ -891,6 +891,12 @@ public class WalletService {
 		if (!userWallets.isEmpty()) {
 			var userwallet = userWallets.get(0);
 			reqId.put("payerAccountId", userwallet.getAccountId());
+
+		}
+		var receivingUser = this.userService.findUserByAccountd(choiceTransfer.getReceiverAccount());
+		if (receivingUser.isPresent()) {
+			reqId.put("payeeMobileForNotification", receivingUser.get().getMobile());
+
 		}
 
 		reqId.put("payeeBankCode", choiceTransfer.getBankCode());
