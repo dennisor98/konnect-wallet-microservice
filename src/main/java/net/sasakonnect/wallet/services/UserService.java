@@ -490,7 +490,15 @@ public class UserService extends RestClientService implements UserDetailsService
 			map.put("message", "Pin already set please ,try to reset");
 			map.put("success", false);
 			return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
-		} else {
+		} else if (this.walletRepository.findByUserWalletsUser(user).isEmpty()) {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("message", "Account Not Verified ");
+			map.put("success", "false");
+			map.put("code", "KWEC003");
+			return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
+		}
+
+		else {
 			var passwordencoded = new BCryptPasswordEncoder().encode(user.getId() + setPin.getPin());
 			var userpin = new UserPin();
 			userpin.setUser(user);
