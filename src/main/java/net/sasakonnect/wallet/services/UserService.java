@@ -495,7 +495,7 @@ public class UserService extends RestClientService implements UserDetailsService
 			map.put("message", "Account Not Verified ");
 			map.put("success", "false");
 			map.put("code", "KWEC003");
-			return ResponseEntity.ok(map);
+			return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
 		}
 
 		else {
