@@ -1,5 +1,8 @@
 package net.sasakonnect.wallet.services;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,6 +12,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -59,6 +63,7 @@ import net.sasakonnect.wallet.enums.WalletTransactionType;
 import net.sasakonnect.wallet.events.TransactionEvent;
 import net.sasakonnect.wallet.notification.NotificationResult;
 import net.sasakonnect.wallet.notification.TransactionResultNotification;
+import net.sasakonnect.wallet.notification.WalletAccountUpgradeResultNotification;
 import net.sasakonnect.wallet.repository.CurrencyRepository;
 import net.sasakonnect.wallet.repository.UserWalletRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
@@ -76,10 +81,10 @@ public class WalletService {
 	UserService userService;
 	@Autowired
 	ChatService chatService;
-	
+
 	@Autowired
 	LarkService larkService;
-	
+
 	@Autowired
 	WalletRepository walletRepository;
 	@Autowired
@@ -91,6 +96,8 @@ public class WalletService {
 	private TransactionService transactionService;
 	@Autowired
 	private ApplicationEventPublisher publisher;
+	@Value("${email.statements}")
+	private String emailStatement;
 
 	public Object getWalletInfo() {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -458,8 +465,8 @@ public class WalletService {
 				if (notificationBody.getStatus() == 7 && user.isPresent()) {
 					Optional<Wallet> existingWallet = walletRepository.findByAccountId(notificationBody.getAccountId());
 					if (existingWallet.isEmpty()) {
-						this.larkService.sendOnBoardingMessage("SUCCESSFUL ONBOARDING","orange",notificationBody);
-						//log creation of new wallet
+						this.larkService.sendOnBoardingMessage("SUCCESSFUL ONBOARDING", "orange", notificationBody);
+						// log creation of new wallet
 						var wallet = new Wallet();
 						wallet.setAccountId(notificationBody.getAccountId());
 						wallet.setAccountType(notificationBody.getAccountType());
@@ -471,38 +478,37 @@ public class WalletService {
 
 						this.userWalletRepository.save(userWallet);
 					}
-                   
-				}else if(notificationBody.getStatus() == 3 && user.isPresent()) {
-					this.larkService.sendOnBoardingMessage("ACCOUNT OPENING PASSED","green",notificationBody);
-				}else if (notificationBody.getStatus() == 4 && user.isPresent()) {
-					//log rejected account deletion
-					this.larkService.sendOnBoardingMessage("REJECTED ONBOARDING","red",notificationBody);
+
+				} else if (notificationBody.getStatus() == 3 && user.isPresent()) {
+					this.larkService.sendOnBoardingMessage("ACCOUNT OPENING PASSED", "green", notificationBody);
+				} else if (notificationBody.getStatus() == 4 && user.isPresent()) {
+					// log rejected account deletion
+					this.larkService.sendOnBoardingMessage("REJECTED ONBOARDING", "red", notificationBody);
 					var onboardingRequestId = params.get("onboardingRequestId").getAsString();
 					System.out.println(onboardingRequestId);
 					this.userService.deletUserByOnboardingRequestId(onboardingRequestId);
-					
-				}else if(notificationBody.getStatus() == 5 && user.isPresent()) {
-					//log closed account
-					this.larkService.sendOnBoardingMessage("ACCOUNT CLOSED","red",notificationBody);
+
+				} else if (notificationBody.getStatus() == 5 && user.isPresent()) {
+					// log closed account
+					this.larkService.sendOnBoardingMessage("ACCOUNT CLOSED", "red", notificationBody);
 					Optional<Wallet> existingWallet = walletRepository.findByAccountId(notificationBody.getAccountId());
-                    if(existingWallet.isPresent()) {
-                  }
-                   
-				}else if(notificationBody.getStatus() == 8 && user.isPresent()) {
-					//log failed account opening
-					this.larkService.sendOnBoardingMessage("ACCOUNT OPENING FAILED","red",notificationBody);
+					if (existingWallet.isPresent()) {
+					}
+
+				} else if (notificationBody.getStatus() == 8 && user.isPresent()) {
+					// log failed account opening
+					this.larkService.sendOnBoardingMessage("ACCOUNT OPENING FAILED", "red", notificationBody);
 					var onboardingRequestId = params.get("onboardingRequestId").getAsString();
 					System.out.println(onboardingRequestId);
-					//delete user from the system 
+					// delete user from the system
 					this.userService.deletUserByOnboardingRequestId(onboardingRequestId);
-				}else if(notificationBody.getStatus() == 9 && user.isPresent()) {
-				  //account under manual review
-					this.larkService.sendOnBoardingMessage("ACCOUNT UNDER MANUAL REVIEW","green",notificationBody);
-					
-				}
-				else {
-					
-					//log any other  onboarding account status 
+				} else if (notificationBody.getStatus() == 9 && user.isPresent()) {
+					// account under manual review
+					this.larkService.sendOnBoardingMessage("ACCOUNT UNDER MANUAL REVIEW", "green", notificationBody);
+
+				} else {
+
+					// log any other onboarding account status
 					if (user.isPresent()) {
 						user.get().setStatus(params.get("status").getAsString());
 						this.userService.save(user.get());
@@ -510,51 +516,68 @@ public class WalletService {
 					}
 				}
 
-//				else {
-//					
-//
-//				}
 			} else if (notification_Type == NotificationType.ACCOUNT_STATEMENT.getCode()) {
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.TRANSACTION.getCode())) {
 
 				log.info("payload {}", body.toString());
-//				TypeToken<NotificationResult<TransactionResultNotification>> typeToken = new TypeToken<NotificationResult<TransactionResultNotification>>() {
-//				};
+
 				NotificationResult<TransactionResultNotification> results = new Gson().fromJson(body.toString(),
 						new TypeToken<NotificationResult<TransactionResultNotification>>() {
 						}.getType());
+				var transaction = this.transactionService.getTransactionById(results.getParams().getTxId());
+				if (transaction.isPresent()) {
+					transaction.get().setTxStatus(results.getParams().getTxStatus());
+					var createdTransaction = this.transactionService.transactionRepository.save(transaction.get());
 
-				log.info("transacttion {}", results);
-//				System.out.println(typeToken.getType().getTypeName());
-//				System.out.println(results.getNotificationType());
-				var createdTransaction = this.transactionService.saveTransaction(results);
-				if (createdTransaction != null) {
-					log.info("publish transaction to socket {}", createdTransaction);
+				} else {
+					var createdTransaction = this.transactionService.saveTransaction(results);
+					if (createdTransaction != null) {
+						log.info("publish transaction to socket {}", createdTransaction);
 
-					this.publisher.publishEvent(TransactionEvent.builder().userService(userService)
-							.transaction(createdTransaction).build());
+						this.publisher.publishEvent(TransactionEvent.builder().userService(userService)
+								.transaction(createdTransaction).build());
+					}
 				}
+				log.info("transacttion {}", results);
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.BALANCE.getCode())) {
+
 				NotificationResult<TransactionResultNotification> results = new Gson().fromJson(body.toString(),
 						new TypeToken<NotificationResult<TransactionResultNotification>>() {
 						}.getType());
+				log.info("balance update {}", results);
 
-				log.info("transacttion {}", results);
-//				System.out.println(typeToken.getType().getTypeName());
-//				System.out.println(results.getNotificationType());
-				results.getParams().setTxStatus(TransactionStatus.SUCCESS.getValue());
-				var createdTransaction = this.transactionService.saveTransaction(results);
-				if (createdTransaction != null) {
-					log.info("publish transaction to socket {}", createdTransaction);
+				var transaction = this.transactionService.getTransactionById(results.getParams().getTxId());
+				if (transaction.isPresent() && this.transactionService.isUpdatableTransaction(results)) {
+					transaction.get().setTxStatus(results.getParams().getTxStatus());
+					transaction.get().setBalance(new BigDecimal(results.getParams().getBalance()));
+					this.transactionService.transactionRepository.save(transaction.get());
 
-					this.publisher.publishEvent(TransactionEvent.builder().userService(userService)
-							.transaction(createdTransaction).build());
+					this.publisher.publishEvent(
+							TransactionEvent.builder().userService(userService).transaction(transaction.get()).build());
+
+				} else {
+					var createdTransaction = this.transactionService.saveTransaction(results);
+					if (createdTransaction != null) {
+						log.info("publish transaction to socket {}", createdTransaction);
+
+						this.publisher.publishEvent(TransactionEvent.builder().userService(userService)
+								.transaction(createdTransaction).build());
+					}
+
 				}
+
 			} else if (notification_Type == NotificationType.INTERNAL_BATCH_TRANSACTION.getCode()) {
 
 			} else if (notification_Type == NotificationType.WALLET_ACCOUNT_UPGRADE.getCode()) {
+
+				//
+				NotificationResult<WalletAccountUpgradeResultNotification> results = new Gson().fromJson(
+						body.toString(), new TypeToken<NotificationResult<WalletAccountUpgradeResultNotification>>() {
+						}.getType());
+				log.info("balance update {}", results);
+				this.userService.pushUpgradeNotification(results.getParams());
 
 			} else if (notification_Type == NotificationType.SME_ACCOUNT_OPEN.getCode()) {
 
@@ -655,7 +678,7 @@ public class WalletService {
 			reqId.put("currency", mpesa.getCurrencyCode());
 			reqId.put("remark", mpesa.getRemarks());
 			reqId.put("otpType", "SMS");
-			reqId.put("payeeMobileForNotification", mpesa.getPayeeMobileForNotification());
+			reqId.put("payeeMobileForNotification", mpesa.getReceiverMobileNumber());
 
 			var reqs = this.requestSigner.signRequest(reqId);
 
@@ -870,16 +893,14 @@ public class WalletService {
 		if (!userWallets.isEmpty()) {
 			var userwallet = userWallets.get(0);
 			reqId.put("payerAccountId", userwallet.getAccountId());
-		}
-
-		var otpUser = this.userService.findUserByWalletAccountId(choiceTransfer.getReceiverAccount());
-		if (otpUser.isPresent()) {
-			reqId.put("payeeMobileForNotification", otpUser.get().getMobile());
-
-		} else {
-			reqId.put("payeeMobileForNotification", choiceTransfer.getPayeeMobileForNotification());
 
 		}
+		var receivingUser = this.userService.findUserByAccountd(choiceTransfer.getReceiverAccount());
+		if (receivingUser.isPresent()) {
+			reqId.put("payeeMobileForNotification", receivingUser.get().getMobile());
+
+		}
+
 		reqId.put("payeeBankCode", choiceTransfer.getBankCode());
 
 		reqId.put("payeeAccountId", choiceTransfer.getReceiverAccount());
@@ -936,7 +957,6 @@ public class WalletService {
 			reqId.put("amount", walletTransfer.getAmount());
 			reqId.put("otpMobile", userLoggedIn.getMobile());
 			reqId.put("otpType", walletTransfer.getOtpType());
-			reqId.put("payeeMobileForNotification", userop.get().getMobile());
 			var reqs = this.requestSigner.signRequest(reqId);
 			Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.WITHDRAW)
 					.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
@@ -1038,21 +1058,23 @@ public class WalletService {
 
 	public Object requestWalletDeduction(@Valid SdkPayDto sdkpayDto, WalletClient clientApp) {
 		var account = clientApp.getWalletClientAccount();
-		switch (account.getAccountType()) {
+		System.out.println(account.get(0).getId());
+		var activeAccount = account.stream().takeWhile(acc -> acc.getDeletedAt() == null).findFirst().get();
+		switch (activeAccount.getAccountType()) {
 		case BANK:
 			break;
 		case MPESA:
 			var mpesaBill = new MpesaBilling();
 			mpesaBill.amount = Integer.parseInt(sdkpayDto.getAmount());
-			if (account.getTillNumber() != null) {
-				mpesaBill.shortCode = account.getTillNumber();
+			if (activeAccount.getTillNumber() != null) {
+				mpesaBill.shortCode = activeAccount.getTillNumber();
 				mpesaBill.setBillType(MpesaBillType.TILL);
 				return this.mpesaTillAndByGoods(mpesaBill);
 
-			} else if (account.getPayBillAccountNo() != null && account.getPaybillNumber() != null) {
-				mpesaBill.shortCode = account.getPaybillNumber();
+			} else if (activeAccount.getPayBillAccountNo() != null && activeAccount.getPaybillNumber() != null) {
+				mpesaBill.shortCode = activeAccount.getPaybillNumber();
 				mpesaBill.setBillType(MpesaBillType.PAY_BILL);
-				mpesaBill.setReceivingAccount(account.getPayBillAccountNo());
+				mpesaBill.setReceivingAccount(activeAccount.getPayBillAccountNo());
 				return this.mpesaTillAndByGoods(mpesaBill);
 			}
 
@@ -1064,7 +1086,7 @@ public class WalletService {
 			break;
 
 		}
-		return clientApp.getWalletClientAccount().getAccountType().name();
+		return activeAccount.getAccountType().name();
 
 		// TODO Auto-generated method stub
 
@@ -1188,6 +1210,36 @@ public class WalletService {
 
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public Object getAccountStatement(LocalDate startdate, LocalDate endDate) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		var userWallets = this.walletRepository.findByUserWalletsUser(user);
+
+		var reqId = new HashMap<String, Object>();
+
+		reqId.put("startTime", startdate.atStartOfDay().toInstant(ZoneOffset.UTC).getEpochSecond());
+		reqId.put("endTime", endDate.atStartOfDay().toInstant(ZoneOffset.UTC).getEpochSecond());
+		reqId.put("accountId", userWallets.get(0).getAccountId());
+		reqId.put("email", emailStatement);
+
+		var reqs = this.requestSigner.signRequest(reqId);
+
+		Mono<String> responseMono = this.bankClientBean.webClient.post()
+				.uri(ChoiceEndpointsConstants.REQUEST_BANK_STATEMENT).contentType(MediaType.APPLICATION_JSON)
+				.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+				.bodyToMono(String.class);
+
+		String responseJson = responseMono.block();
+
+		if (responseJson != null) {
+			return new Gson().fromJson(responseJson, Object.class);
+
+		}
+
+		// TODO Auto-generated method stub
+		return null;
+		// TODO Auto-generated method stub
 	}
 
 }

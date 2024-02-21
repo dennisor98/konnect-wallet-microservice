@@ -17,7 +17,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
-import net.sasakonnect.wallet.RequestDto.CorporateLoginDTO;
+import net.sasakonnect.wallet.RequestDto.OpenIdRequest;
 import net.sasakonnect.wallet.RequestDto.UserLogin;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.RefreshMiddleware;
@@ -33,8 +33,8 @@ import net.sasakonnect.wallet.tools.redis.Queueable;
 @Tag(name = "User", description = "User routes")
 
 public class UserController {
-
-	private final UserService userService;
+	@Autowired
+	UserService userService;
 	@Autowired
 	private TransactionService transactionService;
 
@@ -43,10 +43,6 @@ public class UserController {
 
 	@Autowired
 	FirebaseWrapper firebaseWrapper;
-
-	public UserController(UserService userService) {
-		this.userService = userService;
-	}
 
 	@PostMapping("userLogin")
 	public ResponseEntity<ObjectNode> getAll(@Valid @RequestBody UserLogin loginDto) {
@@ -75,6 +71,12 @@ public class UserController {
 	public ResponseEntity refreshToken() {
 
 		return userService.createRefreshToken();
+	}
+
+	@PostMapping("openId")
+	public ResponseEntity getMyOpenId(@Valid @RequestBody OpenIdRequest openId) {
+
+		return userService.createUserOpenId(openId);
 	}
 
 	@GetMapping("financialContact")

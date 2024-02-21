@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -25,6 +26,8 @@ import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
 import net.sasakonnect.wallet.domain.Transaction;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.Wallet;
+import net.sasakonnect.wallet.enums.NotificationType;
+import net.sasakonnect.wallet.enums.WalletTransactionType;
 import net.sasakonnect.wallet.notification.NotificationResult;
 import net.sasakonnect.wallet.notification.TransactionResultNotification;
 import net.sasakonnect.wallet.repository.TransactionRepository;
@@ -50,8 +53,8 @@ public class TransactionService {
 			var transaction = Transaction.builder().txId(trans.getTxId()).txType(trans.getTxType())
 					.externalTxId(trans.getExternalTxId()).accountId(trans.getAccountId())
 					.accountName(trans.getAccountName()).oppoSubAccount(trans.getOppoSubAccount())
-					.balance(new BigDecimal(trans.getBalance())).oppoBankCode(trans.getOppoBankCode())
-					.requestId(results.getRequestId())
+					.balance(trans.getBalance() == null ? null : new BigDecimal(trans.getBalance()))
+					.oppoBankCode(trans.getOppoBankCode()).requestId(results.getRequestId())
 					// .extInfo(trans.getExtInfo().toString())
 					.notificationType(trans.getTxType())
 					.feeAmount(trans.getFeeAmount() != null ? new BigDecimal(trans.getFeeAmount()) : new BigDecimal(0))
@@ -326,6 +329,22 @@ public class TransactionService {
 			resmap.put("transaction_trends", trendMap);
 			return ResponseEntity.status(HttpStatus.OK).body(resmap);
 		}
+
+	}
+
+	public Optional<Transaction> getTransactionById(String txId) {
+		return this.transactionRepository.findTransactionByTxtId(txId);
+		// TODO Auto-generated method stub
+
+	}
+
+	public Boolean isUpdatableTransaction(NotificationResult<TransactionResultNotification> transaction) {
+		if (transaction.getNotificationType().equalsIgnoreCase(NotificationType.BALANCE.getCode())
+				&& (transaction.getParams().getTxType().equalsIgnoreCase(WalletTransactionType.TTID0006.getValue()))) {
+			return false;
+
+		}
+		return true;
 
 	}
 

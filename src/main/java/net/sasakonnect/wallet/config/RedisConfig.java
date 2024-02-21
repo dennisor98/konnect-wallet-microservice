@@ -2,6 +2,7 @@ package net.sasakonnect.wallet.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializer;
@@ -15,6 +16,7 @@ import net.sasakonnect.wallet.tools.redis.Queueable;
 public class RedisConfig {
 
 	@Bean
+	@Primary
 	<T extends Queueable> RedisTemplate<String, T> redisTemplate(RedisConnectionFactory connectionFactory) {
 		RedisTemplate<String, T> redisTemplate = new RedisTemplate<>();
 		redisTemplate.setConnectionFactory(connectionFactory);
