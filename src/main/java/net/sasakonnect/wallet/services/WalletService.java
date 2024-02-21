@@ -893,7 +893,6 @@ public class WalletService {
 			reqId.put("payerAccountId", userwallet.getAccountId());
 		}
 
-		reqId.put("payeeMobileForNotification", choiceTransfer.getReceiverAccount());
 		reqId.put("payeeBankCode", choiceTransfer.getBankCode());
 
 		reqId.put("payeeAccountId", choiceTransfer.getReceiverAccount());
