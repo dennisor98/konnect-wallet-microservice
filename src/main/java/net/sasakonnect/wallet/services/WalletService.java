@@ -562,7 +562,9 @@ public class WalletService {
 
 			} else if (notification_Type == NotificationType.BULK_PAYMENT.getCode()) {
 
-			} else if (notification_Type == NotificationType.FOREIGN_CURRENCY_DEPOSIT.getCode()) {
+			} else if (notification_Type == NotificationType.ACCOUNT_STATEMENT.getCode()) {
+				
+	         }else if (notification_Type == NotificationType.FOREIGN_CURRENCY_DEPOSIT.getCode()) {
 
 			} else if (notification_Type == NotificationType.FOREIGN_CURRENCY_OUTBOUND_TRANSACTION.getCode()) {
 

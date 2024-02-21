@@ -26,8 +26,11 @@ public interface UserRepository extends JpaRepository<User, String> {
 	
 	@Query("SELECT u FROM User u WHERE u.corporate = :corporateId")
 	Optional<User> getUserByCorporateId(@Param("corporateId") CorporateDetails corporateId);
-
-
+	
+	@Query("SELECT u FROM User u LEFT JOIN FETCH u.userWallets uw LEFT JOIN FETCH uw.wallet WHERE u.firstName LIKE %:queryString% "
+			+ "OR u.lastName LIKE %:queryString% OR uw.wallet.accountId LIKE %:queryString% OR u.mobile LIKE %:queryString%")
+    Page<User> searchUser(@Param("queryString")String queryString, Pageable pageable);
+	
 	@Query("SELECT u FROM User u WHERE u.mobile = :mobile AND u.countryCode=:country_code ")
 	Optional<User> findByMobileAndCountryCode(@Param("mobile") String mobile, @Param("country_code") int countryCode);
 
@@ -48,6 +51,7 @@ public interface UserRepository extends JpaRepository<User, String> {
 	@Query("SELECT u FROM User u WHERE u.onboardingRequestId = :onboardingRequestId")
 	Optional<User> findByOnboardingRequestId(@Param("onboardingRequestId") String onboardingRequestId);
 
-	Optional<User> findByMobile(String mobile); // Return an Optional<User>
+	@Query("SELECT u FROM User u  LEFT JOIN FETCH u.userWallets uw LEFT JOIN FETCH uw.wallet WHERE u.mobile =:mobileNumber")
+	Optional<User> findByMobile(@Param("mobileNumber") String mobile); // Return an Optional<User>
 
 }
