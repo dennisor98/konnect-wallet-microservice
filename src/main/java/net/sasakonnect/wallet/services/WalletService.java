@@ -950,7 +950,6 @@ public class WalletService {
 			reqId.put("amount", walletTransfer.getAmount());
 			reqId.put("otpMobile", userLoggedIn.getMobile());
 			reqId.put("otpType", walletTransfer.getOtpType());
-			reqId.put("payeeMobileForNotification", userop.get().getMobile());
 			var reqs = this.requestSigner.signRequest(reqId);
 			Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.WITHDRAW)
 					.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
