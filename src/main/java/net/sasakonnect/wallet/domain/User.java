@@ -60,7 +60,7 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 	@Column(nullable = false, length = 50)
 	private String lastName;
 
-	@Column(nullable = false, length = 50)
+	@Column(nullable = true, length = 50)
 	private String address;
 
 	@Enumerated(EnumType.STRING)
@@ -94,11 +94,11 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 	private String kraPin;
 
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
+	@Column(nullable = true)
 	private EmploymentStatus employmentStatus;
 
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
+	@Column(nullable = true)
 	private MonthlyIncome monthlyIncome;
 
 	@OneToOne
