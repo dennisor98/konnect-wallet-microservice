@@ -121,8 +121,8 @@ public class AdministrationController {
 	}
 
 	@GetMapping("/users/getAll")
-	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION + "')")
-	@RequirePermission(GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION)
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAllUsers.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.ViewAllUsers.PERMISSION)
 	public ResponseEntity<Object> getAllUsers(
 			@RequestParam(name = "pageSize", defaultValue = "100") Integer pageSize,
 			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber
@@ -131,8 +131,8 @@ public class AdministrationController {
 	}
 
 	@GetMapping("/user/corporate")
-	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION + "')")
-	@RequirePermission(GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION)
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewCorporateUsers.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.ViewCorporateUsers.PERMISSION)
 	public Object getAllCorporateUser() {
 		return this.userService.getCorporateUsers();
 	}
@@ -400,6 +400,19 @@ public class AdministrationController {
 	@RequirePermission(GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION)
 	public void getWalletStatement(@RequestParam(name = "mobileNumber", required = true) String mobileNumber,@RequestParam(name = "filePath", required = true) String filePath) throws Exception {
 		this.accountStatementService.readFileAndGeneratePDF(filePath, mobileNumber);
+	
+	}
+	
+	@GetMapping("/transaction/search")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.SearchTransaction.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.SearchTransaction.PERMISSION)
+	public ResponseEntity<Object> searchTransaction(
+			@RequestParam(name = "queryString", required =true) String queryString,
+		    @RequestParam(name = "pageSize", defaultValue = "20") Integer pageSize,
+			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber
+			) throws Exception {
+	return	this.transactionService.searchTransaction(queryString,pageNumber,pageSize);
 	
 	}
 

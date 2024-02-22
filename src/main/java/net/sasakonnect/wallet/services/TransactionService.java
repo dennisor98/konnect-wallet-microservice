@@ -121,6 +121,32 @@ public class TransactionService {
 
 		return null;
 	}
+	
+	public ResponseEntity<Object> searchTransaction(String queryString,Integer pageNumber,Integer pageSize){
+		Page<Transaction> transactions = this.transactionRepository.searchTransaction(queryString,PageRequest.of(pageNumber,pageSize));
+		Map<String,Object> data = new HashMap<>();
+		Map<String,Object> resMap = new HashMap<>();
+		if(!transactions.isEmpty()) {
+			data.put("success", true);
+			data.put("message","successful");
+			data.put("totalRows", Double.valueOf(transactions.getTotalElements()));
+			data.put("pageSize", transactions.getSize());
+			data.put("currentPage", transactions.getNumber());
+			data.put("nextPage", transactions.hasNext() ? transactions.nextPageable().getPageNumber() : null);
+			data.put("hasNextPage", transactions.hasNext());
+			data.put("hasPreviousPage", transactions.hasPrevious());
+			data.put("transactions", transactions.get().collect(Collectors.toList()));
+			resMap.put("payload",data);
+			
+			return ResponseEntity.status(HttpStatus.OK).body(resMap);
+		}else {
+			data.put("success", false);
+			data.put("message", "No matching records");
+			data.put("transactions", new ArrayList<>());
+			resMap.put("payload", data);
+			return ResponseEntity.status(HttpStatus.OK).body(resMap);
+		}
+	}
 
 	public Object getUserTransactionHistory(Integer pageNumber, Integer pageSize) {
 		var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -185,13 +211,6 @@ public class TransactionService {
 	public Object getTransactionHistory(Integer pageNumber, Integer pageSize) {
 
 		var transactions = transactionRepository.findAll(PageRequest.of(pageNumber, pageSize));
-//		transactions.nextPageable().
-		// var transactionsPayload:TransactionHistory =
-//		Integer pageSize;
-//		   Integer currentPage;
-//		   Integer nextPage;
-//		   Boolean hasNextPage;
-//		   Boolean hasPreviousPage;
 		Map<String, Object> transactionsMap = new HashMap<String, Object>();
 		transactionsMap.put("transactions", transactions.get().collect(Collectors.toList()));
 		transactionsMap.put("pageSize", transactions.getSize());
