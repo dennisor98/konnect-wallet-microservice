@@ -125,7 +125,6 @@ public class TransactionService {
 	public ResponseEntity<Object> searchTransaction(String queryString,Integer pageNumber,Integer pageSize){
 		Page<Transaction> transactions = this.transactionRepository.searchTransaction(queryString,PageRequest.of(pageNumber,pageSize));
 		Map<String,Object> data = new HashMap<>();
-		Map<String,Object> resMap = new HashMap<>();
 		if(!transactions.isEmpty()) {
 			data.put("success", true);
 			data.put("message","successful");
@@ -136,15 +135,13 @@ public class TransactionService {
 			data.put("hasNextPage", transactions.hasNext());
 			data.put("hasPreviousPage", transactions.hasPrevious());
 			data.put("transactions", transactions.get().collect(Collectors.toList()));
-			resMap.put("payload",data);
 			
-			return ResponseEntity.status(HttpStatus.OK).body(resMap);
+			return ResponseEntity.status(HttpStatus.OK).body(data);
 		}else {
 			data.put("success", false);
 			data.put("message", "No matching records");
 			data.put("transactions", new ArrayList<>());
-			resMap.put("payload", data);
-			return ResponseEntity.status(HttpStatus.OK).body(resMap);
+			return ResponseEntity.status(HttpStatus.OK).body(data);
 		}
 	}
 
