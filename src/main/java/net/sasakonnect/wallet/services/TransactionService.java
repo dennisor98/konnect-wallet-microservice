@@ -262,6 +262,43 @@ public class TransactionService {
 
 		return ResponseEntity.status(HttpStatus.OK).body(transMap);
 	}
+	
+	public ResponseEntity<Object> getWalletTransactionBehaviour(){
+		var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		List<Wallet> wallet = this.walletRepository.findByUserWalletsUser(user);
+		
+		if(!wallet.isEmpty()) {
+			List<Object[]> transactions = this.transactionRepository.findWalletTransactionBehaviour(wallet.get(0).getAccountId());
+			
+			if(!transactions.isEmpty()) {
+				
+				var userTransactions = transactions.stream().map(transaction -> {
+					Map<String,Object> map = new HashMap<>();
+					 map.put("transferInCount",transaction[1]);
+				     map.put("transferOutCount",transaction[0]);
+				     map.put("transferInAmount", transaction[2]);
+				     map.put("transferOutAmount", transaction[3]);
+				     map.put("utilityCount", transaction[4]);
+				     map.put("utilityAmount", transaction[5]);
+				     return map;
+				}).collect(Collectors.toList());
+				Map<String,Object> map = new HashMap<>();
+				map.put("success",true);
+				map.put("message","Request successful");
+				map.put("transactions", userTransactions.stream().toList());
+				return ResponseEntity.status(HttpStatus.OK).body(map);
+				
+			}else {
+				Map<String,Object> map = new HashMap<>();
+				map.put("success",true);
+				map.put("message","No transactions found");
+				map.put("transactions",new ArrayList<>());
+				return ResponseEntity.status(HttpStatus.OK).body(map);
+			}
+			
+		}
+	 return null;	
+	}
 
 	public ResponseEntity<Object> getWalletTransactionRanks(Integer pageNumber, Integer pageSize) {
 		Map<String, Object> map = new HashMap<>();
@@ -363,5 +400,7 @@ public class TransactionService {
 		return true;
 
 	}
+	
+	
 
 }

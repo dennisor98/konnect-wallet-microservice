@@ -237,6 +237,11 @@ public class WalletController {
 	public ResponseEntity<Object> getTransactionsSummary() {
 		return this.transactionService.getWalletTransactionBreakdown();
 	}
+	
+	@GetMapping("spending")
+	public ResponseEntity<Object> getTransactionBehaviour() {
+		return this.transactionService.getWalletTransactionBehaviour();
+	}
 
 	@GetMapping("account/statement")
 	@Operation(summary = "Get account statement", description = "Get account statement between start and end dates")

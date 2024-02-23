@@ -66,7 +66,15 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
 	List<Object[]> findAnnualTransactionTrend();
 
 	@Query("SELECT t FROM Transaction t WHERE t.txId =:txId")
-
 	Optional<Transaction> findTransactionByTxtId(@Param("txId") String txId);
+	
+	@Query("SELECT t_out.transfer_out, t_in.transfer_in, t_out.transfer_out_amount, t_in.transfer_in_amount, utility.transfer_in, utility.transfer_in_amount " +
+		       "FROM (SELECT COUNT(t) as transfer_out, SUM(t.amount) as transfer_out_amount FROM Transaction t WHERE (t.amount < 0 AND t.accountId = :accountId OR t.oppoAccountId = :accountId) AND t.txStatus = 8) AS t_out, " +
+		       "(SELECT COUNT(t) as transfer_in, SUM(t.amount) as transfer_in_amount FROM Transaction t WHERE (t.amount > 0 AND t.accountId = :accountId OR t.oppoAccountId = :accountId) AND t.txStatus = 8) AS t_in, " +
+		       "(SELECT COUNT(t) as transfer_in, SUM(t.amount) as transfer_in_amount FROM Transaction t WHERE (t.amount > 0 AND (t.accountId = :accountId AND t.txType = 'TTID0006') OR (t.oppoAccountId = :accountId AND t.txType = 'TTID0006')) AND t.txStatus = 8) AS utility")
+		List<Object[]> findWalletTransactionBehaviour(@Param("accountId") String accountId);
+
+
+
 
 }
