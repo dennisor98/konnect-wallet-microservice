@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,6 +31,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.BodyInserters;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -39,6 +41,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.gson.Gson;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -47,15 +50,19 @@ import net.sasakonnect.wallet.RequestDto.ChangePin;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
 import net.sasakonnect.wallet.RequestDto.OpenIdRequest;
 import net.sasakonnect.wallet.RequestDto.PinDto;
+import net.sasakonnect.wallet.RequestDto.UpdateAccountEmail;
 import net.sasakonnect.wallet.RequestDto.UserLogin;
 import net.sasakonnect.wallet.ResponseDto.UserResponseDTO;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.beans.RedisBean;
+import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
 import net.sasakonnect.wallet.domain.Permission;
 import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.UserPin;
 import net.sasakonnect.wallet.domain.UserRole;
+import net.sasakonnect.wallet.domain.WalletAccountUpgrade;
+import net.sasakonnect.wallet.notification.WalletAccountUpgradeResultNotification;
 import net.sasakonnect.wallet.repository.CorporateDetailsRepository;
 import net.sasakonnect.wallet.repository.PermissionRepository;
 import net.sasakonnect.wallet.repository.RolePermissionRepository;
@@ -63,15 +70,21 @@ import net.sasakonnect.wallet.repository.RoleRepository;
 import net.sasakonnect.wallet.repository.UserPinRepository;
 import net.sasakonnect.wallet.repository.UserRepository;
 import net.sasakonnect.wallet.repository.UserRoleRepository;
+import net.sasakonnect.wallet.repository.WalletAccountUpgradeRepository;
 import net.sasakonnect.wallet.repository.WalletClientRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.tools.JwtService;
+import net.sasakonnect.wallet.tools.RequestSigner;
+import reactor.core.publisher.Mono;
 
 @Service
 @Slf4j
 public class UserService extends RestClientService implements UserDetailsService {
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private WalletAccountUpgradeRepository walletAccountUpgradeRepository;
+
 	@Autowired
 	private SmsService smsService;
 	@Autowired
@@ -106,7 +119,9 @@ public class UserService extends RestClientService implements UserDetailsService
 	String profileActive;
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneOffset.UTC);
 	@Autowired
-	private RedisBean redisBean;
+	private RedisBean<String> redisBean;
+	@Autowired
+	RequestSigner requestSigner;
 
 	public ResponseEntity<Object> getAllUsers(Integer pageNumber, Integer pageSize) {
 		Map<String, Object> resObject = new HashMap<String, Object>();
@@ -161,6 +176,56 @@ public class UserService extends RestClientService implements UserDetailsService
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resObject);
 		}
 
+	}
+
+	public ResponseEntity<Object> searchUser(String queryString, Integer pageNumber, Integer pageSize) {
+		Page<User> user = this.userRepository.searchUser(queryString, PageRequest.of(pageNumber, pageSize));
+		if (!user.isEmpty()) {
+			Map<String, Object> map = new HashMap<>();
+			Map<String, Object> resObject = new HashMap<>();
+			var res = user.stream().map(u -> {
+				Map<String, Object> usermap = new HashMap<>();
+				usermap.put("id", u.getId());
+				usermap.put("firstname", u.getFirstName());
+				usermap.put("lastname", u.getLastName());
+				usermap.put("user_id", u.getId());
+				usermap.put("phone", u.getMobile());
+//            map.put("wallet", u.getUserWallets());
+				usermap.put("corporate", u.getCorporate());
+				if (u.getUserRole() != null) {
+					usermap.put("role", u.getUserRole().getRole());
+
+				} else {
+					usermap.put("role", null);
+
+				}
+				if (u.getUserWallets() != null && !u.getUserWallets().isEmpty()) {
+					usermap.put("wallet", u.getUserWallets().get(0).getWallet());
+				} else {
+					usermap.put("wallet", "null");
+				}
+				return usermap;
+			}).collect(Collectors.toList());
+			map.put("success", "true");
+			map.put("totalRows", Double.valueOf(user.getTotalElements()));
+			map.put("pageSize", user.getSize());
+			map.put("currentPage", user.getNumber());
+			map.put("hasMore", user.hasNext() ? true : false);
+			map.put("nextPage", user.hasNext() ? user.nextPageable().getPageNumber() : null);
+			map.put("hasNextPage", user.hasNext());
+			map.put("hasPreviousPage", user.hasPrevious());
+			map.put("message", "Request successful");
+			map.put("users", res);
+			resObject.put("payload", map);
+			return ResponseEntity.status(HttpStatus.OK).body(resObject);
+
+		} else {
+			Map<String, Object> map = new HashMap<>();
+			map.put("success", false);
+			map.put("message", "User not found");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+
+		}
 	}
 
 	public Object getCorporateUsers() {
@@ -484,7 +549,15 @@ public class UserService extends RestClientService implements UserDetailsService
 			map.put("message", "Pin already set please ,try to reset");
 			map.put("success", false);
 			return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
-		} else {
+		} else if (this.walletRepository.findByUserWalletsUser(user).isEmpty()) {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("message", "Account Not Verified ");
+			map.put("success", "false");
+			map.put("code", "KWEC003");
+			return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
+		}
+
+		else {
 			var passwordencoded = new BCryptPasswordEncoder().encode(user.getId() + setPin.getPin());
 			var userpin = new UserPin();
 			userpin.setUser(user);
@@ -660,25 +733,6 @@ public class UserService extends RestClientService implements UserDetailsService
 		// TODO Auto-generated method stub
 
 	}
-//	public Object userRegister(@Valid UserSignUp userSignUp) throws UserInputException {
-//		Optional<User> userPhone = this.userRepository.findByMobile(userSignUp.getPhoneNumber());
-//		Optional<User> userEmail = this.userRepository.findByEmail(userSignUp.getEmail());
-//
-//		if (userPhone.isPresent()) {
-//			throw new UserInputException(HttpStatus.CONFLICT, "Phone already registered");
-//
-//		}
-//		if (userEmail.isPresent()) {
-//			throw new UserInputException(HttpStatus.CONFLICT, "Email already registered");
-//		}
-//
-//		User user = User.builder().firstName(userSignUp.getFirstName()).lastName(userSignUp.getLastName())
-//				.mobile(userSignUp.getPhoneNumber()).email(userSignUp.getEmail()).countryCode("+254")
-//				.password(new BCryptPasswordEncoder().encode(userSignUp.getPassword())).build();
-//		return this.userRepository.save(user);
-//		// TODO Auto-generated method stub
-//
-//	}
 
 	public ResponseEntity createRefreshToken() {
 		log.warn("principal " + SecurityContextHolder.getContext().getAuthentication().getPrincipal());
@@ -882,26 +936,74 @@ public class UserService extends RestClientService implements UserDetailsService
 	}
 
 	public ResponseEntity createUserOpenId(@Valid OpenIdRequest openId) {
-		var walletClient = this.walletClientRepository.findByAppKeyAnd(openId.getAppId());
+		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-		var value = redisBean.getRecord(openId.getAppId() + openId.getPublicKey()).orElse("jsd");
+		var value = redisBean.getRecord(openId.getPublicKey());
 		Map<String, Object> map = new HashMap<>();
 
-		map.put("success", false);
-		map.put("message", "Open Id process failed or time out");
+		if (value.isEmpty()) {
+			map.put("success", false);
+			map.put("message", "Open Id process failed or time out");
 
-		map.put("code", "unmet_authentication_requirements");
+			map.put("code", "unmet_authentication_requirements");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		var walletClient = this.walletClientRepository.findById(value.get());
 		if (value != null && walletClient.isPresent()) {
-			User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-			var result = this.jwtService.generateOpenIdWithSecret(loggedInUser, (String) value);
+			var result = this.jwtService.generateOpenIdWithSecret(loggedInUser, value.get(), openId.getPublicKey(),
+					openId.getAppId());
 
 			return ResponseEntity.status(HttpStatus.OK).body(result);
 
 		} else {
+			map.put("success", false);
+			map.put("message", "Open Id process failed or time out");
+
+			map.put("code", "unmet_authentication_requirements");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 		}
 
+	}
+
+	public void pushUpgradeNotification(WalletAccountUpgradeResultNotification params) {
+		var walletAccount = WalletAccountUpgrade.builder().accountId(params.getAccountId())
+				.onboardingRequestId(params.getOnboardingRequestId()).accountType(params.getAccountType())
+				.rejectionReasonIds(params.getRejectionReasonIds()).rejectionReasonMsgs(params.getRejectionReasonMsgs())
+				.accountType(params.getAccountType()).status(params.getStatus()).build();
+		this.walletAccountUpgradeRepository.save(walletAccount);
+	}
+
+	public Optional<User> findUserByOpenId(String open_id) {
+		// TODO Auto-generated method stub
+		return this.userRepository.findByOpenId(open_id);
+	}
+
+	public Object updateUserEmail(@Valid UpdateAccountEmail updateAccountEmail) {
+		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		var reqId = new HashMap<String, Object>();
+		reqId.put("onboardType", "personal");
+		reqId.put("personalIdType", "101");
+
+		reqId.put("documentNumber", loggedInUser.getIdNumber());
+
+		reqId.put("email", updateAccountEmail.getEmail());
+
+		var reqs = requestSigner.signRequest(reqId);
+
+		Mono<String> responseMono = this.bankClientBean.webClient.post()
+				.uri(ChoiceEndpointsConstants.ADD_OR_UPDATE_EMAIL).contentType(MediaType.APPLICATION_JSON)
+				.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+				.bodyToMono(String.class);
+
+		String responseJson = responseMono.block();
+
+		if (responseJson != null) {
+			return new Gson().fromJson(responseJson, Object.class);
+
+		}
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

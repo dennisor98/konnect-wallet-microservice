@@ -53,8 +53,8 @@ public class TransactionService {
 			var transaction = Transaction.builder().txId(trans.getTxId()).txType(trans.getTxType())
 					.externalTxId(trans.getExternalTxId()).accountId(trans.getAccountId())
 					.accountName(trans.getAccountName()).oppoSubAccount(trans.getOppoSubAccount())
-					.balance(new BigDecimal(trans.getBalance())).oppoBankCode(trans.getOppoBankCode())
-					.requestId(results.getRequestId())
+					.balance(trans.getBalance() == null ? null : new BigDecimal(trans.getBalance()))
+					.oppoBankCode(trans.getOppoBankCode()).requestId(results.getRequestId())
 					// .extInfo(trans.getExtInfo().toString())
 					.notificationType(trans.getTxType())
 					.feeAmount(trans.getFeeAmount() != null ? new BigDecimal(trans.getFeeAmount()) : new BigDecimal(0))
@@ -121,6 +121,29 @@ public class TransactionService {
 
 		return null;
 	}
+	
+	public ResponseEntity<Object> searchTransaction(String queryString,Integer pageNumber,Integer pageSize){
+		Page<Transaction> transactions = this.transactionRepository.searchTransaction(queryString,PageRequest.of(pageNumber,pageSize));
+		Map<String,Object> data = new HashMap<>();
+		if(!transactions.isEmpty()) {
+			data.put("success", true);
+			data.put("message","successful");
+			data.put("totalRows", Double.valueOf(transactions.getTotalElements()));
+			data.put("pageSize", transactions.getSize());
+			data.put("currentPage", transactions.getNumber());
+			data.put("nextPage", transactions.hasNext() ? transactions.nextPageable().getPageNumber() : null);
+			data.put("hasNextPage", transactions.hasNext());
+			data.put("hasPreviousPage", transactions.hasPrevious());
+			data.put("transactions", transactions.get().collect(Collectors.toList()));
+			
+			return ResponseEntity.status(HttpStatus.OK).body(data);
+		}else {
+			data.put("success", false);
+			data.put("message", "No matching records");
+			data.put("transactions", new ArrayList<>());
+			return ResponseEntity.status(HttpStatus.OK).body(data);
+		}
+	}
 
 	public Object getUserTransactionHistory(Integer pageNumber, Integer pageSize) {
 		var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -185,13 +208,6 @@ public class TransactionService {
 	public Object getTransactionHistory(Integer pageNumber, Integer pageSize) {
 
 		var transactions = transactionRepository.findAll(PageRequest.of(pageNumber, pageSize));
-//		transactions.nextPageable().
-		// var transactionsPayload:TransactionHistory =
-//		Integer pageSize;
-//		   Integer currentPage;
-//		   Integer nextPage;
-//		   Boolean hasNextPage;
-//		   Boolean hasPreviousPage;
 		Map<String, Object> transactionsMap = new HashMap<String, Object>();
 		transactionsMap.put("transactions", transactions.get().collect(Collectors.toList()));
 		transactionsMap.put("pageSize", transactions.getSize());
@@ -245,6 +261,43 @@ public class TransactionService {
 		}
 
 		return ResponseEntity.status(HttpStatus.OK).body(transMap);
+	}
+	
+	public ResponseEntity<Object> getWalletTransactionBehaviour(){
+		var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		List<Wallet> wallet = this.walletRepository.findByUserWalletsUser(user);
+		
+		if(!wallet.isEmpty()) {
+			List<Object[]> transactions = this.transactionRepository.findWalletTransactionBehaviour(wallet.get(0).getAccountId());
+			
+			if(!transactions.isEmpty()) {
+				
+				var userTransactions = transactions.stream().map(transaction -> {
+					Map<String,Object> map = new HashMap<>();
+					 map.put("transferInCount",transaction[1]);
+				     map.put("transferOutCount",transaction[0]);
+				     map.put("transferInAmount", transaction[2]);
+				     map.put("transferOutAmount", transaction[3]);
+				     map.put("utilityCount", transaction[4]);
+				     map.put("utilityAmount", transaction[5]);
+				     return map;
+				}).collect(Collectors.toList());
+				Map<String,Object> map = new HashMap<>();
+				map.put("success",true);
+				map.put("message","Request successful");
+				map.put("transactions", userTransactions.stream().toList());
+				return ResponseEntity.status(HttpStatus.OK).body(map);
+				
+			}else {
+				Map<String,Object> map = new HashMap<>();
+				map.put("success",true);
+				map.put("message","No transactions found");
+				map.put("transactions",new ArrayList<>());
+				return ResponseEntity.status(HttpStatus.OK).body(map);
+			}
+			
+		}
+	 return null;	
 	}
 
 	public ResponseEntity<Object> getWalletTransactionRanks(Integer pageNumber, Integer pageSize) {
@@ -343,9 +396,14 @@ public class TransactionService {
 				&& (transaction.getParams().getTxType().equalsIgnoreCase(WalletTransactionType.TTID0006.getValue()))) {
 			return false;
 
+		} else if (transaction.getNotificationType().equalsIgnoreCase(NotificationType.BALANCE.getCode())
+				&& (transaction.getParams().getTxType().equalsIgnoreCase(WalletTransactionType.TTID0005.getValue()))) {
+			return false;
 		}
 		return true;
 
 	}
+	
+	
 
 }

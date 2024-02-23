@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
 import net.sasakonnect.wallet.RequestDto.OpenIdRequest;
+import net.sasakonnect.wallet.RequestDto.UpdateAccountEmail;
 import net.sasakonnect.wallet.RequestDto.UserLogin;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.RefreshMiddleware;
@@ -88,4 +89,8 @@ public class UserController {
 		return ResponseEntity.status(HttpStatus.OK).body(map);
 	}
 
+	@PostMapping("update/email")
+	public Object updateEmail(@RequestBody() @Valid() UpdateAccountEmail updateAccountEmail) {
+		return userService.updateUserEmail(updateAccountEmail);
+	}
 }

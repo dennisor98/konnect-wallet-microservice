@@ -35,6 +35,21 @@ public final class GlobalPermissionConstants {
 		}
 	}
 	
+	public static class SearchTransaction extends PermissionEntry {
+		public static final String PERMISSION = "can.transaction.search";
+		public static final String DESCRIPTION = "Can search any transaction in the system";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
+	
 	public static class SyncLark extends PermissionEntry {
 		public static final String PERMISSION = "can.sync.lark";
 		public static final String DESCRIPTION = "Can trigger sync of lark users into database(Use with caution)";
@@ -68,6 +83,21 @@ public final class GlobalPermissionConstants {
 	public static class ViewCorporateUsers extends PermissionEntry {
 		public static final String PERMISSION = "can.view.user.corporate";
 		public static final String DESCRIPTION = "Can view corporate users";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
+	
+	public static class ViewAllUsers extends PermissionEntry {
+		public static final String PERMISSION = "can.view.user.all";
+		public static final String DESCRIPTION = "Can view all users";
 
 		@Override
 		public String getPERMISSION() {

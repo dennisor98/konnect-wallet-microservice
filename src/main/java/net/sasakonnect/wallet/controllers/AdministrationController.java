@@ -1,5 +1,6 @@
 package net.sasakonnect.wallet.controllers;
 
+import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,6 +40,7 @@ import net.sasakonnect.wallet.constant.GlobalPermissionConstants;
 import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.repository.RoleRepository;
+import net.sasakonnect.wallet.services.AccountStatementService;
 import net.sasakonnect.wallet.services.AnalyticsService;
 import net.sasakonnect.wallet.services.CorporateService;
 import net.sasakonnect.wallet.services.LarkService;
@@ -79,6 +81,9 @@ public class AdministrationController {
 
 	@Autowired
 	AnalyticsService analyticsService;
+	
+	@Autowired
+	AccountStatementService  accountStatementService;
 
 	@Autowired
 	RoleRepository roleRepository;
@@ -104,6 +109,8 @@ public class AdministrationController {
 	@RequirePermission(GlobalPermissionConstants.CreateWalletClient.PERMISSION)
 	public Object attachPaymentAccount(@Valid @RequestBody() WalletClientAccountDto walletClientAccount) {
 		return this.walletClientService.createWalletClientAccount(walletClientAccount);
+	}public ResponseEntity<Object> searchUserByFirstName(String userNa){
+		return null;
 	}
 
 	@PostMapping("/check/account/status")
@@ -114,8 +121,8 @@ public class AdministrationController {
 	}
 
 	@GetMapping("/users/getAll")
-	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION + "')")
-	@RequirePermission(GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION)
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAllUsers.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.ViewAllUsers.PERMISSION)
 	public ResponseEntity<Object> getAllUsers(
 			@RequestParam(name = "pageSize", defaultValue = "100") Integer pageSize,
 			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber
@@ -124,17 +131,26 @@ public class AdministrationController {
 	}
 
 	@GetMapping("/user/corporate")
-	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION + "')")
-	@RequirePermission(GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION)
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewCorporateUsers.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.ViewCorporateUsers.PERMISSION)
 	public Object getAllCorporateUser() {
 		return this.userService.getCorporateUsers();
 	}
 
-	@GetMapping("/user/phone/search")
+	@GetMapping("/user/search")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanSearchUsers.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CanSearchUsers.PERMISSION)
-	public Object searchUserbyPhone(@RequestParam("phone") String phone) {
-		return this.userService.getUseByPhone(phone);
+	public Object searchUserbyPhone(
+			@RequestParam(name="queryString",required=true) String phone ,
+			@RequestParam(name="pageNumber",required=false,defaultValue="0") Integer pageNumber,
+			@RequestParam(name="pageSize",required=false,defaultValue="10") Integer pageSize
+			) {
+		
+		if(!phone.isEmpty()) {
+			return this.userService.searchUser(phone, pageNumber, pageSize);
+		}
+	
+		return null;
 	}
 
 	@PostMapping("/user/corporate/create")
@@ -376,6 +392,28 @@ public class AdministrationController {
 	@RequirePermission(GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION)
 	public Object getWalletPinAttempts(@RequestParam(name = "accountNumber", required = true) String accountNumber) {
 		return this.walletService.getWalletPinAttempts(accountNumber);
+	}
+	
+	@GetMapping("/wallet/statement")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION)
+	public void getWalletStatement(@RequestParam(name = "mobileNumber", required = true) String mobileNumber,@RequestParam(name = "filePath", required = true) String filePath) throws Exception {
+		this.accountStatementService.readFileAndGeneratePDF(filePath, mobileNumber);
+	
+	}
+	
+	@GetMapping("/transaction/search")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.SearchTransaction.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.SearchTransaction.PERMISSION)
+	public ResponseEntity<Object> searchTransaction(
+			@RequestParam(name = "queryString", required =true) String queryString,
+		    @RequestParam(name = "pageSize", defaultValue = "20") Integer pageSize,
+			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber
+			) throws Exception {
+	return	this.transactionService.searchTransaction(queryString,pageNumber,pageSize);
+	
 	}
 
 }

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpMethod;
@@ -49,6 +50,7 @@ import net.sasakonnect.wallet.services.UserService;
 @Configuration
 @EnableMethodSecurity
 @Slf4j
+@EnableAspectJAutoProxy
 
 public class WebSecurityConfig {
 
@@ -108,7 +110,8 @@ public class WebSecurityConfig {
 				"/webjars/**").permitAll()
 
 				.requestMatchers("/user/userLogin", "/user/confirmOtp", "/konnect/callBack", "/user/refresh/token",
-						"/wallet/getOnboardingStatusById", "/sdk/transaction/{id}", "user/corporateLogin")
+						"/wallet/getOnboardingStatusById", "/sdk/transaction/{id}", "user/corporateLogin",
+						"/sdk/openId")
 
 				.permitAll().requestMatchers("/wallet").permitAll().requestMatchers(HttpMethod.OPTIONS, "/**")
 				.permitAll() // Permit OPTIONS requests
@@ -158,9 +161,8 @@ public class WebSecurityConfig {
 				.description("Gateway Server Server URL(Dev)");
 		Server nginxServer = new Server().url("https://wallet.sasakonnect.net/konnect-wallet")
 				.description("Production env");
-		
-		Server ngrokServer = new Server().url("https://328c-105-29-165-232.ngrok-free.app")
-				.description("Ngrok env");
+
+		Server ngrokServer = new Server().url("https://328c-105-29-165-232.ngrok-free.app").description("Ngrok env");
 
 		Contact contact = new Contact().email("devops@gmail.com").name("DevOps");
 		Info info = new Info().contact(contact).description("Wallet Based implementation Through Choice Bank")
@@ -180,12 +182,13 @@ public class WebSecurityConfig {
 
 		switch (profileActive) {
 		case "dev": {
-			openApi.info(info).addServersItem(gatewayServer).addServersItem(nginxServer).addServersItem(localServer).addServersItem(ngrokServer);
+			openApi.info(info).addServersItem(gatewayServer).addServersItem(nginxServer).addServersItem(localServer)
+					.addServersItem(ngrokServer);
 
 		}
 		default: {
-			openApi.info(info).addServersItem(nginxServer).addServersItem(gatewayServer).addServersItem(localServer).addServersItem(ngrokServer);
-			
+			openApi.info(info).addServersItem(nginxServer).addServersItem(gatewayServer).addServersItem(localServer)
+					.addServersItem(ngrokServer);
 
 		}
 

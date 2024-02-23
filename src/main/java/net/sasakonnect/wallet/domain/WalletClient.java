@@ -9,7 +9,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Transient;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,8 +37,9 @@ public class WalletClient extends BaseWalletDomain {
 	@Column(nullable = true)
 	String callBackUrl;
 
-	@Transient
-	private List<WalletClientAccount> walletClientAccounts;
+	@OneToMany(mappedBy = "walletClient")
+	private List<WalletClientAccount> walletClientAccount;
+
 	@ManyToOne
 	@JoinColumn(name = "owner_id", referencedColumnName = "id")
 	@OnDelete(action = OnDeleteAction.CASCADE)

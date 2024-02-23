@@ -63,6 +63,7 @@ import net.sasakonnect.wallet.enums.WalletTransactionType;
 import net.sasakonnect.wallet.events.TransactionEvent;
 import net.sasakonnect.wallet.notification.NotificationResult;
 import net.sasakonnect.wallet.notification.TransactionResultNotification;
+import net.sasakonnect.wallet.notification.WalletAccountUpgradeResultNotification;
 import net.sasakonnect.wallet.repository.CurrencyRepository;
 import net.sasakonnect.wallet.repository.UserWalletRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
@@ -529,15 +530,16 @@ public class WalletService {
 					transaction.get().setTxStatus(results.getParams().getTxStatus());
 					var createdTransaction = this.transactionService.transactionRepository.save(transaction.get());
 
+				} else {
+					var createdTransaction = this.transactionService.saveTransaction(results);
+					if (createdTransaction != null) {
+						log.info("publish transaction to socket {}", createdTransaction);
+
+						this.publisher.publishEvent(TransactionEvent.builder().userService(userService)
+								.transaction(createdTransaction).build());
+					}
 				}
 				log.info("transacttion {}", results);
-				var createdTransaction = this.transactionService.saveTransaction(results);
-				if (createdTransaction != null) {
-					log.info("publish transaction to socket {}", createdTransaction);
-
-					this.publisher.publishEvent(TransactionEvent.builder().userService(userService)
-							.transaction(createdTransaction).build());
-				}
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.BALANCE.getCode())) {
 
@@ -570,13 +572,22 @@ public class WalletService {
 
 			} else if (notification_Type == NotificationType.WALLET_ACCOUNT_UPGRADE.getCode()) {
 
+				//
+				NotificationResult<WalletAccountUpgradeResultNotification> results = new Gson().fromJson(
+						body.toString(), new TypeToken<NotificationResult<WalletAccountUpgradeResultNotification>>() {
+						}.getType());
+				log.info("balance update {}", results);
+				this.userService.pushUpgradeNotification(results.getParams());
+
 			} else if (notification_Type == NotificationType.SME_ACCOUNT_OPEN.getCode()) {
 
 			} else if (notification_Type == NotificationType.UTILITY.getCode()) {
 
 			} else if (notification_Type == NotificationType.BULK_PAYMENT.getCode()) {
 
-			} else if (notification_Type == NotificationType.FOREIGN_CURRENCY_DEPOSIT.getCode()) {
+			} else if (notification_Type == NotificationType.ACCOUNT_STATEMENT.getCode()) {
+				
+	         }else if (notification_Type == NotificationType.FOREIGN_CURRENCY_DEPOSIT.getCode()) {
 
 			} else if (notification_Type == NotificationType.FOREIGN_CURRENCY_OUTBOUND_TRANSACTION.getCode()) {
 
@@ -667,7 +678,7 @@ public class WalletService {
 			reqId.put("currency", mpesa.getCurrencyCode());
 			reqId.put("remark", mpesa.getRemarks());
 			reqId.put("otpType", "SMS");
-			reqId.put("payeeMobileForNotification", mpesa.getPayeeMobileForNotification());
+			reqId.put("payeeMobileForNotification", mpesa.getReceiverMobileNumber());
 
 			var reqs = this.requestSigner.signRequest(reqId);
 
@@ -882,9 +893,14 @@ public class WalletService {
 		if (!userWallets.isEmpty()) {
 			var userwallet = userWallets.get(0);
 			reqId.put("payerAccountId", userwallet.getAccountId());
+
+		}
+		var receivingUser = this.userService.findUserByAccountd(choiceTransfer.getReceiverAccount());
+		if (receivingUser.isPresent()) {
+			reqId.put("payeeMobileForNotification", receivingUser.get().getMobile());
+
 		}
 
-		reqId.put("payeeMobileForNotification", choiceTransfer.getReceiverAccount());
 		reqId.put("payeeBankCode", choiceTransfer.getBankCode());
 
 		reqId.put("payeeAccountId", choiceTransfer.getReceiverAccount());
@@ -941,7 +957,6 @@ public class WalletService {
 			reqId.put("amount", walletTransfer.getAmount());
 			reqId.put("otpMobile", userLoggedIn.getMobile());
 			reqId.put("otpType", walletTransfer.getOtpType());
-			reqId.put("payeeMobileForNotification", userop.get().getMobile());
 			var reqs = this.requestSigner.signRequest(reqId);
 			Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.WITHDRAW)
 					.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
@@ -1042,22 +1057,24 @@ public class WalletService {
 	}
 
 	public Object requestWalletDeduction(@Valid SdkPayDto sdkpayDto, WalletClient clientApp) {
-		var account = clientApp.getWalletClientAccounts().get(0);
-		switch (account.getAccountType()) {
+		var account = clientApp.getWalletClientAccount();
+		System.out.println(account.get(0).getId());
+		var activeAccount = account.stream().takeWhile(acc -> acc.getDeletedAt() == null).findFirst().get();
+		switch (activeAccount.getAccountType()) {
 		case BANK:
 			break;
 		case MPESA:
 			var mpesaBill = new MpesaBilling();
 			mpesaBill.amount = Integer.parseInt(sdkpayDto.getAmount());
-			if (account.getTillNumber() != null) {
-				mpesaBill.shortCode = account.getTillNumber();
+			if (activeAccount.getTillNumber() != null) {
+				mpesaBill.shortCode = activeAccount.getTillNumber();
 				mpesaBill.setBillType(MpesaBillType.TILL);
 				return this.mpesaTillAndByGoods(mpesaBill);
 
-			} else if (account.getPayBillAccountNo() != null && account.getPaybillNumber() != null) {
-				mpesaBill.shortCode = account.getPaybillNumber();
+			} else if (activeAccount.getPayBillAccountNo() != null && activeAccount.getPaybillNumber() != null) {
+				mpesaBill.shortCode = activeAccount.getPaybillNumber();
 				mpesaBill.setBillType(MpesaBillType.PAY_BILL);
-				mpesaBill.setReceivingAccount(account.getPayBillAccountNo());
+				mpesaBill.setReceivingAccount(activeAccount.getPayBillAccountNo());
 				return this.mpesaTillAndByGoods(mpesaBill);
 			}
 
@@ -1069,7 +1086,7 @@ public class WalletService {
 			break;
 
 		}
-		return clientApp.getWalletClientAccounts().get(0).getAccountType().name();
+		return activeAccount.getAccountType().name();
 
 		// TODO Auto-generated method stub
 

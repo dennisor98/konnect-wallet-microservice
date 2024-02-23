@@ -18,15 +18,18 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.SdkPayDto;
+import net.sasakonnect.wallet.RequestDto.SdkRequestOpenId;
 import net.sasakonnect.wallet.RequestDto.WalletClientAccountDto;
 import net.sasakonnect.wallet.RequestDto.WalletClientDTO;
 import net.sasakonnect.wallet.beans.ClientAppsBean;
+import net.sasakonnect.wallet.beans.RedisBean;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.WalletClient;
 import net.sasakonnect.wallet.domain.WalletClientAccount;
 import net.sasakonnect.wallet.repository.WalletClientAccountRepository;
 import net.sasakonnect.wallet.repository.WalletClientRepository;
 import net.sasakonnect.wallet.tools.Helper;
+import net.sasakonnect.wallet.tools.JwtService;
 
 @Slf4j
 @Service
@@ -41,6 +44,12 @@ public class WalletClientService {
 	private ClientAppsBean clientAppsBean;
 	@Autowired
 	private WalletService walletService;
+	@Autowired
+	private UserService userService;
+	@Autowired
+	private RedisBean<String> redisBean;
+	@Autowired
+	private JwtService jwtService;
 
 	public WalletClient createWallectClientApp(WalletClientDTO walleClientDto) {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -71,7 +80,8 @@ public class WalletClientService {
 
 			var walletclientAccount = this.walletClientAccountRepository.save(walletAccount);
 			var client = walletClient.get();
-			client.setWalletClientAccounts(List.of(walletclientAccount));
+
+			client.setWalletClientAccount(List.of(walletclientAccount));
 
 			this.wallectClientRepository.save(client);
 			Map<String, String> map = new HashMap<String, String>();
@@ -115,10 +125,50 @@ public class WalletClientService {
 		return this.wallectClientRepository.findByAppKeyAnd(client_app_key);
 	}
 
+	@Transactional
+	public Optional<List<WalletClient>> findMerchantByClientAppBySecret(String secretKey) {
+		// TODO Auto-generated method stub
+		return this.wallectClientRepository.findByAppSecret(secretKey);
+	}
+
 	public Object payThroughSdk(@Valid SdkPayDto sdkpayDto) {
 		var clientApp = clientAppsBean.getWalletClient();
 		logger.info("The Object is", clientApp);
 		return this.walletService.requestWalletDeduction(sdkpayDto, clientApp);
+	}
+
+	public ResponseEntity createOpenidSession(@Valid SdkRequestOpenId sdkRequestOpenId, WalletClient clientData) {
+
+		if (this.userService.findUserByOpenId(sdkRequestOpenId.getOpen_id()).isEmpty()) {
+			Map<String, Object> map = new HashMap<>();
+
+			map.put("success", false);
+			map.put("message", "Unrecorgised open id");
+
+			map.put("code", "404");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(map);
+		}
+
+		if (redisBean.getRecord(sdkRequestOpenId.getPublicKey()).isEmpty()) {
+			redisBean.storeRecord(sdkRequestOpenId.getPublicKey(), clientData.getId());
+			Map<String, Object> map = new HashMap<>();
+
+			map.put("success", true);
+			map.put("message", "Session created");
+			map.put("key", sdkRequestOpenId.getPublicKey());
+
+			map.put("code", "200");
+			return ResponseEntity.status(HttpStatus.OK).body(map);
+		}
+		Map<String, Object> map = new HashMap<>();
+
+		map.put("success", true);
+		map.put("message", "Session exist");
+		map.put("key", sdkRequestOpenId.getPublicKey());
+
+		map.put("code", "423");
+		return ResponseEntity.status(HttpStatus.LOCKED).body(map);
+
 	}
 
 }
