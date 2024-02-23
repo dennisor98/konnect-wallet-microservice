@@ -1275,6 +1275,7 @@ public class WalletService {
 
 			if (responseJson != null) {
 				var jsonObject = new Gson().fromJson(responseJson, JsonObject.class);
+				System.out.println(responseJson);
 				String jobId = jsonObject.getAsJsonObject("data").get("jobId").getAsString();
 
 				var job = UserJob.builder().user(loggedInUser).jobId(jobId).build();
