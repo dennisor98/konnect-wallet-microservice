@@ -396,6 +396,9 @@ public class TransactionService {
 				&& (transaction.getParams().getTxType().equalsIgnoreCase(WalletTransactionType.TTID0006.getValue()))) {
 			return false;
 
+		} else if (transaction.getNotificationType().equalsIgnoreCase(NotificationType.BALANCE.getCode())
+				&& (transaction.getParams().getTxType().equalsIgnoreCase(WalletTransactionType.TTID0005.getValue()))) {
+			return false;
 		}
 		return true;
 
