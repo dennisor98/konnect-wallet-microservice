@@ -22,6 +22,7 @@ public class ChoiceEndpointsConstants {
 	public static final String CONFIRM_OTP_TRANSFER = "/trans/confirmTransfer";
 	public static final String REQUEST_BANK_STATEMENT = "/statement/applyBankAccountStatement";
 	public static final String ADD_OR_UPDATE_EMAIL = "/user/addOrUpdateEmail";
+	public static final String REQUEST_BANK_STATEMENT_CSV = "/statement/applyAccountStatement";
 
 	public static final String WITHDRAW = "/trans/applyForTransfer";
 	public static final String BUY_AIRTIME = "/utilityPayment/airtimePayment";

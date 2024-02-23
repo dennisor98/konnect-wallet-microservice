@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,7 +30,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.BodyInserters;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -41,7 +39,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.google.gson.Gson;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -50,12 +47,10 @@ import net.sasakonnect.wallet.RequestDto.ChangePin;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
 import net.sasakonnect.wallet.RequestDto.OpenIdRequest;
 import net.sasakonnect.wallet.RequestDto.PinDto;
-import net.sasakonnect.wallet.RequestDto.UpdateAccountEmail;
 import net.sasakonnect.wallet.RequestDto.UserLogin;
 import net.sasakonnect.wallet.ResponseDto.UserResponseDTO;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.beans.RedisBean;
-import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
 import net.sasakonnect.wallet.domain.Permission;
 import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.User;
@@ -75,7 +70,6 @@ import net.sasakonnect.wallet.repository.WalletClientRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.tools.JwtService;
 import net.sasakonnect.wallet.tools.RequestSigner;
-import reactor.core.publisher.Mono;
 
 @Service
 @Slf4j
@@ -977,33 +971,6 @@ public class UserService extends RestClientService implements UserDetailsService
 	public Optional<User> findUserByOpenId(String open_id) {
 		// TODO Auto-generated method stub
 		return this.userRepository.findByOpenId(open_id);
-	}
-
-	public Object updateUserEmail(@Valid UpdateAccountEmail updateAccountEmail) {
-		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		var reqId = new HashMap<String, Object>();
-		reqId.put("onboardType", "personal");
-		reqId.put("personalIdType", "101");
-
-		reqId.put("documentNumber", loggedInUser.getIdNumber());
-
-		reqId.put("email", updateAccountEmail.getEmail());
-
-		var reqs = requestSigner.signRequest(reqId);
-
-		Mono<String> responseMono = this.bankClientBean.webClient.post()
-				.uri(ChoiceEndpointsConstants.ADD_OR_UPDATE_EMAIL).contentType(MediaType.APPLICATION_JSON)
-				.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
-				.bodyToMono(String.class);
-
-		String responseJson = responseMono.block();
-
-		if (responseJson != null) {
-			return new Gson().fromJson(responseJson, Object.class);
-
-		}
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }
