@@ -555,7 +555,7 @@ public class WalletService {
 
 				var transaction = this.transactionService.getTransactionById(results.getParams().getTxId());
 				if (transaction.isPresent() && this.transactionService.isUpdatableTransaction(results)) {
-					transaction.get().setTxStatus(results.getParams().getTxStatus());
+					transaction.get().setTxStatus(8);
 					transaction.get().setBalance(new BigDecimal(results.getParams().getBalance()));
 					this.transactionService.transactionRepository.save(transaction.get());
 
@@ -1288,7 +1288,7 @@ public class WalletService {
 		}
 		// TODO Auto-generated method stub
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("message", "Unable to request tatement at this time");
+		map.put("message", "Unable to request statement at this time");
 		map.put("success", false);
 		return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body(map);
 	}
