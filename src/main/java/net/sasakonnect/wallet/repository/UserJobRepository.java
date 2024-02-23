@@ -14,6 +14,6 @@ public interface UserJobRepository extends JpaRepository<UserJob, String> {
 
 	@Modifying
 	@Transactional
-	@Query("UPDATE UserJob u SET u.dowloadLink = :downloadLink, u.isComplete = true WHERE u.jobId = :jobId")
+	@Query("UPDATE UserJob u SET u.downloadLink = :downloadLink, u.isComplete = true WHERE u.jobId = :jobId")
 	void updateDownloadLinkAndIsCompleteByJobId(String jobId, String downloadLink);
 }
