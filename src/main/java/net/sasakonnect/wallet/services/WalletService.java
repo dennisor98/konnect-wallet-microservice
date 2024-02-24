@@ -52,6 +52,7 @@ import net.sasakonnect.wallet.RequestDto.admin.CheckUserAccount;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
 import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.domain.UserJob;
 import net.sasakonnect.wallet.domain.UserPin;
 import net.sasakonnect.wallet.domain.UserWallet;
 import net.sasakonnect.wallet.domain.Wallet;
@@ -61,10 +62,12 @@ import net.sasakonnect.wallet.enums.NotificationType;
 import net.sasakonnect.wallet.enums.TransactionStatus;
 import net.sasakonnect.wallet.enums.WalletTransactionType;
 import net.sasakonnect.wallet.events.TransactionEvent;
+import net.sasakonnect.wallet.notification.AccountStatementReportNotification;
 import net.sasakonnect.wallet.notification.NotificationResult;
 import net.sasakonnect.wallet.notification.TransactionResultNotification;
 import net.sasakonnect.wallet.notification.WalletAccountUpgradeResultNotification;
 import net.sasakonnect.wallet.repository.CurrencyRepository;
+import net.sasakonnect.wallet.repository.UserJobRepository;
 import net.sasakonnect.wallet.repository.UserWalletRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.tools.RequestSigner;
@@ -98,6 +101,8 @@ public class WalletService {
 	private ApplicationEventPublisher publisher;
 	@Value("${email.statements}")
 	private String emailStatement;
+	@Autowired
+	UserJobRepository userJobRepository;
 
 	public Object getWalletInfo() {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -550,7 +555,7 @@ public class WalletService {
 
 				var transaction = this.transactionService.getTransactionById(results.getParams().getTxId());
 				if (transaction.isPresent() && this.transactionService.isUpdatableTransaction(results)) {
-					transaction.get().setTxStatus(results.getParams().getTxStatus());
+					transaction.get().setTxStatus(8);
 					transaction.get().setBalance(new BigDecimal(results.getParams().getBalance()));
 					this.transactionService.transactionRepository.save(transaction.get());
 
@@ -585,9 +590,14 @@ public class WalletService {
 
 			} else if (notification_Type == NotificationType.BULK_PAYMENT.getCode()) {
 
-			} else if (notification_Type == NotificationType.ACCOUNT_STATEMENT.getCode()) {
-				
-	         }else if (notification_Type == NotificationType.FOREIGN_CURRENCY_DEPOSIT.getCode()) {
+			} else if (notification_Type.equalsIgnoreCase(NotificationType.ACCOUNT_STATEMENT.getCode())) {
+				NotificationResult<AccountStatementReportNotification> results = new Gson().fromJson(body.toString(),
+						new TypeToken<NotificationResult<AccountStatementReportNotification>>() {
+						}.getType());
+
+				/// this.userJobRepository.updateByJobId()
+
+			} else if (notification_Type == NotificationType.FOREIGN_CURRENCY_DEPOSIT.getCode()) {
 
 			} else if (notification_Type == NotificationType.FOREIGN_CURRENCY_OUTBOUND_TRANSACTION.getCode()) {
 
@@ -1240,6 +1250,48 @@ public class WalletService {
 		// TODO Auto-generated method stub
 		return null;
 		// TODO Auto-generated method stub
+	}
+
+	public Object getUserStatement(LocalDate startDate, LocalDate endDate) {
+		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		var wallets = this.walletRepository.findByUserWalletsUser(loggedInUser);
+		if (!wallets.isEmpty()) {
+			var currentWallet = wallets.get(0);
+
+			var reqId = new HashMap<String, Object>();
+			reqId.put("accountId", currentWallet.getAccountId());
+			reqId.put("startTime", startDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli());
+
+			reqId.put("endTime", endDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli());
+
+			var reqs = requestSigner.signRequest(reqId);
+
+			Mono<String> responseMono = this.bankClientBean.webClient.post()
+					.uri(ChoiceEndpointsConstants.REQUEST_BANK_STATEMENT_CSV).contentType(MediaType.APPLICATION_JSON)
+					.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+					.bodyToMono(String.class);
+
+			String responseJson = responseMono.block();
+
+			if (responseJson != null) {
+				var jsonObject = new Gson().fromJson(responseJson, JsonObject.class);
+				System.out.println(responseJson);
+				String jobId = jsonObject.getAsJsonObject("data").get("jobId").getAsString();
+
+				var job = UserJob.builder().user(loggedInUser).jobId(jobId).build();
+				this.userJobRepository.save(job);
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("message", "Please wait as we process your statement");
+				map.put("success", true);
+				return ResponseEntity.status(HttpStatus.OK).body(map);
+
+			}
+		}
+		// TODO Auto-generated method stub
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("message", "Unable to request statement at this time");
+		map.put("success", false);
+		return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body(map);
 	}
 
 }

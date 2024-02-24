@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.SdkPayDto;
 import net.sasakonnect.wallet.RequestDto.SdkRequestOpenId;
 import net.sasakonnect.wallet.RequestDto.WalletClientAccountDto;
@@ -28,8 +31,11 @@ import net.sasakonnect.wallet.repository.WalletClientRepository;
 import net.sasakonnect.wallet.tools.Helper;
 import net.sasakonnect.wallet.tools.JwtService;
 
+@Slf4j
 @Service
 public class WalletClientService {
+	private static final Logger logger = LoggerFactory.getLogger(WalletClientService.class);
+
 	@Autowired
 	WalletClientRepository wallectClientRepository;
 	@Autowired
@@ -97,13 +103,12 @@ public class WalletClientService {
 	public ResponseEntity<Object> findMerchantByClientAppKey(String client_app_key) {
 		// TODO Auto-generated method stub
 		var client = this.wallectClientRepository.findByAppKeyAnd(client_app_key);
-		if (client.isPresent()) {
+		if (client.isPresent() && !client.get().isEmpty()) {
 			var results = client.get().stream().map(merchant -> merchant.getAppName()).collect(Collectors.toList());
 			Map<String, String> map = new HashMap<String, String>();
 
 			map.put("success", "true");
 			map.put("body", results.get(0));
-
 			return ResponseEntity.status(HttpStatus.OK).body(map);
 		}
 		Map<String, String> map = new HashMap<String, String>();
@@ -128,6 +133,7 @@ public class WalletClientService {
 
 	public Object payThroughSdk(@Valid SdkPayDto sdkpayDto) {
 		var clientApp = clientAppsBean.getWalletClient();
+		logger.info("The Object is", clientApp);
 		return this.walletService.requestWalletDeduction(sdkpayDto, clientApp);
 	}
 
