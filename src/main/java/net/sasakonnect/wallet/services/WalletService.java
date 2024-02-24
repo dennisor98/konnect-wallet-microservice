@@ -563,6 +563,10 @@ public class WalletService {
 							TransactionEvent.builder().userService(userService).transaction(transaction.get()).build());
 
 				} else {
+					if (results.getParams().getTxStatus() == 0) {
+						results.getParams().setTxStatus(8);
+
+					}
 					var createdTransaction = this.transactionService.saveTransaction(results);
 					if (createdTransaction != null) {
 						log.info("publish transaction to socket {}", createdTransaction);
