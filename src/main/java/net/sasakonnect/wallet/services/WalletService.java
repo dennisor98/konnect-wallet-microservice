@@ -595,8 +595,8 @@ public class WalletService {
 			} else if (notification_Type == NotificationType.BULK_PAYMENT.getCode()) {
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.ACCOUNT_STATEMENT.getCode())) {
-				NotificationResult<AccountStatementDTO> results = new Gson().fromJson(body.toString(),
-						new TypeToken<NotificationResult<TransactionResultNotification>>() {
+				NotificationResult<AccountStatementReportNotification> results = new Gson().fromJson(body.toString(),
+						new TypeToken<NotificationResult<AccountStatementReportNotification>>() {
 						}.getType());
 				 this.accountStatementService.readFileAndGeneratePDF(results.getParams().getJobId(),results.getParams().getStatementUrl());
 
