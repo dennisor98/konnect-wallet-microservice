@@ -69,6 +69,7 @@ import net.sasakonnect.wallet.repository.WalletAccountUpgradeRepository;
 import net.sasakonnect.wallet.repository.WalletClientRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.tools.JwtService;
+import net.sasakonnect.wallet.tools.RequestSigner;
 
 @Service
 @Slf4j
@@ -113,6 +114,8 @@ public class UserService extends RestClientService implements UserDetailsService
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneOffset.UTC);
 	@Autowired
 	private RedisBean<String> redisBean;
+	@Autowired
+	RequestSigner requestSigner;
 
 	public ResponseEntity<Object> getAllUsers(Integer pageNumber, Integer pageSize) {
 		Map<String, Object> resObject = new HashMap<String, Object>();
@@ -168,59 +171,56 @@ public class UserService extends RestClientService implements UserDetailsService
 		}
 
 	}
-	
-	public ResponseEntity<Object> searchUser(String queryString,Integer pageNumber,Integer pageSize){
+
+	public ResponseEntity<Object> searchUser(String queryString, Integer pageNumber, Integer pageSize) {
 		Page<User> user = this.userRepository.searchUser(queryString, PageRequest.of(pageNumber, pageSize));
-		if(!user.isEmpty()) {
-			Map<String,Object> map = new HashMap<>();
-			Map<String,Object> resObject = new HashMap<>();
-		var res =	user.stream().map(u->{
-			Map<String, Object> usermap = new HashMap<>();
-			usermap.put("id", u.getId());
-			usermap.put("firstname", u.getFirstName());
-			usermap.put("lastname", u.getLastName());
-			usermap.put("user_id", u.getId());
-			usermap.put("phone", u.getMobile());
+		if (!user.isEmpty()) {
+			Map<String, Object> map = new HashMap<>();
+			Map<String, Object> resObject = new HashMap<>();
+			var res = user.stream().map(u -> {
+				Map<String, Object> usermap = new HashMap<>();
+				usermap.put("id", u.getId());
+				usermap.put("firstname", u.getFirstName());
+				usermap.put("lastname", u.getLastName());
+				usermap.put("user_id", u.getId());
+				usermap.put("phone", u.getMobile());
 //            map.put("wallet", u.getUserWallets());
-			usermap.put("corporate", u.getCorporate());
-			if (u.getUserRole() != null) {
-				usermap.put("role", u.getUserRole().getRole());
+				usermap.put("corporate", u.getCorporate());
+				if (u.getUserRole() != null) {
+					usermap.put("role", u.getUserRole().getRole());
 
-			} else {
-				usermap.put("role", null);
+				} else {
+					usermap.put("role", null);
 
-			}
-			if (u.getUserWallets() != null && !u.getUserWallets().isEmpty()) {
-				usermap.put("wallet", u.getUserWallets().get(0).getWallet());
-			} else {
-				usermap.put("wallet", "null");
-			}
-			return usermap;
+				}
+				if (u.getUserWallets() != null && !u.getUserWallets().isEmpty()) {
+					usermap.put("wallet", u.getUserWallets().get(0).getWallet());
+				} else {
+					usermap.put("wallet", "null");
+				}
+				return usermap;
 			}).collect(Collectors.toList());
-		map.put("success", "true");
-		map.put("totalRows", Double.valueOf(user.getTotalElements()));
-		map.put("pageSize", user.getSize());
-		map.put("currentPage", user.getNumber());
-		map.put("hasMore",user.hasNext() ? true : false);
-		map.put("nextPage", user.hasNext() ? user.nextPageable().getPageNumber() : null);
-		map.put("hasNextPage", user.hasNext());
-		map.put("hasPreviousPage", user.hasPrevious());		
-		map.put("message","Request successful");
-		map.put("users",res);
-		resObject.put("payload",map);
-		return ResponseEntity.status(HttpStatus.OK).body(resObject);
+			map.put("success", "true");
+			map.put("totalRows", Double.valueOf(user.getTotalElements()));
+			map.put("pageSize", user.getSize());
+			map.put("currentPage", user.getNumber());
+			map.put("hasMore", user.hasNext() ? true : false);
+			map.put("nextPage", user.hasNext() ? user.nextPageable().getPageNumber() : null);
+			map.put("hasNextPage", user.hasNext());
+			map.put("hasPreviousPage", user.hasPrevious());
+			map.put("message", "Request successful");
+			map.put("users", res);
+			resObject.put("payload", map);
+			return ResponseEntity.status(HttpStatus.OK).body(resObject);
 
-		}else {
-			Map<String,Object> map = new HashMap<>();
+		} else {
+			Map<String, Object> map = new HashMap<>();
 			map.put("success", false);
-			map.put("message","User not found");
+			map.put("message", "User not found");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 
-		}	
 		}
-	
-
-
+	}
 
 	public Object getCorporateUsers() {
 		Map<String, Object> resObject = new HashMap<String, Object>();
@@ -727,25 +727,6 @@ public class UserService extends RestClientService implements UserDetailsService
 		// TODO Auto-generated method stub
 
 	}
-//	public Object userRegister(@Valid UserSignUp userSignUp) throws UserInputException {
-//		Optional<User> userPhone = this.userRepository.findByMobile(userSignUp.getPhoneNumber());
-//		Optional<User> userEmail = this.userRepository.findByEmail(userSignUp.getEmail());
-//
-//		if (userPhone.isPresent()) {
-//			throw new UserInputException(HttpStatus.CONFLICT, "Phone already registered");
-//
-//		}
-//		if (userEmail.isPresent()) {
-//			throw new UserInputException(HttpStatus.CONFLICT, "Email already registered");
-//		}
-//
-//		User user = User.builder().firstName(userSignUp.getFirstName()).lastName(userSignUp.getLastName())
-//				.mobile(userSignUp.getPhoneNumber()).email(userSignUp.getEmail()).countryCode("+254")
-//				.password(new BCryptPasswordEncoder().encode(userSignUp.getPassword())).build();
-//		return this.userRepository.save(user);
-//		// TODO Auto-generated method stub
-//
-//	}
 
 	public ResponseEntity createRefreshToken() {
 		log.warn("principal " + SecurityContextHolder.getContext().getAuthentication().getPrincipal());

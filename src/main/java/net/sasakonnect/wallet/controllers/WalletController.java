@@ -237,19 +237,29 @@ public class WalletController {
 	public ResponseEntity<Object> getTransactionsSummary() {
 		return this.transactionService.getWalletTransactionBreakdown();
 	}
-	
+
 	@GetMapping("spending")
 	public ResponseEntity<Object> getTransactionBehaviour() {
 		return this.transactionService.getWalletTransactionBehaviour();
 	}
 
-	@GetMapping("account/statement")
+//
+//	@GetMapping("account/statement")
+//	@Operation(summary = "Get account statement", description = "Get account statement between start and end dates")
+//	@Deprecated
+//	public Object getAccountStatement(
+//			@Parameter(description = "Start date (YYYY-MM-DD)", example = "2024-02-01") @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+//			@Parameter(description = "End date (YYYY-MM-DD)", example = "2024-02-29") @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+//		// Your implementation to get the account statement
+//		return this.walletService.getAccountStatement(startDate, endDate);
+//	}
+	@PostMapping("account/statement")
 	@Operation(summary = "Get account statement", description = "Get account statement between start and end dates")
+
 	public Object getAccountStatement(
 			@Parameter(description = "Start date (YYYY-MM-DD)", example = "2024-02-01") @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
 			@Parameter(description = "End date (YYYY-MM-DD)", example = "2024-02-29") @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-		// Your implementation to get the account statement
-		return this.walletService.getAccountStatement(startDate, endDate);
+		return walletService.getUserStatement(startDate, endDate);
 	}
 
 }

@@ -5,11 +5,15 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import lombok.Data;
+import lombok.ToString;
 import net.sasakonnect.wallet.domain.WalletClient;
 
 @Data
 @Component
 @Scope(value = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)
+@ToString
+
 public class ClientAppsBean {
 	WalletClient walletClient;
+
 }
