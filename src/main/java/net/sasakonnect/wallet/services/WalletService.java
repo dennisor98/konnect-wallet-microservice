@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -49,7 +50,6 @@ import net.sasakonnect.wallet.RequestDto.TransferToMpesa;
 import net.sasakonnect.wallet.RequestDto.UpgradeWalletAccountDto;
 import net.sasakonnect.wallet.RequestDto.WalletTransferDto;
 import net.sasakonnect.wallet.RequestDto.admin.CheckUserAccount;
-import net.sasakonnect.wallet.ResponseDto.AccountStatementDTO;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
 import net.sasakonnect.wallet.domain.User;
@@ -62,6 +62,7 @@ import net.sasakonnect.wallet.enums.NotificationBody;
 import net.sasakonnect.wallet.enums.NotificationType;
 import net.sasakonnect.wallet.enums.TransactionStatus;
 import net.sasakonnect.wallet.enums.WalletTransactionType;
+import net.sasakonnect.wallet.events.StatementGenerationEvent;
 import net.sasakonnect.wallet.events.TransactionEvent;
 import net.sasakonnect.wallet.notification.AccountStatementReportNotification;
 import net.sasakonnect.wallet.notification.NotificationResult;
@@ -85,7 +86,7 @@ public class WalletService {
 	UserService userService;
 	@Autowired
 	ChatService chatService;
-	
+
 	@Autowired
 	AccountStatementService accountStatementService;
 
@@ -107,6 +108,8 @@ public class WalletService {
 	private String emailStatement;
 	@Autowired
 	UserJobRepository userJobRepository;
+	@Autowired
+	private ApplicationContext applicationContext;
 
 	public Object getWalletInfo() {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -526,7 +529,7 @@ public class WalletService {
 				}
 
 			} else if (notification_Type == NotificationType.ACCOUNT_STATEMENT.getCode()) {
-                  
+
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.TRANSACTION.getCode())) {
 
 				log.info("payload {}", body.toString());
@@ -598,7 +601,9 @@ public class WalletService {
 				NotificationResult<AccountStatementReportNotification> results = new Gson().fromJson(body.toString(),
 						new TypeToken<NotificationResult<AccountStatementReportNotification>>() {
 						}.getType());
-				 this.accountStatementService.readFileAndGeneratePDF(results.getParams().getJobId(),results.getParams().getStatementUrl());
+				this.accountStatementService.readFileAndGeneratePDF(results.getParams().getJobId(),
+						results.getParams().getStatementUrl(),
+						applicationContext.getBean(StatementGenerationEvent.class));
 
 				/// this.userJobRepository.updateByJobId()
 

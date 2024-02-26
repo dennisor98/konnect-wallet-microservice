@@ -23,7 +23,7 @@ public class UserJob extends BaseWalletDomain implements Serializable {
 	@JoinColumn(name = "user_id") // Name of the foreign key column in UserJob table
 	private User user;
 
-	@Column(nullable = true) // Example of a nullable field
+	@Column(nullable = true, length = 2048) // Increased length for downloadLink field
 	private String downloadLink;
 	@Column() // Example of a nullable field
 	private Boolean isComplete;
