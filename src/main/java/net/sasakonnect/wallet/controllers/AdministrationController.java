@@ -399,7 +399,7 @@ public class AdministrationController {
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION)
 	public void getWalletStatement(@RequestParam(name = "mobileNumber", required = true) String mobileNumber,@RequestParam(name = "filePath", required = true) String filePath)  {
-		this.accountStatementService.readFileAndGeneratePDF(filePath);
+//		this.accountStatementService.readFileAndGeneratePDF(filePath);
 	
 	}
 	
