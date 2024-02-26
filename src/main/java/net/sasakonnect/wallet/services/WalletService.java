@@ -49,6 +49,7 @@ import net.sasakonnect.wallet.RequestDto.TransferToMpesa;
 import net.sasakonnect.wallet.RequestDto.UpgradeWalletAccountDto;
 import net.sasakonnect.wallet.RequestDto.WalletTransferDto;
 import net.sasakonnect.wallet.RequestDto.admin.CheckUserAccount;
+import net.sasakonnect.wallet.ResponseDto.AccountStatementDTO;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
 import net.sasakonnect.wallet.domain.User;
@@ -81,6 +82,9 @@ public class WalletService {
 	UserService userService;
 	@Autowired
 	ChatService chatService;
+	
+	@Autowired
+	AccountStatementService accountStatementService;
 
 	@Autowired
 	LarkService larkService;
@@ -517,7 +521,7 @@ public class WalletService {
 				}
 
 			} else if (notification_Type == NotificationType.ACCOUNT_STATEMENT.getCode()) {
-
+                  
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.TRANSACTION.getCode())) {
 
 				log.info("payload {}", body.toString());
@@ -586,6 +590,10 @@ public class WalletService {
 			} else if (notification_Type == NotificationType.BULK_PAYMENT.getCode()) {
 
 			} else if (notification_Type == NotificationType.ACCOUNT_STATEMENT.getCode()) {
+				NotificationResult<AccountStatementDTO> results = new Gson().fromJson(body.toString(),
+						new TypeToken<NotificationResult<TransactionResultNotification>>() {
+						}.getType());
+				 this.accountStatementService.readFileAndGeneratePDF(results.getParams().getJobId(),results.getParams().getStatementUrl());
 				
 	         }else if (notification_Type == NotificationType.FOREIGN_CURRENCY_DEPOSIT.getCode()) {
 

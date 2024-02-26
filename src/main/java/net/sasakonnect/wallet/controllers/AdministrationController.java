@@ -398,8 +398,8 @@ public class AdministrationController {
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION)
-	public void getWalletStatement(@RequestParam(name = "mobileNumber", required = true) String mobileNumber,@RequestParam(name = "filePath", required = true) String filePath) throws Exception {
-		this.accountStatementService.readFileAndGeneratePDF(filePath, mobileNumber);
+	public void getWalletStatement(@RequestParam(name = "mobileNumber", required = true) String mobileNumber,@RequestParam(name = "filePath", required = true) String filePath)  {
+		this.accountStatementService.readFileAndGeneratePDF(filePath);
 	
 	}
 	
