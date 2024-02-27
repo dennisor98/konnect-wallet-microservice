@@ -400,11 +400,12 @@ public class WalletService {
 					.employmentStatus(easyOnboarding.getEmploymentStatusType()).idNumber(easyOnboarding.getIdNumber())
 					.build();
 
-			final User savedUser = this.userService.createUser(user);
+			User su = this.userService.createUser(user);
+			var savedUser = this.userService.findUserAndWallets(su).get();
 			savedUser.setPins(null);
 			savedUser.setFirebaseTokens(null);
 			savedUser.setUserDevices(null);
-			savedUser.setUserWallets(null);
+			// savedUser.setUserWallets(null);
 			savedUser.setUserPins(null);
 			savedUser.setUserRole(null);
 			savedUser.setNotifications(null);
@@ -446,11 +447,13 @@ public class WalletService {
 			}
 
 		} catch (DataIntegrityViolationException e) {
+			e.printStackTrace();
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("message", "Account already exist");
 			map.put("success", false);
 			return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
 		} catch (Exception e) {
+			e.printStackTrace();
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("message", e.getMessage());
 			map.put("success", false);

@@ -27,9 +27,18 @@ public class UserJob extends BaseWalletDomain implements Serializable {
 	private String downloadLink;
 	@Column() // Example of a nullable field
 	private Boolean isComplete;
+	@Column() // Example of a nullable field
+	private Boolean isRead;
+	@Column() // Example of a nullable field
+	private Boolean isAdmin;
+	@ManyToOne
+	@JoinColumn(name = "requester_user_id", nullable = true) // Name of the foreign key column in UserJob table
+	private User jobOwner;
 
 	public UserJob() {
 		this.isComplete = false; // Set default value
+		this.isRead = false;
+		this.isAdmin = false;
 	}
 
 }
