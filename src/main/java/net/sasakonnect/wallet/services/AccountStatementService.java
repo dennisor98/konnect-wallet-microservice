@@ -45,7 +45,7 @@ public class AccountStatementService {
 					try (InputStream inputStream = Files.newInputStream(csvFile.toPath());
 							CSVReader csvReader = new CSVReader(new java.io.InputStreamReader(inputStream))) {
 
-						try (PdfDocument pdfDocument = new PdfDocument(new PdfWriter(statementPath.toString()+jobId.toString()+".pdf"))) {
+						try (PdfDocument pdfDocument = new PdfDocument(new PdfWriter(statementPath+jobId+".pdf"))) {
 							Document document = new Document(pdfDocument, PageSize.A4.rotate());
 							document.setMargins(20, 100, 20, 100);
 							document.add(new Paragraph("\n\n\n"));
