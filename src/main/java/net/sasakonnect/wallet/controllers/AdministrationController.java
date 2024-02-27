@@ -1,11 +1,9 @@
 package net.sasakonnect.wallet.controllers;
 
-import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.security.auth.login.AccountNotFoundException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -109,9 +107,8 @@ public class AdministrationController {
 	@RequirePermission(GlobalPermissionConstants.CreateWalletClient.PERMISSION)
 	public Object attachPaymentAccount(@Valid @RequestBody() WalletClientAccountDto walletClientAccount) {
 		return this.walletClientService.createWalletClientAccount(walletClientAccount);
-	}public ResponseEntity<Object> searchUserByFirstName(String userNa){
-		return null;
 	}
+
 
 	@PostMapping("/check/account/status")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION + "')")
