@@ -1307,5 +1307,59 @@ public class WalletService {
 		map.put("success", false);
 		return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body(map);
 	}
+	
+	//Overloaded method
+	//get account statement for admin based on accountId
+	public Object getUserStatement(String accountId,LocalDate startDate, LocalDate endDate) {
+		Optional<User> user = this.userService.findUserByWalletAccountId(accountId);
+		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		if(!user.isEmpty()) {
+			var wallets = this.walletRepository.findByAccountId(accountId);
+			if (!wallets.isEmpty()) {
+				var currentWallet = wallets.get();
+
+				var reqId = new HashMap<String, Object>();
+				reqId.put("accountId", currentWallet.getAccountId());
+				reqId.put("startTime", startDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli());
+
+				reqId.put("endTime", endDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli());
+
+				var reqs = requestSigner.signRequest(reqId);
+
+				Mono<String> responseMono = this.bankClientBean.webClient.post()
+						.uri(ChoiceEndpointsConstants.REQUEST_BANK_STATEMENT_CSV).contentType(MediaType.APPLICATION_JSON)
+						.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+						.bodyToMono(String.class);
+
+				String responseJson = responseMono.block();
+
+				if (responseJson != null) {
+					var jsonObject = new Gson().fromJson(responseJson, JsonObject.class);
+					System.out.println(responseJson);
+					String jobId = jsonObject.getAsJsonObject("data").get("jobId").getAsString();
+
+					var job = UserJob.builder()
+							.user(user.get())
+							.jobId(jobId)
+							.user(null)
+							.build();
+					this.userJobRepository.save(job);
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("message", "Please wait as we process your statement");
+					map.put("success", true);
+					return ResponseEntity.status(HttpStatus.OK).body(map);
+
+				}
+			}
+			// TODO Auto-generated method stub
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("message", "Unable to request statement at this time");
+			map.put("success", false);
+			return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body(map);
+		}else {
+			return null;
+		}
+	}
 
 }
