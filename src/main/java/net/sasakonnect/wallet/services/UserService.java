@@ -424,14 +424,24 @@ public class UserService extends RestClientService implements UserDetailsService
 			}
 			var u = opt.get().getUser();
 			this.smsService.deleteOtp(opt.get());
+
 			if (u != null) {
+				u = this.userRepository.findUserWithUserWalletsById(u.getId()).get();
+
 				System.out.println(u.getCreatedAt());
-				var response = UserResponseDTO.builder().token(jwtService.generateToken(u))
-						.refreshToken(jwtService.generateRefreshToken(u)).middleName(u.getMiddleName())
-						.gender(u.getGender().name()).idType(u.getIdType().name()).idNumber(u.getIdNumber())
-						.onboardingRequestId(u.getOnboardingRequestId()).open_id(u.getOpenId())
-						.birthday(formatter.format(u.getBirthday().toInstant())).updatedAt(u.getUpdatedAt())
-						.kraPin(u.getKraPin()).employmentStatus(u.getEmploymentStatus().name())
+				var response = UserResponseDTO.builder().wallets(u.getUserWallets().stream().map((uw) -> {
+					var wallets = uw.getWallet();
+					wallets.setUserWallets(null);
+					return wallets;
+				}).collect(Collectors.toList()))
+
+						.token(jwtService.generateToken(u)).refreshToken(jwtService.generateRefreshToken(u))
+						.middleName(u.getMiddleName()).gender(u.getGender().name()).idType(u.getIdType().name())
+						.idNumber(u.getIdNumber()).onboardingRequestId(u.getOnboardingRequestId())
+						.open_id(u.getOpenId()).birthday(formatter.format(u.getBirthday().toInstant()))
+						.updatedAt(u.getUpdatedAt()).kraPin(u.getKraPin())
+						.employmentStatus(u.getEmploymentStatus().name())
+
 						.monthlyIncome(u.getMonthlyIncome().toString()).createdAt(u.getCreatedAt()).id(u.getId())
 						.address(u.getAddress()).firstName(u.getFirstName()).lastName(u.getLastName())
 						.mobile(u.getMobile()).countryCode(u.getCountryCode()).build();

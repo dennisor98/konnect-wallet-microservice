@@ -1,9 +1,11 @@
 package net.sasakonnect.wallet.ResponseDto;
 
 import java.util.Date;
+import java.util.List;
 
 import lombok.Builder;
 import lombok.Data;
+import net.sasakonnect.wallet.domain.Wallet;
 
 @Data
 @Builder
@@ -29,5 +31,6 @@ public class UserResponseDTO {
 	private String refreshToken;
 	private String token;
 	private String open_id;
+	private List<Wallet> wallets;
 
 }
