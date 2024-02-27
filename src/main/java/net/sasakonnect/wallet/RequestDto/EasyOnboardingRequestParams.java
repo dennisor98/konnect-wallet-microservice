@@ -46,7 +46,7 @@ public class EasyOnboardingRequestParams {
 	@NotBlank
 	String idType;
 
-	@NotBlank
+	@Nullable()
 	String monthlyIncome;
 
 	@NotBlank
