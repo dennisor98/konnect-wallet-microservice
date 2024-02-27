@@ -1,6 +1,7 @@
 package net.sasakonnect.wallet.controllers;
 
 import java.security.GeneralSecurityException;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import net.sasakonnect.wallet.RequestDto.Corporate;
@@ -415,5 +418,15 @@ public class AdministrationController {
 	return	this.transactionService.searchTransaction(queryString,pageNumber,pageSize);
 	
 	}
+	
+	@PostMapping("account/statement")
+	@Operation(summary = "Get account statement", description = "Get account statement between start and end dates")
+	public Object getAccountStatement(
+			@RequestParam(name="accountId",required=true) String accountId,
+			@Parameter(description = "Start date (YYYY-MM-DD)", example = "2024-02-01") @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+			@Parameter(description = "End date (YYYY-MM-DD)", example = "2024-02-29") @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+		return walletService.getUserStatement(accountId,startDate, endDate);
+	}
+
 
 }

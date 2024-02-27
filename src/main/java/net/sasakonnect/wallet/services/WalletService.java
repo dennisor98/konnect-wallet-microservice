@@ -1345,7 +1345,7 @@ public class WalletService {
 					var job = UserJob.builder()
 							.user(user.get())
 							.jobId(jobId)
-							.user(null)
+							.jobOwner(loggedInUser)
 							.build();
 					this.userJobRepository.save(job);
 					Map<String, Object> map = new HashMap<String, Object>();
