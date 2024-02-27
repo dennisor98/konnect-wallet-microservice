@@ -54,6 +54,8 @@ dependencies {
     implementation 'org.apache.poi:poi-ooxml:5.2.3'	
 	implementation 'org.apache.pdfbox:pdfbox:2.0.24'
 	implementation 'com.itextpdf:itext7-core:7.1.16'
+	implementation 'com.opencsv:opencsv:5.5.1'
+	
 	
 	
 }

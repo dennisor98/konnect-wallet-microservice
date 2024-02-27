@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -61,6 +62,7 @@ import net.sasakonnect.wallet.enums.NotificationBody;
 import net.sasakonnect.wallet.enums.NotificationType;
 import net.sasakonnect.wallet.enums.TransactionStatus;
 import net.sasakonnect.wallet.enums.WalletTransactionType;
+import net.sasakonnect.wallet.events.StatementGenerationEvent;
 import net.sasakonnect.wallet.events.TransactionEvent;
 import net.sasakonnect.wallet.notification.AccountStatementReportNotification;
 import net.sasakonnect.wallet.notification.NotificationResult;
@@ -86,6 +88,9 @@ public class WalletService {
 	ChatService chatService;
 
 	@Autowired
+	AccountStatementService accountStatementService;
+
+	@Autowired
 	LarkService larkService;
 
 	@Autowired
@@ -103,6 +108,8 @@ public class WalletService {
 	private String emailStatement;
 	@Autowired
 	UserJobRepository userJobRepository;
+	@Autowired
+	private ApplicationContext applicationContext;
 
 	public Object getWalletInfo() {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -598,6 +605,9 @@ public class WalletService {
 				NotificationResult<AccountStatementReportNotification> results = new Gson().fromJson(body.toString(),
 						new TypeToken<NotificationResult<AccountStatementReportNotification>>() {
 						}.getType());
+				this.accountStatementService.readFileAndGeneratePDF(results.getParams().getJobId(),
+						results.getParams().getStatementUrl(),
+						applicationContext.getBean(StatementGenerationEvent.class));
 
 				/// this.userJobRepository.updateByJobId()
 

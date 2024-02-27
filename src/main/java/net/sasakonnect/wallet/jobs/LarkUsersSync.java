@@ -112,7 +112,6 @@ public class LarkUsersSync {
         LarkDTO departments = responseEntity.getBody();
         if (null != departments.getData().getItems()) {
             departments.getData().getItems().forEach(item -> {
-          	   System.out.println("data"+item);
 //                this.getDepartmentSubDepartments(item.getOpen_department_id());
 
                 try {
@@ -126,7 +125,7 @@ public class LarkUsersSync {
 	
 	
 	@Transactional
-@Scheduled(fixedDelay = 604800000)	
+//@Scheduled(fixedDelay = 604800000)	
 public Object getLarkDepartments() {
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
@@ -270,7 +269,7 @@ public Object getLarkDepartments() {
 	        }
 	  }
 	
-	  @Scheduled(fixedDelay = 604800000)	
+//	  @Scheduled(fixedDelay = 604800000)	
 	  public void syncLarkDeptUsers() {
 	   var depIds =   this.getDepartmentIds().stream().map(depId -> {
 			return depId;
