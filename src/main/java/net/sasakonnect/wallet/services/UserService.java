@@ -507,6 +507,12 @@ public class UserService extends RestClientService implements UserDetailsService
 
 	}
 
+	public Optional<User> findUserAndWallets(User user) {
+		return this.userRepository.findUserWithWalletsById(user.getId());
+		// TODO Auto-generated method stub
+
+	}
+
 	public Optional<User> findUserWallet(String id) {
 		return this.userRepository.findUserWithUserWalletsById(id);
 		// TODO Auto-generated method stub
