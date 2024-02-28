@@ -420,6 +420,9 @@ public class AdministrationController {
 	}
 	
 	@PostMapping("account/statement")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanRequestAccountStatement.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.CanRequestAccountStatement.PERMISSION)
 	@Operation(summary = "Get account statement", description = "Get account statement between start and end dates")
 	public Object getAccountStatement(
 			@RequestParam(name="accountId",required=true) String accountId,
@@ -427,6 +430,17 @@ public class AdministrationController {
 			@Parameter(description = "End date (YYYY-MM-DD)", example = "2024-02-29") @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
 		return walletService.getUserStatement(accountId,startDate, endDate);
 	}
+	
+	@GetMapping("account/statement")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanRequestAccountStatement.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.CanRequestAccountStatement.PERMISSION)
+	public ResponseEntity<Object> getAccountstatement(
+			@RequestParam(name="accountId",required=true) String accountId
+			){
+		return this.walletService.getAdminUserStatementByAccountId(accountId);
+	}
+	
 
 
 }

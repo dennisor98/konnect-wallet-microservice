@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
@@ -19,7 +20,7 @@ public class UserJob extends BaseWalletDomain implements Serializable {
 
 	@Column(nullable = true)
 	private String jobId;
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id") // Name of the foreign key column in UserJob table
 	private User user;
 
@@ -31,7 +32,7 @@ public class UserJob extends BaseWalletDomain implements Serializable {
 	private Boolean isRead;
 	@Column() // Example of a nullable field
 	private Boolean isAdmin;
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "requester_user_id", nullable = true) // Name of the foreign key column in UserJob table
 	private User jobOwner;
 

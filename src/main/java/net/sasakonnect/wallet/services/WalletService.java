@@ -1369,5 +1369,20 @@ public class WalletService {
 			return null;
 		}
 	}
+	
+	public ResponseEntity<Object> getAdminUserStatementByAccountId(String accountId){
+		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		List<UserJob> statements = this.userJobRepository.findAdminStatementsByAccountid(loggedInUser);
+		Map<String,Object> map = new HashMap<>();
+		map.put("success",true);
+		map.put("message", "Request complete");
+		if(!statements.isEmpty()) {
+			var st = statements.stream().map(s-> s).collect(Collectors.toList());
+			map.put("statements",st);
+		}else {
+			map.put("statements", new ArrayList<>());
+		}
+		return ResponseEntity.status(HttpStatus.OK).body(map);
+	}
 
 }
