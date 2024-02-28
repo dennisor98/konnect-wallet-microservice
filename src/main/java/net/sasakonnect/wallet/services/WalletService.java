@@ -1370,9 +1370,9 @@ public class WalletService {
 		}
 	}
 	
-	public ResponseEntity<Object> getAdminUserStatementByAccountId(String accountId){
+	public ResponseEntity<Object> getUserRequestedstatements(){
 		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		List<UserJob> statements = this.userJobRepository.findAdminStatementsByAccountid(loggedInUser);
+		List<UserJob> statements = this.userJobRepository.findUserRequestedStatements(loggedInUser);
 		Map<String,Object> map = new HashMap<>();
 		map.put("success",true);
 		map.put("message", "Request complete");
@@ -1383,6 +1383,34 @@ public class WalletService {
 			map.put("statements", new ArrayList<>());
 		}
 		return ResponseEntity.status(HttpStatus.OK).body(map);
+	}
+	
+	
+	//overload
+	
+	public ResponseEntity<Object> getUserRequestedstatements(String userId){
+		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		Optional<User> user = this.userService.getUserById(userId);
+		if(user.isPresent()) {
+		    List<UserJob> statements = this.userJobRepository.findAdminStatementsByUser(loggedInUser,user.get());
+		    Map<String,Object> map = new HashMap<>();
+		    map.put("success",true);
+		    map.put("message", "Request complete");
+		    if(!statements.isEmpty()) {
+			   var st = statements.stream().map(s-> s).collect(Collectors.toList());
+			   map.put("statements",st);
+		    }else {
+			   map.put("statements", new ArrayList<>());
+		    }
+		    return ResponseEntity.status(HttpStatus.OK).body(map);
+		}else {
+			 Map<String,Object> map = new HashMap<>();
+			 map.put("success", false);
+			 map.put("message", "Uknown user");
+			 
+			 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		
 	}
 
 }

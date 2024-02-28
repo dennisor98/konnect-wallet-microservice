@@ -23,7 +23,11 @@ public interface UserJobRepository extends JpaRepository<UserJob, String> {
 			@Param("downloadLink") String downloadLink);
 	
 	
-	@Query("SELECT u FROM UserJob u WHERE u.jobOwner =:user ")
-	List<UserJob> findAdminStatementsByAccountid(@Param("user") User user);
+	@Query("SELECT u FROM UserJob u WHERE u.jobOwner =:owner AND u.user =:user")
+	List<UserJob> findAdminStatementsByUser(@Param("owner") User owner,@Param("user") User user);
+	
+	
+	@Query("SELECT u FROM UserJob u WHERE u.user =:user")
+	List<UserJob> findUserRequestedStatements(@Param("user") User user);
 
 }

@@ -435,10 +435,10 @@ public class AdministrationController {
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanRequestAccountStatement.PERMISSION
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.CanRequestAccountStatement.PERMISSION)
-	public ResponseEntity<Object> getAccountstatement(
-			@RequestParam(name="accountId",required=true) String accountId
+	public ResponseEntity<Object> getUserAccounttatements(
+			@RequestParam(name="userId",required=true) String userId
 			){
-		return this.walletService.getAdminUserStatementByAccountId(accountId);
+		return this.walletService.getUserRequestedstatements(userId);
 	}
 	
 
