@@ -1377,7 +1377,14 @@ public class WalletService {
 		map.put("success",true);
 		map.put("message", "Request complete");
 		if(!statements.isEmpty()) {
-			var st = statements.stream().map(s-> s).collect(Collectors.toList());
+			var st = statements.stream().map(s->{
+				   Map<String,Object> sMap = new HashMap<>();
+				   sMap.put("userId",s.getUser().getId());
+				   sMap.put("jobId", s.getJobId());
+				   sMap.put("owner",s.getJobOwner().getId());
+				   sMap.put("downloadLink",s.getDownloadLink());
+				   return sMap;
+			   }).collect(Collectors.toList());
 			map.put("statements",st);
 		}else {
 			map.put("statements", new ArrayList<>());
@@ -1397,7 +1404,14 @@ public class WalletService {
 		    map.put("success",true);
 		    map.put("message", "Request complete");
 		    if(!statements.isEmpty()) {
-			   var st = statements.stream().map(s-> s).collect(Collectors.toList());
+			   var st = statements.stream().map(s->{
+				   Map<String,Object> sMap = new HashMap<>();
+				   sMap.put("userId",s.getUser().getId());
+				   sMap.put("jobId", s.getJobId());
+				   sMap.put("owner",s.getJobOwner().getId());
+				   sMap.put("downloadLink",s.getDownloadLink());
+				   return sMap;
+			   }).collect(Collectors.toList());
 			   map.put("statements",st);
 		    }else {
 			   map.put("statements", new ArrayList<>());
