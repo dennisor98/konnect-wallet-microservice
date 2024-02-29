@@ -1406,6 +1406,7 @@ public class WalletService {
 		    if(!statements.isEmpty()) {
 			   var st = statements.stream().map(s->{
 				   Map<String,Object> sMap = new HashMap<>();
+				   sMap.put("createdAt",s.getCreatedAt());
 				   sMap.put("userId",s.getUser().getId());
 				   sMap.put("jobId", s.getJobId());
 				   sMap.put("owner",s.getJobOwner().getId());
