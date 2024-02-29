@@ -26,7 +26,7 @@ import com.opencsv.CSVReader;
 import net.sasakonnect.wallet.interfaces.PDFGenerationCallback;
 
 @Service
-public class AccountStatementService {
+public class AccountStatementService  {
 	@Value("${file.statementPath}")
 	private String statementPath;
 
@@ -59,12 +59,12 @@ public class AccountStatementService {
 							Document document = new Document(pdfDocument, PageSize.A4.rotate());
 							
 							document.setMargins(20, 100, 20, 100);
-							 for (int i = 1; i <= pdfDocument.getNumberOfPages(); i++) {
-								    String bgImageFile = "/src/main/resources/static/images/receipt_1.png"; 
-									ImageData bgImage = ImageDataFactory.create(bgImageFile);
-	                                PdfCanvas canvas = new PdfCanvas(pdfDocument.getPage(i));
-	                                canvas.addImage(bgImage, PageSize.A4.getWidth(), 0, 0, PageSize.A4.getHeight(), 0, 0);
-	                            }
+							String watermarkImagePath = "/src/main/resources/static/images/watermark.png";
+                            ImageData watermarkImageData = ImageDataFactory.create(watermarkImagePath);
+                            float imageWidth = watermarkImageData.getWidth();
+                            float imageHeight = watermarkImageData.getHeight();
+                            PdfCanvas pdfCanvas = new PdfCanvas(pdfDocument.addNewPage());
+                            pdfCanvas.addImage(watermarkImageData, 0, 0, PageSize.A4.getWidth(), PageSize.A4.getHeight(), imageHeight, imageHeight, true);
 							document.add(new Paragraph("\n\n\n"));
 
 							Table table = new Table(expectedHeaders.length);
@@ -80,7 +80,6 @@ public class AccountStatementService {
 												.setBackgroundColor(new DeviceRgb(211, 211, 211)); // Light
 																									// gray
 																									// color
-
 									}
 									table.addCell(new Cell().add(paragraph));
 								}
