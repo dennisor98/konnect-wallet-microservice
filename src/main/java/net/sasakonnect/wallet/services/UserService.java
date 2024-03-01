@@ -80,7 +80,7 @@ public class UserService extends RestClientService implements UserDetailsService
 	private WalletAccountUpgradeRepository walletAccountUpgradeRepository;
 
 	@Autowired
-	private SmsService smsService;
+	private OtpSmsService otpsmsService;
 	@Autowired
 	private PermissionRepository permissionRepository;
 	@Autowired
@@ -312,7 +312,7 @@ public class UserService extends RestClientService implements UserDetailsService
 
 		} else {
 
-			return this.smsService.sendSms(userLogin, null, user);
+			return this.otpsmsService.sendSms(userLogin, null, user);
 
 		}
 
@@ -413,7 +413,7 @@ public class UserService extends RestClientService implements UserDetailsService
 
 	@Transactional
 	public ResponseEntity<Object> verifyOtp(@Valid ConfirmOtp confirmOtp) {
-		var opt = this.smsService.verifyOtp(confirmOtp);
+		var opt = this.otpsmsService.verifyOtp(confirmOtp);
 
 		if (opt.isPresent()) {
 
@@ -423,7 +423,7 @@ public class UserService extends RestClientService implements UserDetailsService
 				return ResponseEntity.badRequest().body(json);
 			}
 			var u = opt.get().getUser();
-			this.smsService.deleteOtp(opt.get());
+			this.otpsmsService.deleteOtp(opt.get());
 
 			if (u != null) {
 				u = this.userRepository.findUserWithUserWalletsById(u.getId()).get();
