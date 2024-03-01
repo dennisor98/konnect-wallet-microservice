@@ -110,6 +110,11 @@ public class WalletService {
 	UserJobRepository userJobRepository;
 	@Autowired
 	private ApplicationContext applicationContext;
+	
+	@Autowired
+	TransactionEventService  transactionEventService;
+
+
 
 	public Object getWalletInfo() {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -716,6 +721,7 @@ public class WalletService {
 			String responseJson = responseMono.block();
 
 			if (responseJson != null) {
+				transactionEventService.notifyNewCustomer(userwallet.getAccountId(), mpesa.getReceiverMobileNumber());
 				return new Gson().fromJson(responseJson, Object.class);
 
 			}

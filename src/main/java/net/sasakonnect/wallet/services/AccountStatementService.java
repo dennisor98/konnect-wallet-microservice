@@ -33,7 +33,6 @@ public class AccountStatementService  {
 	public void readFileAndGeneratePDF(String jobId, String filePath, PDFGenerationCallback callBack) {
 		Thread thread = new Thread(new Runnable() {
 
-			@SuppressWarnings("deprecation")
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
@@ -51,7 +50,7 @@ public class AccountStatementService  {
 						try (PdfDocument pdfDocument = new PdfDocument(new PdfWriter(statementPath+jobId+".pdf"))) {
 							
 							
-							String topImageFile = "/src/main/resources/static/images/receipt_2.png"; 
+							String topImageFile = "src/main/resources/static/images/receipt_2.png"; 
 							ImageData topImage = ImageDataFactory.create(topImageFile);
 							
 							String bImageFile = "/src/main/resources/static/images/receipt_2.png"; 
@@ -59,12 +58,12 @@ public class AccountStatementService  {
 							Document document = new Document(pdfDocument, PageSize.A4.rotate());
 							
 							document.setMargins(20, 100, 20, 100);
-							String watermarkImagePath = "/src/main/resources/static/images/watermark.png";
+							String watermarkImagePath = "src/main/resources/static/images/receipt_1.png";
                             ImageData watermarkImageData = ImageDataFactory.create(watermarkImagePath);
-                            float imageWidth = watermarkImageData.getWidth();
-                            float imageHeight = watermarkImageData.getHeight();
-                            PdfCanvas pdfCanvas = new PdfCanvas(pdfDocument.addNewPage());
-                            pdfCanvas.addImage(watermarkImageData, 0, 0, PageSize.A4.getWidth(), PageSize.A4.getHeight(), imageHeight, imageHeight, true);
+//                            float imageWidth = watermarkImageData.getWidth();
+//                            float imageHeight = watermarkImageData.getHeight();
+//                            PdfCanvas pdfCanvas = new PdfCanvas(pdfDocument.addNewPage());
+//                            pdfCanvas.addImage(watermarkImageData, 0, 0, PageSize.A4.getWidth(), PageSize.A4.getHeight(), imageHeight, imageHeight, true);
 							document.add(new Paragraph("\n\n\n"));
 
 							Table table = new Table(expectedHeaders.length);
@@ -86,6 +85,7 @@ public class AccountStatementService  {
 								isFirstRow = false;
 							}
 							document.add(table);
+							
 
 						} catch (IOException ex) {
 							ex.printStackTrace();

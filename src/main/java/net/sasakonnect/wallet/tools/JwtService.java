@@ -149,7 +149,7 @@ public class JwtService {
 
 				Claims claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
 				if (claims.get("token_type") == jwt.getToken()) {
-					throw new UnsupportedJwtException("jwt supplied is not suppored ");
+					throw new UnsupportedJwtException("jwt supplied is not supported ");
 				}
 				return claims.getSubject();
 
@@ -158,6 +158,7 @@ public class JwtService {
 			}
 
 		} catch (MalformedJwtException e) {
+			System.out.println("exception");
 			throw e;
 		}
 

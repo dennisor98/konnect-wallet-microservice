@@ -22,6 +22,7 @@ public class TransactionEvent implements BaseEvent {
 	Transaction transaction;
 	@Autowired
 	UserService userService;
+	
 
 	public TransactionEvent(UserService userService) {
 		this.userService = userService;
@@ -42,4 +43,6 @@ public class TransactionEvent implements BaseEvent {
 		return Optional.absent();
 
 	}
+	
+
 }
