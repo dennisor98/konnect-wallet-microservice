@@ -557,6 +557,9 @@ public class WalletService {
 
 						this.publisher.publishEvent(TransactionEvent.builder().userService(userService)
 								.transaction(createdTransaction).build());
+					if(createdTransaction.getTxType().equalsIgnoreCase(WalletTransactionType.TTID0001.toString())) {
+						this.transactionEventService.notifyNewCustomer(createdTransaction.getAccountId(),createdTransaction.getOppoAccountId());
+					}
 					}
 				}
 				log.info("transacttion {}", results);
@@ -719,8 +722,6 @@ public class WalletService {
 					.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 
 			String responseJson = responseMono.block();
-			transactionEventService.notifyNewCustomer(userwallet.getAccountId(), mpesa.getReceiverMobileNumber());
-
 			if (responseJson != null) {
 				return new Gson().fromJson(responseJson, Object.class);
 
