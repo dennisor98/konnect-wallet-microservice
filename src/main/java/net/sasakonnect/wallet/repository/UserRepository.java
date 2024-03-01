@@ -3,8 +3,8 @@ package net.sasakonnect.wallet.repository;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -25,17 +25,19 @@ public interface UserRepository extends JpaRepository<User, String> {
 
 	@Query("SELECT u FROM User u WHERE u.corporate = :corporateId")
 	Optional<User> getUserByCorporateId(@Param("corporateId") CorporateDetails corporateId);
-	
+
 	@Query("SELECT u FROM User u LEFT JOIN FETCH u.userWallets uw LEFT JOIN FETCH uw.wallet WHERE u.firstName LIKE %:queryString% "
 			+ "OR u.lastName LIKE %:queryString% OR uw.wallet.accountId LIKE %:queryString% OR u.mobile LIKE %:queryString%")
-    Page<User> searchUser(@Param("queryString")String queryString, Pageable pageable);
-	
+	Page<User> searchUser(@Param("queryString") String queryString, Pageable pageable);
 
 	@Query("SELECT u FROM User u WHERE u.mobile = :mobile AND u.countryCode=:country_code ")
 	Optional<User> findByMobileAndCountryCode(@Param("mobile") String mobile, @Param("country_code") int countryCode);
 
 	@Query("SELECT u FROM User u JOIN FETCH u.userWallets uw JOIN FETCH uw.wallet WHERE u.id = :userId")
 	Optional<User> findUserWithUserWalletsById(@Param("userId") String userId);
+
+	@Query("SELECT u FROM User u  LEFT JOIN FETCH u.userWallets uw  LEFT JOIN FETCH uw.wallet WHERE u.id = :userId")
+	Optional<User> findUserWithWalletsById(@Param("userId") String userId);
 
 	@Query("SELECT u FROM User u LEFT JOIN FETCH u.userRole ur LEFT JOIN FETCH ur.role r  LEFT JOIN FETCH u.userWallets uw LEFT JOIN FETCH uw.wallet ")
 	Page<User> findAllusers(Pageable page);
@@ -53,8 +55,6 @@ public interface UserRepository extends JpaRepository<User, String> {
 
 	@Query("SELECT u FROM User u  LEFT JOIN FETCH u.userWallets uw LEFT JOIN FETCH uw.wallet WHERE u.mobile =:mobileNumber")
 	Optional<User> findByMobile(@Param("mobileNumber") String mobile); // Return an Optional<User>
-
-
 
 	@Query("SELECT u FROM User u WHERE u.openId = :open_id")
 

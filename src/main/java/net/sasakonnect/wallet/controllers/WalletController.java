@@ -261,5 +261,12 @@ public class WalletController {
 			@Parameter(description = "End date (YYYY-MM-DD)", example = "2024-02-29") @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
 		return walletService.getUserStatement(startDate, endDate);
 	}
+	
+	@GetMapping("account/statements")
+	@Operation(summary = "Get requested account statements", description = "Get statemenets requested by user")
+
+	public Object getRequestedStatemens() {
+		return walletService.getUserRequestedstatements();
+	}
 
 }

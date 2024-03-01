@@ -10,27 +10,30 @@ import java.nio.file.Files;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.itextpdf.io.image.ImageData;
+import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.colors.DeviceRgb;
 import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.property.Property;
 import com.opencsv.CSVReader;
-
 import net.sasakonnect.wallet.interfaces.PDFGenerationCallback;
 
 @Service
-public class AccountStatementService {
+public class AccountStatementService  {
 	@Value("${file.statementPath}")
 	private String statementPath;
 
 	public void readFileAndGeneratePDF(String jobId, String filePath, PDFGenerationCallback callBack) {
 		Thread thread = new Thread(new Runnable() {
 
+			@SuppressWarnings("deprecation")
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
@@ -46,8 +49,22 @@ public class AccountStatementService {
 							CSVReader csvReader = new CSVReader(new java.io.InputStreamReader(inputStream))) {
 
 						try (PdfDocument pdfDocument = new PdfDocument(new PdfWriter(statementPath+jobId+".pdf"))) {
+							
+							
+							String topImageFile = "/src/main/resources/static/images/receipt_2.png"; 
+							ImageData topImage = ImageDataFactory.create(topImageFile);
+							
+							String bImageFile = "/src/main/resources/static/images/receipt_2.png"; 
+							ImageData bottomImage = ImageDataFactory.create(bImageFile);
 							Document document = new Document(pdfDocument, PageSize.A4.rotate());
+							
 							document.setMargins(20, 100, 20, 100);
+							String watermarkImagePath = "/src/main/resources/static/images/watermark.png";
+                            ImageData watermarkImageData = ImageDataFactory.create(watermarkImagePath);
+                            float imageWidth = watermarkImageData.getWidth();
+                            float imageHeight = watermarkImageData.getHeight();
+                            PdfCanvas pdfCanvas = new PdfCanvas(pdfDocument.addNewPage());
+                            pdfCanvas.addImage(watermarkImageData, 0, 0, PageSize.A4.getWidth(), PageSize.A4.getHeight(), imageHeight, imageHeight, true);
 							document.add(new Paragraph("\n\n\n"));
 
 							Table table = new Table(expectedHeaders.length);
@@ -63,7 +80,6 @@ public class AccountStatementService {
 												.setBackgroundColor(new DeviceRgb(211, 211, 211)); // Light
 																									// gray
 																									// color
-
 									}
 									table.addCell(new Cell().add(paragraph));
 								}

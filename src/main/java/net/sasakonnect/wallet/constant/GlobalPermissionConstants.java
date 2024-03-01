@@ -381,6 +381,22 @@ public final class GlobalPermissionConstants {
 		}
 	}
 	
+	public static class CanRequestAccountStatement extends PermissionEntry {
+		public static final String PERMISSION = "can.request.account.statement";
+		public static final String DESCRIPTION = "can request user account statement(use with caution)";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
+	
+	
 	
 		
 	

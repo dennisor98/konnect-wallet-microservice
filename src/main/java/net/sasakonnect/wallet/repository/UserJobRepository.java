@@ -1,5 +1,7 @@
 package net.sasakonnect.wallet.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -8,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Optional;
 
+import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.UserJob;
 
 public interface UserJobRepository extends JpaRepository<UserJob, String> {
@@ -18,5 +21,13 @@ public interface UserJobRepository extends JpaRepository<UserJob, String> {
 	@Query("UPDATE UserJob u SET u.downloadLink = :downloadLink, u.isComplete = true WHERE u.jobId = :jobId")
 	void updateDownloadLinkAndIsCompleteByJobId(@Param("jobId") String jobId,
 			@Param("downloadLink") String downloadLink);
+	
+	
+	@Query("SELECT u FROM UserJob u WHERE u.jobOwner =:owner AND u.user =:user ORDER BY u.createdAt DESC")
+	List<UserJob> findAdminStatementsByUser(@Param("owner") User owner,@Param("user") User user);
+	
+	
+	@Query("SELECT u FROM UserJob u WHERE u.user =:user ORDER BY u.createdAt DESC")
+	List<UserJob> findUserRequestedStatements(@Param("user") User user);
 
 }

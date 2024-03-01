@@ -400,11 +400,12 @@ public class WalletService {
 					.employmentStatus(easyOnboarding.getEmploymentStatusType()).idNumber(easyOnboarding.getIdNumber())
 					.build();
 
-			final User savedUser = this.userService.createUser(user);
+			User su = this.userService.createUser(user);
+			var savedUser = this.userService.findUserAndWallets(su).get();
 			savedUser.setPins(null);
 			savedUser.setFirebaseTokens(null);
 			savedUser.setUserDevices(null);
-			savedUser.setUserWallets(null);
+			// savedUser.setUserWallets(null);
 			savedUser.setUserPins(null);
 			savedUser.setUserRole(null);
 			savedUser.setNotifications(null);
@@ -446,11 +447,13 @@ public class WalletService {
 			}
 
 		} catch (DataIntegrityViolationException e) {
+			e.printStackTrace();
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("message", "Account already exist");
 			map.put("success", false);
 			return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
 		} catch (Exception e) {
+			e.printStackTrace();
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("message", e.getMessage());
 			map.put("success", false);
@@ -1292,7 +1295,11 @@ public class WalletService {
 				System.out.println(responseJson);
 				String jobId = jsonObject.getAsJsonObject("data").get("jobId").getAsString();
 
-				var job = UserJob.builder().user(loggedInUser).jobId(jobId).build();
+				var job = UserJob.builder()
+						.user(loggedInUser)
+						.jobId(jobId)
+						.isAdmin(false)
+						.build();
 				this.userJobRepository.save(job);
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("message", "Please wait as we process your statement");
@@ -1306,6 +1313,119 @@ public class WalletService {
 		map.put("message", "Unable to request statement at this time");
 		map.put("success", false);
 		return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body(map);
+	}
+	
+	//Overloaded method
+	//get account statement for admin based on accountId
+	public Object getUserStatement(String accountId,LocalDate startDate, LocalDate endDate) {
+		Optional<User> user = this.userService.findUserByWalletAccountId(accountId);
+		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		if(!user.isEmpty()) {
+			var wallets = this.walletRepository.findByAccountId(accountId);
+			if (!wallets.isEmpty()) {
+				var currentWallet = wallets.get();
+
+				var reqId = new HashMap<String, Object>();
+				reqId.put("accountId", currentWallet.getAccountId());
+				reqId.put("startTime", startDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli());
+
+				reqId.put("endTime", endDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli());
+
+				var reqs = requestSigner.signRequest(reqId);
+
+				Mono<String> responseMono = this.bankClientBean.webClient.post()
+						.uri(ChoiceEndpointsConstants.REQUEST_BANK_STATEMENT_CSV).contentType(MediaType.APPLICATION_JSON)
+						.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+						.bodyToMono(String.class);
+
+				String responseJson = responseMono.block();
+
+				if (responseJson != null) {
+					var jsonObject = new Gson().fromJson(responseJson, JsonObject.class);
+					System.out.println(responseJson);
+					String jobId = jsonObject.getAsJsonObject("data").get("jobId").getAsString();
+
+					var job = UserJob.builder()
+							.user(user.get())
+							.jobId(jobId)
+							.jobOwner(loggedInUser)
+							.isAdmin(true)
+							.build();
+					this.userJobRepository.save(job);
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("message", "Please wait as we process your statement");
+					map.put("success", true);
+					return ResponseEntity.status(HttpStatus.OK).body(map);
+
+				}
+			}
+			// TODO Auto-generated method stub
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("message", "Unable to request statement at this time");
+			map.put("success", false);
+			return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body(map);
+		}else {
+			return null;
+		}
+	}
+	
+	public ResponseEntity<Object> getUserRequestedstatements(){
+		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		List<UserJob> statements = this.userJobRepository.findUserRequestedStatements(loggedInUser);
+		Map<String,Object> map = new HashMap<>();
+		map.put("success",true);
+		map.put("message", "Request complete");
+		if(!statements.isEmpty()) {
+			var st = statements.stream().map(s->{
+				   Map<String,Object> sMap = new HashMap<>();
+				   sMap.put("userId",s.getUser().getId());
+				   sMap.put("jobId", s.getJobId());
+				   sMap.put("owner",s.getJobOwner().getId());
+				   sMap.put("downloadLink",s.getDownloadLink());
+				   return sMap;
+			   }).collect(Collectors.toList());
+			map.put("statements",st);
+		}else {
+			map.put("statements", new ArrayList<>());
+		}
+		return ResponseEntity.status(HttpStatus.OK).body(map);
+	}
+	
+	
+	//overload
+	
+	public ResponseEntity<Object> getUserRequestedstatements(String userId){
+		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		Optional<User> user = this.userService.getUserById(userId);
+		if(user.isPresent()) {
+		    List<UserJob> statements = this.userJobRepository.findAdminStatementsByUser(loggedInUser,user.get());
+		    Map<String,Object> map = new HashMap<>();
+		    map.put("success",true);
+		    map.put("message", "Request complete");
+		    if(!statements.isEmpty()) {
+			   var st = statements.stream().map(s->{
+				   Map<String,Object> sMap = new HashMap<>();
+				   sMap.put("createdAt",s.getCreatedAt());
+				   sMap.put("userId",s.getUser().getId());
+				   sMap.put("jobId", s.getJobId());
+				   sMap.put("owner",s.getJobOwner().getId());
+				   sMap.put("downloadLink",s.getDownloadLink());
+				   return sMap;
+			   }).collect(Collectors.toList());
+			   map.put("statements",st);
+		    }else {
+			   map.put("statements", new ArrayList<>());
+		    }
+		    return ResponseEntity.status(HttpStatus.OK).body(map);
+		}else {
+			 Map<String,Object> map = new HashMap<>();
+			 map.put("success", false);
+			 map.put("message", "Uknown user");
+			 
+			 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		
 	}
 
 }
