@@ -655,7 +655,7 @@ public class WalletService {
 				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 
 		String responseJson = responseMono.block();
-
+         
 		if (responseJson != null) {
 			return new Gson().fromJson(responseJson, Object.class);
 
@@ -719,9 +719,9 @@ public class WalletService {
 					.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 
 			String responseJson = responseMono.block();
+			transactionEventService.notifyNewCustomer(userwallet.getAccountId(), mpesa.getReceiverMobileNumber());
 
 			if (responseJson != null) {
-				transactionEventService.notifyNewCustomer(userwallet.getAccountId(), mpesa.getReceiverMobileNumber());
 				return new Gson().fromJson(responseJson, Object.class);
 
 			}
