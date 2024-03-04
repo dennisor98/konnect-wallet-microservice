@@ -49,17 +49,10 @@ public class AccountStatementService  {
 
 						try (PdfDocument pdfDocument = new PdfDocument(new PdfWriter(statementPath+jobId+".pdf"))) {
 							
-							
-							String topImageFile = "src/main/resources/static/images/receipt_2.png"; 
-							ImageData topImage = ImageDataFactory.create(topImageFile);
-							
-							String bImageFile = "/src/main/resources/static/images/receipt_2.png"; 
-							ImageData bottomImage = ImageDataFactory.create(bImageFile);
 							Document document = new Document(pdfDocument, PageSize.A4.rotate());
 							
 							document.setMargins(20, 100, 20, 100);
-							String watermarkImagePath = "src/main/resources/static/images/receipt_1.png";
-                            ImageData watermarkImageData = ImageDataFactory.create(watermarkImagePath);
+							
 //                            float imageWidth = watermarkImageData.getWidth();
 //                            float imageHeight = watermarkImageData.getHeight();
 //                            PdfCanvas pdfCanvas = new PdfCanvas(pdfDocument.addNewPage());
