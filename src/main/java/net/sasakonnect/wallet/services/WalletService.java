@@ -557,9 +557,6 @@ public class WalletService {
 
 						this.publisher.publishEvent(TransactionEvent.builder().userService(userService)
 								.transaction(createdTransaction).build());
-					if(createdTransaction.getTxType().equalsIgnoreCase(WalletTransactionType.TTID0001.toString())) {
-						this.transactionEventService.notifyNewCustomer(createdTransaction.getAccountId(),createdTransaction.getOppoAccountId());
-					}
 					}
 				}
 				log.info("transacttion {}", results);
@@ -722,6 +719,10 @@ public class WalletService {
 					.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 
 			String responseJson = responseMono.block();
+			
+			//call wallet invitation thread
+			transactionEventService.notifyNewCustomer(userwallet.getAccountId(), mpesa.getReceiverMobileNumber());
+
 			if (responseJson != null) {
 				return new Gson().fromJson(responseJson, Object.class);
 
@@ -1389,6 +1390,7 @@ public class WalletService {
 				   sMap.put("userId",s.getUser().getId());
 				   sMap.put("jobId", s.getJobId());
 				   sMap.put("owner",s.getJobOwner().getId());
+				   sMap.put("isRead",s.getIsRead());
 				   sMap.put("downloadLink",s.getDownloadLink());
 				   return sMap;
 			   }).collect(Collectors.toList());
@@ -1417,6 +1419,7 @@ public class WalletService {
 				   sMap.put("userId",s.getUser().getId());
 				   sMap.put("jobId", s.getJobId());
 				   sMap.put("owner",s.getJobOwner().getId());
+				   sMap.put("isRead",s.getIsRead());
 				   sMap.put("downloadLink",s.getDownloadLink());
 				   return sMap;
 			   }).collect(Collectors.toList());
@@ -1432,6 +1435,33 @@ public class WalletService {
 			 
 			 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 		}
+		
+	}
+	
+	public ResponseEntity<Object> updateStamentRead(String jobId){
+		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		Optional<UserJob> userJob = this.userJobRepository.findUserJobByJobId(jobId);
+		if(userJob.isPresent()) {
+			 if(loggedInUser.getId().equalsIgnoreCase(userJob.get().getJobOwner().getId())) {
+                 userJob.get().setIsRead(true);                
+                 Map<String,Object> map =  new HashMap<>();
+                 map.put("success",true);
+                 map.put("message","Request complete");
+                 this.userJobRepository.save(userJob.get());
+                 return ResponseEntity.status(HttpStatus.OK).body(map);
+            }else {
+            	Map<String,Object> map =  new HashMap<>();
+            	map.put("success", false);
+            	map.put("message","No job ownership");
+            	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+            }
+		}else {
+			Map<String,Object> map =  new HashMap<>();
+			map.put("success", false);
+        	map.put("message","Job does not exist");
+        	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+            
 		
 	}
 

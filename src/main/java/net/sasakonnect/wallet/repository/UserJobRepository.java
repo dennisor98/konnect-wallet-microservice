@@ -1,6 +1,7 @@
 package net.sasakonnect.wallet.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -8,7 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.base.Optional;
 
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.UserJob;
@@ -29,5 +29,9 @@ public interface UserJobRepository extends JpaRepository<UserJob, String> {
 	
 	@Query("SELECT u FROM UserJob u WHERE u.user =:user ORDER BY u.createdAt DESC")
 	List<UserJob> findUserRequestedStatements(@Param("user") User user);
+	
+	Optional<UserJob> findUserJobByJobId(String jobId);
+	
+	
 
 }
