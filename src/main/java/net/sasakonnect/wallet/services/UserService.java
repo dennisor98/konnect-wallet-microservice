@@ -993,12 +993,9 @@ public class UserService extends RestClientService implements UserDetailsService
 	
 	public ResponseEntity<Object> getAuthenticatedUserProfile(){
 		User u = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		List<Wallet> wallet = this.walletRepository.findByUserWalletsUser_Id(u.getId());
-        if(!wallet.isEmpty()) {
-        	
-        }
+		List<Wallet> wallet = this.walletRepository.findByUserWalletsUser(u);
 			var response = UserResponseDTO.builder()
-					.wallets(wallet.isEmpty()? new ArrayList<>() : wallet)
+					.wallets(wallet.stream().toList())
 					.middleName(u.getMiddleName())
 					.gender(u.getGender().name())
 					.idType(u.getIdType().name())
