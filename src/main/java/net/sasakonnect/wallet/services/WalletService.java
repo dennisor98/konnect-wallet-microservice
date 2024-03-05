@@ -601,6 +601,13 @@ public class WalletService {
 						body.toString(), new TypeToken<NotificationResult<WalletAccountUpgradeResultNotification>>() {
 						}.getType());
 				log.info("balance update {}", results);
+				Optional<Wallet> wallet = this.walletRepository.findByAccountId(results.getParams().getAccountId());
+				
+				//update wallet type
+				if(wallet.isPresent()) {
+					wallet.get().setAccountType(results.getParams().getAccountType());
+					this.walletRepository.save(wallet.get());
+				}
 				this.userService.pushUpgradeNotification(results.getParams());
 
 			} else if (notification_Type == NotificationType.SME_ACCOUNT_OPEN.getCode()) {

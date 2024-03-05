@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -56,6 +57,7 @@ import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.UserPin;
 import net.sasakonnect.wallet.domain.UserRole;
+import net.sasakonnect.wallet.domain.Wallet;
 import net.sasakonnect.wallet.domain.WalletAccountUpgrade;
 import net.sasakonnect.wallet.notification.WalletAccountUpgradeResultNotification;
 import net.sasakonnect.wallet.repository.CorporateDetailsRepository;
@@ -987,6 +989,49 @@ public class UserService extends RestClientService implements UserDetailsService
 	public Optional<User> findUserByOpenId(String open_id) {
 		// TODO Auto-generated method stub
 		return this.userRepository.findByOpenId(open_id);
+	}
+	
+	public ResponseEntity<Object> getAuthenticatedUserProfile(){
+		User u = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		List<Wallet> wallet = this.walletRepository.findByUserWalletsUser_Id(u.getId());
+        if(!wallet.isEmpty()) {
+        	
+        }
+			var response = UserResponseDTO.builder()
+					.wallets(wallet.isEmpty()? new ArrayList<>() : wallet)
+					.middleName(u.getMiddleName())
+					.gender(u.getGender().name())
+					.idType(u.getIdType().name())
+					.idNumber(u.getIdNumber())
+					.onboardingRequestId(u.getOnboardingRequestId())
+					.open_id(u.getOpenId())
+					.birthday(formatter.format(u.getBirthday().toInstant()))
+					.updatedAt(u.getUpdatedAt())
+					.kraPin(u.getKraPin())
+					.employmentStatus(u.getEmploymentStatus().name())
+					.monthlyIncome(u.getMonthlyIncome().toString())
+					.createdAt(u.getCreatedAt())
+					.id(u.getId())
+					.address(u.getAddress())
+					.firstName(u.getFirstName())
+					.lastName(u.getLastName())
+					.mobile(u.getMobile())
+					.countryCode(u.getCountryCode())
+					.build();
+			        
+			ObjectMapper objectMapper = new ObjectMapper();
+			objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+			objectMapper.registerModule(new JavaTimeModule());
+			objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+			try {
+				return ResponseEntity.ok(objectMapper.writeValueAsString(response));
+			} catch (JsonProcessingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
+		return null;
 	}
 
 }
