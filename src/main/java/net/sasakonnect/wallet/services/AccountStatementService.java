@@ -17,8 +17,10 @@ import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
+import com.itextpdf.kernel.pdf.extgstate.PdfExtGState;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.property.Property;
@@ -52,11 +54,26 @@ public class AccountStatementService  {
 							Document document = new Document(pdfDocument, PageSize.A4.rotate());
 							
 							document.setMargins(20, 100, 20, 100);
-							
-//                            float imageWidth = watermarkImageData.getWidth();
-//                            float imageHeight = watermarkImageData.getHeight();
-//                            PdfCanvas pdfCanvas = new PdfCanvas(pdfDocument.addNewPage());
-//                            pdfCanvas.addImage(watermarkImageData, 0, 0, PageSize.A4.getWidth(), PageSize.A4.getHeight(), imageHeight, imageHeight, true);
+							 Image watermarkImage = new Image(ImageDataFactory.create(getClass().getClassLoader().getResource("images/watermark.png")));
+
+							    // Iterate over each page of the document
+
+	                            for (int i = 1; i <= pdfDocument.getNumberOfPages(); i++) {
+	                                com.itextpdf.kernel.pdf.PdfPage page = pdfDocument.getPage(i);
+	                                PageSize pageSize = (PageSize) page.getPageSize();
+
+	                                // Add watermark image as a background
+	                                PdfCanvas pdfCanvas = new PdfCanvas(page.newContentStreamBefore(),
+	                                        page.getResources(), pdfDocument);
+	                                pdfCanvas.saveState();
+	                                PdfExtGState gs1 = new PdfExtGState();
+	                                gs1.setFillOpacity(0.5f); // Adjust opacity as needed
+	                                pdfCanvas.setExtGState(gs1);
+	                                watermarkImage.scaleToFit(pageSize.getWidth(), pageSize.getHeight());
+	                                watermarkImage.setFixedPosition(0, 0);
+	                                document.add(watermarkImage);
+	                                pdfCanvas.restoreState();
+	                            }
 							document.add(new Paragraph("\n\n\n"));
 
 							Table table = new Table(expectedHeaders.length);

@@ -1208,8 +1208,9 @@ public class WalletService {
 		Map<String, Object> map = new HashMap<>();
 		Map<String, Object> resMap = new HashMap<>();
 		if (user.isPresent()) {
-			UserPin userPin = user.get().getPins().get(0);
-			if (userPin != null) {
+			var pins = user.get().getPins();
+			if (pins != null && !pins.isEmpty()) {
+				UserPin userPin = user.get().getPins().get(0);
 				Integer attempts = userPin.getPinAttempts();
 				map.put("attempts", attempts);
 				map.put("isBlocked", attempts >= 5 ? true : false);
@@ -1312,6 +1313,7 @@ public class WalletService {
 
 				var job = UserJob.builder()
 						.user(loggedInUser)
+						.jobOwner(loggedInUser)
 						.jobId(jobId)
 						.isAdmin(false)
 						.build();
