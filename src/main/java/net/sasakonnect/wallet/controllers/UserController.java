@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
 import net.sasakonnect.wallet.RequestDto.OpenIdRequest;
+import net.sasakonnect.wallet.RequestDto.UserDeviceToken;
 import net.sasakonnect.wallet.RequestDto.UserLogin;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.RefreshMiddleware;
@@ -73,6 +74,11 @@ public class UserController {
 		return userService.createRefreshToken();
 	}
 
+	@PostMapping("/messaging/token")
+	public ResponseEntity<Object> token(@Valid @RequestBody UserDeviceToken userDeviceToken) {
+		return userService.updateFirebaseToken(userDeviceToken);
+	}
+
 	@PostMapping("openId")
 	public ResponseEntity getMyOpenId(@Valid @RequestBody OpenIdRequest openId) {
 
@@ -87,9 +93,9 @@ public class UserController {
 
 		return ResponseEntity.status(HttpStatus.OK).body(map);
 	}
-	
+
 	@GetMapping("profile")
-	public ResponseEntity<Object> getUserProfile(){
+	public ResponseEntity<Object> getUserProfile() {
 		return this.userService.getAuthenticatedUserProfile();
 	}
 

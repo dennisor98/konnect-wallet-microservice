@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -48,10 +47,12 @@ import net.sasakonnect.wallet.RequestDto.ChangePin;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
 import net.sasakonnect.wallet.RequestDto.OpenIdRequest;
 import net.sasakonnect.wallet.RequestDto.PinDto;
+import net.sasakonnect.wallet.RequestDto.UserDeviceToken;
 import net.sasakonnect.wallet.RequestDto.UserLogin;
 import net.sasakonnect.wallet.ResponseDto.UserResponseDTO;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.beans.RedisBean;
+import net.sasakonnect.wallet.domain.FirebaseToken;
 import net.sasakonnect.wallet.domain.Permission;
 import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.User;
@@ -61,6 +62,7 @@ import net.sasakonnect.wallet.domain.Wallet;
 import net.sasakonnect.wallet.domain.WalletAccountUpgrade;
 import net.sasakonnect.wallet.notification.WalletAccountUpgradeResultNotification;
 import net.sasakonnect.wallet.repository.CorporateDetailsRepository;
+import net.sasakonnect.wallet.repository.FirebaseTokenRepository;
 import net.sasakonnect.wallet.repository.PermissionRepository;
 import net.sasakonnect.wallet.repository.RolePermissionRepository;
 import net.sasakonnect.wallet.repository.RoleRepository;
@@ -78,6 +80,8 @@ import net.sasakonnect.wallet.tools.RequestSigner;
 public class UserService extends RestClientService implements UserDetailsService {
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private FirebaseTokenRepository firebaseTokenRepository;
 	@Autowired
 	private WalletAccountUpgradeRepository walletAccountUpgradeRepository;
 
@@ -990,45 +994,45 @@ public class UserService extends RestClientService implements UserDetailsService
 		// TODO Auto-generated method stub
 		return this.userRepository.findByOpenId(open_id);
 	}
-	
-	public ResponseEntity<Object> getAuthenticatedUserProfile(){
+
+	public ResponseEntity<Object> getAuthenticatedUserProfile() {
 		User u = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		List<Wallet> wallet = this.walletRepository.findByUserWalletsUser(u);
-			var response = UserResponseDTO.builder()
-					.wallets(wallet.stream().toList())
-					.middleName(u.getMiddleName())
-					.gender(u.getGender().name())
-					.idType(u.getIdType().name())
-					.idNumber(u.getIdNumber())
-					.onboardingRequestId(u.getOnboardingRequestId())
-					.open_id(u.getOpenId())
-					.birthday(formatter.format(u.getBirthday().toInstant()))
-					.updatedAt(u.getUpdatedAt())
-					.kraPin(u.getKraPin())
-					.employmentStatus(u.getEmploymentStatus().name())
-					.monthlyIncome(u.getMonthlyIncome().toString())
-					.createdAt(u.getCreatedAt())
-					.id(u.getId())
-					.address(u.getAddress())
-					.firstName(u.getFirstName())
-					.lastName(u.getLastName())
-					.mobile(u.getMobile())
-					.countryCode(u.getCountryCode())
-					.build();
-			        
-			ObjectMapper objectMapper = new ObjectMapper();
-			objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
-			objectMapper.registerModule(new JavaTimeModule());
-			objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+		var response = UserResponseDTO.builder().wallets(wallet.stream().toList()).middleName(u.getMiddleName())
+				.gender(u.getGender().name()).idType(u.getIdType().name()).idNumber(u.getIdNumber())
+				.onboardingRequestId(u.getOnboardingRequestId()).open_id(u.getOpenId())
+				.birthday(formatter.format(u.getBirthday().toInstant())).updatedAt(u.getUpdatedAt())
+				.kraPin(u.getKraPin()).employmentStatus(u.getEmploymentStatus().name())
+				.monthlyIncome(u.getMonthlyIncome().toString()).createdAt(u.getCreatedAt()).id(u.getId())
+				.address(u.getAddress()).firstName(u.getFirstName()).lastName(u.getLastName()).mobile(u.getMobile())
+				.countryCode(u.getCountryCode()).build();
 
-			try {
-				return ResponseEntity.ok(objectMapper.writeValueAsString(response));
-			} catch (JsonProcessingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+		objectMapper.registerModule(new JavaTimeModule());
+		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+		try {
+			return ResponseEntity.ok(objectMapper.writeValueAsString(response));
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		return null;
+	}
+
+	public ResponseEntity<Object> updateFirebaseToken(@Valid UserDeviceToken userDeviceToken) {
+		User u = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		var firebaseToken = FirebaseToken.builder().user(u).token(userDeviceToken.getToken()).build();
+		var saveToken = this.firebaseTokenRepository.save(firebaseToken);
+		Map<String, Object> map = new HashMap<>();
+
+		map.put("message", "Firebase Token updated");
+
+		return ResponseEntity.status(HttpStatus.CREATED).body(map);
+
 	}
 
 }

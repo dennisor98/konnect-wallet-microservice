@@ -82,11 +82,6 @@ public class WalletController {
 		return this.walletService.resendOnboardingOtp();
 	}
 
-	@PostMapping("/messaging/token")
-	public ResponseEntity<Optional<User>> token() {
-		return ResponseEntity.ok(userService.getUserById("0"));
-	}
-
 	@GetMapping("/info")
 	public ResponseEntity<Object> info() {
 		return ResponseEntity.ok(this.walletService.getWalletInfo());
@@ -262,18 +257,16 @@ public class WalletController {
 			@Parameter(description = "End date (YYYY-MM-DD)", example = "2024-02-29") @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
 		return walletService.getUserStatement(startDate, endDate);
 	}
-	
+
 	@GetMapping("account/statements")
 	@Operation(summary = "Get requested account statements", description = "Get statemenets requested by user")
 
 	public Object getRequestedStatemens() {
 		return walletService.getUserRequestedstatements();
 	}
-	
+
 	@PutMapping("account/statement/updateread")
-	public Object updateStatementRead(
-			@RequestParam(name="jobId") String jobId
-			) {
+	public Object updateStatementRead(@RequestParam(name = "jobId") String jobId) {
 		return walletService.updateStamentRead(jobId);
 	}
 
