@@ -19,6 +19,7 @@ import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.property.Property;
@@ -52,11 +53,18 @@ public class AccountStatementService  {
 							Document document = new Document(pdfDocument, PageSize.A4.rotate());
 							
 							document.setMargins(20, 100, 20, 100);
-							
-//                            float imageWidth = watermarkImageData.getWidth();
-//                            float imageHeight = watermarkImageData.getHeight();
-//                            PdfCanvas pdfCanvas = new PdfCanvas(pdfDocument.addNewPage());
-//                            pdfCanvas.addImage(watermarkImageData, 0, 0, PageSize.A4.getWidth(), PageSize.A4.getHeight(), imageHeight, imageHeight, true);
+							 Image watermarkImage = new Image(ImageDataFactory.create(getClass().getClassLoader().getResource("images/watermark.png")));
+
+							    // Iterate over each page of the document
+							    for (int i = 1; i <= pdfDocument.getNumberOfPages(); i++) {
+							        // Retrieve the current page
+							        com.itextpdf.kernel.pdf.PdfPage page = pdfDocument.getPage(i);
+							        PageSize pageSize = (PageSize) page.getPageSize();
+
+							        // Add the watermark image to the page
+							        watermarkImage.setFixedPosition(i * pageSize.getWidth() / 2, pageSize.getHeight() / 2);
+							        document.add(watermarkImage);
+							    }
 							document.add(new Paragraph("\n\n\n"));
 
 							Table table = new Table(expectedHeaders.length);
