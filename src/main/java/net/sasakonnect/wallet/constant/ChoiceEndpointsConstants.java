@@ -14,24 +14,24 @@ public class ChoiceEndpointsConstants {
 	public static final String POLL_ONBOARDING = "/onboarding/getUserKyc";
 	public static final String OPEN_WALLET_ACCOUNT = "/onboarding/submitEasyOnboardingRequest";
 	public static final String GET_WALLET_INFO = "/onboarding/getOnboardingStatus";
-	public static final String REQUEST_OTP_RESEND = "/sms/onboarding/resendOnboardSms";
-	public static final String CONFIRM_OTP = "/sms/onboarding/confirmOnboardingRequest";
+	public static final String REQUEST_OTP_RESEND = "/common/resendOtp";
+	public static final String CONFIRM_OTP = "/common/confirmOperation";
 	public static final String GET_ACCOUNT_INFO = "/query/getAccountDetail";
 	public static final String DEPOSIT_FROM_MPESA = "/trans/depositFromMpesa";
 	public static final String GET_TRANSACTIONS = "/query/getTransList";
-	public static final String CONFIRM_OTP_TRANSFER = "/trans/confirmTransfer";
+	public static final String CONFIRM_OTP_TRANSFER = "/common/confirmOperation";
 	public static final String REQUEST_BANK_STATEMENT = "/statement/applyBankAccountStatement";
 	public static final String ADD_OR_UPDATE_EMAIL = "/user/addOrUpdateEmail";
 	public static final String REQUEST_BANK_STATEMENT_CSV = "/statement/applyAccountStatement";
 
-	public static final String WITHDRAW = "/trans/applyForTransfer";
-	public static final String BUY_AIRTIME = "/utilityPayment/airtimePayment";
-	public static final String PAY_UTILITY = "/utilityPayment/billPayment";
+	public static final String WITHDRAW = "/trans/v2/applyForTransfer";
+	public static final String BUY_AIRTIME = "/utilityPayment/v2/airtimePayment";
+	public static final String PAY_UTILITY = "/utilityPayment/v2/billPayment";
 	public static final String CHECK_BALANCE = "/query/getAccountDetails";
 	public static final String SHORT_CODE = "/account/applyForShortCode";
 	public static final String GET_SHORT_CODE = "/account/queryAccountByShortCode";
 	public static final String GET_ONBOARDING_STATUS = "/onboarding/getOnboardingStatus";
-	public static final String MPESA_TILL_AND_PAYBILL = "/trans/applyForMpesaBusinessTransfer";
+	public static final String MPESA_TILL_AND_PAYBILL = "/trans/v2/applyForMpesaBusinessTransfer";
 	public static final String GET_TRANSACTION_STATUS = "/query/getTransResult";
 	public static final String UPGRADE_ACCOUNT = "/onboarding/walletAccountUpgrade";
 

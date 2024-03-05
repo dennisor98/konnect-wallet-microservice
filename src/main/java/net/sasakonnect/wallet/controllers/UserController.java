@@ -87,5 +87,10 @@ public class UserController {
 
 		return ResponseEntity.status(HttpStatus.OK).body(map);
 	}
+	
+	@GetMapping("profile")
+	public ResponseEntity<Object> getUserProfile(){
+		return this.userService.getAuthenticatedUserProfile();
+	}
 
 }
