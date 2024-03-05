@@ -1312,6 +1312,7 @@ public class WalletService {
 
 				var job = UserJob.builder()
 						.user(loggedInUser)
+						.jobOwner(loggedInUser)
 						.jobId(jobId)
 						.isAdmin(false)
 						.build();
