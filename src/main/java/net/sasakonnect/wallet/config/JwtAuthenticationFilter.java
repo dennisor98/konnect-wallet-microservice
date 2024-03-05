@@ -35,7 +35,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter implements Han
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException, UnsupportedJwtException {
-		System.out.println("hello");
 		String authHeader = request.getHeader("Authorization");
 		String token = null;
 		String id = null;
@@ -60,7 +59,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter implements Han
 //				Optional<User> user = this.userService.findUserWallet(id);
 				User userDetails = (User) userService.loadUserByUsername(id);
 				if (userDetails != null && this.jwtService.validateToken(token, userDetails, JwtType.ACCESS_TOKEN)) {
-					System.out.println("this is do internal");
 
 					UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
 							null, null);

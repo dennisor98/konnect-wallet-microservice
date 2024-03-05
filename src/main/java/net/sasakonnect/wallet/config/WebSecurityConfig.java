@@ -184,11 +184,13 @@ public class WebSecurityConfig {
 		case "dev": {
 			openApi.info(info).addServersItem(gatewayServer).addServersItem(nginxServer).addServersItem(localServer)
 					.addServersItem(ngrokServer);
+			break;
 
 		}
 		default: {
 			openApi.info(info).addServersItem(nginxServer).addServersItem(gatewayServer).addServersItem(localServer)
 					.addServersItem(ngrokServer);
+			break;
 
 		}
 
