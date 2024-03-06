@@ -1041,7 +1041,7 @@ public class WalletService {
 		// User user = (User)
 		// SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-		this.choiceBankSmsService.confirmOperation(otpTransfer.getTxId(), otpTransfer.getOtp());
+		return this.choiceBankSmsService.confirmOperation(otpTransfer.getTxId(), otpTransfer.getOtp());
 //		var reqId = new HashMap<String, Object>();
 //		reqId.put("txId", otpTransfer.getTxId());
 //		reqId.put("otpCode", otpTransfer.getOtp());
