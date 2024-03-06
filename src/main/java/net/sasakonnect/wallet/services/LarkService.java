@@ -265,7 +265,6 @@ public class LarkService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "Bearer "+accessToken);   
         HttpEntity<Object> requestEntity = new HttpEntity<>(requestMap,headers);
-        System.out.println("response "+requestEntity);
 
         
         ResponseEntity<Object> responseEntity = restTemplate.exchange(
@@ -275,7 +274,6 @@ public class LarkService {
                 Object.class
         );
         
-        System.out.println(responseEntity);
 		
 	}
 	
@@ -431,7 +429,6 @@ public class LarkService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "Bearer "+accessToken);   
         HttpEntity<Object> requestEntity = new HttpEntity<>(requestMap,headers);
-        System.out.println("response "+requestEntity);
 
         
         ResponseEntity<Object> responseEntity = restTemplate.exchange(
@@ -441,7 +438,6 @@ public class LarkService {
                 Object.class
         );
         
-        System.out.println(responseEntity);
 		
 	}
    
