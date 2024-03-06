@@ -1,7 +1,6 @@
 package net.sasakonnect.wallet.services;
 
 import java.util.HashMap;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -27,7 +26,7 @@ public class ChoiceBankSmsService {
 	RequestSigner requestSigner;
 	ExecutorService executor = Executors.newFixedThreadPool(5);
 
-	public Optional<Object> invokeSms(String businessId) {
+	public Object invokeSms(String businessId) {
 		executor.submit(() -> {
 
 			var reqId = new HashMap<String, Object>();
@@ -43,18 +42,18 @@ public class ChoiceBankSmsService {
 			String responseJson = responseMono.block();
 			log.info(responseJson);
 			if (responseJson != null) {
-				return Optional.of(new Gson().fromJson(responseJson, Object.class));
+				return new Gson().fromJson(responseJson, Object.class);
 
 			}
-			return Optional.ofNullable(null);
+			return null;
 
 		});
 
-		return Optional.ofNullable(null);
+		return null;
 
 	}
 
-	public Optional<Object> confirmOperation(String businessId, String otpCode) {
+	public Object confirmOperation(String businessId, String otpCode) {
 		executor.submit(() -> {
 			var reqId = new HashMap<String, Object>();
 			reqId.put("businessId", businessId);
@@ -69,11 +68,11 @@ public class ChoiceBankSmsService {
 			log.info(responseJson);
 
 			if (responseJson != null) {
-				return Optional.of(new Gson().fromJson(responseJson, Object.class));
+				return new Gson().fromJson(responseJson, Object.class);
 
 			}
-			return Optional.ofNullable(null);
+			return null;
 		});
-		return Optional.ofNullable(null);
+		return null;
 	}
 }
