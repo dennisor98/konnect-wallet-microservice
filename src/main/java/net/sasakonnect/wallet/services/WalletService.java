@@ -50,6 +50,7 @@ import net.sasakonnect.wallet.RequestDto.TransferToMpesa;
 import net.sasakonnect.wallet.RequestDto.UpgradeWalletAccountDto;
 import net.sasakonnect.wallet.RequestDto.WalletTransferDto;
 import net.sasakonnect.wallet.RequestDto.admin.CheckUserAccount;
+import net.sasakonnect.wallet.ResponseDto.TransactionResponseDto;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
 import net.sasakonnect.wallet.domain.User;
@@ -83,6 +84,8 @@ public class WalletService {
 	@Autowired
 	RequestSigner requestSigner;
 	@Autowired
+	ChoiceBankSmsService choiceBankSmsService;
+	@Autowired
 	UserService userService;
 	@Autowired
 	ChatService chatService;
@@ -110,11 +113,9 @@ public class WalletService {
 	UserJobRepository userJobRepository;
 	@Autowired
 	private ApplicationContext applicationContext;
-	
+
 	@Autowired
-	TransactionEventService  transactionEventService;
-
-
+	TransactionEventService transactionEventService;
 
 	public Object getWalletInfo() {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -602,9 +603,9 @@ public class WalletService {
 						}.getType());
 				log.info("balance update {}", results);
 				Optional<Wallet> wallet = this.walletRepository.findByAccountId(results.getParams().getAccountId());
-				
-				//update wallet type
-				if(wallet.isPresent()) {
+
+				// update wallet type
+				if (wallet.isPresent()) {
 					wallet.get().setAccountType(results.getParams().getAccountType());
 					this.walletRepository.save(wallet.get());
 				}
@@ -662,7 +663,7 @@ public class WalletService {
 				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 
 		String responseJson = responseMono.block();
-         
+
 		if (responseJson != null) {
 			return new Gson().fromJson(responseJson, Object.class);
 
@@ -726,13 +727,14 @@ public class WalletService {
 					.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 
 			String responseJson = responseMono.block();
-			
-			//call wallet invitation thread
+			log.info(responseJson);
+			// call wallet invitation thread
 			transactionEventService.notifyNewCustomer(userwallet.getAccountId(), mpesa.getReceiverMobileNumber());
 
 			if (responseJson != null) {
+				var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
+				choiceBankSmsService.invokeSms(resp.getData().txId);
 				return new Gson().fromJson(responseJson, Object.class);
-
 			}
 		}
 		// TODO Auto-generated method stub
@@ -766,7 +768,10 @@ public class WalletService {
 			String responseJson = responseMono.block();
 
 			if (responseJson != null) {
-				return new Gson().fromJson(responseJson, Object.class);
+				// return new Gson().fromJson(responseJson, Object.class);
+				var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
+				choiceBankSmsService.invokeSms(resp.getData().txId);
+				return resp;
 
 			}
 		}
@@ -880,6 +885,11 @@ public class WalletService {
 		String responseJson = responseMono.block();
 
 		if (responseJson != null) {
+			var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
+			log.info("begun sending sms");
+			choiceBankSmsService.invokeSms(resp.getData().txId);
+			log.info("now returning");
+
 			return new Gson().fromJson(responseJson, Object.class);
 
 		}
@@ -918,6 +928,8 @@ public class WalletService {
 		String responseJson = responseMono.block();
 
 		if (responseJson != null) {
+			var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
+			choiceBankSmsService.invokeSms(resp.getData().txId);
 			return new Gson().fromJson(responseJson, Object.class);
 
 		}
@@ -962,8 +974,10 @@ public class WalletService {
 		String responseJson = responseMono.block();
 
 		if (responseJson != null) {
-			return new Gson().fromJson(responseJson, Object.class);
-
+			var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
+			choiceBankSmsService.invokeSms(resp.getData().txId);
+			log.info(resp.getData().txId);
+			return resp;
 		}
 
 		// TODO Auto-generated method stub
@@ -1024,28 +1038,30 @@ public class WalletService {
 	}
 
 	public Object confirmOtpTransfer(OtpTransfer otpTransfer) {
-		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		// User user = (User)
+		// SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-		var reqId = new HashMap<String, Object>();
-		reqId.put("txId", otpTransfer.getTxId());
-		reqId.put("otpCode", otpTransfer.getOtp());
-
-		var reqs = this.requestSigner.signRequest(reqId);
-
-		Mono<String> responseMono = this.bankClientBean.webClient.post()
-				.uri(ChoiceEndpointsConstants.CONFIRM_OTP_TRANSFER).contentType(MediaType.APPLICATION_JSON)
-				.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
-				.bodyToMono(String.class);
-
-		String responseJson = responseMono.block();
-
-		if (responseJson != null) {
-			return new Gson().fromJson(responseJson, Object.class);
-
-		}
-
-		// TODO Auto-generated method stub
-		return null;
+		return this.choiceBankSmsService.confirmOperation(otpTransfer.getTxId(), otpTransfer.getOtp()).get();
+//		var reqId = new HashMap<String, Object>();
+//		reqId.put("txId", otpTransfer.getTxId());
+//		reqId.put("otpCode", otpTransfer.getOtp());
+//
+//		var reqs = this.requestSigner.signRequest(reqId);
+//
+//		Mono<String> responseMono = this.bankClientBean.webClient.post()
+//				.uri(ChoiceEndpointsConstants.CONFIRM_OTP_TRANSFER).contentType(MediaType.APPLICATION_JSON)
+//				.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+//				.bodyToMono(String.class);
+//
+//		String responseJson = responseMono.block();
+//
+//		if (responseJson != null) {
+//			return new Gson().fromJson(responseJson, Object.class);
+//
+//		}
+//
+//		// TODO Auto-generated method stub
+//		return null;
 	}
 
 	public Object mpesaTillAndByGoods(@Valid MpesaBilling tillAndBuyGoods) {
@@ -1090,7 +1106,10 @@ public class WalletService {
 		String responseJson = responseMono.block();
 
 		if (responseJson != null) {
-			return new Gson().fromJson(responseJson, Object.class);
+			var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
+			choiceBankSmsService.invokeSms(resp.getData().txId);
+			return resp;
+			// return new Gson().fromJson(responseJson, Object.class);
 
 		}
 
@@ -1311,11 +1330,7 @@ public class WalletService {
 				System.out.println(responseJson);
 				String jobId = jsonObject.getAsJsonObject("data").get("jobId").getAsString();
 
-				var job = UserJob.builder()
-						.user(loggedInUser)
-						.jobOwner(loggedInUser)
-						.jobId(jobId)
-						.isAdmin(false)
+				var job = UserJob.builder().user(loggedInUser).jobOwner(loggedInUser).jobId(jobId).isAdmin(false)
 						.build();
 				this.userJobRepository.save(job);
 				Map<String, Object> map = new HashMap<String, Object>();
@@ -1331,14 +1346,14 @@ public class WalletService {
 		map.put("success", false);
 		return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body(map);
 	}
-	
-	//Overloaded method
-	//get account statement for admin based on accountId
-	public Object getUserStatement(String accountId,LocalDate startDate, LocalDate endDate) {
+
+	// Overloaded method
+	// get account statement for admin based on accountId
+	public Object getUserStatement(String accountId, LocalDate startDate, LocalDate endDate) {
 		Optional<User> user = this.userService.findUserByWalletAccountId(accountId);
 		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-		if(!user.isEmpty()) {
+		if (!user.isEmpty()) {
 			var wallets = this.walletRepository.findByAccountId(accountId);
 			if (!wallets.isEmpty()) {
 				var currentWallet = wallets.get();
@@ -1352,9 +1367,9 @@ public class WalletService {
 				var reqs = requestSigner.signRequest(reqId);
 
 				Mono<String> responseMono = this.bankClientBean.webClient.post()
-						.uri(ChoiceEndpointsConstants.REQUEST_BANK_STATEMENT_CSV).contentType(MediaType.APPLICATION_JSON)
-						.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
-						.bodyToMono(String.class);
+						.uri(ChoiceEndpointsConstants.REQUEST_BANK_STATEMENT_CSV)
+						.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
+						.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 
 				String responseJson = responseMono.block();
 
@@ -1363,11 +1378,7 @@ public class WalletService {
 					System.out.println(responseJson);
 					String jobId = jsonObject.getAsJsonObject("data").get("jobId").getAsString();
 
-					var job = UserJob.builder()
-							.user(user.get())
-							.jobId(jobId)
-							.jobOwner(loggedInUser)
-							.isAdmin(true)
+					var job = UserJob.builder().user(user.get()).jobId(jobId).jobOwner(loggedInUser).isAdmin(true)
 							.build();
 					this.userJobRepository.save(job);
 					Map<String, Object> map = new HashMap<String, Object>();
@@ -1382,96 +1393,94 @@ public class WalletService {
 			map.put("message", "Unable to request statement at this time");
 			map.put("success", false);
 			return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body(map);
-		}else {
+		} else {
 			return null;
 		}
 	}
-	
-	public ResponseEntity<Object> getUserRequestedstatements(){
+
+	public ResponseEntity<Object> getUserRequestedstatements() {
 		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		List<UserJob> statements = this.userJobRepository.findUserRequestedStatements(loggedInUser);
-		Map<String,Object> map = new HashMap<>();
-		map.put("success",true);
+		Map<String, Object> map = new HashMap<>();
+		map.put("success", true);
 		map.put("message", "Request complete");
-		if(!statements.isEmpty()) {
-			var st = statements.stream().map(s->{
-				   Map<String,Object> sMap = new HashMap<>();
-				   sMap.put("userId",s.getUser().getId());
-				   sMap.put("jobId", s.getJobId());
-				   sMap.put("owner",s.getJobOwner().getId());
-				   sMap.put("isRead",s.getIsRead());
-				   sMap.put("downloadLink",s.getDownloadLink());
-				   return sMap;
-			   }).collect(Collectors.toList());
-			map.put("statements",st);
-		}else {
+		if (!statements.isEmpty()) {
+			var st = statements.stream().map(s -> {
+				Map<String, Object> sMap = new HashMap<>();
+				sMap.put("userId", s.getUser().getId());
+				sMap.put("jobId", s.getJobId());
+				sMap.put("owner", s.getJobOwner().getId());
+				sMap.put("isRead", s.getIsRead());
+				sMap.put("downloadLink", s.getDownloadLink());
+				return sMap;
+			}).collect(Collectors.toList());
+			map.put("statements", st);
+		} else {
 			map.put("statements", new ArrayList<>());
 		}
 		return ResponseEntity.status(HttpStatus.OK).body(map);
 	}
-	
-	
-	//overload
-	
-	public ResponseEntity<Object> getUserRequestedstatements(String userId){
+
+	// overload
+
+	public ResponseEntity<Object> getUserRequestedstatements(String userId) {
 		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		Optional<User> user = this.userService.getUserById(userId);
-		if(user.isPresent()) {
-		    List<UserJob> statements = this.userJobRepository.findAdminStatementsByUser(loggedInUser,user.get());
-		    Map<String,Object> map = new HashMap<>();
-		    map.put("success",true);
-		    map.put("message", "Request complete");
-		    if(!statements.isEmpty()) {
-			   var st = statements.stream().map(s->{
-				   Map<String,Object> sMap = new HashMap<>();
-				   sMap.put("createdAt",s.getCreatedAt());
-				   sMap.put("userId",s.getUser().getId());
-				   sMap.put("jobId", s.getJobId());
-				   sMap.put("owner",s.getJobOwner().getId());
-				   sMap.put("isRead",s.getIsRead());
-				   sMap.put("downloadLink",s.getDownloadLink());
-				   return sMap;
-			   }).collect(Collectors.toList());
-			   map.put("statements",st);
-		    }else {
-			   map.put("statements", new ArrayList<>());
-		    }
-		    return ResponseEntity.status(HttpStatus.OK).body(map);
-		}else {
-			 Map<String,Object> map = new HashMap<>();
-			 map.put("success", false);
-			 map.put("message", "Uknown user");
-			 
-			 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		if (user.isPresent()) {
+			List<UserJob> statements = this.userJobRepository.findAdminStatementsByUser(loggedInUser, user.get());
+			Map<String, Object> map = new HashMap<>();
+			map.put("success", true);
+			map.put("message", "Request complete");
+			if (!statements.isEmpty()) {
+				var st = statements.stream().map(s -> {
+					Map<String, Object> sMap = new HashMap<>();
+					sMap.put("createdAt", s.getCreatedAt());
+					sMap.put("userId", s.getUser().getId());
+					sMap.put("jobId", s.getJobId());
+					sMap.put("owner", s.getJobOwner().getId());
+					sMap.put("isRead", s.getIsRead());
+					sMap.put("downloadLink", s.getDownloadLink());
+					return sMap;
+				}).collect(Collectors.toList());
+				map.put("statements", st);
+			} else {
+				map.put("statements", new ArrayList<>());
+			}
+			return ResponseEntity.status(HttpStatus.OK).body(map);
+		} else {
+			Map<String, Object> map = new HashMap<>();
+			map.put("success", false);
+			map.put("message", "Uknown user");
+
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 		}
-		
+
 	}
-	
-	public ResponseEntity<Object> updateStamentRead(String jobId){
+
+	public ResponseEntity<Object> updateStamentRead(String jobId) {
 		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		Optional<UserJob> userJob = this.userJobRepository.findUserJobByJobId(jobId);
-		if(userJob.isPresent()) {
-			 if(loggedInUser.getId().equalsIgnoreCase(userJob.get().getJobOwner().getId())) {
-                 userJob.get().setIsRead(true);                
-                 Map<String,Object> map =  new HashMap<>();
-                 map.put("success",true);
-                 map.put("message","Request complete");
-                 this.userJobRepository.save(userJob.get());
-                 return ResponseEntity.status(HttpStatus.OK).body(map);
-            }else {
-            	Map<String,Object> map =  new HashMap<>();
-            	map.put("success", false);
-            	map.put("message","No job ownership");
-            	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
-            }
-		}else {
-			Map<String,Object> map =  new HashMap<>();
+		if (userJob.isPresent()) {
+			if (loggedInUser.getId().equalsIgnoreCase(userJob.get().getJobOwner().getId())) {
+				userJob.get().setIsRead(true);
+				Map<String, Object> map = new HashMap<>();
+				map.put("success", true);
+				map.put("message", "Request complete");
+				this.userJobRepository.save(userJob.get());
+				return ResponseEntity.status(HttpStatus.OK).body(map);
+			} else {
+				Map<String, Object> map = new HashMap<>();
+				map.put("success", false);
+				map.put("message", "No job ownership");
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+			}
+		} else {
+			Map<String, Object> map = new HashMap<>();
 			map.put("success", false);
-        	map.put("message","Job does not exist");
-        	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+			map.put("message", "Job does not exist");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 		}
-            
-		
+
 	}
 
 }
