@@ -54,25 +54,24 @@ public class ChoiceBankSmsService {
 	}
 
 	public Object confirmOperation(String businessId, String otpCode) {
-		executor.submit(() -> {
-			var reqId = new HashMap<String, Object>();
-			reqId.put("businessId", businessId);
-			reqId.put("otpCode", otpCode);
-			var reqs = requestSigner.signRequest(reqId);
 
-			Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.CONFIRM_OTP)
-					.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
-					.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
+		var reqId = new HashMap<String, Object>();
+		reqId.put("businessId", businessId);
+		reqId.put("otpCode", otpCode);
+		var reqs = requestSigner.signRequest(reqId);
 
-			String responseJson = responseMono.block();
-			log.info(responseJson);
+		Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.CONFIRM_OTP)
+				.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
+				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 
-			if (responseJson != null) {
-				return new Gson().fromJson(responseJson, Object.class);
+		String responseJson = responseMono.block();
+		log.info(responseJson);
 
-			}
-			return null;
-		});
+		if (responseJson != null) {
+			return new Gson().fromJson(responseJson, Object.class);
+
+		}
 		return null;
+
 	}
 }
