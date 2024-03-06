@@ -20,7 +20,7 @@ move:
   script:
     - echo "Copying  from remote server to GitLab CI/CD..."
     - hostname
-    - main
+    - pwd
 
 
 
