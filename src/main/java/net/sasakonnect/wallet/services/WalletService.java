@@ -889,10 +889,7 @@ public class WalletService {
 
 		if (responseJson != null) {
 			var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
-			log.info("begun sending sms");
 			choiceBankSmsService.invokeSms(resp.getData().txId);
-			log.info("now returning");
-
 			return new Gson().fromJson(responseJson, Object.class);
 
 		}
