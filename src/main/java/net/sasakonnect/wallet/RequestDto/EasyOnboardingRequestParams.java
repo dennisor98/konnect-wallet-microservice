@@ -82,6 +82,10 @@ public class EasyOnboardingRequestParams {
 			return 102;
 
 		}
+		case "PASSPORT": {
+			return 103;
+
+		}
 		}
 		return 101;
 	}
@@ -94,6 +98,10 @@ public class EasyOnboardingRequestParams {
 		}
 		case "ALIEN_KENYA_ID": {
 			return IdType.ALIEN_KENYA_ID;
+
+		}
+		case "PASSPORT": {
+			return IdType.PASSPORT;
 
 		}
 		}
