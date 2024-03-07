@@ -448,6 +448,7 @@ public class WalletService {
 			} else {
 				savedUser.setOnboardingRequestId(onboardingRequestId.asText());
 				var updateduser = this.userService.updateUser(savedUser);
+				this.choiceBankSmsService.invokeSms(onboardingRequestId.asText());
 				return this.userService.createJwtFor(savedUser);
 
 			}

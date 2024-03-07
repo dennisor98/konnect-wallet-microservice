@@ -35,6 +35,8 @@ public class UserJob extends BaseWalletDomain implements Serializable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "requester_user_id", nullable = true) // Name of the foreign key column in UserJob table
 	private User jobOwner;
+	@Column(nullable = true, columnDefinition = "TEXT")
+	private String description;
 
 	public UserJob() {
 		this.isComplete = false; // Set default value
