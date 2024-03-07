@@ -1379,8 +1379,8 @@ public class WalletService {
 					System.out.println(responseJson);
 					String jobId = jsonObject.getAsJsonObject("data").get("jobId").getAsString();
 
-					var job = UserJob.builder().user(user.get()).jobId(jobId).jobOwner(loggedInUser).isAdmin(true)
-							.build();
+					var job = UserJob.builder().description(startDate.toString() + "-" + endDate.toString())
+							.user(user.get()).jobId(jobId).jobOwner(loggedInUser).isAdmin(true).build();
 					this.userJobRepository.save(job);
 					Map<String, Object> map = new HashMap<String, Object>();
 					map.put("message", "Please wait as we process your statement");
@@ -1412,6 +1412,8 @@ public class WalletService {
 				sMap.put("jobId", s.getJobId());
 				sMap.put("owner", s.getJobOwner().getId());
 				sMap.put("isRead", s.getIsRead());
+				sMap.put("createdAt", s.getCreatedAt());
+				sMap.put("description", s.getDescription());
 				sMap.put("downloadLink", s.getDownloadLink());
 				return sMap;
 			}).collect(Collectors.toList());
