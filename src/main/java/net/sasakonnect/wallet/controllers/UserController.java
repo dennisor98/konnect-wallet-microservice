@@ -70,7 +70,6 @@ public class UserController {
 	@PostMapping("refresh/token")
 	@RefreshMiddleware()
 	public ResponseEntity refreshToken() {
-
 		return userService.createRefreshToken();
 	}
 

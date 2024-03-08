@@ -122,8 +122,8 @@ public class AdministrationController {
 	}
 
 	@GetMapping("/users/getAll")
-	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAllUsers.PERMISSION + "')")
-	@RequirePermission(GlobalPermissionConstants.ViewAllUsers.PERMISSION)
+//	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAllUsers.PERMISSION + "')")
+//	@RequirePermission(GlobalPermissionConstants.ViewAllUsers.PERMISSION)
 	public ResponseEntity<Object> getAllUsers(
 			@RequestParam(name = "pageSize", defaultValue = "100") Integer pageSize,
 			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber
