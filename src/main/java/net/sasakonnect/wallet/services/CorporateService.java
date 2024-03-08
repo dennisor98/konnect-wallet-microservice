@@ -39,19 +39,19 @@ public class CorporateService {
  public Object createCorporateDetails(Corporate corporate) {
 	 Map<String, Object> map = new HashMap<>();
 	 Map<String, Object> payloadMap = new HashMap<>();
-	  Optional<Role> role = this.roleRepository.findByRoleName("CORPORATE");
+//	  Optional<Role> role = this.roleRepository.findByRoleName("CORPORATE");
 	  Optional<User> user = this.userRepository.findByMobile(corporate.getPhone());
-	  if(role.isPresent() && user.isPresent()) {
-		  UserRoleDTO userRole = UserRoleDTO.builder()
-				  .roleId(role.get().getId())
-				  .userId(user.get().getId())
-				  .build();
-		  try {
-			   this.roleService.attachUserToRole(userRole);
-		  }catch(Exception ex) {
-			 System.out.println("ERROR"+ex);	
-		  }
-		  
+//	  if(role.isPresent() && user.isPresent()) {
+//		  UserRoleDTO userRole = UserRoleDTO.builder()
+//				  .roleId(role.get().getId())
+//				  .userId(user.get().getId())
+//				  .build();
+//		  try {
+//			   this.roleService.attachUserToRole(userRole);
+//		  }catch(Exception ex) {
+//			 System.out.println("ERROR"+ex);	
+//		  }
+		  if(user.isPresent()) {
 		  CorporateDetails cop  =  CorporateDetails.builder()
 				  .phone(corporate.getPhone())
 				  .corporateEmail(corporate.getEmail())
@@ -69,12 +69,12 @@ public class CorporateService {
 		  
 		 
 		 map.put("success",true);
-		 map.put("message","User Role updated");
+		 map.put("message","User added to corporate");
 		 payloadMap.put("payload",map);
 		 return ResponseEntity.status(HttpStatus.OK).body(payloadMap);
 	  }else {
 		     map.put("success",false);
-			 map.put("message","Unable to process Request");
+			 map.put("message","User not found");
 		  return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 	  }
 	  
