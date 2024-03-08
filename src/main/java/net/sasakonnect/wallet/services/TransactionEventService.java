@@ -32,7 +32,7 @@ public class TransactionEventService {
 			if(contact.isEmpty()) {
 				
 				//send notification
-				smsService.sendSms(null, phone);
+				smsService.sendSms(null, "+254"+phone);
 				//record contact as notified
 				var notified = NotifiedContact.builder()
 						.contact(phone)

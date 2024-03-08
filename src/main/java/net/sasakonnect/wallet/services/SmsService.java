@@ -2,7 +2,11 @@ package net.sasakonnect.wallet.services;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.provider.SmsManager;
+
+@Slf4j
 
 @Service
 public class SmsService {
@@ -20,10 +24,11 @@ public class SmsService {
 	public void sendSms(String template,String contact) {
 		StringBuilder stringbuilder = new StringBuilder();
 
-		if (template == null) {
-			template = this.template;
-		}
-		stringbuilder.append(template);
+//		if (template == null) {
+//			template = this.template;
+//		}
+		stringbuilder.append(this.template);
+		log.info(stringbuilder.toString());
 	    smsManager.sendMessage(stringbuilder.toString(),contact);
 			
 	}
