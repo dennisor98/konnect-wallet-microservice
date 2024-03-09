@@ -964,6 +964,7 @@ public class WalletService {
 		reqId.put("amount", choiceTransfer.getAmount());
 		reqId.put("otpMobile", user.getMobile());
 		reqId.put("otpType", choiceTransfer.getOtpType());
+		reqId.put("remark", choiceTransfer.getRemarks());
 
 		var reqs = this.requestSigner.signRequest(reqId);
 
