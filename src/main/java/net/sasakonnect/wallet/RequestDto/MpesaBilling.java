@@ -26,7 +26,7 @@ public class MpesaBilling {
 	@Positive
 	public Integer amount;
 
-	@NotBlank
+	@Nullable
 	public String shortNote;
 
 	public String otpType = "SMS";
