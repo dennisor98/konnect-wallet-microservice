@@ -404,6 +404,35 @@ public class TransactionService {
 
 	}
 	
+	public ResponseEntity<Object> getRecentTransactionContact(String accountId,String transactionType,Integer pageNumber,Integer pageSize) {
+		Page<Transaction> recentTransactions = this.transactionRepository.findRecentTransactionContactByTxType(transactionType, accountId,PageRequest.of(pageNumber,pageSize));
+	   Map<String,Object> payload = new HashMap<>();
+		if(!recentTransactions.isEmpty()) {
+		 var rt =  recentTransactions.stream().map(t->{
+			   return t.getOppoAccountId();
+		   }).collect(Collectors.toList());
+		   Map<String,Object> map = new HashMap<>();
+		   map.put("success",true);
+		   map.put("message","Request completed");
+		   map.put("contacts",rt);
+		   payload.put("payload", map);
+		   map.put("pageSize", recentTransactions.getSize());
+		   map.put("currentPage", recentTransactions.getNumber());
+		   map.put("nextPage", recentTransactions.hasNext() ? recentTransactions.nextPageable().getPageNumber() : null);
+		   map.put("hasNextPage", recentTransactions.hasNext());
+		   map.put("hasPreviousPage", recentTransactions.hasPrevious());
+		return ResponseEntity.status(HttpStatus.OK).body(payload);
+	   }else {
+		   Map<String,Object> map = new HashMap<>();
+		   map.put("success",true);
+		   map.put("message","Request completed");
+		   map.put("contacts",new ArrayList<>());
+		   payload.put("payload", map);
+		   return ResponseEntity.status(HttpStatus.OK).body(payload);
+	   }
+	   
+	}
+	
 	
 
 }

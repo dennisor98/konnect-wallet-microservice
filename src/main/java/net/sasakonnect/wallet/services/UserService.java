@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -1033,6 +1034,34 @@ public class UserService extends RestClientService implements UserDetailsService
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(map);
 
+	}
+	
+	public ResponseEntity<Object> getUserPermissions(){
+		User u = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	Optional<UserRole> role = this.userRoleRepository.findUserRoleByUserId(u.getId());
+		if(role.isPresent()) {
+			Map<String,Object> map = new HashMap<String,Object>();
+			map.put("success",true);
+			map.put("message","Request complete");
+			map.put("role",role.get().getRole().getRoleName());
+			map.put("permissions",role.get().getRole().getRolePermissions().stream().map(r->{
+				Map<String,Object> per = new HashMap<String,Object>();
+				var p=r.getPermission();
+				per.put("id",p.getId());
+				per.put("name",p.getName());
+				per.put("description", p.getDescription());
+
+				return per;
+			}).collect(Collectors.toList()));
+			return ResponseEntity.status(HttpStatus.OK).body(map);
+		}else {
+			Map<String,Object> map = new HashMap<String,Object>();
+			map.put("success",true);
+			map.put("message","Request complete");
+			map.put("role",null);
+			map.put("permissions",new ArrayList<>());
+			return ResponseEntity.status(HttpStatus.OK).body(map); 
+		}
 	}
 
 }
