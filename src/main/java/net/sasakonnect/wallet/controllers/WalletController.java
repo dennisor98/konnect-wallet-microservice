@@ -270,7 +270,7 @@ public class WalletController {
 		return walletService.updateStamentRead(jobId);
 	}
 	
-	@GetMapping("/recentContact")
+	@GetMapping("/transaction/recentContact")
 	public ResponseEntity<Object> getRecentTransactionContact(
 			@RequestParam(name="txType") String txType,
 			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
