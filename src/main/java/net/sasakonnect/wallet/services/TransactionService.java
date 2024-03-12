@@ -56,7 +56,7 @@ public class TransactionService {
 					.balance(trans.getBalance() == null ? null : new BigDecimal(trans.getBalance()))
 					.oppoBankCode(trans.getOppoBankCode()).requestId(results.getRequestId())
 					// .extInfo(trans.getExtInfo().toString())
-					.notificationType(trans.getTxType())
+					.notificationType(results.getNotificationType())
 					.feeAmount(trans.getFeeAmount() != null ? new BigDecimal(trans.getFeeAmount()) : new BigDecimal(0))
 					// .mpesaBusinessPayType(trans.getMpesaBusinessPayType())
 					.txStatus(trans.getTxStatus())
@@ -121,13 +121,14 @@ public class TransactionService {
 
 		return null;
 	}
-	
-	public ResponseEntity<Object> searchTransaction(String queryString,Integer pageNumber,Integer pageSize){
-		Page<Transaction> transactions = this.transactionRepository.searchTransaction(queryString,PageRequest.of(pageNumber,pageSize));
-		Map<String,Object> data = new HashMap<>();
-		if(!transactions.isEmpty()) {
+
+	public ResponseEntity<Object> searchTransaction(String queryString, Integer pageNumber, Integer pageSize) {
+		Page<Transaction> transactions = this.transactionRepository.searchTransaction(queryString,
+				PageRequest.of(pageNumber, pageSize));
+		Map<String, Object> data = new HashMap<>();
+		if (!transactions.isEmpty()) {
 			data.put("success", true);
-			data.put("message","successful");
+			data.put("message", "successful");
 			data.put("totalRows", Double.valueOf(transactions.getTotalElements()));
 			data.put("pageSize", transactions.getSize());
 			data.put("currentPage", transactions.getNumber());
@@ -135,9 +136,9 @@ public class TransactionService {
 			data.put("hasNextPage", transactions.hasNext());
 			data.put("hasPreviousPage", transactions.hasPrevious());
 			data.put("transactions", transactions.get().collect(Collectors.toList()));
-			
+
 			return ResponseEntity.status(HttpStatus.OK).body(data);
-		}else {
+		} else {
 			data.put("success", false);
 			data.put("message", "No matching records");
 			data.put("transactions", new ArrayList<>());
@@ -262,42 +263,43 @@ public class TransactionService {
 
 		return ResponseEntity.status(HttpStatus.OK).body(transMap);
 	}
-	
-	public ResponseEntity<Object> getWalletTransactionBehaviour(){
+
+	public ResponseEntity<Object> getWalletTransactionBehaviour() {
 		var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		List<Wallet> wallet = this.walletRepository.findByUserWalletsUser(user);
-		
-		if(!wallet.isEmpty()) {
-			List<Object[]> transactions = this.transactionRepository.findWalletTransactionBehaviour(wallet.get(0).getAccountId());
-			
-			if(!transactions.isEmpty()) {
-				
+
+		if (!wallet.isEmpty()) {
+			List<Object[]> transactions = this.transactionRepository
+					.findWalletTransactionBehaviour(wallet.get(0).getAccountId());
+
+			if (!transactions.isEmpty()) {
+
 				var userTransactions = transactions.stream().map(transaction -> {
-					Map<String,Object> map = new HashMap<>();
-					 map.put("transferInCount",transaction[1]);
-				     map.put("transferOutCount",transaction[0]);
-				     map.put("transferInAmount", transaction[2]);
-				     map.put("transferOutAmount", transaction[3]);
-				     map.put("utilityCount", transaction[4]);
-				     map.put("utilityAmount", transaction[5]);
-				     return map;
+					Map<String, Object> map = new HashMap<>();
+					map.put("transferInCount", transaction[1]);
+					map.put("transferOutCount", transaction[0]);
+					map.put("transferInAmount", transaction[2]);
+					map.put("transferOutAmount", transaction[3]);
+					map.put("utilityCount", transaction[4]);
+					map.put("utilityAmount", transaction[5]);
+					return map;
 				}).collect(Collectors.toList());
-				Map<String,Object> map = new HashMap<>();
-				map.put("success",true);
-				map.put("message","Request successful");
+				Map<String, Object> map = new HashMap<>();
+				map.put("success", true);
+				map.put("message", "Request successful");
 				map.put("transactions", userTransactions.stream().toList());
 				return ResponseEntity.status(HttpStatus.OK).body(map);
-				
-			}else {
-				Map<String,Object> map = new HashMap<>();
-				map.put("success",true);
-				map.put("message","No transactions found");
-				map.put("transactions",new ArrayList<>());
+
+			} else {
+				Map<String, Object> map = new HashMap<>();
+				map.put("success", true);
+				map.put("message", "No transactions found");
+				map.put("transactions", new ArrayList<>());
 				return ResponseEntity.status(HttpStatus.OK).body(map);
 			}
-			
+
 		}
-	 return null;	
+		return null;
 	}
 
 	public ResponseEntity<Object> getWalletTransactionRanks(Integer pageNumber, Integer pageSize) {
@@ -403,6 +405,7 @@ public class TransactionService {
 		return true;
 
 	}
+<<<<<<< HEAD
 	
 	public ResponseEntity<Object> getRecentTransactionContact(String accountId,String transactionType,Integer pageNumber,Integer pageSize) {
 		Page<Transaction> recentTransactions = this.transactionRepository.findRecentTransactionContactByTxType(transactionType, accountId,PageRequest.of(pageNumber,pageSize));
@@ -434,5 +437,7 @@ public class TransactionService {
 	}
 	
 	
+=======
+>>>>>>> a75b0a44eed08a00d0b21cdaaf219ead7c7810db
 
 }
