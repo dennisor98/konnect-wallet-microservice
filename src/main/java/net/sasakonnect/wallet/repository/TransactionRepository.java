@@ -34,11 +34,15 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
 			+ "AND (account1 IS NOT NULL AND account2 IS NOT NULL) "
 			+ "AND (account1 != 'string' AND account2 != 'string')")
 	List<Object[]> findDistinctInteractions(@Param("accountId") String accountId);
-
-	@Query("SELECT t FROM Transaction t WHERE ((t.accountId =:accountId)  OR (t.accountId  =:accountId AND t.txType ='TTID0003'))  ORDER BY t.createdAt DESC")
+  
+	@Override
+	 @Query("SELECT t FROM Transaction t ORDER BY t.updatedAt DESC")
+	 Page<Transaction> findAll(Pageable page);
+	
+	@Query("SELECT t FROM Transaction t WHERE ((t.accountId =:accountId)  OR (t.accountId  =:accountId AND t.txType ='TTID0003'))  ORDER BY t.updatedAt DESC")
 	Page<Transaction> findByAccountId(@Param("accountId") String accountId, Pageable pageable);
 
-	@Query("SELECT t FROM Transaction t ORDER BY t.createdAt DESC")
+	@Query("SELECT t FROM Transaction t ORDER BY t.updatedAt DESC")
 	Page<Transaction> findRecentTransactions(Pageable pageable);
 
 	@Query("SELECT COUNT(t) FROM Transaction t WHERE t.txStatus = 8 AND t.oppoAccountId =:accountId")
@@ -47,7 +51,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
 	@Query("SELECT COUNT(t)  FROM Transaction t WHERE t.txStatus = 8 AND t.accountId =:accountId ")
 	Long findAllSent(@Param("accountId") String accountId);
 
-	@Query("SELECT COUNT(t) FROM Transaction t WHERE (t.accountId =:accountId OR t.oppoAccountId =:accountId) AND t.txStatus = 8 ")
+	@Query("SELECT COUNT(t) FROM Transaction t WHERE (t.accountId =:accountId OR t.oppoAccountId =:accountId) AND t.txStatus = 8 ORDER BY t.updatedAt DESC ")
 	Long findCountByAccountId(@Param("accountId") String accountId);
   
 	@Query("SELECT t FROM Transaction t WHERE ((LOWER(t.accountId) LIKE %:queryString%) OR (LOWER(t.accountId) LIKE %:queryString% AND t.txType ='TTID0003') OR LOWER(t.txId) LIKE %:queryString% OR LOWER(t.accountName) LIKE %:queryString%) OR LOWER(t.oppoAccountId) LIKE %:queryString% OR LOWER(t.oppoAccountName) LIKE %:queryString% ORDER BY t.createdAt DESC")	
@@ -73,6 +77,9 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
 		       "(SELECT COUNT(t) as transfer_in, SUM(t.amount) as transfer_in_amount FROM Transaction t WHERE (t.amount > 0 AND t.accountId = :accountId OR t.oppoAccountId = :accountId) AND t.txStatus = 8) AS t_in, " +
 		       "(SELECT COUNT(t) as transfer_in, SUM(t.amount) as transfer_in_amount FROM Transaction t WHERE (t.amount > 0 AND (t.accountId = :accountId AND t.txType = 'TTID0006') OR (t.oppoAccountId = :accountId AND t.txType = 'TTID0006')) AND t.txStatus = 8) AS utility")
 		List<Object[]> findWalletTransactionBehaviour(@Param("accountId") String accountId);
+		
+   @Query("SELECT t FROM Transaction t WHERE t.txType =:txType AND t.accountId =:accountId ORDER BY t.updatedAt DESC")
+   Page<Transaction> findRecentTransactionContactByTxType(@Param("txType") String txType,@Param("accountId") String accountId,Pageable page);
 
 
 

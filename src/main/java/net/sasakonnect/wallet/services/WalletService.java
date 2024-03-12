@@ -1484,5 +1484,15 @@ public class WalletService {
 		}
 
 	}
+	
+	public ResponseEntity<Object> getRecentTransactionContact(String txtype,Integer pageNumber,Integer pageSize){
+		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		var wallets = this.walletRepository.findByUserWalletsUser(loggedInUser);
+		if(!wallets.isEmpty()) {
+			var currentWallet = wallets.get(0);
+			return this.transactionService.getRecentTransactionContact(currentWallet.getAccountId(), txtype, pageNumber, pageSize);
+		}
+		return null;
+	}
 
 }

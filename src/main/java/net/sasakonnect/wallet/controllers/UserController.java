@@ -97,5 +97,10 @@ public class UserController {
 	public ResponseEntity<Object> getUserProfile() {
 		return this.userService.getAuthenticatedUserProfile();
 	}
+	
+	@GetMapping("permissions")
+	public ResponseEntity<Object> getUserRolesAndPermissions() {
+		return this.userService.getUserPermissions();
+	}
 
 }

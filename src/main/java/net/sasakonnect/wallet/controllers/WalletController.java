@@ -269,5 +269,14 @@ public class WalletController {
 	public Object updateStatementRead(@RequestParam(name = "jobId") String jobId) {
 		return walletService.updateStamentRead(jobId);
 	}
+	
+	@GetMapping("/recentContact")
+	public ResponseEntity<Object> getRecentTransactionContact(
+			@RequestParam(name="txType") String txType,
+			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
+			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+
+		return this.walletService.getRecentTransactionContact(txType, pageNumber, pageSize);
+	}
 
 }
