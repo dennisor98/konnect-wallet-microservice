@@ -53,12 +53,12 @@ public class MerchantWoker {
 	public void notifyMerchantIncomingPayment(Object walletClientService, SdkPayDto pay) {
 		try {
 			ObjectMapper objectMapper = new ObjectMapper();
-			var data = (LinkedTreeMap<String, Object>) walletClientService;
+			var data = (net.sasakonnect.wallet.ResponseDto.TransactionResponseDto) walletClientService;
 			System.out.println(walletClientService);
 
 			var clientApp = clientAppsBean.getWalletClient();
 
-			pay.getPayload().put("txtId", ((LinkedTreeMap) data.get("data")).get("txId"));
+			pay.getPayload().put("txtId",data.getData().txId);
 
 			String jsonRequestBody;
 

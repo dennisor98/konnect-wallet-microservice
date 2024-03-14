@@ -1117,7 +1117,8 @@ public class WalletService {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+     
+	//overload
 	public Object requestWalletDeduction(@Valid SdkPayDto sdkpayDto, WalletClient clientApp) {
 		var account = clientApp.getWalletClientAccount();
 		System.out.println(account.get(0).getId());
@@ -1334,7 +1335,7 @@ public class WalletService {
 				var job = UserJob.builder().user(loggedInUser).jobOwner(loggedInUser).jobId(jobId).isAdmin(false)
 						.build();
 				this.userJobRepository.save(job);
-				Map<String, Object> map = new HashMap<String, Object>();
+				Map<String, Object> map = new HashMap<String,Object>();
 				map.put("message", "Please wait as we process your statement");
 				map.put("success", true);
 				return ResponseEntity.status(HttpStatus.OK).body(map);
