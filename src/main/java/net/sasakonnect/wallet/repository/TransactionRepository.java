@@ -72,11 +72,13 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
 	@Query("SELECT t FROM Transaction t WHERE t.txId =:txId")
 	Optional<Transaction> findTransactionByTxtId(@Param("txId") String txId);
 	
-	@Query("SELECT t_out.transfer_out, t_in.transfer_in, t_out.transfer_out_amount, t_in.transfer_in_amount, utility.transfer_in, utility.transfer_in_amount " +
-		       "FROM (SELECT COUNT(t) as transfer_out, SUM(t.amount) as transfer_out_amount FROM Transaction t WHERE (t.amount < 0 AND t.accountId = :accountId OR t.oppoAccountId = :accountId) AND t.txStatus = 8) AS t_out, " +
-		       "(SELECT COUNT(t) as transfer_in, SUM(t.amount) as transfer_in_amount FROM Transaction t WHERE (t.amount > 0 AND t.accountId = :accountId OR t.oppoAccountId = :accountId) AND t.txStatus = 8) AS t_in, " +
-		       "(SELECT COUNT(t) as transfer_in, SUM(t.amount) as transfer_in_amount FROM Transaction t WHERE (t.amount > 0 AND (t.accountId = :accountId AND t.txType = 'TTID0006') OR (t.oppoAccountId = :accountId AND t.txType = 'TTID0006')) AND t.txStatus = 8) AS utility")
-		List<Object[]> findWalletTransactionBehaviour(@Param("accountId") String accountId);
+	@Query("SELECT IFNULL(ABS(t_out.toMpesa), 0), IFNULL(ABS(w.toWallet), 0), IFNULL(ABS(r.received), 0), IFNULL(ABS(tb.tillPaybill), 0), IFNULL(ABS(u.utility), 0) " +
+		       "FROM (SELECT SUM(t.amount) as toMpesa FROM Transaction t WHERE t.amount < 0 AND t.accountId = :accountId AND t.txType = 'TTID0001' AND t.txStatus = 8 AND YEAR(t.updatedAt) = :year AND MONTH(t.updatedAt) = :month) AS t_out, " +
+		       "(SELECT SUM(t.amount) as toWallet FROM Transaction t WHERE t.amount < 0 AND t.accountId = :accountId AND t.txType = 'TTID0002' AND t.txStatus = 8 AND YEAR(t.updatedAt) = :year AND MONTH(t.updatedAt) = :month) AS w, "+
+		       "(SELECT SUM(t.amount) as received FROM Transaction t WHERE t.amount > 0 AND t.oppoAccountId = :accountId AND t.txType = 'TTID0003' AND t.txStatus = 8 AND YEAR(t.updatedAt) = :year AND MONTH(t.updatedAt) = :month) AS r, "+
+		       "(SELECT SUM(t.amount) as tillPaybill FROM Transaction t WHERE t.amount < 0 AND t.accountId = :accountId AND t.txType = 'TTID0005' AND t.txStatus = 8 AND YEAR(t.updatedAt) = :year AND MONTH(t.updatedAt) = :month) AS tb, " +
+		       "(SELECT SUM(t.amount) as utility FROM Transaction t WHERE t.amount < 0 AND ((t.accountId = :accountId AND t.txType = 'TTID0006') OR (t.oppoAccountId = :accountId AND t.txType = 'TTID0006')) AND t.txStatus = 8 AND YEAR(t.updatedAt) = :year AND MONTH(t.updatedAt) = :month) AS u")
+	List<Object[]> findWalletTransactionBehaviour(@Param("accountId") String accountId,@Param("year") String year,@Param("month") String month);
 		
    @Query("SELECT t FROM Transaction t WHERE t.txType =:txType AND t.accountId =:accountId ORDER BY t.updatedAt DESC")
    Page<Transaction> findRecentTransactionContactByTxType(@Param("txType") String txType,@Param("accountId") String accountId,Pageable page);

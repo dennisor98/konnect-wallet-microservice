@@ -263,23 +263,22 @@ public class TransactionService {
 		return ResponseEntity.status(HttpStatus.OK).body(transMap);
 	}
 	
-	public ResponseEntity<Object> getWalletTransactionBehaviour(){
+	public ResponseEntity<Object> getWalletTransactionBehaviour(String year,String month){
 		var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		List<Wallet> wallet = this.walletRepository.findByUserWalletsUser(user);
 		
 		if(!wallet.isEmpty()) {
-			List<Object[]> transactions = this.transactionRepository.findWalletTransactionBehaviour(wallet.get(0).getAccountId());
+			List<Object[]> transactions = this.transactionRepository.findWalletTransactionBehaviour(wallet.get(0).getAccountId(),year,month);
 			
 			if(!transactions.isEmpty()) {
 				
 				var userTransactions = transactions.stream().map(transaction -> {
 					Map<String,Object> map = new HashMap<>();
-					 map.put("transferInCount",transaction[1]);
-				     map.put("transferOutCount",transaction[0]);
-				     map.put("transferInAmount", transaction[2]);
-				     map.put("transferOutAmount", transaction[3]);
-				     map.put("utilityCount", transaction[4]);
-				     map.put("utilityAmount", transaction[5]);
+					 map.put("toMpesa",transaction[0]);
+				     map.put("toWallet",transaction[1]);
+				     map.put("received", transaction[2]);
+				     map.put("toTillsAndPaybills", transaction[3]);
+				     map.put("utilityPayments", transaction[4]);
 				     return map;
 				}).collect(Collectors.toList());
 				Map<String,Object> map = new HashMap<>();

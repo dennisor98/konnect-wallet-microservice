@@ -235,8 +235,11 @@ public class WalletController {
 	}
 
 	@GetMapping("spending")
-	public ResponseEntity<Object> getTransactionBehaviour() {
-		return this.transactionService.getWalletTransactionBehaviour();
+	public ResponseEntity<Object> getTransactionBehaviour(
+			@RequestParam("year") String year,
+			@RequestParam("month") String month
+			) {
+		return this.transactionService.getWalletTransactionBehaviour(year,month);
 	}
 
 //
