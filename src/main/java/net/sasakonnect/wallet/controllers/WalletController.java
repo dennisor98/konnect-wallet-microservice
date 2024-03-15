@@ -278,8 +278,7 @@ public class WalletController {
 			@RequestParam(name="txType") String txType,
 			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
 			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
-
-		return this.walletService.getRecentTransactionContact(txType, pageNumber, pageSize);
+		return this.walletService.getRecentTransactionContact(txType,pageNumber,pageSize);
 	}
 
 }
