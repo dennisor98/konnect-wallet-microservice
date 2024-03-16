@@ -404,11 +404,15 @@ public class TransactionService {
 	}
 	
 	public ResponseEntity<Object> getRecentTransactionContact(String accountId,String transactionType,Integer pageNumber,Integer pageSize) {
-		Page<Transaction> recentTransactions = transactionType.equalsIgnoreCase("wallet") ? this.transactionRepository.findWalletToWalletTransContact(transactionType,accountId,PageRequest.of(pageNumber,pageSize)): this.transactionRepository.findRecentTransactionContactByTxType(transactionType, accountId,PageRequest.of(pageNumber,pageSize));
+		Page<Transaction> recentTransactions = transactionType.equalsIgnoreCase("wallet") ? this.transactionRepository.findWalletToWalletTransContact("TTID0002",accountId,PageRequest.of(pageNumber,pageSize)): this.transactionRepository.findRecentTransactionContactByTxType(transactionType, accountId,PageRequest.of(pageNumber,pageSize));
 	   Map<String,Object> payload = new HashMap<>();
 		if(!recentTransactions.isEmpty()) {
 		 var rt =  recentTransactions.stream().map(t->{
-			   return t.getOppoAccountId();
+			 Map<String,Object> map = new HashMap<>();
+			 map.put("accountId",t.getOppoAccountId());
+			 map.put("accountName",t.getOppoAccountName());
+			 map.put("subAccountId",t.getOppoSubAccount());		
+			 return map;
 		   }).collect(Collectors.toList());
 		   Map<String,Object> map = new HashMap<>();
 		   map.put("success",true);
