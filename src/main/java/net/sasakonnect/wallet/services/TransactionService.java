@@ -404,7 +404,7 @@ public class TransactionService {
 	}
 	
 	public ResponseEntity<Object> getRecentTransactionContact(String accountId,String transactionType,Integer pageNumber,Integer pageSize) {
-		Page<Transaction> recentTransactions = transactionType.equalsIgnoreCase("TTID0002") ? this.transactionRepository.findWalletToWalletTransContact(transactionType,accountId,PageRequest.of(pageNumber,pageSize)): this.transactionRepository.findRecentTransactionContactByTxType(transactionType, accountId,PageRequest.of(pageNumber,pageSize));
+		Page<Transaction> recentTransactions = transactionType.equalsIgnoreCase("wallet") ? this.transactionRepository.findWalletToWalletTransContact(transactionType,accountId,PageRequest.of(pageNumber,pageSize)): this.transactionRepository.findRecentTransactionContactByTxType(transactionType, accountId,PageRequest.of(pageNumber,pageSize));
 	   Map<String,Object> payload = new HashMap<>();
 		if(!recentTransactions.isEmpty()) {
 		 var rt =  recentTransactions.stream().map(t->{
