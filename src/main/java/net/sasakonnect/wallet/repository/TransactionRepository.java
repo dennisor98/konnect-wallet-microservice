@@ -80,7 +80,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
 		       "(SELECT SUM(t.amount) as utility FROM Transaction t WHERE t.amount < 0 AND ((t.accountId = :accountId AND t.txType = 'TTID0006') OR (t.oppoAccountId = :accountId AND t.txType = 'TTID0006')) AND t.txStatus = 8 AND YEAR(t.updatedAt) = :year AND MONTH(t.updatedAt) = :month) AS u")
 	List<Object[]> findWalletTransactionBehaviour(@Param("accountId") String accountId,@Param("year") String year,@Param("month") String month);
 		
-   @Query("SELECT t FROM Transaction t WHERE t.txType =:txType AND t.accountId =:accountId ORDER BY t.updatedAt DESC")
+   @Query("SELECT t FROM Transaction t WHERE t.txType = :txType AND t.accountId = :accountId AND t.id IN (SELECT MIN(t2.id) FROM Transaction t2 WHERE t2.txType = :txType AND t2.accountId = :accountId AND t2.oppoAccountId IN (SELECT w.accountId FROM Wallet w) GROUP BY t2.oppoAccountId) ORDER BY t.updatedAt DESC")
    Page<Transaction> findRecentTransactionContactByTxType(@Param("txType") String txType,@Param("accountId") String accountId,Pageable page);
    
    @Query("SELECT t FROM Transaction t WHERE t.txType = :txType AND t.accountId = :accountId AND t.oppoAccountId IN (SELECT w.accountId FROM Wallet w) AND t.id IN (SELECT MIN(t2.id) FROM Transaction t2 WHERE t2.txType = :txType AND t2.accountId = :accountId AND t2.oppoAccountId IN (SELECT w.accountId FROM Wallet w) GROUP BY t2.oppoAccountId) ORDER BY t.updatedAt DESC")
