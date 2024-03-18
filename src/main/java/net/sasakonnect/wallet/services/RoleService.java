@@ -1,11 +1,15 @@
 package net.sasakonnect.wallet.services;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -204,6 +208,42 @@ public class RoleService {
 		  map.put("message","Request successful");
 		  map.put("success", "true");
 		  map.put("permissions",permissions);
+		  resMap.put("payload",map);
+		  return ResponseEntity.status(HttpStatus.OK).body(resMap);
+	  }else {
+		  map.put("message","Role Not Found");
+		  map.put("success", "true");
+		  resMap.put("payload",map);
+		  return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resMap);
+   	  }
+	}
+	
+	public Object getRoleUsers(String roleId,Integer pageNumber,Integer pageSize) {
+		Optional<Role> role =  this.roleRepository.findById(roleId);
+		Map<String,Object> map = new HashMap<>();
+		Map<String,Object> resMap = new HashMap<>();
+	  if(!role.isEmpty()) {
+		  Page<UserRole> userRole = this.userRoleRepository.findUserRoleByRole(role.get(),PageRequest.of(pageNumber,pageSize));
+		  var users = !userRole.isEmpty() ? 
+				  userRole.stream().map(ur->{
+					 Map<String,Object> usersMap = new HashMap<>();
+					 usersMap.put("id",ur.getUser().getId());
+					 usersMap.put("firstName",ur.getUser().getFirstName());
+					 usersMap.put("middleName",ur.getUser().getMiddleName());
+					 usersMap.put("lastName",ur.getUser().getLastName());
+					 usersMap.put("mobile",ur.getUser().getMobile());
+					 
+					 return usersMap;
+				  }).collect(Collectors.toList())
+				  : new ArrayList<>();
+ 		  map.put("message","Request successful");
+		  map.put("success", "true");
+		  map.put("pageSize", userRole.getSize());
+		   map.put("currentPage", userRole.getNumber());
+		   map.put("nextPage", userRole.hasNext() ? userRole.nextPageable().getPageNumber() : null);
+		   map.put("hasNextPage", userRole.hasNext());
+		   map.put("hasPreviousPage", userRole.hasPrevious());
+		  map.put("users",users);
 		  resMap.put("payload",map);
 		  return ResponseEntity.status(HttpStatus.OK).body(resMap);
 	  }else {
