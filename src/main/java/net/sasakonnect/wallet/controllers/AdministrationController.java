@@ -284,6 +284,14 @@ public class AdministrationController {
 
 		return this.roleService.getRolePermissionsByRoleId(roleId);
 	}
+	
+	@GetMapping("/role/users")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAllRoles.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.ViewAllRoles.PERMISSION)
+	public Object getRoleUsers(@RequestParam(name = "roleId", required = true) String roleId) {
+
+		return this.roleService.getRoleUsers(roleId);
+	}
 
 	@PutMapping("/permission")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.EditPermission.PERMISSION + "')")

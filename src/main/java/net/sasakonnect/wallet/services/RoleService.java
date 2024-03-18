@@ -1,9 +1,11 @@
 package net.sasakonnect.wallet.services;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -204,6 +206,37 @@ public class RoleService {
 		  map.put("message","Request successful");
 		  map.put("success", "true");
 		  map.put("permissions",permissions);
+		  resMap.put("payload",map);
+		  return ResponseEntity.status(HttpStatus.OK).body(resMap);
+	  }else {
+		  map.put("message","Role Not Found");
+		  map.put("success", "true");
+		  resMap.put("payload",map);
+		  return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resMap);
+   	  }
+	}
+	
+	public Object getRoleUsers(String roleId) {
+		Optional<Role> role =  this.roleRepository.findById(roleId);
+		Map<String,Object> map = new HashMap<>();
+		Map<String,Object> resMap = new HashMap<>();
+	  if(!role.isEmpty()) {
+		  var userRole = this.userRoleRepository.findUserRoleByRole(role.get());
+		  var users = !userRole.isEmpty() ? 
+				  userRole.stream().map(ur->{
+					 Map<String,Object> usersMap = new HashMap<>();
+					 usersMap.put("id",ur.getUser().getId());
+					 usersMap.put("firstName",ur.getUser().getFirstName());
+					 usersMap.put("middleName",ur.getUser().getMiddleName());
+					 usersMap.put("lastName",ur.getUser().getLastName());
+					 usersMap.put("mobile",ur.getUser().getMobile());
+					 
+					 return usersMap;
+				  }).collect(Collectors.toList())
+				  : new ArrayList<>();
+ 		  map.put("message","Request successful");
+		  map.put("success", "true");
+		  map.put("users",users);
 		  resMap.put("payload",map);
 		  return ResponseEntity.status(HttpStatus.OK).body(resMap);
 	  }else {
