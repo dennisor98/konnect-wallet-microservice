@@ -3,6 +3,8 @@ package net.sasakonnect.wallet.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -18,7 +20,7 @@ public interface UserRoleRepository extends JpaRepository<UserRole, String> {
 	
 	Optional<UserRole> findUserRoleByUserId(@Param("userId") String userId);
 	
-	List<UserRole> findUserRoleByRole(Role role);
+	Page<UserRole> findUserRoleByRole(Role role,Pageable page);
 	
 	
 	@Query("SELECT ur FROM UserRole ur WHERE ur.roleId =:roleId AND ur.userId =:userId")

@@ -288,9 +288,13 @@ public class AdministrationController {
 	@GetMapping("/role/users")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAllRoles.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.ViewAllRoles.PERMISSION)
-	public Object getRoleUsers(@RequestParam(name = "roleId", required = true) String roleId) {
+	public Object getRoleUsers(
+			@RequestParam(name = "roleId", required = true) String roleId,
+			@RequestParam(name = "pageSize", defaultValue = "20") Integer pageSize,
+			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber
+			) {
 
-		return this.roleService.getRoleUsers(roleId);
+		return this.roleService.getRoleUsers(roleId,pageNumber,pageSize);
 	}
 
 	@PutMapping("/permission")
