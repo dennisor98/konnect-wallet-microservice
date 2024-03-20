@@ -50,8 +50,8 @@ public class StatementGenerationEvent implements PDFGenerationCallback {
 				User user =  job.getJobOwner();
 				CorporateDetails corp = user.getCorporate();
 				String alertMessage = message+
-						"\nJob Id:"+jobId
-						+"Download Link:"+job.getDownloadLink();
+						"\n**Job Id**:"+jobId
+						+"\n**Download Link**:"+job.getDownloadLink();
 				this.larkUtilityService.walletStatementAlert("Statement Request Alert", alertMessage,"open_id",corp.getLarkOpenId());
 			}
 			

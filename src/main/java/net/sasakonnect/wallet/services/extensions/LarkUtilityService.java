@@ -66,10 +66,10 @@ public class LarkUtilityService extends LarkService {
     CountDownLatch latch = new CountDownLatch(1);
 
     public void walletStatementAlert(String header,String message,String idType,String openId) {
-    	Thread thread =  new Thread(new Runnable(){
-
-			@Override
-			public void run() {
+//    	Thread thread =  new Thread(new Runnable(){
+//
+//			@Override
+//			public void run() {
 				Map<String, Object> map = new HashMap<>();
 				map.put("msg_type", "interactive");
 				map.put("chat_id",openId);
@@ -153,9 +153,9 @@ public class LarkUtilityService extends LarkService {
 	          System.out.println(responseEntity);
 			}
     		
-    	});
+//    	});
     	
-    	thread.start();
+//    	thread.start();
    	   
-    }
+    
 }

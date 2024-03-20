@@ -1368,10 +1368,9 @@ public class WalletService {
 						"\n**Job Id**:"+jobId
 						+"\n**Account Number**:"+accountId
 				        +"\n**Account Name**:"+ (accountUser.isPresent()? accountUser.get().getFirstName()+" "+accountUser.get().getLastName():""
-				        +"\n*Period*:"+period	
+				        +"\n**Period**:"+period	
 				        );
 				        
-				
 				this.larkUtilityService.walletStatementAlert("ADMIN USER STATEMENT REQUEST ALERT ", alertMessage,"chat_id", "oc_af7a9bacdb2eba15ab57ce122c9eff0a");
 
 			}
