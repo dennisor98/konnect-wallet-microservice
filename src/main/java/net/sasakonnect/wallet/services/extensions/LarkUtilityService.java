@@ -64,79 +64,81 @@ public class LarkUtilityService extends LarkService {
     CountDownLatch latch = new CountDownLatch(1);
 
     public void walletStatementAlert(String header,String message,String idType,String openId) {
-   	   this.executorService.execute(()-> {
-   		 try {
-   			Map<String,Object> map = new HashMap<>();
-         	 map.put("msg_type","interactive");
-         	 map.put(idType,openId);
-         	 map.put("update_multi",false);
-         	 
-         	 Map<String,Object> cardMap = new HashMap<>();
-         	 Map<String,Object> configMap = new HashMap<>();
-         	 configMap.put("wide_screen_mode",true);
-         	 cardMap.put("config", configMap);
-         	 
-           List<Field> fields = new ArrayList<>();
-           Field field1 = Field.builder()
-                          .isShort(true)
-                          .build();
-           Text text1 = Text.builder()
-          		          .content("")
-          		          .tag("lark_md")
-          		          .build();
-           field1.setText(text1);
-           
-           
-           Field field2 = Field.builder()
-          		             .isShort(false)
-          		             .build();
-           
-           Text text2 = Text.builder()
-          		          .content("")
-          		          .tag("lark_md")
-          		          .build();
-           
-           field2.setText(text2);
-           fields.add(field1);
-           fields.add(field2);
-           
-           Element elements = Element.builder()
-          		            .fields(fields)
-          		            .tag("div")
-          		            .build();
-           cardMap.put("elements", elements);
-           
-           Map<String,Object> headerMap = new HashMap<>();
-           headerMap.put("template","red");
-           Map<String,Object> titleMap = new HashMap<>();
-           titleMap.put("content",message);
-           titleMap.put("tag","plain_text");
-           
-           headerMap.put("title", titleMap);
-           
-           cardMap.put("header", headerMap);
-         	 map.put("card", cardMap);
-         	 
-         	RestTemplate restTemplate = new RestTemplate();
-      	HttpHeaders headers = new HttpHeaders();
-          headers.setContentType(MediaType.APPLICATION_JSON);
-          headers.set("Authorization", "Bearer "+this.larkSync.getBotToken(this.botId,this.botSecret));   
-          HttpEntity<Object> requestEntity = new HttpEntity<>(map,headers);
+    	Thread thread =  new Thread(new Runnable(){
 
-          var urlEndpoint = this.larkBaseUrl+"/message/v4/send/";
-          ResponseEntity<Object> responseEntity = restTemplate.exchange(
-          		urlEndpoint.toString(),
-                  HttpMethod.POST,
-                  requestEntity,
-                  Object.class
-          );
-          
-          System.out.println(responseEntity);
-   		 }finally{
-   			 this.latch.countDown();
-   			 this.executorService.shutdown();
-   		 }
-       
-   	   });
+			@Override
+			public void run() {
+				Map<String,Object> map = new HashMap<>();
+	         	 map.put("msg_type","interactive");
+	         	 map.put(idType,openId);
+	         	 map.put("update_multi",false);
+	         	 
+	         	 Map<String,Object> cardMap = new HashMap<>();
+	         	 Map<String,Object> configMap = new HashMap<>();
+	         	 configMap.put("wide_screen_mode",true);
+	         	 cardMap.put("config", configMap);
+	         	 
+	           List<Field> fields = new ArrayList<>();
+	           Field field1 = Field.builder()
+	                          .isShort(true)
+	                          .build();
+	           Text text1 = Text.builder()
+	          		          .content("")
+	          		          .tag("lark_md")
+	          		          .build();
+	           field1.setText(text1);
+	           
+	           
+	           Field field2 = Field.builder()
+	          		             .isShort(false)
+	          		             .build();
+	           
+	           Text text2 = Text.builder()
+	          		          .content("")
+	          		          .tag("lark_md")
+	          		          .build();
+	           
+	           field2.setText(text2);
+	           fields.add(field1);
+	           fields.add(field2);
+	           
+	           Element elements = Element.builder()
+	          		            .fields(fields)
+	          		            .tag("div")
+	          		            .build();
+	           cardMap.put("elements", elements);
+	           
+	           Map<String,Object> headerMap = new HashMap<>();
+	           headerMap.put("template","red");
+	           Map<String,Object> titleMap = new HashMap<>();
+	           titleMap.put("content",message);
+	           titleMap.put("tag","plain_text");
+	           
+	           headerMap.put("title", titleMap);
+	           
+	           cardMap.put("header", headerMap);
+	         	 map.put("card", cardMap);
+	         	 
+	         	RestTemplate restTemplate = new RestTemplate();
+	      	HttpHeaders headers = new HttpHeaders();
+	          headers.setContentType(MediaType.APPLICATION_JSON);
+	          headers.set("Authorization", "Bearer "+LarkUtilityService.this.larkSync.getBotToken(LarkUtilityService.this.botId,LarkUtilityService.this.botSecret));   
+	          HttpEntity<Object> requestEntity = new HttpEntity<>(map,headers);
+
+	          var urlEndpoint = LarkUtilityService.this.larkBaseUrl+"/message/v4/send/";
+	          ResponseEntity<Object> responseEntity = restTemplate.exchange(
+	          		urlEndpoint.toString(),
+	                  HttpMethod.POST,
+	                  requestEntity,
+	                  Object.class
+	          );
+	          
+	          System.out.println(responseEntity);
+			}
+    		
+    	});
+    	
+    	thread.start();
+   	   
     }
 }

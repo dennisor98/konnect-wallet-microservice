@@ -57,7 +57,15 @@ public interface UserRepository extends JpaRepository<User, String> {
 	Optional<User> findByMobile(@Param("mobileNumber") String mobile); // Return an Optional<User>
 
 	@Query("SELECT u FROM User u WHERE u.openId = :open_id")
-
 	Optional<User> findByOpenId(@Param("open_id") String open_id);
-
+	
+	@Query("SELECT DATE(u.createdAt),COUNT(u) FROM User u  WHERE MONTH(u.createdAt) =:month AND YEAR(u.createdAt) =:year GROUP BY DATE(u.createdAt) ORDER BY DATE(u.createdAt) DESC")
+	List<Object[]> findDailyOnBoardingTrend(@Param("month") String month,@Param("year") String year);
+	
+	@Query("SELECT MONTHNAME(u.createdAt),COUNT(u) FROM User u WHERE  YEAR(u.createdAt) =:year GROUP BY MONTHNAME(u.createdAt) ORDER BY MONTH(u.createdAt) DESC")
+	List<Object[]> findMonthlyOnBoardingTrend(@Param("year") String year);
+	
+	
+	@Query("SELECT YEAR(u.createdAt),COUNT(u) FROM User u GROUP BY YEAR(u.createdAt) ORDER BY YEAR(u.createdAt) DESC")
+     List<Object[]> findAnnualOnBoardingTrend();
 }

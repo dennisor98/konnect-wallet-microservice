@@ -101,6 +101,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
 		       "            AND t2.txType = :txType " +
 		       "            AND t2.accountId = :accountId)")
    Page<Transaction> findWalletToWalletTransContact(@Param("txType") String txType,@Param("accountId") String accountId,Pageable page);
+	 
 
 
 

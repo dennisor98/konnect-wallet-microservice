@@ -27,6 +27,8 @@ public interface UserRoleRepository extends JpaRepository<UserRole, String> {
 	Optional<UserRole> findUserRoleByUserIdAndRoleId(@Param("userId") String userId,@Param("roleId") String roleId);
 	
 	
+	
+	
 //	@Modifying
 //    @Transactional
 //    @Query("UPDATE UserRole u SET u.userId = :userId, u.roleId = :roleId,u. WHERE u.id = :id")

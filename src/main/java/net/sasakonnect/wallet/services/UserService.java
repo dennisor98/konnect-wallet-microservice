@@ -799,10 +799,10 @@ public class UserService extends RestClientService implements UserDetailsService
 					LocalDateTime currentTime = LocalDateTime.now();
 					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 					String formattedDateTime = currentTime.format(formatter);
-					writer.write(formattedDateTime + " - " + loggedInUser.getFirstName() + "   "
-							+ loggedInUser.getLastName() + "failed to reset PIN attempts for user(Invalid count number)"
-							+ user.get().getFirstName() + user.get().getLastName() + "of phone No"
-							+ user.get().getMobile());
+//					writer.write(formattedDateTime + " - " + loggedInUser.getFirstName() + "   "
+//							+ loggedInUser.getLastName() + "failed to reset PIN attempts for user(Invalid count number)"
+//							+ user.get().getFirstName() + user.get().getLastName() + "of phone No"
+//							+ user.get().getMobile());
 					this.larkService.sendPinResetNotification(loggedInUser,
 							user.get().getUserWallets().get(0).getWallet(), "ATTEMPTS", "Failed");
 				} catch (IOException e) {
@@ -816,19 +816,19 @@ public class UserService extends RestClientService implements UserDetailsService
 						this.userPinRepository.save(userPin.get());
 						map.put("success", true);
 						map.put("message", "Pin attempts updated");
-						try (FileWriter writer = new FileWriter("pin_reset.txt", true)) {
-							LocalDateTime currentTime = LocalDateTime.now();
-							DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-							String formattedDateTime = currentTime.format(formatter);
-							writer.write(formattedDateTime + " - " + loggedInUser.getFirstName() + ""
-									+ loggedInUser.getLastName() + "succeeded to reset PIN attempts for user"
-									+ user.get().getFirstName() + user.get().getLastName() + "of phone No"
-									+ user.get().getMobile());
+//						try (FileWriter writer = new FileWriter("pin_reset.txt", true)) {
+//							LocalDateTime currentTime = LocalDateTime.now();
+//							DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+//							String formattedDateTime = currentTime.format(formatter);
+//							writer.write(formattedDateTime + " - " + loggedInUser.getFirstName() + ""
+//									+ loggedInUser.getLastName() + "succeeded to reset PIN attempts for user"
+//									+ user.get().getFirstName() + user.get().getLastName() + "of phone No"
+//									+ user.get().getMobile());
 							this.larkService.sendPinResetNotification(loggedInUser,
 									user.get().getUserWallets().get(0).getWallet(), "ATTEMPTS", "Succcess");
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
+//						} catch (IOException e) {
+//							e.printStackTrace();
+//						}
 						return ResponseEntity.status(HttpStatus.OK).body(map);
 					} catch (Exception ex) {
 						map.put("success", false);
@@ -841,9 +841,9 @@ public class UserService extends RestClientService implements UserDetailsService
 						LocalDateTime currentTime = LocalDateTime.now();
 						DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 						String formattedDateTime = currentTime.format(formatter);
-						writer.write(formattedDateTime + " - " + loggedInUser.getFirstName() + ""
-								+ loggedInUser.getLastName()
-								+ "failed to reset PIN attempts for user(User does not have a PIN set)" + userId);
+//						writer.write(formattedDateTime + " - " + loggedInUser.getFirstName() + ""
+//								+ loggedInUser.getLastName()
+//								+ "failed to reset PIN attempts for user(User does not have a PIN set)" + userId);
 						this.larkService.sendPinResetNotification(loggedInUser,
 								user.get().getUserWallets().get(0).getWallet(), "ATTEMPTS", "Success");
 					} catch (IOException e) {
@@ -861,8 +861,8 @@ public class UserService extends RestClientService implements UserDetailsService
 				LocalDateTime currentTime = LocalDateTime.now();
 				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 				String formattedDateTime = currentTime.format(formatter);
-				writer.write(formattedDateTime + " - " + loggedInUser.getFirstName() + "" + loggedInUser.getLastName()
-						+ "failed to reset PIN attempts for user(User does not exist)" + userId);
+//				writer.write(formattedDateTime + " - " + loggedInUser.getFirstName() + "" + loggedInUser.getLastName()
+//						+ "failed to reset PIN attempts for user(User does not exist)" + userId);
 				this.larkService.sendPinResetNotification(loggedInUser, user.get().getUserWallets().get(0).getWallet(),
 						"ATTEMPTS", "Failed");
 			} catch (IOException e) {
@@ -1063,5 +1063,67 @@ public class UserService extends RestClientService implements UserDetailsService
 			return ResponseEntity.status(HttpStatus.OK).body(map); 
 		}
 	}
+	
+	public ResponseEntity<Object> getDailyOnboardingTrend(String month,String year){
+		List<Object[]> obTrend = this.userRepository.findDailyOnBoardingTrend(month, year);
+		Map<String,Object> resMap = new HashMap<>();
+		if(!obTrend.isEmpty()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success", true);
+			map.put("message", "Request succcessful");
+			
+			var trend =  obTrend.stream().map(obt->{
+				Map<String,Object> tMap = new HashMap<>();
+				tMap.put("date", obt[0]);
+				tMap.put("users",obt[1]);
+				
+				return tMap;
+			}).collect(Collectors.toList());
+			
+			map.put("trend", trend);
+			resMap.put("payload", map);
+			return ResponseEntity.status(HttpStatus.OK).body(resMap);
+		}else {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success", true);
+			map.put("message", "Request succcessful");
+			map.put("trend",new ArrayList<>());
+			resMap.put("payload", map);
+			
+			return ResponseEntity.status(HttpStatus.OK).body(resMap);
+		}
+	}
+	
+	public ResponseEntity<Object> getMonthlyOnboardingTrend(String month,String year){
+		List<Object[]> obTrend = this.userRepository.findMonthlyOnBoardingTrend(month);
+		Map<String,Object> resMap = new HashMap<>();
+		if(!obTrend.isEmpty()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success", true);
+			map.put("message", "Request succcessful");
+			
+			var trend =  obTrend.stream().map(obt->{
+				Map<String,Object> tMap = new HashMap<>();
+				tMap.put("date", obt[0]);
+				tMap.put("users",obt[1]);
+				
+				return tMap;
+			}).collect(Collectors.toList());
+			
+			map.put("trend", trend);
+			resMap.put("payload", map);
+			return ResponseEntity.status(HttpStatus.OK).body(resMap);
+		}else {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success", true);
+			map.put("message", "Request succcessful");
+			map.put("trend",new ArrayList<>());
+			resMap.put("payload", map);
+			
+			return ResponseEntity.status(HttpStatus.OK).body(resMap);
+		}
+	}
+	
+	
 
 }
