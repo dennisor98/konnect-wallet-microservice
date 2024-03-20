@@ -1,11 +1,18 @@
 package net.sasakonnect.wallet.events;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.domain.CorporateDetails;
+import net.sasakonnect.wallet.domain.UserJob;
 import net.sasakonnect.wallet.interfaces.PDFGenerationCallback;
 import net.sasakonnect.wallet.repository.UserJobRepository;
+import net.sasakonnect.wallet.services.WalletService;
+import net.sasakonnect.wallet.services.extensions.LarkUtilityService;
 
 @Component
 public class StatementGenerationEvent implements PDFGenerationCallback {
@@ -15,6 +22,9 @@ public class StatementGenerationEvent implements PDFGenerationCallback {
 
 	@Autowired
 	UserJobRepository userJobRepository;
+	
+	@Autowired
+	WalletService walletService;
 
 	@Override
 	public void onPDFGenerated(String jobId, String pdfFilePath) {
@@ -22,7 +32,7 @@ public class StatementGenerationEvent implements PDFGenerationCallback {
 		// TODO Auto-generated method stub
 		this.userJobRepository.updateDownloadLinkAndIsCompleteByJobId(jobId,
 				statamentDownloadPath.toString() + "/" + jobId + ".pdf");
-
+		
 	}
 
 	@Override
@@ -30,5 +40,15 @@ public class StatementGenerationEvent implements PDFGenerationCallback {
 		// TODO Auto-generated method stub
 
 	}
+
+	@Override
+	public void sendNotification(String jobId) {
+		this.walletService.notifyRequestedAdmin(jobId,"Statement Processing completed");
+		
+	}
+	
+	
+
+
 
 }

@@ -92,14 +92,16 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
    Page<Transaction> findRecentTransactionContactByTxType(@Param("txType") String txType,@Param("accountId") String accountId,Pageable page);
    
 	 @Query("SELECT t FROM Transaction t " +
-	           "WHERE t.txType = :txType " +
-	           "AND t.accountId = :accountId " +
-	           "AND t.oppoAccountId IN (SELECT w.accountId FROM Wallet w) " +
-	           "AND t.id = (SELECT MIN(t2.id) FROM Transaction t2 " +
-	           "            WHERE t2.txType = :txType " +
-	           "            AND t2.accountId = :accountId " +
-	           "            AND t2.oppoAccountId IN (SELECT w.accountId FROM Wallet w))")
+		       "WHERE t.txType = :txType " +
+		       "AND t.accountId = :accountId " +
+		       "AND t.oppoAccountId IS NOT NULL " +
+		       "AND EXISTS (SELECT 1 FROM Wallet w WHERE w.accountId = t.oppoAccountId) " +
+		       "AND t.id = (SELECT MIN(t2.id) FROM Transaction t2 " +
+		       "            WHERE t2.oppoAccountId = t.oppoAccountId " +
+		       "            AND t2.txType = :txType " +
+		       "            AND t2.accountId = :accountId)")
    Page<Transaction> findWalletToWalletTransContact(@Param("txType") String txType,@Param("accountId") String accountId,Pageable page);
+	 
 
 
 

@@ -53,6 +53,7 @@ import net.sasakonnect.wallet.RequestDto.admin.CheckUserAccount;
 import net.sasakonnect.wallet.ResponseDto.TransactionResponseDto;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
+import net.sasakonnect.wallet.domain.CorporateDetails;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.UserJob;
 import net.sasakonnect.wallet.domain.UserPin;
@@ -73,6 +74,7 @@ import net.sasakonnect.wallet.repository.CurrencyRepository;
 import net.sasakonnect.wallet.repository.UserJobRepository;
 import net.sasakonnect.wallet.repository.UserWalletRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
+import net.sasakonnect.wallet.services.extensions.LarkUtilityService;
 import net.sasakonnect.wallet.tools.RequestSigner;
 import reactor.core.publisher.Mono;
 
@@ -96,6 +98,9 @@ public class WalletService {
 	@Autowired
 	LarkService larkService;
 
+	@Autowired
+	LarkUtilityService larkUtilityService;
+	
 	@Autowired
 	WalletRepository walletRepository;
 	@Autowired
@@ -1342,11 +1347,50 @@ public class WalletService {
 
 			}
 		}
-		// TODO Auto-generated method stub
+		
+		
+		//DO Auto-generated method stub
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("message", "Unable to request statement at this time");
 		map.put("success", false);
 		return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body(map);
+	}
+	
+	public void notifyAllAdminsOnStatementRequest(String jobId,String accountId,String period) {
+		Optional<UserJob> userJob = this.userJobRepository.findUserJobByJobId(jobId);
+		Optional<User> accountUser = this.userService.findUserByWalletAccountId(accountId);
+		if(userJob.isPresent()) {
+			var job = userJob.get();
+			if(job.getIsAdmin()) {
+				User user =  job.getJobOwner();
+				CorporateDetails corp = user.getCorporate();
+				String alertMessage = "<at id="+corp.getLarkOpenId()+"></at>"+" requested an account statement"+
+						"\n**Job Id**:"+jobId
+						+"\n**Account Number**:"+accountId
+				        +"\n**Account Name**:"+ (accountUser.isPresent()? accountUser.get().getFirstName()+" "+accountUser.get().getLastName():""
+				        +"\n**Period**:"+period	
+				        );
+				        
+				this.larkUtilityService.walletStatementAlert("ADMIN USER STATEMENT REQUEST ALERT ", alertMessage,"chat_id", "oc_af7a9bacdb2eba15ab57ce122c9eff0a");
+
+			}
+		}
+	}
+	
+	public void notifyRequestedAdmin(String jobId,String message) {
+		Optional<UserJob> userJob = this.userJobRepository.findUserJobByJobId(jobId);
+		if(userJob.isPresent()) {
+			var job = userJob.get();
+			if(job.getIsAdmin()) {
+				User user =  job.getJobOwner();
+				CorporateDetails corp = user.getCorporate();
+				String alertMessage = message+
+						"\n**Job Id**:"+jobId
+						+"\n**Download Link**:"+job.getDownloadLink();
+				this.larkUtilityService.walletStatementAlert("Statement Request Alert", alertMessage,"open_id",corp.getLarkOpenId());
+			}
+			
+		}
 	}
 
 	// Overloaded method
@@ -1386,6 +1430,7 @@ public class WalletService {
 					Map<String, Object> map = new HashMap<String, Object>();
 					map.put("message", "Please wait as we process your statement");
 					map.put("success", true);
+                    this.notifyAllAdminsOnStatementRequest(jobId, accountId,startDate+"-"+endDate);
 					return ResponseEntity.status(HttpStatus.OK).body(map);
 
 				}

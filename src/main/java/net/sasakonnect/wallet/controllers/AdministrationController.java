@@ -451,6 +451,21 @@ public class AdministrationController {
 		return this.walletService.getUserRequestedstatements(userId);
 	}
 	
+	@GetMapping("analytics/onBoarding/trend")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAllAnalytics.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.ViewAllAnalytics.PERMISSION)
+	@Operation(summary = "Get account statement", description = "Get account statement between start and end dates")
+	public Object getOnboardingTrend(
+			@RequestParam(name="",required=true,defaultValue="") String type,
+			@Parameter(description = "Year (YYYY)", example = "2024",required = false) @RequestParam("year") String year,
+			@Parameter(description = "Month (MM)", example = "02") @RequestParam("month") String month) {
+		if(type.equalsIgnoreCase("daily")) {
+			
+		}
+		return null;
+//		return walletService.getUserStatement(accountId,startDate, endDate);
+	}
 
 
 }

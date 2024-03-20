@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -26,9 +27,11 @@ import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.property.Property;
 import com.opencsv.CSVReader;
 import net.sasakonnect.wallet.interfaces.PDFGenerationCallback;
+import net.sasakonnect.wallet.services.extensions.LarkUtilityService;
 
 @Service
 public class AccountStatementService  {
+	
 	@Value("${file.statementPath}")
 	private String statementPath;
 
@@ -107,7 +110,8 @@ public class AccountStatementService  {
 						// After processing, delete the CSV file
 						Files.deleteIfExists(csvFile.toPath());
 						callBack.onPDFGenerated(jobId, filePath);
-						;
+						callBack.sendNotification(jobId);
+						
 					}
 				} catch (IOException ex) {
 					ex.printStackTrace();

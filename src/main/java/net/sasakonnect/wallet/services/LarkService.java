@@ -96,21 +96,23 @@ class Text {
         return tag;
     }
 }
+
+
 @Service
 public class LarkService {
 	
 	@Autowired
-	LarkUserRepository   larkUserRepository;
+	 LarkUserRepository   larkUserRepository;
 
 	@Autowired
-	LarkUsersSync larkSync;
+	public LarkUsersSync larkSync;
 	
 	@Autowired
 	UserRepository userRepository;
 	
-	private final String botId = "cli_a53a08afc8b8d00a";
-	private String botSecret = "v0SWDp3ppqPHuKQ0ihtTefQiazd7lUFh";
-	private final String larkBaseUrl = "https://open.larksuite.com/open-apis";
+	protected final String botId = "cli_a53a08afc8b8d00a";
+	protected String botSecret = "v0SWDp3ppqPHuKQ0ihtTefQiazd7lUFh";
+	protected final String larkBaseUrl = "https://open.larksuite.com/open-apis";
 	
 	
 //	String cardTitle,String color,NotificationBody notificationBody
@@ -478,5 +480,7 @@ public class LarkService {
       public void synLarkDepartments() {
     	  this.larkSync.getLarkDepartments();
     }
+      
+
   
 }
