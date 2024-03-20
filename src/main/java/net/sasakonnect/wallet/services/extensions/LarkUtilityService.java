@@ -72,7 +72,7 @@ public class LarkUtilityService extends LarkService {
 			public void run() {
 				Map<String, Object> map = new HashMap<>();
 				map.put("msg_type", "interactive");
-				map.put("chat_id",openId);
+				map.put(idType,openId);
 				map.put("update_multi", false);
 
 				Map<String, Object> cardMap = new HashMap<>();
