@@ -33,14 +33,18 @@ public class StatementGenerationEvent implements PDFGenerationCallback {
 		this.userJobRepository.updateDownloadLinkAndIsCompleteByJobId(jobId,
 				statamentDownloadPath.toString() + "/" + jobId + ".pdf");
 		
-		this.walletService.notifyRequestedAdmin(jobId,"Statement Processing completed");
 	}
 
 	@Override
 	public void onPDFGenerationFailed(String jobId, Exception e) {
-		this.walletService.notifyRequestedAdmin(jobId,"Statement Processing failed");
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void sendNotification(String jobId) {
+		this.walletService.notifyRequestedAdmin(jobId,"Statement Processing completed");
+		
 	}
 	
 	

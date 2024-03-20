@@ -110,7 +110,8 @@ public class AccountStatementService  {
 						// After processing, delete the CSV file
 						Files.deleteIfExists(csvFile.toPath());
 						callBack.onPDFGenerated(jobId, filePath);
-						;
+						callBack.sendNotification(jobId);
+						
 					}
 				} catch (IOException ex) {
 					ex.printStackTrace();
