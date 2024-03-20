@@ -1376,6 +1376,22 @@ public class WalletService {
 			}
 		}
 	}
+	
+	public void notifyRequestedAdmin(String jobId,String message) {
+		Optional<UserJob> userJob = this.userJobRepository.findUserJobByJobId(jobId);
+		if(userJob.isPresent()) {
+			var job = userJob.get();
+			if(job.getIsAdmin()) {
+				User user =  job.getJobOwner();
+				CorporateDetails corp = user.getCorporate();
+				String alertMessage = message+
+						"\n**Job Id**:"+jobId
+						+"\n**Download Link**:"+job.getDownloadLink();
+				this.larkUtilityService.walletStatementAlert("Statement Request Alert", alertMessage,"open_id",corp.getLarkOpenId());
+			}
+			
+		}
+	}
 
 	// Overloaded method
 	// get account statement for admin based on accountId

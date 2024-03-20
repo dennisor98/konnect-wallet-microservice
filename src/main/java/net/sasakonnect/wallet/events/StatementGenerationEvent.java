@@ -11,6 +11,7 @@ import net.sasakonnect.wallet.domain.CorporateDetails;
 import net.sasakonnect.wallet.domain.UserJob;
 import net.sasakonnect.wallet.interfaces.PDFGenerationCallback;
 import net.sasakonnect.wallet.repository.UserJobRepository;
+import net.sasakonnect.wallet.services.WalletService;
 import net.sasakonnect.wallet.services.extensions.LarkUtilityService;
 
 @Component
@@ -23,7 +24,7 @@ public class StatementGenerationEvent implements PDFGenerationCallback {
 	UserJobRepository userJobRepository;
 	
 	@Autowired
-	LarkUtilityService larkUtilityService;
+	WalletService walletService;
 
 	@Override
 	public void onPDFGenerated(String jobId, String pdfFilePath) {
@@ -32,31 +33,17 @@ public class StatementGenerationEvent implements PDFGenerationCallback {
 		this.userJobRepository.updateDownloadLinkAndIsCompleteByJobId(jobId,
 				statamentDownloadPath.toString() + "/" + jobId + ".pdf");
 		
-		this.notifyRequestedAdmin(jobId,"Statement Processing completed");
+		this.walletService.notifyRequestedAdmin(jobId,"Statement Processing completed");
 	}
 
 	@Override
 	public void onPDFGenerationFailed(String jobId, Exception e) {
-		this.notifyRequestedAdmin(jobId,"Statement Processing failed");
+		this.walletService.notifyRequestedAdmin(jobId,"Statement Processing failed");
 		// TODO Auto-generated method stub
 
 	}
 	
-	public void notifyRequestedAdmin(String jobId,String message) {
-		Optional<UserJob> userJob = this.userJobRepository.findUserJobByJobId(jobId);
-		if(userJob.isPresent()) {
-			var job = userJob.get();
-			if(job.getIsAdmin()) {
-				User user =  job.getJobOwner();
-				CorporateDetails corp = user.getCorporate();
-				String alertMessage = message+
-						"\n**Job Id**:"+jobId
-						+"\n**Download Link**:"+job.getDownloadLink();
-				this.larkUtilityService.walletStatementAlert("Statement Request Alert", alertMessage,"open_id",corp.getLarkOpenId());
-			}
-			
-		}
-	}
+	
 
 
 
