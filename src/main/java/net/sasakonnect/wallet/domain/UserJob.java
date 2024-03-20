@@ -32,7 +32,7 @@ public class UserJob extends BaseWalletDomain implements Serializable {
 	private Boolean isRead;
 	@Column() // Example of a nullable field
 	private Boolean isAdmin;
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "requester_user_id", nullable = true) // Name of the foreign key column in UserJob table
 	private User jobOwner;
 	@Column(nullable = true, columnDefinition = "TEXT")
