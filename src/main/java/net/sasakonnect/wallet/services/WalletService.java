@@ -1356,7 +1356,7 @@ public class WalletService {
 		return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body(map);
 	}
 	
-	public void notifyAllAdminsOnStatementRequest(String jobId,String accountId) {
+	public void notifyAllAdminsOnStatementRequest(String jobId,String accountId,String period) {
 		Optional<UserJob> userJob = this.userJobRepository.findUserJobByJobId(jobId);
 		Optional<User> accountUser = this.userService.findUserByWalletAccountId(accountId);
 		if(userJob.isPresent()) {
@@ -1365,11 +1365,14 @@ public class WalletService {
 				User user =  job.getJobOwner();
 				CorporateDetails corp = user.getCorporate();
 				String alertMessage = "<at id="+corp.getLarkOpenId()+"></at>"+" requested an account statement"+
-						"\nJob Id:"+jobId
-						+"Account Number:"+accountId
-				        +"Account Name:"+ (accountUser.isPresent()? accountUser.get().getFirstName()+" "+accountUser.get().getLastName():"");
+						"\n**Job Id**:"+jobId
+						+"\n**Account Number**:"+accountId
+				        +"\n**Account Name**:"+ (accountUser.isPresent()? accountUser.get().getFirstName()+" "+accountUser.get().getLastName():""
+				        +"\n*Period*:"+period	
+				        );
+				        
 				
-				this.larkUtilityService.walletStatementAlert("ADMIN USER STATEMENT REQUEST ALERT ", alertMessage,"chat_id", "oc_a9f46991cde6bf92a6b84ee331f5ea99");
+				this.larkUtilityService.walletStatementAlert("ADMIN USER STATEMENT REQUEST ALERT ", alertMessage,"chat_id", "oc_af7a9bacdb2eba15ab57ce122c9eff0a");
 
 			}
 		}
@@ -1412,7 +1415,7 @@ public class WalletService {
 					Map<String, Object> map = new HashMap<String, Object>();
 					map.put("message", "Please wait as we process your statement");
 					map.put("success", true);
-                    this.notifyAllAdminsOnStatementRequest(jobId, accountId);
+                    this.notifyAllAdminsOnStatementRequest(jobId, accountId,startDate+"-"+endDate);
 					return ResponseEntity.status(HttpStatus.OK).body(map);
 
 				}
