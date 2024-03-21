@@ -1162,8 +1162,8 @@ public class UserService extends RestClientService implements UserDetailsService
 		if(!deviation.isEmpty()) {
 			deviation.stream().map(d->{
 				Map<String,Object> map =  new HashMap<>();
-				map.put("today", d);//				
-//				map.put("yesterday", d[1]);
+				map.put("today", d[0]);//				
+				map.put("yesterday", d[1]);
 				return map;
 			}).collect(Collectors.toList());
 		Map<String,Object> map =  new HashMap<>();
