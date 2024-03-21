@@ -1064,7 +1064,7 @@ public class UserService extends RestClientService implements UserDetailsService
 		}
 	}
 	
-	public ResponseEntity<Object> getDailyOnboardingTrend(String month,String year){
+	public ResponseEntity<Object> getDailyOnboardingTrend(int month,int year){
 		List<Object[]> obTrend = this.userRepository.findDailyOnBoardingTrend(month, year);
 		Map<String,Object> resMap = new HashMap<>();
 		if(!obTrend.isEmpty()) {
@@ -1094,8 +1094,8 @@ public class UserService extends RestClientService implements UserDetailsService
 		}
 	}
 	
-	public ResponseEntity<Object> getMonthlyOnboardingTrend(String month,String year){
-		List<Object[]> obTrend = this.userRepository.findMonthlyOnBoardingTrend(month);
+	public ResponseEntity<Object> getMonthlyOnboardingTrend(int month,int year){
+		List<Object[]> obTrend = this.userRepository.findMonthlyOnBoardingTrend(year);
 		Map<String,Object> resMap = new HashMap<>();
 		if(!obTrend.isEmpty()) {
 			Map<String,Object> map = new HashMap<>();
@@ -1124,6 +1124,58 @@ public class UserService extends RestClientService implements UserDetailsService
 		}
 	}
 	
+	
+	public ResponseEntity<Object> getAnnualOnboardingTrend(){
+		List<Object[]> obTrend = this.userRepository.findAnnualOnBoardingTrend();
+		Map<String,Object> resMap = new HashMap<>();
+		if(!obTrend.isEmpty()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success", true);
+			map.put("message", "Request succcessful");
+			
+			var trend =  obTrend.stream().map(obt->{
+				Map<String,Object> tMap = new HashMap<>();
+				tMap.put("date", obt[0]);
+				tMap.put("users",obt[1]);
+				
+				return tMap;
+			}).collect(Collectors.toList());
+			
+			map.put("trend", trend);
+			resMap.put("payload", map);
+			return ResponseEntity.status(HttpStatus.OK).body(resMap);
+		}else {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success", true);
+			map.put("message", "Request succcessful");
+			map.put("trend",new ArrayList<>());
+			resMap.put("payload", map);
+			
+			return ResponseEntity.status(HttpStatus.OK).body(resMap);
+		}
+	}
+	
+	
+	public ResponseEntity<Object> getOnBoardingDeviation(){
+		
+		List<Object[]> deviation =  this.userRepository.findOnBoardingDeviation();
+		if(!deviation.isEmpty()) {
+			deviation.stream().map(d->{
+				Map<String,Object> map =  new HashMap<>();
+				map.put("today", d);//				
+//				map.put("yesterday", d[1]);
+				return map;
+			}).collect(Collectors.toList());
+		Map<String,Object> map =  new HashMap<>();
+		map.put("success",true);
+		map.put("message","Request successful");
+		Map<String,Object> resMap =  new HashMap<>();
+		
+		map.put("payload",map);
+		return ResponseEntity.status(HttpStatus.OK).body(resMap);
+		}
+		return null;
+	}
 	
 
 }
