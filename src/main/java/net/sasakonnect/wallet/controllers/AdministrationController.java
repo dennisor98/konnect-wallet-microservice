@@ -26,6 +26,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import net.bytebuddy.asm.Advice.This;
 import net.sasakonnect.wallet.RequestDto.Corporate;
 import net.sasakonnect.wallet.RequestDto.PermissionDTO;
 import net.sasakonnect.wallet.RequestDto.PermissionsToRoleDTO;
@@ -455,17 +456,33 @@ public class AdministrationController {
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAllAnalytics.PERMISSION
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.ViewAllAnalytics.PERMISSION)
-	@Operation(summary = "Get account statement", description = "Get account statement between start and end dates")
-	public Object getOnboardingTrend(
-			@RequestParam(name="",required=true,defaultValue="") String type,
-			@Parameter(description = "Year (YYYY)", example = "2024",required = false) @RequestParam("year") String year,
-			@Parameter(description = "Month (MM)", example = "02") @RequestParam("month") String month) {
-		if(type.equalsIgnoreCase("daily")) {
-			
+	@Operation(summary = "Get user onboarding trend", description = "Get user onBoarding trend")
+	public ResponseEntity<Object> getOnboardingTrend(
+			@RequestParam(name="type",required=true,defaultValue="daily") String type,
+			@RequestParam(name = "month",required=false,defaultValue = "#{T(java.time.LocalDate).now().getMonthValue()}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) int month,
+			@RequestParam(name = "year",required=false,defaultValue="#{T(java.time.LocalDate).now().getYear()}") int year
+			) {
+		if(type.equalsIgnoreCase("annual")) {
+			return this.userService.getAnnualOnboardingTrend();
 		}
+		
+		if(type.equalsIgnoreCase("monthly")) {
+			return this.userService.getMonthlyOnboardingTrend(month, year);
+		}
+		
+		if(type.equalsIgnoreCase("daily")) {
+			return this.userService.getDailyOnboardingTrend(month, year);
+		}
+		
 		return null;
-//		return walletService.getUserStatement(accountId,startDate, endDate);
 	}
-
-
+	
+	@GetMapping("analytics/onBoarding/deviation")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAllAnalytics.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.ViewAllAnalytics.PERMISSION)
+	@Operation(summary = "Get user onboarding trend", description = "Get user onBoarding trend")
+    public ResponseEntity<Object> getUserOnboardingDeviation(){
+		return this.userService.getOnBoardingDeviation();
+	}
 }

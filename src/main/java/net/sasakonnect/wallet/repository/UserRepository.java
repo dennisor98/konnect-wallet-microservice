@@ -60,12 +60,22 @@ public interface UserRepository extends JpaRepository<User, String> {
 	Optional<User> findByOpenId(@Param("open_id") String open_id);
 	
 	@Query("SELECT DATE(u.createdAt),COUNT(u) FROM User u  WHERE MONTH(u.createdAt) =:month AND YEAR(u.createdAt) =:year GROUP BY DATE(u.createdAt) ORDER BY DATE(u.createdAt) DESC")
-	List<Object[]> findDailyOnBoardingTrend(@Param("month") String month,@Param("year") String year);
+	List<Object[]> findDailyOnBoardingTrend(@Param("month") int month,@Param("year") int year);
 	
-	@Query("SELECT MONTHNAME(u.createdAt),COUNT(u) FROM User u WHERE  YEAR(u.createdAt) =:year GROUP BY MONTHNAME(u.createdAt) ORDER BY MONTH(u.createdAt) DESC")
-	List<Object[]> findMonthlyOnBoardingTrend(@Param("year") String year);
+	@Query("SELECT MONTHNAME(u.createdAt),COUNT(u) FROM User u WHERE  YEAR(u.createdAt) =:year GROUP BY MONTHNAME(u.createdAt),MONTH(u.createdAt) ORDER BY MONTH(u.createdAt) DESC")
+	List<Object[]> findMonthlyOnBoardingTrend(@Param("year") int year);
 	
 	
 	@Query("SELECT YEAR(u.createdAt),COUNT(u) FROM User u GROUP BY YEAR(u.createdAt) ORDER BY YEAR(u.createdAt) DESC")
      List<Object[]> findAnnualOnBoardingTrend();
+     
+//     @Query("SELECT COUNT(*) FROM User u WHERE DATE(u.createdAt) <= CURRENT_DATE()")
+     @Query(value = "SELECT "
+    	       + "(SELECT COUNT(*) FROM user u WHERE DATE(u.created_at) <= DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)), "
+    	       + "(SELECT COUNT(*) FROM user u WHERE DATE(u.created_at) <= CURRENT_DATE())", 
+    	       nativeQuery = true)
+
+//     + "(SELECT COUNT(u) FROM User u WHERE FUNCTION('DATE', u.createdAt) <= CURRENT_DATE()) ")
+
+     List<Object[]> findOnBoardingDeviation();
 }
