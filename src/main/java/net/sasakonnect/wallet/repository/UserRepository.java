@@ -74,8 +74,5 @@ public interface UserRepository extends JpaRepository<User, String> {
     	       + "(SELECT COUNT(*) FROM user u WHERE DATE(u.created_at) <= DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)), "
     	       + "(SELECT COUNT(*) FROM user u WHERE DATE(u.created_at) <= CURRENT_DATE())", 
     	       nativeQuery = true)
-
-//     + "(SELECT COUNT(u) FROM User u WHERE FUNCTION('DATE', u.createdAt) <= CURRENT_DATE()) ")
-
      List<Object[]> findOnBoardingDeviation();
 }

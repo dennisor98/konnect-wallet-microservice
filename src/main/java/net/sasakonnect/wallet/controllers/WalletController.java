@@ -236,22 +236,13 @@ public class WalletController {
 
 	@GetMapping("spending")
 	public ResponseEntity<Object> getTransactionBehaviour(
-			@RequestParam("year") String year,
-			@RequestParam("month") String month
+			@RequestParam(name = "month",required=false,defaultValue = "#{T(java.time.LocalDate).now().getMonthValue()}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) int month,
+			@RequestParam(name = "year",required=false,defaultValue="#{T(java.time.LocalDate).now().getYear()}") int year
 			) {
 		return this.transactionService.getWalletTransactionBehaviour(year,month);
 	}
 
-//
-//	@GetMapping("account/statement")
-//	@Operation(summary = "Get account statement", description = "Get account statement between start and end dates")
-//	@Deprecated
-//	public Object getAccountStatement(
-//			@Parameter(description = "Start date (YYYY-MM-DD)", example = "2024-02-01") @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-//			@Parameter(description = "End date (YYYY-MM-DD)", example = "2024-02-29") @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-//		// Your implementation to get the account statement
-//		return this.walletService.getAccountStatement(startDate, endDate);
-//	}
+
 	@PostMapping("account/statement")
 	@Operation(summary = "Get account statement", description = "Get account statement between start and end dates")
 

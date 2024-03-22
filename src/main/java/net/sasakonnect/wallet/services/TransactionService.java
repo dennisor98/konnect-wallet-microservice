@@ -263,7 +263,7 @@ public class TransactionService {
 		return ResponseEntity.status(HttpStatus.OK).body(transMap);
 	}
 	
-	public ResponseEntity<Object> getWalletTransactionBehaviour(String year,String month){
+	public ResponseEntity<Object> getWalletTransactionBehaviour(int year,int month){
 		var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		List<Wallet> wallet = this.walletRepository.findByUserWalletsUser(user);
 		
@@ -297,6 +297,51 @@ public class TransactionService {
 			
 		}
 	 return null;	
+	}
+	
+	public ResponseEntity<Object> getGeneralTransactionBehaviour(Integer year,Integer month){
+			List<Object[]> transactions = null;
+			if(year !=null && month == null) {
+				transactions = this.transactionRepository.findWalletTransactionBehaviour(year);
+			}
+			if(year !=null && month !=null ) {
+				System.out.println("Executing 2");
+				transactions = this.transactionRepository.findWalletTransactionBehaviour(year,month);	
+			}
+			if(year ==null && month==null) {
+				System.out.println("Executing 3");
+				transactions = this.transactionRepository.findWalletTransactionBehaviour();
+			}
+			
+			if(transactions !=null) {
+				
+				var userTransactions = transactions.stream().map(transaction -> {
+					Map<String,Object> map = new HashMap<>();
+					 map.put("toMpesaAmount",transaction[0]);
+					 map.put("toMpesaCount",transaction[1]);
+				     map.put("toWalletAmount",transaction[2]);
+				     map.put("toWalletCount", transaction[3]);
+				     map.put("toTillsAndPaybillsAmount", transaction[4]);
+				     map.put("toTillsAndPaybillsCount", transaction[5]);				    
+				     map.put("utilityAmount", transaction[6]);
+				     map.put("utilityCount", transaction[7]);
+				     return map;
+				}).collect(Collectors.toList());
+				Map<String,Object> map = new HashMap<>();
+				map.put("success",true);
+				map.put("message","Request successful");
+				map.put("transactions", userTransactions.stream().toList());
+				return ResponseEntity.status(HttpStatus.OK).body(map);
+				
+			}else {
+				Map<String,Object> map = new HashMap<>();
+				map.put("success",true);
+				map.put("message","No transactions found");
+				map.put("transactions",new ArrayList<>());
+				return ResponseEntity.status(HttpStatus.OK).body(map);
+			}
+			
+		
 	}
 
 	public ResponseEntity<Object> getWalletTransactionRanks(Integer pageNumber, Integer pageSize) {

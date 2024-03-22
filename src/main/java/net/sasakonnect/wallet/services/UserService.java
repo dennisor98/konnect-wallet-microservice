@@ -1160,18 +1160,16 @@ public class UserService extends RestClientService implements UserDetailsService
 		
 		List<Object[]> deviation =  this.userRepository.findOnBoardingDeviation();
 		if(!deviation.isEmpty()) {
-			deviation.stream().map(d->{
-				Map<String,Object> map =  new HashMap<>();
-				map.put("today", d[0]);//				
-				map.put("yesterday", d[1]);
-				return map;
-			}).collect(Collectors.toList());
+		      Map<String,Object> devMap = new HashMap<>();
+		      devMap.put("today",deviation.get(0)[0]);//				
+		      devMap.put("yesterday",deviation.get(0)[1]);
 		Map<String,Object> map =  new HashMap<>();
 		map.put("success",true);
 		map.put("message","Request successful");
+		map.put("deviation", devMap);
 		Map<String,Object> resMap =  new HashMap<>();
 		
-		map.put("payload",map);
+		resMap.put("payload",map);
 		return ResponseEntity.status(HttpStatus.OK).body(resMap);
 		}
 		return null;
