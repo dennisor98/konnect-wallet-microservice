@@ -301,18 +301,19 @@ public class TransactionService {
 	
 	public ResponseEntity<Object> getGeneralTransactionBehaviour(Integer year,Integer month){
 			List<Object[]> transactions = null;
-			
 			if(year !=null && month == null) {
 				transactions = this.transactionRepository.findWalletTransactionBehaviour(year);
 			}
-			else if(year !=null && month !=null ) {
+			if(year !=null && month !=null ) {
+				System.out.println("Executing 2");
 				transactions = this.transactionRepository.findWalletTransactionBehaviour(year,month);	
 			}
-			else {
+			if(year ==null && month==null) {
+				System.out.println("Executing 3");
 				transactions = this.transactionRepository.findWalletTransactionBehaviour();
 			}
 			
-			if(transactions !=null || !transactions.isEmpty()) {
+			if(transactions !=null) {
 				
 				var userTransactions = transactions.stream().map(transaction -> {
 					Map<String,Object> map = new HashMap<>();

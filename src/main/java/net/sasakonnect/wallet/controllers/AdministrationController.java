@@ -492,16 +492,22 @@ public class AdministrationController {
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.ViewAllAnalytics.PERMISSION)
 	public ResponseEntity<Object> getTransactionBehaviour(
-			@RequestParam(name = "month",required=false) Integer year,
-			@RequestParam(name = "year",required=false) Integer month
+			@RequestParam(name = "year",required=false) Integer year,
+			@RequestParam(name = "month",required=false) Integer month
 			) {
 		  if (year != null && month != null) {
 	            return transactionService.getGeneralTransactionBehaviour(year, month);
-	        } else if (year != null && month == null) {
+		  }
+	      if (year != null && month == null) {
+	    	  
 	            return transactionService.getGeneralTransactionBehaviour(year,null);
-	        } else {
+	      }
+	      
+	      if(year==null && month == null) {
 	            return transactionService.getGeneralTransactionBehaviour(null,null);
-	        }
+	      }
+	      
+	      return transactionService.getGeneralTransactionBehaviour(null,null);
 	}
 
 }
