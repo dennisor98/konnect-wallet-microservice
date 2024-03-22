@@ -73,7 +73,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
 	Optional<Transaction> findTransactionByTxtId(@Param("txId") String txId);
 	
 	@Query("SELECT IFNULL(ABS(t_out.toMpesa), 0), IFNULL(ABS(w.toWallet), 0), IFNULL(ABS(r.received), 0), IFNULL(ABS(tb.tillPaybill), 0), IFNULL(ABS(u.utility), 0) " +
-		       "FROM (SELECT SUM(t.amount) as toMpesa FROM Transaction t WHERE t.amount < 0 AND (t.txType = 'TTID0001' OR (t.txType ='TTID0002' AND t.oppoAccountId NOT IN(SELECT w.accountId FROM Wallet w))) AND t.txStatus = 8 AND YEAR(t.updatedAt) = :year AND MONTH(t.updatedAt) = :month) AS t_out, " +
+		       "FROM (SELECT SUM(t.amount) as toMpesa FROM Transaction t WHERE t.amount < 0 AND t.accountId = :accountId  AND (t.txType = 'TTID0001' OR (t.txType ='TTID0002' AND t.oppoAccountId NOT IN(SELECT w.accountId FROM Wallet w))) AND t.txStatus = 8 AND YEAR(t.updatedAt) = :year AND MONTH(t.updatedAt) = :month) AS t_out, " +
 		       "(SELECT SUM(t.amount) as toWallet FROM Transaction t WHERE t.amount < 0 AND t.accountId = :accountId AND t.txType = 'TTID0002' AND t.txStatus = 8 AND YEAR(t.updatedAt) = :year AND MONTH(t.updatedAt) = :month) AS w, "+
 		       "(SELECT SUM(t.amount) as received FROM Transaction t WHERE t.amount > 0 AND t.oppoAccountId = :accountId AND t.txType = 'TTID0003' AND t.txStatus = 8 AND YEAR(t.updatedAt) = :year AND MONTH(t.updatedAt) = :month) AS r, "+
 		       "(SELECT SUM(t.amount) as tillPaybill FROM Transaction t WHERE t.amount < 0 AND t.accountId = :accountId AND t.txType = 'TTID0005' AND t.txStatus = 8 AND YEAR(t.updatedAt) = :year AND MONTH(t.updatedAt) = :month) AS tb, " +
