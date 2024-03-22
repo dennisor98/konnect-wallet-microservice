@@ -73,12 +73,41 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
 	Optional<Transaction> findTransactionByTxtId(@Param("txId") String txId);
 	
 	@Query("SELECT IFNULL(ABS(t_out.toMpesa), 0), IFNULL(ABS(w.toWallet), 0), IFNULL(ABS(r.received), 0), IFNULL(ABS(tb.tillPaybill), 0), IFNULL(ABS(u.utility), 0) " +
-		       "FROM (SELECT SUM(t.amount) as toMpesa FROM Transaction t WHERE t.amount < 0 AND t.accountId = :accountId AND t.txType = 'TTID0001' AND t.txStatus = 8 AND YEAR(t.updatedAt) = :year AND MONTH(t.updatedAt) = :month) AS t_out, " +
+		       "FROM (SELECT SUM(t.amount) as toMpesa FROM Transaction t WHERE t.amount < 0 AND t.txType = 'TTID0001' OR (t.txType ='TTID0002' AND t.oppoAccountId NOT IN(SELECT w.accountId FROM Wallet w) ) AND t.txStatus = 8 AND YEAR(t.updatedAt) = :year AND MONTH(t.updatedAt) = :month) AS t_out, " +
 		       "(SELECT SUM(t.amount) as toWallet FROM Transaction t WHERE t.amount < 0 AND t.accountId = :accountId AND t.txType = 'TTID0002' AND t.txStatus = 8 AND YEAR(t.updatedAt) = :year AND MONTH(t.updatedAt) = :month) AS w, "+
 		       "(SELECT SUM(t.amount) as received FROM Transaction t WHERE t.amount > 0 AND t.oppoAccountId = :accountId AND t.txType = 'TTID0003' AND t.txStatus = 8 AND YEAR(t.updatedAt) = :year AND MONTH(t.updatedAt) = :month) AS r, "+
 		       "(SELECT SUM(t.amount) as tillPaybill FROM Transaction t WHERE t.amount < 0 AND t.accountId = :accountId AND t.txType = 'TTID0005' AND t.txStatus = 8 AND YEAR(t.updatedAt) = :year AND MONTH(t.updatedAt) = :month) AS tb, " +
 		       "(SELECT SUM(t.amount) as utility FROM Transaction t WHERE t.amount < 0 AND ((t.accountId = :accountId AND t.txType = 'TTID0006') OR (t.oppoAccountId = :accountId AND t.txType = 'TTID0006')) AND t.txStatus = 8 AND YEAR(t.updatedAt) = :year AND MONTH(t.updatedAt) = :month) AS u")
-	List<Object[]> findWalletTransactionBehaviour(@Param("accountId") String accountId,@Param("year") String year,@Param("month") String month);
+	List<Object[]> findWalletTransactionBehaviour(@Param("accountId") String accountId,@Param("year") int year,@Param("month") int month);
+	
+	
+	
+	//first method overload(get general summary in a given month in a year)
+	@Query("SELECT IFNULL(ABS(t_out.toMpesa), 0),t_out.cnt,IFNULL(ABS(w.toWallet), 0),w.cnt,IFNULL(ABS(tb.tillPaybill), 0),tb.cnt,IFNULL(ABS(u.utility), 0),u.cnt " +
+		       "FROM (SELECT SUM(t.amount) as toMpesa,COUNT(t) as cnt FROM Transaction t WHERE t.amount < 0  AND t.txType = 'TTID0001' OR (t.txType = 'TTID0002' AND t.oppoAccountId NOT IN(SELECT w.accountId FROM Wallet w)) AND t.txStatus = 8 AND YEAR(t.updatedAt) = :year AND MONTH(t.updatedAt) = :month) AS t_out, " +
+		       "(SELECT SUM(t.amount) as toWallet,COUNT(t) as cnt FROM Transaction t WHERE t.amount < 0 AND t.txType = 'TTID0002' AND t.oppoAccountId IN(SELECT w.accountId FROM Wallet w) AND t.txStatus = 8 AND YEAR(t.updatedAt) = :year AND MONTH(t.updatedAt) = :month) AS w, "+
+		       "(SELECT SUM(t.amount) as tillPaybill,COUNT(t) as cnt FROM Transaction t WHERE t.amount < 0 AND t.txType = 'TTID0005' AND t.txStatus = 8 AND YEAR(t.updatedAt) = :year AND MONTH(t.updatedAt) = :month) AS tb, " +
+		       "(SELECT SUM(t.amount) as utility,COUNT(t) cnt FROM Transaction t WHERE t.amount < 0  AND t.txType = 'TTID0006' AND t.txStatus = 8 AND YEAR(t.updatedAt) = :year AND MONTH(t.updatedAt) = :month) AS u")
+	List<Object[]> findWalletTransactionBehaviour(@Param("year") int year,@Param("month") int month);
+	
+	    //2nd method overload(get general summary in a given year)
+	@Query("SELECT IFNULL(ABS(t_out.toMpesa), 0), t_out.cnt, IFNULL(ABS(w.toWallet), 0), w.cnt, IFNULL(ABS(tb.tillPaybill), 0), tb.cnt, IFNULL(ABS(u.utility), 0), u.cnt " +
+		       "FROM (SELECT SUM(t.amount) as toMpesa,COUNT(t) as cnt FROM Transaction t WHERE t.amount < 0 AND t.txType = 'TTID0001' OR (t.txType = 'TTID0002' AND t.oppoAccountId NOT IN (SELECT w.accountId FROM Wallet w)) AND t.txStatus = 8 AND YEAR(t.updatedAt) = :year) AS t_out, " +
+		       "(SELECT SUM(t.amount) as toWallet, COUNT(t) as cnt FROM Transaction t WHERE t.amount < 0 AND t.txType = 'TTID0002' AND t.oppoAccountId IN (SELECT w.accountId FROM Wallet w) AND t.txStatus = 8 AND YEAR(t.updatedAt) = :year) AS w, " +
+		       "(SELECT SUM(t.amount) as tillPaybill, COUNT(t) as cnt FROM Transaction t WHERE t.amount < 0 AND t.txType = 'TTID0005' AND t.txStatus = 8 AND YEAR(t.updatedAt) = :year) AS tb, " +
+		       "(SELECT SUM(t.amount) as utility, COUNT(t) as cnt FROM Transaction t WHERE t.amount < 0 AND t.txType = 'TTID0006' AND t.txStatus = 8 AND YEAR(t.updatedAt) = :year) AS u")
+	List<Object[]> findWalletTransactionBehaviour(@Param("year") int year);
+
+
+	
+	    //3rd method overload(get general summary in the system without time period)
+	@Query("SELECT IFNULL(ABS(t_out.toMpesa), 0), t_out.cnt, IFNULL(ABS(w.toWallet), 0), w.cnt, IFNULL(ABS(tb.tillPaybill), 0), tb.cnt, IFNULL(ABS(u.utility), 0), u.cnt " +
+		       "FROM (SELECT SUM(t.amount) as toMpesa, COUNT(t) as cnt FROM Transaction t WHERE t.amount < 0 AND t.txType = 'TTID0001' OR (t.txType = 'TTID0002' AND t.oppoAccountId NOT IN (SELECT w.accountId FROM Wallet w)) AND t.txStatus = 8) AS t_out, " +
+		       "(SELECT SUM(t.amount) as toWallet, COUNT(t) as cnt FROM Transaction t WHERE t.amount < 0 AND t.txType = 'TTID0002' AND t.oppoAccountId IN (SELECT w.accountId FROM Wallet w) AND t.txStatus = 8) AS w, " +
+		       "(SELECT SUM(t.amount) as tillPaybill, COUNT(t) as cnt FROM Transaction t WHERE t.amount < 0 AND t.txType = 'TTID0005' AND t.txStatus = 8) AS tb, " +
+		       "(SELECT SUM(t.amount) as utility, COUNT(t) as cnt FROM Transaction t WHERE t.amount < 0 AND t.txType = 'TTID0006' AND t.txStatus = 8) AS u")
+	List<Object[]> findWalletTransactionBehaviour();
+
 		
 	 @Query("SELECT t FROM Transaction t " +
 	           "WHERE t.txType = :txType " +

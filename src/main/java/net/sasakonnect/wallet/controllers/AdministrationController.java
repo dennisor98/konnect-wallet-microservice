@@ -485,4 +485,23 @@ public class AdministrationController {
     public ResponseEntity<Object> getUserOnboardingDeviation(){
 		return this.userService.getOnBoardingDeviation();
 	}
+	
+	
+	@GetMapping("analytics/spending")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAllAnalytics.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.ViewAllAnalytics.PERMISSION)
+	public ResponseEntity<Object> getTransactionBehaviour(
+			@RequestParam(name = "month",required=false) Integer year,
+			@RequestParam(name = "year",required=false) Integer month
+			) {
+		  if (year != null && month != null) {
+	            return transactionService.getGeneralTransactionBehaviour(year, month);
+	        } else if (year != null && month == null) {
+	            return transactionService.getGeneralTransactionBehaviour(year,null);
+	        } else {
+	            return transactionService.getGeneralTransactionBehaviour(null,null);
+	        }
+	}
+
 }
