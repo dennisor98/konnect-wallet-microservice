@@ -1,7 +1,11 @@
 package net.sasakonnect.wallet.services;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +36,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -55,6 +62,7 @@ import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.beans.RedisBean;
 import net.sasakonnect.wallet.domain.FirebaseToken;
 import net.sasakonnect.wallet.domain.Permission;
+import net.sasakonnect.wallet.domain.ProfileImage;
 import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.UserPin;
@@ -65,6 +73,7 @@ import net.sasakonnect.wallet.notification.WalletAccountUpgradeResultNotificatio
 import net.sasakonnect.wallet.repository.CorporateDetailsRepository;
 import net.sasakonnect.wallet.repository.FirebaseTokenRepository;
 import net.sasakonnect.wallet.repository.PermissionRepository;
+import net.sasakonnect.wallet.repository.ProfileImageRepository;
 import net.sasakonnect.wallet.repository.RolePermissionRepository;
 import net.sasakonnect.wallet.repository.RoleRepository;
 import net.sasakonnect.wallet.repository.UserPinRepository;
@@ -115,7 +124,10 @@ public class UserService extends RestClientService implements UserDetailsService
 	BankWebClientBean bankClientBean;
 	@Value("${MAX_PIN_ATTEMPT:3}")
 	private int maxpinattempt;
-
+	
+	@Value("${PROFILE_IMAGE_PATH}")
+    private Path profileImageDir;
+    
 	@Value("${spring.profiles.active}")
 	String profileActive;
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneOffset.UTC);
@@ -123,7 +135,18 @@ public class UserService extends RestClientService implements UserDetailsService
 	private RedisBean<String> redisBean;
 	@Autowired
 	RequestSigner requestSigner;
+	
+	@Autowired
+	ProfileImageRepository profileImageRepository;
 
+//	public UserService() {
+//        try {
+//            Files.createDirectories(this.profileImageDir);
+//        } catch (Exception ex) {
+//            throw new RuntimeException("Could not create the directory where the uploaded files will be stored.", ex);
+//        }	
+//	}
+//	
 	public ResponseEntity<Object> getAllUsers(Integer pageNumber, Integer pageSize) {
 		Map<String, Object> resObject = new HashMap<String, Object>();
 		Map<String, Object> payloadMap = new HashMap<>();
@@ -999,14 +1022,27 @@ public class UserService extends RestClientService implements UserDetailsService
 	public ResponseEntity<Object> getAuthenticatedUserProfile() {
 		User u = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		List<Wallet> wallet = this.walletRepository.findByUserWalletsUser(u);
-		var response = UserResponseDTO.builder().wallets(wallet.stream().toList()).middleName(u.getMiddleName())
-				.gender(u.getGender().name()).idType(u.getIdType().name()).idNumber(u.getIdNumber())
+		var response = UserResponseDTO.builder().wallets(wallet.stream().toList())
+				.middleName(u.getMiddleName())
+				.gender(u.getGender()
+				.name())
+				.idType(u.getIdType().name())
+				.idNumber(u.getIdNumber())
 				.onboardingRequestId(u.getOnboardingRequestId()).open_id(u.getOpenId())
-				.birthday(formatter.format(u.getBirthday().toInstant())).updatedAt(u.getUpdatedAt())
-				.kraPin(u.getKraPin()).employmentStatus(u.getEmploymentStatus().name())
-				.monthlyIncome(u.getMonthlyIncome().toString()).createdAt(u.getCreatedAt()).id(u.getId())
-				.address(u.getAddress()).firstName(u.getFirstName()).lastName(u.getLastName()).mobile(u.getMobile())
-				.countryCode(u.getCountryCode()).build();
+				.birthday(formatter.format(u.getBirthday().toInstant()))
+				.updatedAt(u.getUpdatedAt())
+				.kraPin(u.getKraPin())
+				.employmentStatus(u.getEmploymentStatus().name())
+				.monthlyIncome(u.getMonthlyIncome().toString())
+				.createdAt(u.getCreatedAt())
+				.id(u.getId())
+				.address(u.getAddress())
+				.firstName(u.getFirstName())
+				.lastName(u.getLastName())
+				.mobile(u.getMobile())
+				.countryCode(u.getCountryCode())
+				.profileImage(u.getProfileImage())
+				.build();
 
 		ObjectMapper objectMapper = new ObjectMapper();
 		objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
@@ -1174,6 +1210,43 @@ public class UserService extends RestClientService implements UserDetailsService
 		}
 		return null;
 	}
+	
+	public ResponseEntity<Object> uploadProfileImage(MultipartFile file){
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		 String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+
+	        try {
+	            if (fileName.contains("..")) {
+	                throw new RuntimeException("Sorry! Filename contains invalid path sequence " + fileName);
+	            }
+
+	            String newFileName = UUID.randomUUID().toString() + "_" + user.getId()+"."+file.getContentType().split("/")[1];
+	            Path targetLocation = this.profileImageDir.resolve(newFileName);
+	            Files.copy(file.getInputStream(), targetLocation);
+	            ProfileImage profileImage  = ProfileImage.builder()
+	            		.name(fileName)
+	            		.type(file.getContentType())
+	            		.filePath(targetLocation.toString())
+	            		.build();
+	            
+	            this.profileImageRepository.save(profileImage);
+	            
+	             user.setProfileImage(profileImage);
+	            this.userRepository.save(user);
+                Map<String,Object> map =  new HashMap<>();
+                map.put("success",true);
+                map.put("message","Request completed");
+                map.put("fileName",newFileName);
+                Map<String,Object> resMap = new HashMap<>();
+                resMap.put("payload",map);
+                
+	          return ResponseEntity.status(HttpStatus.OK).body(resMap);
+	        } catch (IOException ex) {
+	            throw new RuntimeException("Could not store file " + fileName + ". Please try again!", ex);
+	        }
+	}
+	
+
 	
 
 }
