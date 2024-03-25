@@ -1226,7 +1226,7 @@ public class UserService extends RestClientService implements UserDetailsService
 	            ProfileImage profileImage  = ProfileImage.builder()
 	            		.name(fileName)
 	            		.type(file.getContentType())
-	            		.filePath(targetLocation.toString())
+	            		.filePath("https://wallet.sasakonnect.net/konnect-wallet"+targetLocation.toString().substring(targetLocation.toString().indexOf("/profiles")))
 	            		.build();
 	            
 	            this.profileImageRepository.save(profileImage);
