@@ -1,5 +1,8 @@
 package net.sasakonnect.wallet.services;
 
+import net.coobird.thumbnailator.Thumbnails;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -22,6 +25,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -127,6 +132,9 @@ public class UserService extends RestClientService implements UserDetailsService
 	
 	@Value("${PROFILE_IMAGE_PATH}")
     private Path profileImageDir;
+	
+	 private final int compressedImageWidth = 300; // Adjust the width as needed
+	 private final float imageQuality = 0.5f;
     
 	@Value("${spring.profiles.active}")
 	String profileActive;
@@ -1219,10 +1227,25 @@ public class UserService extends RestClientService implements UserDetailsService
 	            if (fileName.contains("..")) {
 	                throw new RuntimeException("Sorry! Filename contains invalid path sequence " + fileName);
 	            }
-
+	            if (file.getSize() > 5000000) {
+	            	Map<String,Object> map =  new HashMap<>();
+	            	map.put("success",false);
+	            	map.put("message","File exists maximum size");
+	            	
+	            	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);	       
+	            }
+	            
+	            //check if file type is image
+	            if (!file.getContentType().equalsIgnoreCase("image/png") && !file.getContentType().equalsIgnoreCase("image/jpg") && !file.getContentType().equalsIgnoreCase("image/jpeg")) {
+	            	Map<String,Object> map =  new HashMap<>();
+	            	map.put("success",false);
+	            	map.put("message","Invalid file format.Allowed types:.png,.jpg,.jpeg");	            
+	            	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);	       
+	            }
+	            byte[] compressedImageData = compressImage(file.getBytes());
 	            String newFileName = UUID.randomUUID().toString() + "_" + user.getId()+"."+file.getContentType().split("/")[1];
 	            Path targetLocation = this.profileImageDir.resolve(newFileName);
-	            Files.copy(file.getInputStream(), targetLocation);
+	            Files.write(targetLocation, compressedImageData);
 	            ProfileImage profileImage  = ProfileImage.builder()
 	            		.name(fileName)
 	            		.type(file.getContentType())
@@ -1245,6 +1268,15 @@ public class UserService extends RestClientService implements UserDetailsService
 	            throw new RuntimeException("Could not store file " + fileName + ". Please try again!", ex);
 	        }
 	}
+	
+	   private byte[] compressImage(byte[] imageData) throws IOException {
+	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+	        Thumbnails.of(new ByteArrayInputStream(imageData))
+	                .width(compressedImageWidth)
+	                .outputQuality(imageQuality)
+	                .toOutputStream(outputStream);
+	        return outputStream.toByteArray();
+	    }
 	
 
 	
