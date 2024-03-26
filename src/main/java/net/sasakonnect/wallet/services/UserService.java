@@ -138,6 +138,10 @@ public class UserService extends RestClientService implements UserDetailsService
     
 	@Value("${spring.profiles.active}")
 	String profileActive;
+	
+	@Value("${WALLET_BASE_URL}")
+	String wallet_base_url;
+	
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneOffset.UTC);
 	@Autowired
 	private RedisBean<String> redisBean;
@@ -1249,7 +1253,7 @@ public class UserService extends RestClientService implements UserDetailsService
 	            ProfileImage profileImage  = ProfileImage.builder()
 	            		.name(fileName)
 	            		.type(file.getContentType())
-	            		.filePath("https://wallet.sasakonnect.net/konnect-wallet"+targetLocation.toString().substring(targetLocation.toString().indexOf("/profiles")))
+	            		.filePath(this.wallet_base_url+targetLocation.toString().substring(targetLocation.toString().indexOf("/profiles")))
 	            		.build();
 	            
 	            this.profileImageRepository.save(profileImage);

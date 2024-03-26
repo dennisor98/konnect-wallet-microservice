@@ -1,6 +1,7 @@
 package net.sasakonnect.wallet.notification;
 
 import lombok.Data;
+import net.sasakonnect.wallet.domain.ExtInfo;
 
 @Data
 public class TransactionResultNotification {
@@ -26,5 +27,8 @@ public class TransactionResultNotification {
 	private long updateTime; // Updated to long
 	private String errorCode;
 	private String errorMsg;
-	private Object extInfo;
+	private ExtInfo extInfo;
 }
+
+
+
