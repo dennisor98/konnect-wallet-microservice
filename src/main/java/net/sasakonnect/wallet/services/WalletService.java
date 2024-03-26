@@ -579,6 +579,9 @@ public class WalletService {
 				if (transaction.isPresent() && this.transactionService.isUpdatableTransaction(results)) {
 					transaction.get().setTxStatus(8);
 					transaction.get().setBalance(new BigDecimal(results.getParams().getBalance()));
+					if(results.getParams().getExtInfo().getCounterpartyName() == null) {
+						transaction.get().setCounterpartyName(transaction.get().getCounterpartyName());
+					}
 					this.transactionService.transactionRepository.save(transaction.get());
 
 					this.publisher.publishEvent(
