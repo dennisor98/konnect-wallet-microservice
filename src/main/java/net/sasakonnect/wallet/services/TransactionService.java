@@ -60,7 +60,6 @@ public class TransactionService {
 					.feeAmount(trans.getFeeAmount() != null ? new BigDecimal(trans.getFeeAmount()) : new BigDecimal(0))
 					// .mpesaBusinessPayType(trans.getMpesaBusinessPayType())
 					.txStatus(trans.getTxStatus())
-
 					.oppoAccountId(trans.getOppoAccountId()).oppoChannelId(trans.getOppoChannelId())
 					.oppoAccountName(trans.getOppoAccountName()).thirdPartyTxType(trans.getThirdPartyTxType())
 					.counterpartyName(trans.getExtInfo().getCounterpartyName())
@@ -180,8 +179,8 @@ public class TransactionService {
 					resultData.put("txStatus", Double.valueOf(transaction.getTxStatus().toString()));
 					resultData.put("createTime", Double.valueOf(transaction.getCreatedAt().getTime()));
 					resultData.put("updateTime", Double.valueOf(transaction.getUpdatedAt().getTime()));
-					resultData.put("feeAmount",
-							transaction.getFeeAmount() == null ? "0" : transaction.getFeeAmount().toString());
+					resultData.put("counterPartyName",transaction.getCounterpartyName());
+					resultData.put("feeAmount",transaction.getFeeAmount() == null ? "0" : transaction.getFeeAmount().toString());
 
 					return resultData;
 				}).collect(Collectors.toList());
