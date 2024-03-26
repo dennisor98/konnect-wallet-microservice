@@ -83,6 +83,10 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 	@OneToOne
 	@JoinColumn(name = "corporate_id", referencedColumnName = "id", nullable = true)
 	private CorporateDetails corporate;
+	
+	@OneToOne
+	@JoinColumn(name = "profileImage", referencedColumnName = "id", nullable = true)
+	private ProfileImage profileImage;
 
 	@Column(length = 50, unique = true)
 	private String onboardingRequestId;
@@ -129,6 +133,8 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 	private String status;
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<UserJob> userJobs;
+	
+	
 
 	public Map<String, Object> toBankPayload() {
 		Map<String, Object> payload = new HashMap<>();
