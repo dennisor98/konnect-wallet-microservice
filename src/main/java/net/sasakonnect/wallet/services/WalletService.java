@@ -555,6 +555,7 @@ public class WalletService {
 				var transaction = this.transactionService.getTransactionById(results.getParams().getTxId());
 				if (transaction.isPresent()) {
 					transaction.get().setTxStatus(results.getParams().getTxStatus());
+					transaction.get().setCounterpartyName(results.getParams().getExtInfo().getCounterpartyName());
 					var createdTransaction = this.transactionService.transactionRepository.save(transaction.get());
 
 				} else {
