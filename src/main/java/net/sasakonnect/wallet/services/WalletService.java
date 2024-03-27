@@ -566,19 +566,21 @@ public class WalletService {
 								.transaction(createdTransaction).build());
 					}
 				}
-				log.info("transacttion {}", results);
+//				log.info("transacttion {}", results);
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.BALANCE.getCode())) {
 
 				NotificationResult<TransactionResultNotification> results = new Gson().fromJson(body.toString(),
 						new TypeToken<NotificationResult<TransactionResultNotification>>() {
 						}.getType());
-				log.info("balance update {}", results);
+//				log.info("balance update {}", results);
 
 				var transaction = this.transactionService.getTransactionById(results.getParams().getTxId());
-				if (transaction.isPresent() && this.transactionService.isUpdatableTransaction(results)) {
+				if(transaction.isPresent() && this.transactionService.isUpdatableTransaction(results)) {
+					log.info("existing transaction"+results);
 					transaction.get().setTxStatus(8);
 					transaction.get().setBalance(new BigDecimal(results.getParams().getBalance()));
+					
 					if(results.getParams().getExtInfo().getCounterpartyName() == null) {
 						transaction.get().setCounterpartyName(transaction.get().getCounterpartyName());
 					}
@@ -588,13 +590,14 @@ public class WalletService {
 							TransactionEvent.builder().userService(userService).transaction(transaction.get()).build());
 
 				} else {
+					log.info("new transaction"+results);
 					if (results.getParams().getTxStatus() == 0) {
 						results.getParams().setTxStatus(8);
 
 					}
 					var createdTransaction = this.transactionService.saveTransaction(results);
 					if (createdTransaction != null) {
-						log.info("publish transaction to socket {}", createdTransaction);
+//						log.info("publish transaction to socket {}", createdTransaction);
 
 						this.publisher.publishEvent(TransactionEvent.builder().userService(userService)
 								.transaction(createdTransaction).build());
