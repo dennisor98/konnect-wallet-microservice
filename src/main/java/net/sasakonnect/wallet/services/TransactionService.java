@@ -64,7 +64,6 @@ public class TransactionService {
 					.oppoAccountName(trans.getOppoAccountName()).thirdPartyTxType(trans.getThirdPartyTxType())
 					.counterpartyName(trans.getExtInfo().getCounterpartyName())
 					.currency(trans.getCurrency()).amount(new BigDecimal(trans.getAmount())).build();
-			        
 			return this.transactionRepository.save(transaction);
 		} else {
 //			var transaction = Transaction.builder().txId(trans.getTxId()).txType(trans.getTxType())
