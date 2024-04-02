@@ -224,13 +224,6 @@ public class TransactionService {
 
 		var transactions = transactionRepository.findByAccountId(accountNumber,
 				PageRequest.of(pageNumber == null ? 0 : pageNumber, pageSize == null ? 100 : pageSize));
-//		transactions.nextPageable().
-		// var transactionsPayload:TransactionHistory =
-//		Integer pageSize;
-//		   Integer currentPage;
-//		   Integer nextPage;
-//		   Boolean hasNextPage;
-//		   Boolean hasPreviousPage;
 		Map<String, Object> transactionsMap = new HashMap<>();
 		transactionsMap.put("transactions", transactions.get().collect(Collectors.toList()));
 		transactionsMap.put("pageSize", transactions.getSize());
