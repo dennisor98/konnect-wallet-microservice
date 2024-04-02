@@ -483,7 +483,7 @@ public class UserService extends RestClientService implements UserDetailsService
 						.open_id(u.getOpenId()).birthday(formatter.format(u.getBirthday().toInstant()))
 						.updatedAt(u.getUpdatedAt()).kraPin(u.getKraPin())
 						.employmentStatus(u.getEmploymentStatus().name())
-
+                        .profileImage(u.getProfileImage())
 						.monthlyIncome(u.getMonthlyIncome().toString()).createdAt(u.getCreatedAt()).id(u.getId())
 						.address(u.getAddress()).firstName(u.getFirstName()).lastName(u.getLastName())
 						.mobile(u.getMobile()).countryCode(u.getCountryCode()).build();

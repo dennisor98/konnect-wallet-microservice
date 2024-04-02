@@ -32,7 +32,7 @@ public class UserResponseDTO {
 	private String refreshToken;
 	private String token;
 	private String open_id;
-	private ProfileImage profileImage;
+	private Object profileImage;
 	private List<Wallet> wallets;
 
 }
