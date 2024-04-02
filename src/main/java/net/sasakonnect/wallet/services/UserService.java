@@ -1263,7 +1263,7 @@ public class UserService extends RestClientService implements UserDetailsService
                 Map<String,Object> map =  new HashMap<>();
                 map.put("success",true);
                 map.put("message","Request completed");
-                map.put("fileName",newFileName);
+                map.put("profileImage",profileImage);
                 Map<String,Object> resMap = new HashMap<>();
                 resMap.put("payload",map);
                 
