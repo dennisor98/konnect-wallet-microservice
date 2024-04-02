@@ -1092,7 +1092,7 @@ public class WalletService {
 
 		switch (tillAndBuyGoods.billType) {
 		case PAY_BILL:
-			reqId.put("payeeReferenNumber", tillAndBuyGoods.getReceivingAccount());
+			reqId.put("payeeReferenNumber", tillAndBuyGoods.getReceivingAccount().trim());
 
 			break;
 		case TILL:
@@ -1102,7 +1102,7 @@ public class WalletService {
 			break;
 
 		}
-		reqId.put("payeeShortCode", tillAndBuyGoods.getShortCode());
+		reqId.put("payeeShortCode", tillAndBuyGoods.getShortCode().trim());
 
 		reqId.put("amount", tillAndBuyGoods.getAmount());
 		reqId.put("description", tillAndBuyGoods.getShortNote());
