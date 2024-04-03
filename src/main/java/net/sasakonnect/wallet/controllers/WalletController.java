@@ -35,7 +35,10 @@ import net.sasakonnect.wallet.RequestDto.UpgradeWalletAccountDto;
 import net.sasakonnect.wallet.RequestDto.WalletTransferDto;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.TransactionMiddleware;
+import net.sasakonnect.wallet.constant.ChannelType;
 import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.domain.invoice.Tariff;
+import net.sasakonnect.wallet.services.TarrifService;
 import net.sasakonnect.wallet.services.TransactionService;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.services.WalletService;
@@ -51,6 +54,9 @@ public class WalletController {
 
 	@Autowired
 	TransactionService transactionService;
+	
+	@Autowired
+	TarrifService tarrifService;
 
 	public WalletController(UserService userService, WalletService walletService) {
 		this.userService = userService;
@@ -271,5 +277,12 @@ public class WalletController {
 			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
 		return this.walletService.getRecentTransactionContact(txType,pageNumber,pageSize);
 	}
-
+	@GetMapping("/tarrif/cost")
+	public ResponseEntity<Object> getCostFor(
+			@RequestParam(name="amount") double amout,
+			@RequestParam(name="opponentAccount") String opponentAccount,
+			@RequestParam(name = "channel") ChannelType channelType) {
+		return this.tarrifService.getCostOn(channelType, amout,opponentAccount);
+	}
+	
 }

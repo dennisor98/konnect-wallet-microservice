@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -44,6 +45,17 @@ public class WalletExceptionHandler extends ResponseEntityExceptionHandler {
 		return this.handleExceptionInternal(ex, apiError, new HttpHeaders(), apiError.getStatus(), request);
 
 	}
+	
+//	@ExceptionHandler({ MissingServletRequestParameterException.class })
+//	public ResponseEntity<Object> handleConstraintViolation(MissingServletRequestParameterException ex, WebRequest request) {
+//		List<String> errors = new ArrayList<String>();
+//		Map<String, String> fieldErrorMap = new HashMap<>();
+//		fieldErrorMap.put("message", ex.getMessage());
+//		return ResponseEntity.status(ex.getStatusCode()).headers(ex.getHeaders()).body(ex.getBody().getDetail());
+//
+//	}
+	
+	
 
 	@ExceptionHandler({ ResponseStatusException.class })
 	public ResponseEntity<Object> handleConstraintViolation(ResponseStatusException ex, WebRequest request)
