@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -101,6 +103,13 @@ public class UserController {
 	@GetMapping("permissions")
 	public ResponseEntity<Object> getUserRolesAndPermissions() {
 		return this.userService.getUserPermissions();
+	}
+	
+	@PostMapping("profile/image/upload")
+	public ResponseEntity<Object> uploadProfileImage(
+		@Valid	@RequestParam("file") MultipartFile file
+			){
+		return this.userService.uploadProfileImage(file);
 	}
 
 }

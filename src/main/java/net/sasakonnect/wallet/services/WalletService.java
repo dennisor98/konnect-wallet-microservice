@@ -555,6 +555,7 @@ public class WalletService {
 				var transaction = this.transactionService.getTransactionById(results.getParams().getTxId());
 				if (transaction.isPresent()) {
 					transaction.get().setTxStatus(results.getParams().getTxStatus());
+					transaction.get().setCounterpartyName(results.getParams().getExtInfo().getCounterpartyName());
 					var createdTransaction = this.transactionService.transactionRepository.save(transaction.get());
 
 				} else {
@@ -566,32 +567,38 @@ public class WalletService {
 								.transaction(createdTransaction).build());
 					}
 				}
-				log.info("transacttion {}", results);
+//				log.info("transacttion {}", results);
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.BALANCE.getCode())) {
 
 				NotificationResult<TransactionResultNotification> results = new Gson().fromJson(body.toString(),
 						new TypeToken<NotificationResult<TransactionResultNotification>>() {
 						}.getType());
-				log.info("balance update {}", results);
+//				log.info("balance update {}", results);
 
 				var transaction = this.transactionService.getTransactionById(results.getParams().getTxId());
-				if (transaction.isPresent() && this.transactionService.isUpdatableTransaction(results)) {
+				if(transaction.isPresent() && this.transactionService.isUpdatableTransaction(results)) {
+					log.info("existing transaction"+results);
 					transaction.get().setTxStatus(8);
 					transaction.get().setBalance(new BigDecimal(results.getParams().getBalance()));
+					
+					if(results.getParams().getExtInfo().getCounterpartyName() == null) {
+						transaction.get().setCounterpartyName(transaction.get().getCounterpartyName());
+					}
 					this.transactionService.transactionRepository.save(transaction.get());
 
 					this.publisher.publishEvent(
 							TransactionEvent.builder().userService(userService).transaction(transaction.get()).build());
 
 				} else {
+					log.info("new transaction"+results);
 					if (results.getParams().getTxStatus() == 0) {
 						results.getParams().setTxStatus(8);
 
 					}
 					var createdTransaction = this.transactionService.saveTransaction(results);
 					if (createdTransaction != null) {
-						log.info("publish transaction to socket {}", createdTransaction);
+//						log.info("publish transaction to socket {}", createdTransaction);
 
 						this.publisher.publishEvent(TransactionEvent.builder().userService(userService)
 								.transaction(createdTransaction).build());
@@ -1085,7 +1092,7 @@ public class WalletService {
 
 		switch (tillAndBuyGoods.billType) {
 		case PAY_BILL:
-			reqId.put("payeeReferenNumber", tillAndBuyGoods.getReceivingAccount());
+			reqId.put("payeeReferenNumber", tillAndBuyGoods.getReceivingAccount().trim());
 
 			break;
 		case TILL:
@@ -1095,7 +1102,7 @@ public class WalletService {
 			break;
 
 		}
-		reqId.put("payeeShortCode", tillAndBuyGoods.getShortCode());
+		reqId.put("payeeShortCode", tillAndBuyGoods.getShortCode().trim());
 
 		reqId.put("amount", tillAndBuyGoods.getAmount());
 		reqId.put("description", tillAndBuyGoods.getShortNote());

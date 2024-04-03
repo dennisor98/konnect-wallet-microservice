@@ -5,6 +5,7 @@ import java.util.List;
 
 import lombok.Builder;
 import lombok.Data;
+import net.sasakonnect.wallet.domain.ProfileImage;
 import net.sasakonnect.wallet.domain.Wallet;
 
 @Data
@@ -31,6 +32,7 @@ public class UserResponseDTO {
 	private String refreshToken;
 	private String token;
 	private String open_id;
+	private Object profileImage;
 	private List<Wallet> wallets;
 
 }

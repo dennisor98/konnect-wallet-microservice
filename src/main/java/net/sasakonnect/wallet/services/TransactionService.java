@@ -60,9 +60,9 @@ public class TransactionService {
 					.feeAmount(trans.getFeeAmount() != null ? new BigDecimal(trans.getFeeAmount()) : new BigDecimal(0))
 					// .mpesaBusinessPayType(trans.getMpesaBusinessPayType())
 					.txStatus(trans.getTxStatus())
-
 					.oppoAccountId(trans.getOppoAccountId()).oppoChannelId(trans.getOppoChannelId())
 					.oppoAccountName(trans.getOppoAccountName()).thirdPartyTxType(trans.getThirdPartyTxType())
+					.counterpartyName(trans.getExtInfo().getCounterpartyName())
 					.currency(trans.getCurrency()).amount(new BigDecimal(trans.getAmount())).build();
 			return this.transactionRepository.save(transaction);
 		} else {
@@ -178,8 +178,8 @@ public class TransactionService {
 					resultData.put("txStatus", Double.valueOf(transaction.getTxStatus().toString()));
 					resultData.put("createTime", Double.valueOf(transaction.getCreatedAt().getTime()));
 					resultData.put("updateTime", Double.valueOf(transaction.getUpdatedAt().getTime()));
-					resultData.put("feeAmount",
-							transaction.getFeeAmount() == null ? "0" : transaction.getFeeAmount().toString());
+					resultData.put("counterPartyName",transaction.getCounterpartyName());
+					resultData.put("feeAmount",transaction.getFeeAmount() == null ? "0" : transaction.getFeeAmount().toString());
 
 					return resultData;
 				}).collect(Collectors.toList());
@@ -224,13 +224,6 @@ public class TransactionService {
 
 		var transactions = transactionRepository.findByAccountId(accountNumber,
 				PageRequest.of(pageNumber == null ? 0 : pageNumber, pageSize == null ? 100 : pageSize));
-//		transactions.nextPageable().
-		// var transactionsPayload:TransactionHistory =
-//		Integer pageSize;
-//		   Integer currentPage;
-//		   Integer nextPage;
-//		   Boolean hasNextPage;
-//		   Boolean hasPreviousPage;
 		Map<String, Object> transactionsMap = new HashMap<>();
 		transactionsMap.put("transactions", transactions.get().collect(Collectors.toList()));
 		transactionsMap.put("pageSize", transactions.getSize());
