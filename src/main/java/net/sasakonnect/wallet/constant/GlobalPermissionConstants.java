@@ -396,7 +396,20 @@ public final class GlobalPermissionConstants {
 		}
 	}
 	
-	
+	public static class CanCreateTarrif extends PermissionEntry {
+		public static final String PERMISSION = "can.create.tarrif";
+		public static final String DESCRIPTION = "user with this permission can create a tarrif for a channel(use with caution)";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
 	
 		
 	

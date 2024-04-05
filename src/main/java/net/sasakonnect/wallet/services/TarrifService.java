@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import jakarta.validation.Valid;
+import net.sasakonnect.wallet.RequestDto.tarrif.TariffDTO;
 import net.sasakonnect.wallet.constant.ChannelType;
 import net.sasakonnect.wallet.domain.invoice.Tariff;
 import net.sasakonnect.wallet.repository.TarrifRepository;
@@ -49,4 +51,22 @@ public class TarrifService {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(map);
 	}
 
+	public Object createTarrif(@Valid TariffDTO t) {
+	var tarrif=	Tariff.builder().max(t.getMax()).min(t.getMin()).cbCharge(t.getCbCharge())
+		.channelType(t.getChannelType())
+		.exciseDutyTax(t.getExciseDutyTax())
+		.channelCharge(t.getChannelCharge())
+		.opponentAccount(t.getOpponentAccount())
+		.totalMarginTaxable(t.getTotalMarginTaxable())
+		.savedValue(t.getSavedValue())
+		.tierLabel(t.getTierLabel())
+		.tier(t.getTier())
+		.totalPartnerProfit(t.getTotalPartnerProfit())
+		.totalCostToUserIncl(t.getTotalCostToUserIncl()).build();
+	return this.tarrifRepository.save(tarrif);
+		
+		// TODO Auto-generated method stub
+	}
+
+	
 }

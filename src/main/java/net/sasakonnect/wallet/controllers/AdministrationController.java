@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,6 +37,7 @@ import net.sasakonnect.wallet.RequestDto.WalletClientAccountDto;
 import net.sasakonnect.wallet.RequestDto.WalletClientDTO;
 import net.sasakonnect.wallet.RequestDto.admin.CheckUserAccount;
 import net.sasakonnect.wallet.RequestDto.admin.PinReset;
+import net.sasakonnect.wallet.RequestDto.tarrif.TariffDTO;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.RequirePermission;
 import net.sasakonnect.wallet.constant.GlobalPermissionConstants;
@@ -48,6 +50,7 @@ import net.sasakonnect.wallet.services.CorporateService;
 import net.sasakonnect.wallet.services.LarkService;
 import net.sasakonnect.wallet.services.PermissionService;
 import net.sasakonnect.wallet.services.RoleService;
+import net.sasakonnect.wallet.services.TarrifService;
 import net.sasakonnect.wallet.services.TransactionService;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.services.WalletClientService;
@@ -86,6 +89,9 @@ public class AdministrationController {
 	
 	@Autowired
 	AccountStatementService  accountStatementService;
+	
+	@Autowired
+	TarrifService tarrifService;
 
 	@Autowired
 	RoleRepository roleRepository;
@@ -508,5 +514,21 @@ public class AdministrationController {
 	      
 	      return transactionService.getGeneralTransactionBehaviour(null,null);
 	}
+   //tarrif routes
+	
+	@PostMapping("tarrif")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanCreateTarrif.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.CanCreateTarrif.PERMISSION)
+	@Operation(summary = "Create a new tarrif", description = "Create tarrif that will show on client the ammount they are changed on transaction")
+	public Object createTarrif( @Valid @RequestBody TariffDTO tariffDTO,
+	        BindingResult bindingResult) {
+		if(bindingResult.hasErrors()) {
+			return bindingResult.getFieldErrors();
 
+		}else {
+			return this.tarrifService.createTarrif(tariffDTO);
+		}
+		//return walletService.getUserStatement(accountId,startDate, endDate);
+	}
 }
