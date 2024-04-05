@@ -828,22 +828,17 @@ public class UserService extends RestClientService implements UserDetailsService
 			Optional<UserPin> userPin = this.userPinRepository.getUserPinByUser(user.get());
 //			List<Wallet> wallet = this.walletRepository;
 			if (counter >= maxpinattempt) {
-				map.put("success", false);
-				map.put("message", "Invalid reset to value");
-				try (FileWriter writer = new FileWriter("pin_reset.txt")) {
+				map.put("success", true);
+				map.put("message", "PIN blocked successfully");
+//				try (FileWriter writer = new FileWriter("pin_reset.txt")) {
 					LocalDateTime currentTime = LocalDateTime.now();
 					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 					String formattedDateTime = currentTime.format(formatter);
-//					writer.write(formattedDateTime + " - " + loggedInUser.getFirstName() + "   "
-//							+ loggedInUser.getLastName() + "failed to reset PIN attempts for user(Invalid count number)"
-//							+ user.get().getFirstName() + user.get().getLastName() + "of phone No"
-//							+ user.get().getMobile());
+
 					this.larkService.sendPinResetNotification(loggedInUser,
-							user.get().getUserWallets().get(0).getWallet(), "ATTEMPTS", "Failed");
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+							user.get().getUserWallets().get(0).getWallet(), "BLOCKING", "Success");
+			
+				return ResponseEntity.status(HttpStatus.OK).body(map);
 			} else {
 				if (userPin.isPresent()) {
 					userPin.get().setPinAttempts(counter);
@@ -851,19 +846,10 @@ public class UserService extends RestClientService implements UserDetailsService
 						this.userPinRepository.save(userPin.get());
 						map.put("success", true);
 						map.put("message", "Pin attempts updated");
-//						try (FileWriter writer = new FileWriter("pin_reset.txt", true)) {
-//							LocalDateTime currentTime = LocalDateTime.now();
-//							DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-//							String formattedDateTime = currentTime.format(formatter);
-//							writer.write(formattedDateTime + " - " + loggedInUser.getFirstName() + ""
-//									+ loggedInUser.getLastName() + "succeeded to reset PIN attempts for user"
-//									+ user.get().getFirstName() + user.get().getLastName() + "of phone No"
-//									+ user.get().getMobile());
+
 							this.larkService.sendPinResetNotification(loggedInUser,
-									user.get().getUserWallets().get(0).getWallet(), "ATTEMPTS", "Succcess");
-//						} catch (IOException e) {
-//							e.printStackTrace();
-//						}
+									user.get().getUserWallets().get(0).getWallet(), "ATTEMPTS", "Success");
+
 						return ResponseEntity.status(HttpStatus.OK).body(map);
 					} catch (Exception ex) {
 						map.put("success", false);
@@ -872,19 +858,12 @@ public class UserService extends RestClientService implements UserDetailsService
 						return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
 					}
 				} else {
-					try (FileWriter writer = new FileWriter("pin_reset.txt", true)) {
 						LocalDateTime currentTime = LocalDateTime.now();
 						DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 						String formattedDateTime = currentTime.format(formatter);
-//						writer.write(formattedDateTime + " - " + loggedInUser.getFirstName() + ""
-//								+ loggedInUser.getLastName()
-//								+ "failed to reset PIN attempts for user(User does not have a PIN set)" + userId);
+
 						this.larkService.sendPinResetNotification(loggedInUser,
 								user.get().getUserWallets().get(0).getWallet(), "ATTEMPTS", "Success");
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-
 					map.put("success", false);
 					map.put("message", "User does not have a PIN");
 					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
@@ -892,17 +871,11 @@ public class UserService extends RestClientService implements UserDetailsService
 
 			}
 		} else {
-			try (FileWriter writer = new FileWriter("pin_reset.txt")) {
 				LocalDateTime currentTime = LocalDateTime.now();
 				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 				String formattedDateTime = currentTime.format(formatter);
-//				writer.write(formattedDateTime + " - " + loggedInUser.getFirstName() + "" + loggedInUser.getLastName()
-//						+ "failed to reset PIN attempts for user(User does not exist)" + userId);
 				this.larkService.sendPinResetNotification(loggedInUser, user.get().getUserWallets().get(0).getWallet(),
 						"ATTEMPTS", "Failed");
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 			map.put("success", false);
 			map.put("message", "User not found");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
