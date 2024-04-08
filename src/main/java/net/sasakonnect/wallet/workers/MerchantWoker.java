@@ -35,11 +35,35 @@ public class MerchantWoker {
 	@Transactional
 	public void notifyMerchant(Transaction transaction) {
 		if (transaction.getTxType().equalsIgnoreCase("TTID0005")) {
+			 Transaction newTransaction = Transaction.builder()
+	                    .txId(transaction.getTxId())
+	                    .externalTxId(transaction.getExternalTxId())
+	                    .accountId("***********")
+	                    .accountName(transaction.getAccountName()) // Assuming you want to set the currency as the account name
+	                    .txType(transaction.getTxType())
+	                    .oppoBankCode(transaction.getOppoBankCode())
+	                    .oppoAccountId(transaction.getOppoAccountId())
+	                    .oppoSubAccount(transaction.getOppoSubAccount())
+	                    .txStatus(transaction.getTxStatus())
+	                    .mpesaBusinessPayType(transaction.getMpesaBusinessPayType())
+	                    .oppoAccountName(transaction.getOppoAccountName())
+	                    .counterpartyName(transaction.getCounterpartyName())
+	                    .extInfo(transaction.getExtInfo())
+	                    .oppoChannelId(transaction.getOppoChannelId())
+	                    .thirdPartyTxType(transaction.getThirdPartyTxType())
+	                    .currency(transaction.getCurrency())
+	                    .amount(transaction.getAmount())
+	                    
+	                    
+	                    .completeTime(transaction.getCompleteTime())
+	                    .notificationType(transaction.getNotificationType())
+	                    .requestId(transaction.getRequestId())
+	                    .build();
 			var walletClient = this.walletClientAccountRepo.findWalletClientByTillNumberAndAccountType(
 					transaction.getOppoAccountId(), FinancialInstituation.MPESA);
 
 			WebClient.ResponseSpec responseSpec = webClient.post().uri(walletClient.get(0).getCallBackUrl())
-					.contentType(MediaType.APPLICATION_JSON).bodyValue(transaction).retrieve();
+					.contentType(MediaType.APPLICATION_JSON).bodyValue(newTransaction).retrieve();
 
 			// Perform the request and handle the response
 			responseSpec.toEntity(String.class).subscribe(responseEntity -> {
