@@ -89,8 +89,7 @@ public class WalletService {
 	ChoiceBankSmsService choiceBankSmsService;
 	@Autowired
 	UserService userService;
-	@Autowired
-	ChatService chatService;
+	
 
 	@Autowired
 	AccountStatementService accountStatementService;
@@ -501,7 +500,6 @@ public class WalletService {
 						var userWallet = new UserWallet();
 						userWallet.setUser(user.get());
 						userWallet.setWallet(savedwallet);
-						this.chatService.registerUserToOpenFire(user.get());
 
 						this.userWalletRepository.save(userWallet);
 					}

@@ -54,7 +54,6 @@ public class MerchantWoker {
 	                    .currency(transaction.getCurrency())
 	                    .amount(transaction.getAmount())
 	                    
-	                    
 	                    .completeTime(transaction.getCompleteTime())
 	                    .notificationType(transaction.getNotificationType())
 	                    .requestId(transaction.getRequestId())

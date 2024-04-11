@@ -79,43 +79,7 @@ public class RefreshTokenWiddlewareAspect {
 				SecurityContextHolder.getContext().setAuthentication(authToken);
 			}
 			;
-			// throw new Exception("");
 
-//			if (userDetails != null
-//					&& this.jwtService.validateToken(refreshTokenHeader, userDetails.get(), JwtType.REFRESH_TOKEN)) {
-//				System.out.println("this is do internal");
-//
-//				UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
-//						null, null);
-//				authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-//				SecurityContextHolder.getContext().setAuthentication(authToken);
-//			}
-//			} catch (Exception e) {
-//				System.err.println(e.getMessage());
-//
-//			}
-
-//			var walletclient = this.walletclientService.findMerchantByClientAppByKey(client_app_key);
-//			if (walletclient.isPresent()) {
-//				var clients = walletclient.get();
-//				if (!clients.isEmpty()) {
-//					var client = clients.get(0);
-//					clientDataService.setWalletClient(client);
-//					return;
-//				}
-//			}
-//			Map<String, Object> map = new HashMap<String, Object>();
-//			map.put("message", "merchant key  required");
-//			map.put("success", false);
-//			ObjectMapper objectMapper = new ObjectMapper();
-//			try {
-//				String jsonError = objectMapper.writeValueAsString(map);
-//				throw new ResponseStatusException(HttpStatus.FORBIDDEN, jsonError);
-//
-//			} catch (JsonProcessingException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
 		}
 
 	}
