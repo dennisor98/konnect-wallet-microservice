@@ -35,6 +35,36 @@ public final class GlobalPermissionConstants {
 		}
 	}
 	
+	public static class CanViewTariffs extends PermissionEntry {
+		public static final String PERMISSION = "can.view.tariff.all";
+		public static final String DESCRIPTION = "Can view tariffs";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
+	
+	
+	public static class CanEditTariff extends PermissionEntry {
+		public static final String PERMISSION = "can.edit.tariff.all";
+		public static final String DESCRIPTION = "Can edit tariff(use with caution)";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
 	public static class SearchTransaction extends PermissionEntry {
 		public static final String PERMISSION = "can.transaction.search";
 		public static final String DESCRIPTION = "Can search any transaction in the system";

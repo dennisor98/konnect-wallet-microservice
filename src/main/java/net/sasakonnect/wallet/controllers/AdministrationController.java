@@ -40,6 +40,7 @@ import net.sasakonnect.wallet.RequestDto.admin.PinReset;
 import net.sasakonnect.wallet.RequestDto.tarrif.TariffDTO;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.RequirePermission;
+import net.sasakonnect.wallet.constant.ChannelType;
 import net.sasakonnect.wallet.constant.GlobalPermissionConstants;
 import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.User;
@@ -521,7 +522,7 @@ public class AdministrationController {
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.CanCreateTarrif.PERMISSION)
 	@Operation(summary = "Create a new tarrif", description = "Create tarrif that will show on client the ammount they are changed on transaction")
-	public Object createTarrif( @Valid @RequestBody TariffDTO tariffDTO,
+	public  Object createTarrif( @Valid @RequestBody TariffDTO tariffDTO,
 	        BindingResult bindingResult) {
 		if(bindingResult.hasErrors()) {
 			return bindingResult.getFieldErrors();
@@ -531,4 +532,31 @@ public class AdministrationController {
 		}
 		//return walletService.getUserStatement(accountId,startDate, endDate);
 	}
+	
+	@GetMapping("tarrif")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanViewTariffs.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.CanViewTariffs.PERMISSION)
+	public ResponseEntity<Object> getTariffs(){
+		return this.tarrifService.getTarrifs();
+	}
+	
+	@GetMapping("tarrif/filter")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanViewTariffs.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.CanViewTariffs.PERMISSION)
+	public ResponseEntity<Object> filterTariffsByChannel(@Valid @RequestParam("channelType") ChannelType  channelType){
+		return this.tarrifService.filterByChannel(channelType);
+	}
+	
+	@PutMapping("tarrif")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanEditTariff.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.CanEditTariff.PERMISSION)
+	public ResponseEntity<Object> EditTarrif(@RequestParam("id") String id,@RequestBody() TariffDTO tariffDTO){
+		return this.tarrifService.editTarrif(id,tariffDTO);
+	}
+	
+	
+	
 }
