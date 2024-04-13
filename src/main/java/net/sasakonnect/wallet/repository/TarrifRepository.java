@@ -18,6 +18,8 @@ public interface TarrifRepository extends JpaRepository<Tariff, String> {
     @Query("SELECT t FROM Tariff t WHERE t.max = :max AND t.min = :min AND t.channelType = :channelType  ORDER BY t.id ASC LIMIT 1")
     Optional<Tariff> findMaxAndMin(@Param("channelType") ChannelType channelType, @Param("min") int min, @Param("max") int max);
     
-    List<Tariff> findByChannelType(ChannelType channelType);
+    List<Tariff> findAllByOrderByMinAsc();
+    
+    List<Tariff> findByChannelTypeOrderByMinAsc(ChannelType channelType);
 
 }

@@ -95,7 +95,7 @@ public class TarrifService {
 	}
 	
 	public ResponseEntity<Object> getTarrifs(){
-		List<Tariff> tarrifs = this.tarrifRepository.findAll();
+		List<Tariff> tarrifs = this.tarrifRepository.findAllByOrderByMinAsc();
 		Map<String,Object> map =  new HashMap<>();
 		map.put("success", true);
 		map.put("tarrifs", !tarrifs.isEmpty()? tarrifs.stream().collect(Collectors.toList()): new ArrayList<>());
@@ -103,7 +103,7 @@ public class TarrifService {
 	}
 	
 	public ResponseEntity<Object> filterByChannel(ChannelType channelType){
-		List<Tariff> tarrifs = this.tarrifRepository.findByChannelType(channelType);
+		List<Tariff> tarrifs = this.tarrifRepository.findByChannelTypeOrderByMinAsc(channelType);
 		if(tarrifs.isEmpty()) {
 			Map<String,Object> map = new HashMap<>();
 			map.put("success",true);

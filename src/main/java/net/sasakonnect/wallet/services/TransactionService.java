@@ -152,7 +152,7 @@ public class TransactionService {
 		List<Wallet> wallets = this.walletRepository.findByUserWalletsUser(user);
 		if (!wallets.isEmpty()) {
 
-			Page<Transaction> transactions = transactionRepository.findByAccountId(wallets.get(0).getAccountId(),
+			Page<Transaction> transactions = transactionRepository.findByUserAccountId(wallets.get(0).getAccountId(),
 					PageRequest.of(pageNumber, pageSize));
 			Map<String, Object> payload = new HashMap<>();
 			payload.put("code", "");
