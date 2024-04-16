@@ -46,12 +46,12 @@ public class InvoiceManager {
         
     }
     
-    void loadData(List<InvoiceItem> invoiceItem){
+    public void loadData(List<InvoiceItem> invoiceItem){
     	this.invoicegenerator.loadTable(invoiceItem);
     	this.invoicegenerator.loadTotalRow(invoiceItem);
     	
     }
-    void invoiceMetaData(InvoiceMetaData invoiceData) {
+    public void invoiceMetaData(InvoiceMetaData invoiceData) {
     	this.invoicegenerator.addMetaData(invoiceData)	;
     	this.invoicegenerator.addInvoiceData(invoiceData);
     	this.invoicegenerator.addSubject(invoiceData);

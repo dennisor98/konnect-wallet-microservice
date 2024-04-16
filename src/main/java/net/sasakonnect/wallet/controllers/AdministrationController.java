@@ -48,6 +48,7 @@ import net.sasakonnect.wallet.repository.RoleRepository;
 import net.sasakonnect.wallet.services.AccountStatementService;
 import net.sasakonnect.wallet.services.AnalyticsService;
 import net.sasakonnect.wallet.services.CorporateService;
+import net.sasakonnect.wallet.services.InvoiceService;
 import net.sasakonnect.wallet.services.LarkService;
 import net.sasakonnect.wallet.services.PermissionService;
 import net.sasakonnect.wallet.services.RoleService;
@@ -97,6 +98,9 @@ public class AdministrationController {
 	@Autowired
 	RoleRepository roleRepository;
 
+	@Autowired
+	InvoiceService invoiceService;
+	
 	@GetMapping("/upload/app")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CreateSuperApp.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CreateSuperApp.PERMISSION)
@@ -553,10 +557,19 @@ public class AdministrationController {
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanEditTariff.PERMISSION
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.CanEditTariff.PERMISSION)
-	public ResponseEntity<Object> EditTarrif(@RequestParam("id") String id,@RequestBody() TariffDTO tariffDTO){
+	public ResponseEntity<Object> editTarrif(@RequestParam("id") String id,@RequestBody() TariffDTO tariffDTO){
 		return this.tarrifService.editTarrif(id,tariffDTO);
 	}
 	
+	@GetMapping("invoice/generate")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanGenerateInvoice.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.CanGenerateInvoice.PERMISSION)
+	public ResponseEntity<Object> generateInvoice(
+			@Parameter(description = "Start date (YYYY-MM-DD)", example = "2024-02-01") @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+			@Parameter(description = "End date (YYYY-MM-DD)", example = "2024-02-29") @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate){
+		return this.invoiceService.generateInvoice(startDate, endDate);
+	}
 	
 	
 }
