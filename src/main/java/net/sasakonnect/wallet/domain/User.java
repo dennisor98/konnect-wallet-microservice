@@ -115,7 +115,7 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 	@OneToMany(mappedBy = "user")
 	private List<UserPin> pins;
 
-	@OneToMany(mappedBy = "user")
+	@OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
 	private List<FirebaseToken> firebaseTokens;
 
 	@ManyToMany(mappedBy = "user_notified")
