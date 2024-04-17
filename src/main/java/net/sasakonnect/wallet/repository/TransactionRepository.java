@@ -1,6 +1,7 @@
 package net.sasakonnect.wallet.repository;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -137,27 +138,28 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
    Page<Transaction> findWalletToWalletTransContact(@Param("txType") String txType,@Param("accountId") String accountId,Pageable page);
 	 
    @Query("SELECT t FROM Transaction t WHERE t.txType =:channel AND ((t.createdAt BETWEEN :startDate AND :endDate) OR (t.updatedAt BETWEEN :startDate AND :endDate)) AND t.txStatus = 8")
-   List<Transaction> findTransactionsByChannel(@Param("channel") ChannelType channel,@Param("startDate") LocalDate startDate,@Param("endDate") LocalDate endDate);
+   List<Transaction> findTransactionsByChannel(@Param("channel") ChannelType channel,@Param("startDate") Date startDate,@Param("endDate") Date endDate);
 
    @Query("SELECT t FROM Transaction t WHERE t.txType = 'TTID0002' AND ((t.createdAt BETWEEN :startDate AND :endDate) OR (t.updatedAt BETWEEN :startDate"
    		+ " AND :endDate)) AND t.txStatus = 8 AND t.oppoBankCode = 'CIC0018'")
-   List<Transaction> findWalletTransactions(@Param("startDate") LocalDate startDate,@Param("endDate") LocalDate endDate);
+   List<Transaction> findWalletTransactions(@Param("startDate") Date startDate,@Param("endDate") Date endDate);
    
-   @Query("SELECT t FROM Transaction t WHERE (t.txType = 'TTID0002' OR t.txType = 'TTID0001') AND ((t.createdAt BETWEEN :startDate AND :endDate) OR (t.updatedAt BETWEEN :startDate"
-	   		+ " AND :endDate)) AND t.txStatus = 8 AND t.oppoBankCode = 'MPESA'")
-   List<Transaction> findMpesaTransactions(@Param("startDate") LocalDate startDate,@Param("endDate") LocalDate endDate);
+   @Query("SELECT t FROM Transaction t WHERE (t.txType = 'TTID0002' OR t.txType = 'TTID0001') " +
+           "AND t.createdAt BETWEEN :startDate AND :endDate " +
+           "AND t.txStatus = 8 AND t.oppoBankCode = 'MPESA'")
+   List<Transaction> findMpesaTransactions(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+//   List<Transaction> findMpesaTransactions(@Param("startDate") Date startDate,@Param("endDate") Date endDate);
    
-   @Query("SELECT t FROM Transaction t WHERE (t.txType = 'TTID0005') AND oppoSubAccount IS NOT NULL AND ((t.createdAt BETWEEN :startDate AND :endDate) OR (t.updatedAt BETWEEN :startDate"
-	   		+ " AND :endDate)) AND t.txStatus = 8")
-  List<Transaction> findPayBillTransactions(@Param("startDate") LocalDate startDate,@Param("endDate") LocalDate endDate);
+   @Query("SELECT t FROM Transaction t WHERE (t.txType = 'TTID0005') AND oppoSubAccount IS NOT NULL AND ((t.createdAt BETWEEN :startDate AND :endDate) OR (t.updatedAt BETWEEN :startDate AND :endDate)) AND t.txStatus = 8")
+  List<Transaction> findPayBillTransactions(@Param("startDate") Date startDate,@Param("endDate") Date endDate);
    
   @Query("SELECT t FROM Transaction t WHERE (t.txType = 'TTID0005' OR t.txType = 'TTID0006') AND t.oppoSubAccount IS NULL AND ((t.createdAt BETWEEN :startDate AND :endDate) OR (t.updatedAt BETWEEN :startDate"
 	   		+ " AND :endDate)) AND t.txStatus = 8")
-  List<Transaction> findTillTransactions(@Param("startDate") LocalDate startDate,@Param("endDate") LocalDate endDate);
+  List<Transaction> findTillTransactions(@Param("startDate") Date startDate,@Param("endDate") Date endDate);
   
   @Query("SELECT t FROM Transaction t WHERE t.txType = 'TTID0002' AND ((t.createdAt BETWEEN :startDate AND :endDate) OR (t.updatedAt BETWEEN :startDate"
 	   		+ " AND :endDate)) AND t.txStatus = 8 AND t.oppoBankCode != 'MPESA' AND t.oppoBankCode != 'CIC0018'")
-  List<Transaction> findPesalinkTransactions(@Param("startDate") LocalDate startDate,@Param("endDate") LocalDate endDate);
+  List<Transaction> findPesalinkTransactions(@Param("startDate") Date startDate,@Param("endDate") Date endDate);
   
 //  t.oppoBankCode != 'MPESA' AND t.oppoBankCode != 'CIC0018'
   

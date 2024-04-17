@@ -17,10 +17,12 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import lombok.Data;
+import lombok.ToString;
 import net.sasakonnect.wallet.serde.CustomDateSerializer;
 
 @Data
 @MappedSuperclass
+@ToString
 public abstract class BaseWalletDomain {
 
 	@Id

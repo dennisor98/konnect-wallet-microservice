@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import net.sasakonnect.wallet.constant.ChannelType;
 import net.sasakonnect.wallet.domain.BaseWalletDomain;
 
@@ -21,6 +22,7 @@ import net.sasakonnect.wallet.domain.BaseWalletDomain;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class Tariff extends BaseWalletDomain implements Serializable {
     private static final long serialVersionUID = 10000007L;
 	private String tier;
@@ -39,5 +41,9 @@ public class Tariff extends BaseWalletDomain implements Serializable {
     private String tierLabel;
     private int min;
     private int max;
+    
+    public boolean amountInThisTarrif(double amout) {
+    	return false;
+    }
    
 }
