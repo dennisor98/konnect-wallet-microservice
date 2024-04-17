@@ -3,6 +3,7 @@ package net.sasakonnect.wallet.services;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 
 import com.google.gson.Gson;
 
+import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChannelType;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
@@ -36,7 +38,7 @@ import net.sasakonnect.wallet.repository.TransactionRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.tools.RequestSigner;
 import reactor.core.publisher.Mono;
-
+@Slf4j
 @Service
 public class TransactionService {
 	@Autowired
@@ -477,34 +479,36 @@ public class TransactionService {
 	   
 	}
 	
-	public List<Transaction> getAllTransactions(ChannelType channel,LocalDate startDate,LocalDate endDate) {
+	public List<Transaction> getAllTransactions(ChannelType channel,Date startDate,Date endDate) {
 		List<Transaction> transactions = null;
 		if(channel.getValue().equalsIgnoreCase(ChannelType.MPESA_ACCOUNT.toString())) {
-			transactions = this.transactionRepository.findMpesaTransactions(startDate, endDate);
+			log.info("start"+startDate+"end"+endDate);
+			transactions = this.transactionRepository.findMpesaTransactions(startDate,endDate);
 		}
 		
 		if(channel.getValue().equalsIgnoreCase(ChannelType.MPESA_PAYBILL.toString())) {
-			transactions = this.transactionRepository.findPayBillTransactions(startDate, endDate);
+			transactions = this.transactionRepository.findPayBillTransactions(startDate,endDate);
 		}
 		
 		if(channel.getValue().equalsIgnoreCase(ChannelType.MPESA_TILL.toString())) {
-			transactions = this.transactionRepository.findTillTransactions(startDate, endDate);
+			transactions = this.transactionRepository.findTillTransactions(startDate,endDate);
 		}
 		
 		if(channel.getValue().equalsIgnoreCase(ChannelType.WALLET.toString())) {
-			transactions = this.transactionRepository.findWalletTransactions(startDate, endDate);
+			transactions = this.transactionRepository.findWalletTransactions(startDate,endDate);
 		}
 		
 		if(channel.getValue().equalsIgnoreCase(ChannelType.PESA_LINK.toString())) {
-			transactions = this.transactionRepository.findPesalinkTransactions(startDate, endDate);
+			transactions = this.transactionRepository.findPesalinkTransactions(startDate,endDate);
 		}
-		
+		log.info("tr"+transactions);
 		if(!transactions.isEmpty()) {
-			return transactions.stream().collect(Collectors.toList());
+			return transactions;
 		}
 		return new ArrayList<>();
 	}
 	
+		
 	
 	
 	

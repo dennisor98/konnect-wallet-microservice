@@ -60,7 +60,9 @@ public class MerchantWoker {
 	                    .build();
 			var walletClient = this.walletClientAccountRepo.findWalletClientByTillNumberAndAccountType(
 					transaction.getOppoAccountId(), FinancialInstituation.MPESA);
-
+                 if(!walletClient.isEmpty()) {
+                	 
+                
 			WebClient.ResponseSpec responseSpec = webClient.post().uri(walletClient.get(0).getCallBackUrl())
 					.contentType(MediaType.APPLICATION_JSON).bodyValue(newTransaction).retrieve();
 
@@ -68,6 +70,7 @@ public class MerchantWoker {
 			responseSpec.toEntity(String.class).subscribe(responseEntity -> {
 				// Handle the response here
 			});
+                 }
 		}
 	}
 

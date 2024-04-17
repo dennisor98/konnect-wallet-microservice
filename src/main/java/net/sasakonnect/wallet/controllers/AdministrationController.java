@@ -2,6 +2,7 @@ package net.sasakonnect.wallet.controllers;
 
 import java.security.GeneralSecurityException;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -566,9 +567,9 @@ public class AdministrationController {
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.CanGenerateInvoice.PERMISSION)
 	public ResponseEntity<Object> generateInvoice(
-			@Parameter(description = "Start date (YYYY-MM-DD)", example = "2024-02-01") @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-			@Parameter(description = "End date (YYYY-MM-DD)", example = "2024-02-29") @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate){
-		return this.invoiceService.generateInvoice(startDate, endDate);
+			@Parameter(description = "Start date (YYYY-MM-DD)", example = "2024-02-01") @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startDate,
+			@Parameter(description = "End date (YYYY-MM-DD)", example = "2024-02-29") @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date endDate){
+		return this.invoiceService.generateInvoice(startDate,endDate);
 	}
 	
 	
