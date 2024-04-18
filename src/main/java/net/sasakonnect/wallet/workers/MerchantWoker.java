@@ -18,6 +18,7 @@ import net.sasakonnect.wallet.domain.FinancialInstituation;
 import net.sasakonnect.wallet.domain.Transaction;
 import net.sasakonnect.wallet.repository.WalletClientAccountRepository;
 import net.sasakonnect.wallet.services.TransactionService;
+import net.sasakonnect.wallet.services.UserService;
 
 @Component
 public class MerchantWoker {
@@ -29,6 +30,10 @@ public class MerchantWoker {
 	TransactionService transactionService;
 	@Autowired
 	private ClientAppsBean clientAppsBean;
+	
+	@Autowired
+	UserService userService;
+	
 	WebClient webClient = WebClient.builder().build();
 
 	@Async
@@ -37,6 +42,7 @@ public class MerchantWoker {
 		if (transaction.getTxType().equalsIgnoreCase("TTID0005")) {
 			 Transaction newTransaction = Transaction.builder()
 	                    .txId(transaction.getTxId())
+	                    
 	                    .externalTxId(transaction.getExternalTxId())
 	                    .accountId("***********")
 	                    .accountName(transaction.getAccountName()) // Assuming you want to set the currency as the account name
@@ -61,6 +67,7 @@ public class MerchantWoker {
 			var walletClient = this.walletClientAccountRepo.findWalletClientByTillNumberAndAccountType(
 					transaction.getOppoAccountId(), FinancialInstituation.MPESA);
                  if(!walletClient.isEmpty()) {
+                	 newTransaction.id=this.userService.findUserByAccountd(transaction.getAccountId()).isPresent()? this.userService.findUserByAccountd(transaction.getAccountId()).get().toString():null;
                 	 
                 
 			WebClient.ResponseSpec responseSpec = webClient.post().uri(walletClient.get(0).getCallBackUrl())
