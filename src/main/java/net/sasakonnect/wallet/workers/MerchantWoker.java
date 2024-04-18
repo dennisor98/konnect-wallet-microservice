@@ -67,7 +67,7 @@ public class MerchantWoker {
 			var walletClient = this.walletClientAccountRepo.findWalletClientByTillNumberAndAccountType(
 					transaction.getOppoAccountId(), FinancialInstituation.MPESA);
                  if(!walletClient.isEmpty()) {
-                	 newTransaction.id=this.userService.findUserByAccountd(transaction.getAccountId()).isPresent()? this.userService.findUserByAccountd(transaction.getAccountId()).get().toString():null;
+                	 newTransaction.id=this.userService.findUserByAccountd(transaction.getAccountId()).isPresent()? this.userService.findUserByAccountd(transaction.getAccountId()).get().getOpenId():null;
                 	 
                 
 			WebClient.ResponseSpec responseSpec = webClient.post().uri(walletClient.get(0).getCallBackUrl())
