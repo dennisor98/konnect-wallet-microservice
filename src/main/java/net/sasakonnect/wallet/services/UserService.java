@@ -171,6 +171,7 @@ public class UserService extends RestClientService implements UserDetailsService
 				Map<String, Object> map = new HashMap<>();
 				map.put("id", u.getId());
 				map.put("firstname", u.getFirstName());
+				map.put("middlename",u.getMiddleName());
 				map.put("lastname", u.getLastName());
 				map.put("user_id", u.getId());
 				map.put("phone", u.getMobile());
