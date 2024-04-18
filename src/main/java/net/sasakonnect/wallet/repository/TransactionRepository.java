@@ -147,7 +147,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
    @Query("SELECT t FROM Transaction t WHERE (t.txType = 'TTID0002' OR t.txType = 'TTID0001') " +
            "AND t.createdAt BETWEEN :startDate AND :endDate " +
            "AND t.txStatus = 8 AND t.oppoBankCode = 'MPESA'")
-   List<Transaction> findMpesaTransactions(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+   List<Transaction> findMpesaTransactions(@Param("startDate") Long startDate, @Param("endDate") Long endDate);
 //   List<Transaction> findMpesaTransactions(@Param("startDate") Date startDate,@Param("endDate") Date endDate);
    
    @Query("SELECT t FROM Transaction t WHERE (t.txType = 'TTID0005') AND oppoSubAccount IS NOT NULL AND ((t.createdAt BETWEEN :startDate AND :endDate) OR (t.updatedAt BETWEEN :startDate AND :endDate)) AND t.txStatus = 8")
