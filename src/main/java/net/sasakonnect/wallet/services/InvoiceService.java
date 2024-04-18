@@ -106,7 +106,7 @@ public class InvoiceService {
    private  InvoiceItem computeValidTransactionsByChannel(ChannelType channel,Date startDate,Date endDate){
 	   List<Tariff> tarrifs = this.tarrifRepository.findByChannelTypeOrderByMinAsc(channel);
 	   List<Transaction> transactions = this.transactionService.getAllTransactions(channel, startDate, endDate);
-	   log.info(tarrifs.size()+"Tar"+transactions.size()+"");
+	   log.info(tarrifs+"");
 	   if(!transactions.isEmpty() && !tarrifs.isEmpty()) {
 		   var resultMap = transactions.stream()
                    .map(tr -> {
