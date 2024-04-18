@@ -20,10 +20,12 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.itextpdf.text.DocumentException;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -37,6 +39,7 @@ import net.sasakonnect.wallet.repository.TransactionRepository;
 import net.sasakonnect.wallet.ResponseDto.InvoiceDataDTO;
 import net.sasakonnect.wallet.constant.ChannelType;
 import net.sasakonnect.wallet.domain.Transaction;
+import net.sasakonnect.wallet.domain.User;
 @Slf4j
 @Service
 public class InvoiceService {
@@ -51,8 +54,7 @@ public class InvoiceService {
 	@Autowired
 	TarrifRepository tarrifRepository;
 	
-	
-	
+	@Transactional
    public ResponseEntity<Object> generateInvoice(Date startDate,Date endDate){
 	   List<ChannelType> channelTypes = new ArrayList<>(Arrays.asList(ChannelType.MPESA_ACCOUNT,
 			   ChannelType.MPESA_PAYBILL, ChannelType.MPESA_TILL, ChannelType.PESA_LINK,
@@ -61,31 +63,15 @@ public class InvoiceService {
 	   ArrayList<InvoiceItem> ivoiceItems= new ArrayList<InvoiceItem>();
 	   var invoiceItem1 = this.computeValidTransactionsByChannel(ChannelType.MPESA_ACCOUNT, startDate, endDate);
 //	   return ResponseEntity.status(HttpStatus.OK).body(invoiceItem1);
-	   ivoiceItems.add(invoiceItem1);
-ivoiceItems.add(InvoiceItem.builder()
-               .amount(250)
-               .noOfTransaction("30")
-               .count(2)
-               .description(ChannelType.PESA_LINK.getValue()).build()
-               );
-ivoiceItems.add(InvoiceItem.builder()
-               .amount(250)
-               .noOfTransaction("30")
-               .count(2)
-               .description(ChannelType.MPESA_TILL.getValue()).build()
-               );
-ivoiceItems.add(InvoiceItem.builder()
-               .amount(250)
-               .noOfTransaction("30")
-               .count(2)
-               .description(ChannelType.MPESA_PAYBILL.getValue()).build()
-               );
-ivoiceItems.add(InvoiceItem.builder()
-               .amount(250)
-               .noOfTransaction("30")
-               .count(2)
-               .description(ChannelType.WALLET.getValue()).build()
-               );
+	       ivoiceItems.add(invoiceItem1);
+	   var invoiceItem2 = this.computeValidTransactionsByChannel(ChannelType.MPESA_TILL, startDate, endDate);
+	       ivoiceItems.add(invoiceItem2);
+	   var invoiceItem3 = this.computeValidTransactionsByChannel(ChannelType.PESA_LINK, startDate, endDate);
+	     ivoiceItems.add(invoiceItem3);
+       var invoiceItem4 = this.computeValidTransactionsByChannel(ChannelType.MPESA_PAYBILL, startDate, endDate);
+          ivoiceItems.add(invoiceItem4);
+     var invoiceItem5 = this.computeValidTransactionsByChannel(ChannelType.WALLET, startDate, endDate);
+          ivoiceItems.add(invoiceItem5);
 //	  var invoiceItems = channelTypes.stream().map(channel ->{
 //		   
 //         return ivoiceItems;
@@ -93,16 +79,17 @@ ivoiceItems.add(InvoiceItem.builder()
       
        try {
               DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
+              var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
               var invoicemetaData=InvoiceMetaData.builder()
                               .invoiceNo( LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault()).format(formatter))
-                               .invoiceFrom(Date.from(Instant.now().atZone(ZoneId.systemDefault()).minus(1,ChronoUnit.MONTHS).toInstant()))
-                               .invoiceTo(Date.from(Instant.now()))
+                               .invoiceFrom(startDate)
+                               .invoiceTo(endDate)
                                .invoiceDate(new Date()).build();                 
               invoicemanager.init("invoice");
               invoicemanager.invoiceMetaData(invoicemetaData);
               invoicemanager.loadData(ivoiceItems);
               invoicemanager.signInvoice();
-              invoicemanager.generateBy("David Macharia");
+              invoicemanager.generateBy(user.getFirstName()+" "+user.getMiddleName()+" "+user.getLastName());
               invoicemanager.close();
       } catch (DocumentException | IOException e) {
               // TODO Auto-generated catch block
@@ -131,8 +118,6 @@ ivoiceItems.add(InvoiceItem.builder()
                        return transactionTariff;
                    })
                    .reduce(InvoiceItem.builder().build(), (acc, incomingInvoiceData) -> {
-                	   log.info(incomingInvoiceData.getTariff().toString());
-                	   log.info(incomingInvoiceData.getTransaction().toString());
                 	   acc.setAmount(acc.getAmount()+incomingInvoiceData.getTariff().getTotalPartnerProfit());
                 	   acc.setTax(acc.getTax()+incomingInvoiceData.getTariff().getExciseDutyTax());
                 	   acc.setDescription(channel.getValue());
@@ -144,7 +129,10 @@ ivoiceItems.add(InvoiceItem.builder()
          return resultMap;
 	   }
 
-	   return InvoiceDataDTO.builder().build();
+	   return InvoiceDataDTO.builder()
+			   .description(channel.getValue())
+			   .noOfTransaction("0")
+			   .build();
    }
    
    private Tariff getTarrifByChannelAndAmount(List<Tariff> tariffs, BigDecimal amount) {

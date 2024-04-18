@@ -6,6 +6,7 @@ import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,7 +30,7 @@ public class Transaction extends BaseWalletDomain implements Serializable {
 	@Column
 	private String externalTxId;
 
-	@OneToMany(mappedBy = "transaction")
+	@OneToMany(mappedBy = "transaction",fetch=FetchType.LAZY)
 	private List<WalletTransaction> walletTransactions;
 
 	@Column
