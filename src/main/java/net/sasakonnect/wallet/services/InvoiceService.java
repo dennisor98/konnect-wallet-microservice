@@ -150,10 +150,23 @@ public class InvoiceService {
    }
    
    
-   public Object getInvoices(Integer pageNumber,Integer pageSize) {
+   public ResponseEntity<Object> getInvoices(Integer pageNumber,Integer pageSize) {
 	   Page<InvoiceJob> invoices = this.invoiceJobRepository.findByOrderByCreatedAtDesc(PageRequest.of(pageNumber,pageSize));
-	   
-	   return null;
+	   Map<String,Object> map = new HashMap<>();
+	   Map<String,Object> resMap =  new HashMap<>();
+
+	   if(!invoices.isEmpty()) {
+		   map.put("hasMore",invoices.hasNext());
+		   map.put("nextPage",invoices.nextPageable());
+		   map.put("hasPrevious",invoices.hasPrevious());
+		   map.put("previousPage",invoices.previousPageable());
+		   map.put("invoices",invoices.stream().collect(Collectors.toList()));
+		  resMap.put("payload", map);
+	   }else {
+		   map.put("invoices",invoices.stream().collect(Collectors.toList()));
+		   resMap.put("payload", map);
+	   }
+	   return ResponseEntity.status(HttpStatus.OK).body(resMap);
    }
  
 }
