@@ -151,7 +151,7 @@ public class InvoiceService {
    
    
    public Object getInvoices(Integer pageNumber,Integer pageSize) {
-	   Page<InvoiceJob> invoices = this.invoiceJobRepository.findInvoiceJobOrderByCreatedAtDesc(PageRequest.of(pageNumber,pageSize));
+	   Page<InvoiceJob> invoices = this.invoiceJobRepository.findByOrderByCreatedAtDesc(PageRequest.of(pageNumber,pageSize));
 	   
 	   return null;
    }
