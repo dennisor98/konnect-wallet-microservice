@@ -18,6 +18,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,10 +36,12 @@ import net.sasakonnect.wallet.domain.invoice.InvoiceItem;
 import net.sasakonnect.wallet.domain.invoice.InvoiceMetaData;
 import net.sasakonnect.wallet.domain.invoice.Tariff;
 import net.sasakonnect.wallet.invoice.InvoiceManager;
+import net.sasakonnect.wallet.repository.InvoiceJobRepository;
 import net.sasakonnect.wallet.repository.TarrifRepository;
 import net.sasakonnect.wallet.repository.TransactionRepository;
 import net.sasakonnect.wallet.ResponseDto.InvoiceDataDTO;
 import net.sasakonnect.wallet.constant.ChannelType;
+import net.sasakonnect.wallet.domain.InvoiceJob;
 import net.sasakonnect.wallet.domain.Transaction;
 import net.sasakonnect.wallet.domain.User;
 @Slf4j
@@ -53,6 +57,9 @@ public class InvoiceService {
 	
 	@Autowired
 	TarrifRepository tarrifRepository;
+	
+	@Autowired
+	InvoiceJobRepository  invoiceJobRepository;
 	
 	@Transactional
    public ResponseEntity<Object> generateInvoice(Date startDate,Date endDate){
@@ -85,7 +92,7 @@ public class InvoiceService {
                                .invoiceFrom(startDate)
                                .invoiceTo(endDate)
                                .invoiceDate(new Date()).build();                 
-              invoicemanager.init("invoice");
+              invoicemanager.init(startDate,endDate);
               invoicemanager.invoiceMetaData(invoicemetaData);
               invoicemanager.loadData(ivoiceItems);
               invoicemanager.signInvoice();
@@ -142,5 +149,24 @@ public class InvoiceService {
        return tariffOptional.orElse(null);
    }
    
+   
+   public ResponseEntity<Object> getInvoices(Integer pageNumber,Integer pageSize) {
+	   Page<InvoiceJob> invoices = this.invoiceJobRepository.findByOrderByCreatedAtDesc(PageRequest.of(pageNumber,pageSize));
+	   Map<String,Object> map = new HashMap<>();
+	   Map<String,Object> resMap =  new HashMap<>();
+
+	   if(!invoices.isEmpty()) {
+		   map.put("hasMore",invoices.hasNext());
+		   map.put("nextPage",invoices.nextPageable());
+		   map.put("hasPrevious",invoices.hasPrevious());
+		   map.put("previousPage",invoices.previousPageable());
+		   map.put("invoices",invoices.stream().collect(Collectors.toList()));
+		  resMap.put("payload", map);
+	   }else {
+		   map.put("invoices",invoices.stream().collect(Collectors.toList()));
+		   resMap.put("payload", map);
+	   }
+	   return ResponseEntity.status(HttpStatus.OK).body(resMap);
+   }
  
 }

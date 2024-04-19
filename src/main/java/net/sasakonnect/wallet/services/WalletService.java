@@ -21,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.BodyInserters;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -54,6 +55,7 @@ import net.sasakonnect.wallet.ResponseDto.TransactionResponseDto;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
 import net.sasakonnect.wallet.domain.CorporateDetails;
+import net.sasakonnect.wallet.domain.Transaction;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.UserJob;
 import net.sasakonnect.wallet.domain.UserPin;
@@ -121,6 +123,10 @@ public class WalletService {
 	@Autowired
 	TransactionEventService transactionEventService;
 
+	
+	@Value("${internetTillNumber}")
+	String internetTillNumber;
+	
 	public Object getWalletInfo() {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		var reqId = new HashMap<String, Object>();
@@ -550,21 +556,8 @@ public class WalletService {
 				NotificationResult<TransactionResultNotification> results = new Gson().fromJson(body.toString(),
 						new TypeToken<NotificationResult<TransactionResultNotification>>() {
 						}.getType());
-				var transaction = this.transactionService.getTransactionById(results.getParams().getTxId());
-				if (transaction.isPresent()) {
-					transaction.get().setTxStatus(results.getParams().getTxStatus());
-					transaction.get().setCounterpartyName(results.getParams().getExtInfo().getCounterpartyName());
-					var createdTransaction = this.transactionService.transactionRepository.save(transaction.get());
-
-				} else {
-					var createdTransaction = this.transactionService.saveTransaction(results);
-					if (createdTransaction != null) {
-						log.info("publish transaction to socket {}", createdTransaction);
-
-						this.publisher.publishEvent(TransactionEvent.builder().userService(userService)
-								.transaction(createdTransaction).build());
-					}
-				}
+				this.processTransaction(results);
+				
 //				log.info("transacttion {}", results);
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.BALANCE.getCode())) {
@@ -657,6 +650,26 @@ public class WalletService {
 		map.put("message", "Got You!");
 		map.put("success", true);
 		return ResponseEntity.status(HttpStatus.OK).body("ok");
+	}
+	
+	@Transactional
+	private void processTransaction(NotificationResult<TransactionResultNotification> results) {
+		Optional<Transaction> transaction = this.transactionService.getTransactionById(results.getParams().getTxId());
+
+		if (transaction.isPresent()) {
+			transaction.get().setTxStatus(results.getParams().getTxStatus());
+			transaction.get().setCounterpartyName(results.getParams().getExtInfo().getCounterpartyName());
+			var createdTransaction = this.transactionService.transactionRepository.save(transaction.get());
+
+		} else {
+			var createdTransaction = this.transactionService.saveTransaction(results);
+			if (createdTransaction != null) {
+				log.info("publish transaction to socket {}", createdTransaction);
+
+				this.publisher.publishEvent(TransactionEvent.builder().userService(userService)
+						.transaction(createdTransaction).build());
+			}
+		}
 	}
 
 	public Object confirmOnboardingOtp(@Valid OnboardingOtp otp) {
@@ -1049,33 +1062,12 @@ public class WalletService {
 	}
 
 	public Object confirmOtpTransfer(OtpTransfer otpTransfer) {
-		// User user = (User)
-		// SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
+		
 		return this.choiceBankSmsService.confirmOperation(otpTransfer.getTxId(), otpTransfer.getOtp());
-//		var reqId = new HashMap<String, Object>();
-//		reqId.put("txId", otpTransfer.getTxId());
-//		reqId.put("otpCode", otpTransfer.getOtp());
-//
-//		var reqs = this.requestSigner.signRequest(reqId);
-//
-//		Mono<String> responseMono = this.bankClientBean.webClient.post()
-//				.uri(ChoiceEndpointsConstants.CONFIRM_OTP_TRANSFER).contentType(MediaType.APPLICATION_JSON)
-//				.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
-//				.bodyToMono(String.class);
-//
-//		String responseJson = responseMono.block();
-//
-//		if (responseJson != null) {
-//			return new Gson().fromJson(responseJson, Object.class);
-//
-//		}
-//
-//		// TODO Auto-generated method stub
-//		return null;
 	}
 
 	public Object mpesaTillAndByGoods(@Valid MpesaBilling tillAndBuyGoods) {
+		
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
 		var reqId = new HashMap<String, Object>();
@@ -1113,9 +1105,12 @@ public class WalletService {
 				.uri(ChoiceEndpointsConstants.MPESA_TILL_AND_PAYBILL).contentType(MediaType.APPLICATION_JSON)
 				.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
 				.bodyToMono(String.class);
-
 		String responseJson = responseMono.block();
-
+		
+        if(tillAndBuyGoods.getBillType().toString().equalsIgnoreCase("TILL") && tillAndBuyGoods.getShortCode().trim().equalsIgnoreCase(internetTillNumber) ) {
+             return null;	
+        }
+        
 		if (responseJson != null) {
 			var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
 			choiceBankSmsService.invokeSms(resp.getData().txId);

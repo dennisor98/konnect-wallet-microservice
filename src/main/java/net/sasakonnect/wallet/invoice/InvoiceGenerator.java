@@ -2,6 +2,7 @@ package net.sasakonnect.wallet.invoice;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.time.LocalDate;
@@ -12,8 +13,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StreamUtils;
 
+import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
@@ -41,10 +49,22 @@ public class InvoiceGenerator {
 Document document = new Document(PageSize.A6,0,0,20,0);
 
 PdfWriter writer;
-    public  final String IMAGE = "background.jpg";
-    public  final String LOGO = "logo.png";
-    public  final String CEO_SIGN = "ceo_sign.png";
-    public  final String DIRECTOR_SIGN= "kabiru_sign.png";
+@Value("classpath:static/background.jpg")
+Resource IMAGE;
+
+@Value("classpath:static/logo.png")
+Resource LOGO;
+
+@Value("classpath:static/ceo_sign.png")
+Resource CEO_SIGN;
+
+@Value("classpath:static/kabiru_sign.png")
+Resource DIRECTOR_SIGN;
+
+//    public  final Image IMAGE = "resources/static/background.jpg";
+//    public  final String LOGO = "resources/static/logo.png";
+//    public  final String CEO_SIGN = "resources/static/ceo_sign.png";
+//    public  final String DIRECTOR_SIGN= "resources/static/kabiru_sign.png";
 
 
 	  
@@ -152,7 +172,7 @@ PdfWriter writer;
 
   	
   	// Add PDF Table Header ->
-		Stream.of("NO.", "DESCRIPTION","NO.TXT ","TAX", "AMOUNT(kSh)")
+		Stream.of("NO.", "DESCRIPTION","NO.TXT ","TAX", "AMOUNT(Ksh)")
 		    .forEach(headerTitle -> {
 		          PdfPCell header = new PdfPCell();
 		          
@@ -214,9 +234,11 @@ PdfWriter writer;
   }
   public  void buildBackground( PdfWriter writer,Document document) throws MalformedURLException, IOException, DocumentException {
 	  PdfContentByte canvas = writer.getDirectContent();
-      
+	  InputStream imageStream   = IMAGE.getInputStream();
+	  byte[] imageData = StreamUtils.copyToByteArray(imageStream);
+//	  var  imagef=ImageDataFactory.create(imageData);
       // Add image to the canvas
-       Image image = Image.getInstance(IMAGE);
+       Image image = Image.getInstance(imageData);
        
        // Calculate scaling factors
        float widthRatio = document.getPageSize().getWidth() / image.getWidth();
@@ -236,9 +258,10 @@ PdfWriter writer;
   }
   public  void buildLogo( PdfWriter writer,Document document,float x,float y) throws MalformedURLException, IOException, DocumentException {
 	  PdfContentByte canvas = writer.getDirectContent();
-      
+	  InputStream imageStream   = LOGO.getInputStream();
+	  byte[] imageData = StreamUtils.copyToByteArray(imageStream);
       // Add image to the canvas
-       Image image = Image.getInstance(LOGO);
+       Image image = Image.getInstance(imageData);
        
        // Calculate scaling factors
        float widthRatio = document.getPageSize().getWidth() / image.getWidth();
@@ -429,9 +452,10 @@ public void signInvoice() {
 }
 private  void ceoSign( PdfWriter writer,Document document,float x,float y) throws MalformedURLException, IOException, DocumentException {
 	  PdfContentByte canvas = writer.getDirectContent();
-    
+	  InputStream imageStream   = CEO_SIGN.getInputStream();
+	  byte[] imageData = StreamUtils.copyToByteArray(imageStream);
     // Add image to the canvas
-     Image image = Image.getInstance(CEO_SIGN);
+     Image image = Image.getInstance(imageData);
      
      // Calculate scaling factors
      float widthRatio = document.getPageSize().getWidth() / image.getWidth();
@@ -451,9 +475,10 @@ private  void ceoSign( PdfWriter writer,Document document,float x,float y) throw
 }
 private  void directorSign( PdfWriter writer,Document document,float x,float y) throws MalformedURLException, IOException, DocumentException {
 	  PdfContentByte canvas = writer.getDirectContent();
-  
+	  InputStream imageStream   = DIRECTOR_SIGN.getInputStream();
+	  byte[] imageData = StreamUtils.copyToByteArray(imageStream);
   // Add image to the canvas
-   Image image = Image.getInstance(DIRECTOR_SIGN);
+   Image image = Image.getInstance(imageData);
    
    // Calculate scaling factors
    float widthRatio = document.getPageSize().getWidth() / image.getWidth();
