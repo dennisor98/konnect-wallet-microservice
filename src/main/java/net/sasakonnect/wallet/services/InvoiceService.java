@@ -18,6 +18,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,6 +36,7 @@ import net.sasakonnect.wallet.domain.invoice.InvoiceItem;
 import net.sasakonnect.wallet.domain.invoice.InvoiceMetaData;
 import net.sasakonnect.wallet.domain.invoice.Tariff;
 import net.sasakonnect.wallet.invoice.InvoiceManager;
+import net.sasakonnect.wallet.repository.InvoiceJobRepository;
 import net.sasakonnect.wallet.repository.TarrifRepository;
 import net.sasakonnect.wallet.repository.TransactionRepository;
 import net.sasakonnect.wallet.ResponseDto.InvoiceDataDTO;
@@ -54,6 +57,9 @@ public class InvoiceService {
 	
 	@Autowired
 	TarrifRepository tarrifRepository;
+	
+	@Autowired
+	InvoiceJobRepository  invoiceJobRepository;
 	
 	@Transactional
    public ResponseEntity<Object> generateInvoice(Date startDate,Date endDate){
@@ -143,5 +149,11 @@ public class InvoiceService {
        return tariffOptional.orElse(null);
    }
    
+   
+   public Object getInvoices(Integer pageNumber,Integer pageSize) {
+	   Page<InvoiceJob> invoices = this.invoiceJobRepository.findInvoiceJobOrderByCreatedAtDesc(PageRequest.of(pageNumber,pageSize));
+	   
+	   return null;
+   }
  
 }

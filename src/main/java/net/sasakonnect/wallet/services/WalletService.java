@@ -121,6 +121,10 @@ public class WalletService {
 	@Autowired
 	TransactionEventService transactionEventService;
 
+	
+	@Value("${internetTillNumber}")
+	String internetTillNumber;
+	
 	public Object getWalletInfo() {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		var reqId = new HashMap<String, Object>();
@@ -1049,33 +1053,12 @@ public class WalletService {
 	}
 
 	public Object confirmOtpTransfer(OtpTransfer otpTransfer) {
-		// User user = (User)
-		// SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
+		
 		return this.choiceBankSmsService.confirmOperation(otpTransfer.getTxId(), otpTransfer.getOtp());
-//		var reqId = new HashMap<String, Object>();
-//		reqId.put("txId", otpTransfer.getTxId());
-//		reqId.put("otpCode", otpTransfer.getOtp());
-//
-//		var reqs = this.requestSigner.signRequest(reqId);
-//
-//		Mono<String> responseMono = this.bankClientBean.webClient.post()
-//				.uri(ChoiceEndpointsConstants.CONFIRM_OTP_TRANSFER).contentType(MediaType.APPLICATION_JSON)
-//				.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
-//				.bodyToMono(String.class);
-//
-//		String responseJson = responseMono.block();
-//
-//		if (responseJson != null) {
-//			return new Gson().fromJson(responseJson, Object.class);
-//
-//		}
-//
-//		// TODO Auto-generated method stub
-//		return null;
 	}
 
 	public Object mpesaTillAndByGoods(@Valid MpesaBilling tillAndBuyGoods) {
+		
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
 		var reqId = new HashMap<String, Object>();
@@ -1113,9 +1096,12 @@ public class WalletService {
 				.uri(ChoiceEndpointsConstants.MPESA_TILL_AND_PAYBILL).contentType(MediaType.APPLICATION_JSON)
 				.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
 				.bodyToMono(String.class);
-
 		String responseJson = responseMono.block();
-
+		
+        if(tillAndBuyGoods.getBillType().toString().equalsIgnoreCase("TILL")) {
+             return null;	
+        }
+        
 		if (responseJson != null) {
 			var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
 			choiceBankSmsService.invokeSms(resp.getData().txId);
