@@ -38,6 +38,7 @@ import net.sasakonnect.wallet.repository.TarrifRepository;
 import net.sasakonnect.wallet.repository.TransactionRepository;
 import net.sasakonnect.wallet.ResponseDto.InvoiceDataDTO;
 import net.sasakonnect.wallet.constant.ChannelType;
+import net.sasakonnect.wallet.domain.InvoiceJob;
 import net.sasakonnect.wallet.domain.Transaction;
 import net.sasakonnect.wallet.domain.User;
 @Slf4j
@@ -85,7 +86,7 @@ public class InvoiceService {
                                .invoiceFrom(startDate)
                                .invoiceTo(endDate)
                                .invoiceDate(new Date()).build();                 
-              invoicemanager.init("invoice");
+              invoicemanager.init();
               invoicemanager.invoiceMetaData(invoicemetaData);
               invoicemanager.loadData(ivoiceItems);
               invoicemanager.signInvoice();

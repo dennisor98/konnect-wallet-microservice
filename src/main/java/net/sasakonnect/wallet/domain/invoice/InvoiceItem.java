@@ -1,5 +1,6 @@
 package net.sasakonnect.wallet.domain.invoice;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

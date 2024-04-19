@@ -152,7 +152,7 @@ PdfWriter writer;
 
   	
   	// Add PDF Table Header ->
-		Stream.of("NO.", "DESCRIPTION","NO.TXT ","TAX", "AMOUNT(kSh)")
+		Stream.of("NO.", "DESCRIPTION","NO.TXT ","TAX", "AMOUNT(Ksh)")
 		    .forEach(headerTitle -> {
 		          PdfPCell header = new PdfPCell();
 		          

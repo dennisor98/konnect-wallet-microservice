@@ -1,6 +1,7 @@
 package net.sasakonnect.wallet.domain.invoice;
 
 
+
 import lombok.Data;
 
 @Data
