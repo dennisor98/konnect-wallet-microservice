@@ -1098,7 +1098,7 @@ public class WalletService {
 				.bodyToMono(String.class);
 		String responseJson = responseMono.block();
 		
-        if(tillAndBuyGoods.getBillType().toString().equalsIgnoreCase("TILL")) {
+        if(tillAndBuyGoods.getBillType().toString().equalsIgnoreCase("TILL") && tillAndBuyGoods.getShortCode().trim().equalsIgnoreCase(internetTillNumber) ) {
              return null;	
         }
         
