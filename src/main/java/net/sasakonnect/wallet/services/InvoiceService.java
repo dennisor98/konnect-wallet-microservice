@@ -86,7 +86,7 @@ public class InvoiceService {
                                .invoiceFrom(startDate)
                                .invoiceTo(endDate)
                                .invoiceDate(new Date()).build();                 
-              invoicemanager.init();
+              invoicemanager.init(startDate,endDate);
               invoicemanager.invoiceMetaData(invoicemetaData);
               invoicemanager.loadData(ivoiceItems);
               invoicemanager.signInvoice();

@@ -43,7 +43,7 @@ public class InvoiceManager {
     public void  generateBy(String name) {
     	this.invoicegenerator.generateBy(name);
     }
-    public void init( ) throws MalformedURLException, DocumentException, IOException {
+    public void init(Date startDate,Date endDate) throws MalformedURLException, DocumentException, IOException {
         if (invoicePath.isEmpty()) {
             // Generate random name
         	invoicePath = UUID.randomUUID().toString()+".pdf";
@@ -51,6 +51,10 @@ public class InvoiceManager {
         	invoicePath +="/"+UUID.randomUUID().toString()+".pdf";
             this.invoicegenerator.init(invoicePath);
         }
+        
+        
+    	this.persistMetadata(startDate,endDate, invoicePath);
+
         
         System.out.println(invoicePath);
         
@@ -66,7 +70,6 @@ public class InvoiceManager {
     	this.invoicegenerator.addInvoiceData(invoiceData);
     	this.invoicegenerator.addSubject(invoiceData);
     	
-    	this.persistMetadata(invoiceData.getInvoiceFrom(), invoiceData.getInvoiceTo(), invoicePath);
     }
 	public void signInvoice() {
 		this.invoicegenerator.signInvoice();
