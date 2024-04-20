@@ -573,5 +573,14 @@ public class AdministrationController {
 		return this.invoiceService.generateInvoice(startDate,endDate);
 	}
 	
+	@GetMapping("invoice")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanViewInvoices.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.CanViewInvoices.PERMISSION)
+	public ResponseEntity<Object> getInvoices(
+			@RequestParam("pageNumber") Integer pageNumber,@RequestParam("pageSize") Integer pageSize
+			){
+		return this.invoiceService.getInvoices(pageNumber, pageSize);
+	}
 	
 }
