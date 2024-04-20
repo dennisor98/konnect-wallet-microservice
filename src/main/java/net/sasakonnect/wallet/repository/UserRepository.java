@@ -50,7 +50,7 @@ public interface UserRepository extends JpaRepository<User, String> {
 	@Query("DELETE FROM User u WHERE u.onboardingRequestId = :onboardingRequestId")
 	void deleteByOnboardingRequestId(@Param("onboardingRequestId") String onboardingRequestId);
 
-	@Query("SELECT u FROM User u WHERE u.onboardingRequestId = :onboardingRequestId")
+	@Query("SELECT u FROM User u JOIN FETCH u.firebaseTokens WHERE u.onboardingRequestId = :onboardingRequestId")
 	Optional<User> findByOnboardingRequestId(@Param("onboardingRequestId") String onboardingRequestId);
 
 	@Query("SELECT u FROM User u  LEFT JOIN FETCH u.userWallets uw LEFT JOIN FETCH uw.wallet WHERE u.mobile =:mobileNumber")
