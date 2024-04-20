@@ -69,16 +69,19 @@ public class RefreshTokenWiddlewareAspect {
 			// try {
 //					Optional<User> user = this.userService.findUserWallet(id);
 			Optional<User> userDetails = userService.getUserById(id);
-			log.error("userDetails" + userDetails.get().getFirstName());
-			if (this.jwtService.validateToken(refreshTokenHeader, userDetails.get(), JwtType.REFRESH_TOKEN)) {
-				Optional<User> clonedUserDetails = Optional.of(userDetails.get());
+			if(userDetails.isPresent()) {
+				log.error("userDetails" + userDetails.get().getFirstName());
+				if (this.jwtService.validateToken(refreshTokenHeader, userDetails.get(), JwtType.REFRESH_TOKEN)) {
+					Optional<User> clonedUserDetails = Optional.of(userDetails.get());
 
-				UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-						clonedUserDetails.get(), null, null);
-				authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-				SecurityContextHolder.getContext().setAuthentication(authToken);
+					UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+							clonedUserDetails.get(), null, null);
+					authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+					SecurityContextHolder.getContext().setAuthentication(authToken);
+				}
 			}
-			;
+			
+			
 
 		}
 
