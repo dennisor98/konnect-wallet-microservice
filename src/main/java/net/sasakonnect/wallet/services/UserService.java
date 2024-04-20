@@ -774,6 +774,7 @@ public class UserService extends RestClientService implements UserDetailsService
 		var user = this.userRepository.findByOnboardingRequestId(onboardingRequestId);
 		if (user.isPresent()) {
 			this.userPinRepository.deleteByUser_Id(user.get().getId());
+			this.firebaseTokenRepository.deleteAll(user.get().getFirebaseTokens());
 			this.userRepository.deleteByOnboardingRequestId(onboardingRequestId);
 
 		}
