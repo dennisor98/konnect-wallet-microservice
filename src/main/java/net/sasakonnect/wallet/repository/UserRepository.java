@@ -32,6 +32,8 @@ public interface UserRepository extends JpaRepository<User, String> {
 
 	@Query("SELECT u FROM User u WHERE u.mobile = :mobile AND u.countryCode=:country_code ")
 	Optional<User> findByMobileAndCountryCode(@Param("mobile") String mobile, @Param("country_code") int countryCode);
+	@Query("SELECT u FROM User u JOIN u.userWallets uw WHERE u.mobile = :mobile AND u.countryCode=:country_code ")
+	Optional<User> findByMobileAndJoinWalletCountryCode(@Param("mobile") String mobile, @Param("country_code") int countryCode);
 
 	@Query("SELECT u FROM User u LEFT JOIN FETCH u.profileImage JOIN FETCH u.userWallets uw JOIN FETCH uw.wallet WHERE u.id = :userId")
 	Optional<User> findUserWithUserWalletsById(@Param("userId") String userId);

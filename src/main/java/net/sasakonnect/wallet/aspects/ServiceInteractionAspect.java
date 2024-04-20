@@ -17,6 +17,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.beans.ClientAppsBean;
 import net.sasakonnect.wallet.config.KonnectHeader;
 import net.sasakonnect.wallet.services.WalletClientService;
@@ -25,6 +26,7 @@ import net.sasakonnect.wallet.tools.JwtService;
 @Aspect
 @Component
 @Scope(value = "request")
+@Slf4j
 public class ServiceInteractionAspect {
 	private WalletClientService walletclientService;
 	private JwtService jwtService;
@@ -41,6 +43,7 @@ public class ServiceInteractionAspect {
 	public void beforeControllerMethodExecution() {
 		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
 				.getRequest();
+		log.info(KonnectHeader.SECRET_APP_KEY_HEADER.toString());
 		var client_app_key = request.getHeader(KonnectHeader.SECRET_APP_KEY_HEADER.toString());
 		if (client_app_key == null) {
 			Map<String, Object> map = new HashMap<String, Object>();

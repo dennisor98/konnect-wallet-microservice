@@ -811,6 +811,13 @@ public class UserService extends RestClientService implements UserDetailsService
 		// TODO Auto-generated method stub
 
 	}
+	public Optional<User> findUserByPhoneNumberLoadUserWallet(String phoneNumber, String countrycode) {
+		// log.error(phoneNumber);
+		return this.userRepository.findByMobileAndJoinWalletCountryCode(phoneNumber,Integer.parseInt(countrycode));
+		// TODO Auto-generated method stub
+
+	}
+	
 
 	public Optional<User> findUserByWalletAccountId(String receiverAccount) {
 		return this.userRepository.findUserByWalletAccountId(receiverAccount);
