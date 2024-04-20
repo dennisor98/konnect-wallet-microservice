@@ -79,6 +79,13 @@ public class RefreshTokenWiddlewareAspect {
 					authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 					SecurityContextHolder.getContext().setAuthentication(authToken);
 				}
+			}else {
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("message", "refresh token header required");
+				map.put("success", false);
+				ObjectMapper objectMapper = new ObjectMapper();
+				String jsonError = objectMapper.writeValueAsString(map);
+				throw new ResponseStatusException(HttpStatus.FORBIDDEN, jsonError);
 			}
 			
 			
