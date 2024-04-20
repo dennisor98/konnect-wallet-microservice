@@ -160,13 +160,15 @@ public class InvoiceService {
 		   map.put("nextPage",invoices.nextPageable());
 		   map.put("hasPrevious",invoices.hasPrevious());
 		   map.put("previousPage",invoices.previousPageable());
-		   map.put("invoices",invoices.stream().collect(Collectors.toList()));
-		  resMap.put("payload", map);
+		   map.put("invoices",invoices.get().collect(Collectors.toList()));
+		  resMap.put("payload",map);
+		   return ResponseEntity.status(HttpStatus.OK).body(resMap);
 	   }else {
-		   map.put("invoices",invoices.stream().collect(Collectors.toList()));
-		   resMap.put("payload", map);
+		   map.put("invoices",new ArrayList<>());
+		   resMap.put("payload",map);
 	   }
 	   return ResponseEntity.status(HttpStatus.OK).body(resMap);
+
    }
  
 }

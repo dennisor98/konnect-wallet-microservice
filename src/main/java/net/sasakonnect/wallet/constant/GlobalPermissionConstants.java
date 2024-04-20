@@ -50,6 +50,21 @@ public final class GlobalPermissionConstants {
 		}
 	}
 	
+	public static class CanViewInvoices extends PermissionEntry {
+		public static final String PERMISSION = "can.view.invoices";
+		public static final String DESCRIPTION = "Can view invoices";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
+	
 	public static class CanGenerateInvoice extends PermissionEntry {
 		public static final String PERMISSION = "can.generate.invoice";
 		public static final String DESCRIPTION = "Can generate invoice";

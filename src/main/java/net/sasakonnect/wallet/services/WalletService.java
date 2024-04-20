@@ -1122,6 +1122,60 @@ public class WalletService {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+public Object mpesaTillAndByGoodsSdk(@Valid MpesaBilling tillAndBuyGoods) {
+		
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		var reqId = new HashMap<String, Object>();
+
+		var userWallets = this.walletRepository.findByUserWalletsUser(user);
+		if (!userWallets.isEmpty()) {
+			var userwallet = userWallets.get(0);
+			reqId.put("payerAccountId", userwallet.getAccountId());
+
+		}
+		reqId.put("payType", tillAndBuyGoods.getBillType().getCode());
+
+		switch (tillAndBuyGoods.billType) {
+		case PAY_BILL:
+			reqId.put("payeeReferenNumber", tillAndBuyGoods.getReceivingAccount().trim());
+
+			break;
+		case TILL:
+
+			break;
+		default:
+			break;
+
+		}
+		reqId.put("payeeShortCode", tillAndBuyGoods.getShortCode().trim());
+
+		reqId.put("amount", tillAndBuyGoods.getAmount());
+		reqId.put("description", tillAndBuyGoods.getShortNote());
+
+		reqId.put("otpType", tillAndBuyGoods.getOtpType());
+
+		var reqs = this.requestSigner.signRequest(reqId);
+
+		Mono<String> responseMono = this.bankClientBean.webClient.post()
+				.uri(ChoiceEndpointsConstants.MPESA_TILL_AND_PAYBILL).contentType(MediaType.APPLICATION_JSON)
+				.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+				.bodyToMono(String.class);
+		String responseJson = responseMono.block();
+		
+        
+		if (responseJson != null) {
+			var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
+			choiceBankSmsService.invokeSms(resp.getData().txId);
+			return resp;
+			// return new Gson().fromJson(responseJson, Object.class);
+
+		}
+
+		// TODO Auto-generated method stub
+		return null;
+	}
      
 	//overload
 	public Object requestWalletDeduction(@Valid SdkPayDto sdkpayDto, WalletClient clientApp) {
@@ -1137,13 +1191,13 @@ public class WalletService {
 			if (activeAccount.getTillNumber() != null) {
 				mpesaBill.shortCode = activeAccount.getTillNumber();
 				mpesaBill.setBillType(MpesaBillType.TILL);
-				return this.mpesaTillAndByGoods(mpesaBill);
+				return this.mpesaTillAndByGoodsSdk(mpesaBill);
 
 			} else if (activeAccount.getPayBillAccountNo() != null && activeAccount.getPaybillNumber() != null) {
 				mpesaBill.shortCode = activeAccount.getPaybillNumber();
 				mpesaBill.setBillType(MpesaBillType.PAY_BILL);
 				mpesaBill.setReceivingAccount(activeAccount.getPayBillAccountNo());
-				return this.mpesaTillAndByGoods(mpesaBill);
+				return this.mpesaTillAndByGoodsSdk(mpesaBill);
 			}
 
 			break;
