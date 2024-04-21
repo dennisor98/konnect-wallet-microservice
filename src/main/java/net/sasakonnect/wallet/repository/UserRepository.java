@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import jakarta.transaction.Transactional;
+import net.sasakonnect.wallet.RequestDto.PhoneCountryPair;
 import net.sasakonnect.wallet.domain.CorporateDetails;
 import net.sasakonnect.wallet.domain.User;
 
@@ -32,6 +33,13 @@ public interface UserRepository extends JpaRepository<User, String> {
 
 	@Query("SELECT u FROM User u WHERE u.mobile = :mobile AND u.countryCode=:country_code ")
 	Optional<User> findByMobileAndCountryCode(@Param("mobile") String mobile, @Param("country_code") int countryCode);
+	
+	
+	@Query(value = "SELECT u FROM User u LEFT JOIN FETCH u.userWallets uw " +
+            "WHERE u.mobile IN :mobile")
+		List<User> findCustomersByMultiplePhoneAndCountry(
+		    @Param("mobile") List<Object> mobileNumber);
+	  
 	@Query("SELECT u FROM User u JOIN u.userWallets uw WHERE u.mobile = :mobile AND u.countryCode=:country_code ")
 	Optional<User> findByMobileAndJoinWalletCountryCode(@Param("mobile") String mobile, @Param("country_code") int countryCode);
 

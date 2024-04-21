@@ -59,6 +59,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.ChangePin;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
 import net.sasakonnect.wallet.RequestDto.OpenIdRequest;
+import net.sasakonnect.wallet.RequestDto.PhoneCountryPair;
 import net.sasakonnect.wallet.RequestDto.PinDto;
 import net.sasakonnect.wallet.RequestDto.UserDeviceToken;
 import net.sasakonnect.wallet.RequestDto.UserLogin;
@@ -814,6 +815,13 @@ public class UserService extends RestClientService implements UserDetailsService
 	public Optional<User> findUserByPhoneNumberLoadUserWallet(String phoneNumber, String countrycode) {
 		// log.error(phoneNumber);
 		return this.userRepository.findByMobileAndJoinWalletCountryCode(phoneNumber,Integer.parseInt(countrycode));
+		// TODO Auto-generated method stub
+
+	}
+	
+	public List<User> findUserPhoneNumberAndCountryCode(List<PhoneCountryPair> listCountryCode) {
+		// log.error(phoneNumber);
+		return this.userRepository.findCustomersByMultiplePhoneAndCountry(listCountryCode.stream().map(data->data.getMobile()).collect(Collectors.toList()));
 		// TODO Auto-generated method stub
 
 	}
