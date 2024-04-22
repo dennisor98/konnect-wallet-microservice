@@ -182,13 +182,6 @@ public class AdministrationController {
 		return this.corporateService.activateCorporateAccount(request);
 	}
 
-//	@PostMapping("/user/corporate/email/verify")
-//	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION + "')")
-//	@RequirePermission(GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION)
-//    public Object verifyCorporateEmail(@RequestBody  VerifyEmailDTO request) {
-//		return this.corporateService.verifyEmail(request.getEmail(),true);
-//	}
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewCorporateUsers.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.ViewCorporateUsers.PERMISSION)
 	@GetMapping("/user/corporate/get")

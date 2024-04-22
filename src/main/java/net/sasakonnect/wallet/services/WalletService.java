@@ -55,6 +55,7 @@ import net.sasakonnect.wallet.ResponseDto.TransactionResponseDto;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
 import net.sasakonnect.wallet.domain.CorporateDetails;
+import net.sasakonnect.wallet.domain.RejectedAccount;
 import net.sasakonnect.wallet.domain.Transaction;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.UserJob;
@@ -506,8 +507,8 @@ public class WalletService {
 						var userWallet = new UserWallet();
 						userWallet.setUser(user.get());
 						userWallet.setWallet(savedwallet);
-
 						this.userWalletRepository.save(userWallet);
+						this.userService.deleteSuccessfulFromRejected(user.get().getIdNumber());
 					}
 
 				} else if (notificationBody.getStatus() == 3 && user.isPresent()) {
@@ -517,6 +518,21 @@ public class WalletService {
 					this.larkService.sendOnBoardingMessage("REJECTED ONBOARDING", "red", notificationBody);
 					var onboardingRequestId = params.get("onboardingRequestId").getAsString();
 					System.out.println(onboardingRequestId);
+					//insert into rejected accounts
+					var u = user.get();
+					var rejected  = RejectedAccount.builder()
+							         .address(u.getAddress())
+							         .employmentStatus(u.getEmploymentStatus())
+							         .countryCode(u.getCountryCode())
+							         .birthday(u.getBirthday())
+							         .gender(u.getGender())
+							         .idNumber(u.getIdNumber())
+							         .idType(u.getIdType())
+							         .middleName(u.getMiddleName())
+							         .firstName(u.getFirstName())
+							         .lastName(u.getLastName())
+							         .build();
+					this.userService.createRejectedAccount(rejected);
 					this.userService.deletUserByOnboardingRequestId(onboardingRequestId);
 
 				} else if (notificationBody.getStatus() == 5 && user.isPresent()) {

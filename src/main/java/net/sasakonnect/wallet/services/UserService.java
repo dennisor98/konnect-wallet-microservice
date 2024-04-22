@@ -69,6 +69,7 @@ import net.sasakonnect.wallet.beans.RedisBean;
 import net.sasakonnect.wallet.domain.FirebaseToken;
 import net.sasakonnect.wallet.domain.Permission;
 import net.sasakonnect.wallet.domain.ProfileImage;
+import net.sasakonnect.wallet.domain.RejectedAccount;
 import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.UserPin;
@@ -80,6 +81,7 @@ import net.sasakonnect.wallet.repository.CorporateDetailsRepository;
 import net.sasakonnect.wallet.repository.FirebaseTokenRepository;
 import net.sasakonnect.wallet.repository.PermissionRepository;
 import net.sasakonnect.wallet.repository.ProfileImageRepository;
+import net.sasakonnect.wallet.repository.RejectedAccountRepository;
 import net.sasakonnect.wallet.repository.RolePermissionRepository;
 import net.sasakonnect.wallet.repository.RoleRepository;
 import net.sasakonnect.wallet.repository.UserPinRepository;
@@ -125,6 +127,9 @@ public class UserService extends RestClientService implements UserDetailsService
 
 	@Autowired
 	WalletRepository walletRepository;
+	
+	@Autowired
+	RejectedAccountRepository  rejectedAccountRepository;
 
 	@Autowired
 	BankWebClientBean bankClientBean;
@@ -226,6 +231,7 @@ public class UserService extends RestClientService implements UserDetailsService
 				usermap.put("id", u.getId());
 				usermap.put("firstname", u.getFirstName());
 				usermap.put("lastname", u.getLastName());
+				usermap.put("middlename",u.getMiddleName());	
 				usermap.put("user_id", u.getId());
 				usermap.put("phone", u.getMobile());
 //            map.put("wallet", u.getUserWallets());
@@ -781,6 +787,14 @@ public class UserService extends RestClientService implements UserDetailsService
 		}
 		// TODO Auto-generated method stub
 
+	}
+	
+	public void createRejectedAccount(RejectedAccount payload) {
+		this.rejectedAccountRepository.save(payload);
+	}
+	
+	public void deleteSuccessfulFromRejected(String IdNumber) {
+		this.rejectedAccountRepository.deleteByIdNumber(IdNumber);
 	}
 
 	public Optional<User> findUserByAccountd(String accountId) {

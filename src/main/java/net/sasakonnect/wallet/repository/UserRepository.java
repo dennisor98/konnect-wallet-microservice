@@ -28,7 +28,7 @@ public interface UserRepository extends JpaRepository<User, String> {
 	Optional<User> getUserByCorporateId(@Param("corporateId") CorporateDetails corporateId);
 
 	@Query("SELECT u FROM User u LEFT JOIN FETCH u.userWallets uw LEFT JOIN FETCH uw.wallet WHERE u.firstName LIKE %:queryString% "
-			+ "OR u.lastName LIKE %:queryString% OR uw.wallet.accountId LIKE %:queryString% OR u.mobile LIKE %:queryString%")
+			+ "OR u.lastName LIKE %:queryString% OR u.middleName LIKE %:queryString% OR u.idNumber LIKE %:queryString%  OR uw.wallet.accountId LIKE %:queryString% OR u.mobile LIKE %:queryString%")
 	Page<User> searchUser(@Param("queryString") String queryString, Pageable pageable);
 
 	@Query("SELECT u FROM User u WHERE u.mobile = :mobile AND u.countryCode=:country_code ")
@@ -49,7 +49,7 @@ public interface UserRepository extends JpaRepository<User, String> {
 	@Query("SELECT u FROM User u  LEFT JOIN FETCH u.userWallets uw  LEFT JOIN FETCH uw.wallet WHERE u.id = :userId")
 	Optional<User> findUserWithWalletsById(@Param("userId") String userId);
 
-	@Query("SELECT u FROM User u LEFT JOIN FETCH u.userRole ur LEFT JOIN FETCH ur.role r  LEFT JOIN FETCH u.userWallets uw LEFT JOIN FETCH uw.wallet ")
+	@Query("SELECT u FROM User u LEFT JOIN FETCH u.userRole ur LEFT JOIN FETCH ur.role r  LEFT JOIN FETCH u.userWallets uw LEFT JOIN FETCH uw.wallet WHERE uw IS NOT NULL")
 	Page<User> findAllusers(Pageable page);
 
 	@Query("SELECT u FROM User u JOIN u.userWallets uw WHERE uw.wallet.accountId = :accountId")
@@ -69,14 +69,14 @@ public interface UserRepository extends JpaRepository<User, String> {
 	@Query("SELECT u FROM User u WHERE u.openId = :open_id")
 	Optional<User> findByOpenId(@Param("open_id") String open_id);
 	
-	@Query("SELECT DATE(u.createdAt),COUNT(u) FROM User u  WHERE MONTH(u.createdAt) =:month AND YEAR(u.createdAt) =:year GROUP BY DATE(u.createdAt) ORDER BY DATE(u.createdAt) DESC")
+	@Query("SELECT DATE(u.createdAt),COUNT(u) FROM User u LEFT JOIN u.userWallets uw WHERE MONTH(u.createdAt) =:month AND YEAR(u.createdAt) =:year AND uw IS NOT NULL GROUP BY DATE(u.createdAt) ORDER BY DATE(u.createdAt) DESC")
 	List<Object[]> findDailyOnBoardingTrend(@Param("month") int month,@Param("year") int year);
 	
-	@Query("SELECT MONTHNAME(u.createdAt),COUNT(u) FROM User u WHERE  YEAR(u.createdAt) =:year GROUP BY MONTHNAME(u.createdAt),MONTH(u.createdAt) ORDER BY MONTH(u.createdAt) DESC")
+	@Query("SELECT MONTHNAME(u.createdAt),COUNT(u) FROM User u LEFT JOIN u.userWallets uw WHERE  YEAR(u.createdAt) =:year AND uw IS NOT NULL GROUP BY MONTHNAME(u.createdAt),MONTH(u.createdAt) ORDER BY MONTH(u.createdAt) DESC")
 	List<Object[]> findMonthlyOnBoardingTrend(@Param("year") int year);
 	
 	
-	@Query("SELECT YEAR(u.createdAt),COUNT(u) FROM User u GROUP BY YEAR(u.createdAt) ORDER BY YEAR(u.createdAt) DESC")
+	@Query("SELECT YEAR(u.createdAt),COUNT(u) FROM User u LEFT JOIN u.userWallets uw WHERE  uw IS NOT NULL GROUP BY YEAR(u.createdAt)  ORDER BY YEAR(u.createdAt) DESC")
      List<Object[]> findAnnualOnBoardingTrend();
      
 //     @Query("SELECT COUNT(*) FROM User u WHERE DATE(u.createdAt) <= CURRENT_DATE()")
