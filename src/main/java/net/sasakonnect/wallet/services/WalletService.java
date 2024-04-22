@@ -529,6 +529,8 @@ public class WalletService {
 							         .idNumber(u.getIdNumber())
 							         .idType(u.getIdType())
 							         .middleName(u.getMiddleName())
+							         .onboardingRequestId(u.getOnboardingRequestId())
+							         .mobile(u.getMobile())							    
 							         .firstName(u.getFirstName())
 							         .lastName(u.getLastName())
 							         .build();
