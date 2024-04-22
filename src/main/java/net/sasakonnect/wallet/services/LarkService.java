@@ -134,6 +134,7 @@ public class LarkService {
         markdown1.put("tag", "markdown");
         markdown1.put("content","<at id=ou_58180bf0fcc619b69d7eccfd14741939></at>,<at id=ou_4902c36327956f8db2e29900b559e994></at>,<at id=ou_97ebb1bf896adf1e2f854589fe8f352f></at>");
         
+        
         Map<String,Object> markdown2 = new HashMap<>();
         markdown2.put("tag", "markdown");
         markdown2.put("content",LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
@@ -144,7 +145,7 @@ public class LarkService {
         tagSet.put("background_style", "grey");
         
         ArrayList<Map<String,Object>> columns = new ArrayList<>();
-        String[] columnNames = {"Date","OB ID","Acc. No.","Acc. Name","Status Code"};
+        String[] columnNames = {"Date","OB ID","Acc. No.","Acc. Name","Code"};
         for(String col : columnNames) {
         	Map<String,Object>  cols = new HashMap<>(); 
         	cols.put("tag","column");

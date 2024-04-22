@@ -390,9 +390,9 @@ public class WalletService {
 
 	public ResponseEntity<Object> createNewOnBoardingUser(@Valid EasyOnboardingRequestParams easyOnboarding) {
 		Map<String, Object> userMap = new HashMap<String, Object>();
-		userMap.put("firstName", easyOnboarding.getFirstName());
-		userMap.put("middleName", easyOnboarding.getMiddleName());
-		userMap.put("lastName", easyOnboarding.getLastName());
+		userMap.put("firstName", easyOnboarding.getFirstName().toUpperCase());
+		userMap.put("middleName", easyOnboarding.getMiddleName().toUpperCase());
+		userMap.put("lastName", easyOnboarding.getLastName().toUpperCase());
 		userMap.put("birthday", easyOnboarding.getBirthday());
 		userMap.put("gender", easyOnboarding.getGenderVerbal().getValue());
 		userMap.put("countryCode", easyOnboarding.getCountryCode());
@@ -407,8 +407,8 @@ public class WalletService {
 		userMap.put("employmentStatus", easyOnboarding.getEmploymentStatusType().getCode());
 		userMap.put("monthlyIncome", easyOnboarding.monthlyIncomeType().getCode());
 		try {
-			var user = User.builder().firstName(easyOnboarding.getFirstName()).lastName(easyOnboarding.getLastName())
-					.middleName(easyOnboarding.getMiddleName()).lastName(easyOnboarding.getLastName())
+			var user = User.builder().firstName(easyOnboarding.getFirstName().toUpperCase()).lastName(easyOnboarding.getLastName().toUpperCase())
+					.middleName(easyOnboarding.getMiddleName().toUpperCase()).lastName(easyOnboarding.getLastName().toUpperCase())
 					.birthday(easyOnboarding.parseBithDay()).address(easyOnboarding.getAddress())
 					.gender(easyOnboarding.getGenderVerbal())
 					.countryCode(Integer.parseInt(easyOnboarding.getCountryCode()))
