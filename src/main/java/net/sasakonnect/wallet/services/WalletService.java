@@ -1499,7 +1499,13 @@ public Object mpesaTillAndByGoodsSdk(@Valid MpesaBilling tillAndBuyGoods) {
 			var wallets = this.walletRepository.findByAccountId(accountId);
 			if (!wallets.isEmpty()) {
 				var currentWallet = wallets.get();
-
+				   var log = Logs.builder()
+		             		 .activity(LogTypes.STATEMENT_REQUEST)
+		             		 .description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.getId()+"and acc No:"+loggedInUser.getUserWallets().get(0).getWallet().getAccountId()
+		             				 +"requested an account statement for"+user.get().getFirstName()+" "+user.get().getLastName()+"of acc No: "+currentWallet.getAccountId())
+		             		 .user(user.get())
+		             		 .build();
+		              this.logsRepository.save(log);
 				var reqId = new HashMap<String, Object>();
 				reqId.put("accountId", currentWallet.getAccountId());
 				reqId.put("startTime", startDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli());
@@ -1572,6 +1578,13 @@ public Object mpesaTillAndByGoodsSdk(@Valid MpesaBilling tillAndBuyGoods) {
 		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		Optional<User> user = this.userService.getUserById(userId);
 		if (user.isPresent()) {
+			var log = Logs.builder()
+	        		 .activity(LogTypes.STATEMENT_REQUEST)
+	        		 .description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.getId()+"and acc No:"+loggedInUser.getUserWallets().get(0).getWallet().getAccountId()
+	        				 +"requested generated user statements")
+	        		 .user(loggedInUser)
+	        		 .build();
+	         this.logsRepository.save(log);
 			List<UserJob> statements = this.userJobRepository.findAdminStatementsByUser(loggedInUser, user.get());
 			Map<String, Object> map = new HashMap<>();
 			map.put("success", true);

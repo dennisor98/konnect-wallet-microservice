@@ -35,14 +35,17 @@ import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.domain.invoice.InvoiceItem;
 import net.sasakonnect.wallet.domain.invoice.InvoiceMetaData;
 import net.sasakonnect.wallet.domain.invoice.Tariff;
+import net.sasakonnect.wallet.enums.LogTypes;
 import net.sasakonnect.wallet.invoice.InvoiceManager;
 import net.sasakonnect.wallet.repository.InvoiceJobRepository;
+import net.sasakonnect.wallet.repository.LogsRepository;
 import net.sasakonnect.wallet.repository.RejectedAccountRepository;
 import net.sasakonnect.wallet.repository.TarrifRepository;
 import net.sasakonnect.wallet.repository.TransactionRepository;
 import net.sasakonnect.wallet.ResponseDto.InvoiceDataDTO;
 import net.sasakonnect.wallet.constant.ChannelType;
 import net.sasakonnect.wallet.domain.InvoiceJob;
+import net.sasakonnect.wallet.domain.Logs;
 import net.sasakonnect.wallet.domain.Transaction;
 import net.sasakonnect.wallet.domain.User;
 @Slf4j
@@ -61,6 +64,9 @@ public class InvoiceService {
 	
 	@Autowired
 	InvoiceJobRepository  invoiceJobRepository;
+	
+	@Autowired
+	LogsRepository logsRepository;
 	
 	
 
@@ -101,18 +107,23 @@ public class InvoiceService {
               invoicemanager.signInvoice();
               invoicemanager.generateBy(user.getFirstName()+" "+user.getMiddleName()+" "+user.getLastName());
               invoicemanager.close();
-      } catch (DocumentException | IOException e) {
+              Map<String,Object> map = new HashMap<>();
+              map.put("success",true);
+              map.put("message","Request successful");
+              
+              var log = Logs.builder()
+             		 .activity(LogTypes.INVOICE_REQUEST)
+             		 .description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.getId()+"and acc No:"+user.getUserWallets().get(0).getWallet().getAccountId()+"requested transactions invoice")
+             		 .user(user)
+             		 .build();
+              this.logsRepository.save(log);
+              } catch (DocumentException | IOException e) {
               // TODO Auto-generated catch block
               e.printStackTrace();
       }
 	   return null;
    }
-   
-   private Object getInvoiceData() {
-	   
-	 return null;   
-   }
-   
+      
    private  InvoiceItem computeValidTransactionsByChannel(ChannelType channel,Date startDate,Date endDate){
 	   List<Tariff> tarrifs = this.tarrifRepository.findByChannelTypeOrderByMinAsc(channel);
 	   List<Transaction> transactions = this.transactionService.getAllTransactions(channel, startDate, endDate);
@@ -166,9 +177,10 @@ public class InvoiceService {
 		   map.put("previousPage",invoices.hasPrevious()? invoices.previousPageable().getPageNumber() : null);
 	       map.put("invoices",invoices.get().map(i->{
 	    	   Map<String,Object> invoiceMap = new HashMap<>();
-	    	   
+	    	   invoiceMap.put("id",i.getId());
 	    	   invoiceMap.put("owner",i.getJobOwner().getFirstName() +" "+i.getJobOwner().getMiddleName() +" "+i.getJobOwner().getLastName());
 	    	   invoiceMap.put("period","From "+i.getStartDate().toString().split(" ")[0]+" to " +i.getEndDate().toString().split(" ")[0]);
+	    	   invoiceMap.put("description",i.getDescription());
 	    	   invoiceMap.put("link",i.getDownloadLink());
 	    	   return invoiceMap;
 	       }).collect(Collectors.toList()));
