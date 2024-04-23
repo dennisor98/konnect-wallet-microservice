@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.springdoc.core.converters.models.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -61,6 +62,7 @@ import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
 import net.sasakonnect.wallet.RequestDto.OpenIdRequest;
 import net.sasakonnect.wallet.RequestDto.PhoneCountryPair;
 import net.sasakonnect.wallet.RequestDto.PinDto;
+import net.sasakonnect.wallet.RequestDto.SdkSearchCustomers;
 import net.sasakonnect.wallet.RequestDto.UserDeviceToken;
 import net.sasakonnect.wallet.RequestDto.UserLogin;
 import net.sasakonnect.wallet.ResponseDto.UserResponseDTO;
@@ -1245,6 +1247,51 @@ public class UserService extends RestClientService implements UserDetailsService
 	                .toOutputStream(outputStream);
 	        return outputStream.toByteArray();
 	    }
+
+	public Object  findUsersCreatedBetweenStartAndEndDate( SdkSearchCustomers sdkSearchCustomer) {
+		        Date endDate = new Date(sdkSearchCustomer.getCreatedAtEnd()*1000);
+		        Date startDate = new Date(sdkSearchCustomer.getCreatedAtStart()*1000);
+				Map<Object, Object> message= new HashMap<>();
+
+           var pageable= PageRequest.of(sdkSearchCustomer.getPageNumber(),sdkSearchCustomer.getPageSize());
+
+		var results= this.userRepository.findByCreatedAtBetween(endDate,startDate,pageable);
+		
+		 
+			var data=results.stream().map(founduser->{
+				Map<Object, Object> m= new HashMap<>();
+				m.put("openId",founduser.getOpenId());
+				m.put("countryCode", founduser.getCountryCode());
+				m.put("firstName",founduser.getFirstName());
+				m.put("lastName",founduser.getLastName());
+				m.put("middleName",founduser.getMiddleName());
+				m.put("mobile",founduser.getMobile());
+				m.put("verified",founduser.getUserWallets().isEmpty()?false:true);
+				m.put("createdAt",founduser.getCreatedAt());
+				return m;
+			}).collect(Collectors.toList());		
+			message.put("payload", data);
+			var page= new HashMap<String,Object>();
+			page.put("hasNext", results.hasNext());
+			page.put("hasPrevious", results.hasPrevious());
+			page.put("nextPage", results.hasNext()?results.nextPageable().getPageNumber():null);
+			page.put("totalPages",results.getTotalPages());
+			page.put("itemsPage",results.getPageable().getPageSize());
+			page.put("currentPage", results.getNumber());
+			page.put("totalItems", results.getTotalElements());
+			page.put("previousPage", results.previousOrFirstPageable().getPageNumber());
+			page.put("fromDate", sdkSearchCustomer.getCreatedAtStart());
+			page.put("toDate", sdkSearchCustomer.getCreatedAtEnd());
+			message.put("page", page);
+			
+			
+		    return ResponseEntity.status(HttpStatus.OK).body(message);
+		
+	
+		// TODO Auto-generated method stub
+		
+	}
+	
 	
 
 	
