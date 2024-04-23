@@ -24,7 +24,6 @@ import net.sasakonnect.wallet.enums.MonthlyIncome;
 public class Logs extends BaseWalletDomain implements Serializable{
 
 	private static final long serialVersionUID = -1466182051674693633L;
-   @Column(nullable=true)
    @ManyToOne()
    @JoinColumn(name="user_id")
    User user;
