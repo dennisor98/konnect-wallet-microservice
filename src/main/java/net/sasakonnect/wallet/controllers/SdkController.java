@@ -137,7 +137,7 @@ public class SdkController {
 
 	@PostMapping("customers")
 	@ServiceInteractionMiddleware()
-	@RateLimit(3)
+	@RateLimit(30)
 	public Object checkCustomers(
 			@Parameter(example = "d388a3ababb6c3a2851f1ad112d8037c1350b32fe93623edda82", 
 			name = "secret-key", description = "Provide app key of the app you created on dashboard", in = ParameterIn.HEADER, required = true) @RequestHeader("secret-key") String appSecret,
@@ -145,40 +145,17 @@ public class SdkController {
 			@RequestBody() @Valid() SdkSearchCustomers sdkSearchCustomer) {
 		//ignored  country code just for brevity
 		
-	
+		if(sdkSearchCustomer.getPageSize()==0) {
+			sdkSearchCustomer.setPageSize(10);
+		}else if(sdkSearchCustomer.getPageSize()>50) {
+			sdkSearchCustomer.setPageSize(50);
+
+		}
 		Map<Object, Object> wrapper= new HashMap<>();
 		var clientData = clientDataService.getWalletClient();
 		if (clientData.getEnabled() && clientData.getDeletedAt() == null) {
-			
-			var phoneNumbers=sdkSearchCustomer.createPhonePairs();
-			
-			var userList= this.userService.findUserPhoneNumberAndCountryCode(phoneNumbers);
-			
-			
-			List<Map<Object, Object>> data= userList.stream().map((founduser)->{
-					Map<Object, Object> message= new HashMap<>();
-					message.put("openId",founduser.getOpenId());
-					message.put("countryCode", founduser.getCountryCode());
-					message.put("firstName",founduser.getFirstName());
-					message.put("lastName",founduser.getLastName());
-					message.put("middleName",founduser.getMiddleName());
-					message.put("mobile",founduser.getMobile());
-					message.put("verified",founduser.getUserWallets().isEmpty()?false:true);
-					message.put("createdAt",founduser.getCreatedAt());
-					return message;
-				}).collect(Collectors.toList());;
-				
-				wrapper.put("payload", data);
-				wrapper.put("sucess", true);
-				
-
-				
-				
-			    return ResponseEntity.status(HttpStatus.OK).body(wrapper);
-			
+			return this.userService.findUsersCreatedBetweenStartAndEndDate(sdkSearchCustomer);
 		}
-		wrapper.put("success", false);
-		wrapper.put("message","could not validate key");
 		
 		
 	    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(wrapper);

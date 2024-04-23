@@ -19,6 +19,7 @@ import com.google.gson.JsonSyntaxException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.OnboardingStatus;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.domain.User;
@@ -27,7 +28,7 @@ import net.sasakonnect.wallet.services.WalletService;
 
 @CustomController()
 @Tag(name = "Choice-Bank", description = "Bank Routes routes")
-
+@Slf4j
 public class ChoiceBankController {
 
 	private final UserService userService;
@@ -54,6 +55,7 @@ public class ChoiceBankController {
 
 	@PostMapping("konnect/callBack")
 	public Object konnectCallBack(@RequestBody Map<String, Object> body) {
+		log.info(body.toString());
 		System.err.println(body);
 		ObjectMapper objectMapper = new ObjectMapper();
 

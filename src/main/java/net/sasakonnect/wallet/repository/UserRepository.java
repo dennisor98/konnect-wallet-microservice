@@ -1,5 +1,6 @@
 package net.sasakonnect.wallet.repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -85,4 +86,9 @@ public interface UserRepository extends JpaRepository<User, String> {
     	       + "(SELECT COUNT(*) FROM user u WHERE DATE(u.created_at) <= CURRENT_DATE())", 
     	       nativeQuery = true)
      List<Object[]> findOnBoardingDeviation();
+     
+//     @Query("SELECT u FROM User u WHERE u.createdAt >= :startDate " +
+//             "AND u.createdAt <= :endDate")
+     Page<User> findByCreatedAtBetween( @Param("startDate") Date startDate, @Param("endDate") Date endDate, Pageable pageable);
+
 }

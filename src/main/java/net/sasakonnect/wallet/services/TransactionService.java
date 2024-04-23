@@ -31,13 +31,16 @@ import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChannelType;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
+import net.sasakonnect.wallet.domain.Logs;
 import net.sasakonnect.wallet.domain.Transaction;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.Wallet;
+import net.sasakonnect.wallet.enums.LogTypes;
 import net.sasakonnect.wallet.enums.NotificationType;
 import net.sasakonnect.wallet.enums.WalletTransactionType;
 import net.sasakonnect.wallet.notification.NotificationResult;
 import net.sasakonnect.wallet.notification.TransactionResultNotification;
+import net.sasakonnect.wallet.repository.LogsRepository;
 import net.sasakonnect.wallet.repository.TransactionRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.tools.RequestSigner;
@@ -53,6 +56,9 @@ public class TransactionService {
 	BankWebClientBean bankClientBean;
 	@Autowired
 	RequestSigner requestSigner;
+	
+	@Autowired
+	LogsRepository logsRepository;
 
 	public Transaction saveTransaction(NotificationResult<TransactionResultNotification> results) {
 		var trans = results.getParams();
@@ -72,7 +78,16 @@ public class TransactionService {
 					.oppoAccountName(trans.getOppoAccountName()).thirdPartyTxType(trans.getThirdPartyTxType())
 					.counterpartyName(trans.getExtInfo().getCounterpartyName())
 					.currency(trans.getCurrency()).amount(new BigDecimal(trans.getAmount())).build();
+			User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+			var log = Logs.builder()
+					.description(user.getFirstName()+" "+user.getLastName()+"of acc No:"+trans.getAccountId()
+					+" invoked a transaction with id"+trans.getTxId()+"of amount"+trans.getAmount() +"to" +"acc No:"+trans.getOppoAccountId())
+					.activity(LogTypes.TRANSACTION)
+					.user(user)
+					.build();
+			this.logsRepository.save(log);
 			return this.transactionRepository.save(transaction);
+			
 		} else {
 //			var transaction = Transaction.builder().txId(trans.getTxId()).txType(trans.getTxType())
 //					.externalTxId(trans.getExternalTxId()).accountId(trans.getAccountId())
