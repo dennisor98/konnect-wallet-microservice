@@ -55,6 +55,7 @@ import net.sasakonnect.wallet.ResponseDto.TransactionResponseDto;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
 import net.sasakonnect.wallet.domain.CorporateDetails;
+import net.sasakonnect.wallet.domain.Logs;
 import net.sasakonnect.wallet.domain.RejectedAccount;
 import net.sasakonnect.wallet.domain.Transaction;
 import net.sasakonnect.wallet.domain.User;
@@ -63,6 +64,7 @@ import net.sasakonnect.wallet.domain.UserPin;
 import net.sasakonnect.wallet.domain.UserWallet;
 import net.sasakonnect.wallet.domain.Wallet;
 import net.sasakonnect.wallet.domain.WalletClient;
+import net.sasakonnect.wallet.enums.LogTypes;
 import net.sasakonnect.wallet.enums.NotificationBody;
 import net.sasakonnect.wallet.enums.NotificationType;
 import net.sasakonnect.wallet.enums.TransactionStatus;
@@ -74,6 +76,7 @@ import net.sasakonnect.wallet.notification.NotificationResult;
 import net.sasakonnect.wallet.notification.TransactionResultNotification;
 import net.sasakonnect.wallet.notification.WalletAccountUpgradeResultNotification;
 import net.sasakonnect.wallet.repository.CurrencyRepository;
+import net.sasakonnect.wallet.repository.LogsRepository;
 import net.sasakonnect.wallet.repository.UserJobRepository;
 import net.sasakonnect.wallet.repository.UserWalletRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
@@ -120,6 +123,9 @@ public class WalletService {
 	UserJobRepository userJobRepository;
 	@Autowired
 	private ApplicationContext applicationContext;
+	
+	@Autowired
+	LogsRepository logsRepository;
 
 	@Autowired
 	TransactionEventService transactionEventService;
@@ -499,7 +505,13 @@ public class WalletService {
 					Optional<Wallet> existingWallet = walletRepository.findByAccountId(notificationBody.getAccountId());
 					if (existingWallet.isEmpty()) {
 						this.larkService.sendOnBoardingMessage("SUCCESSFUL ONBOARDING", "orange", notificationBody);
-						// log creation of new wallet
+						// write logs to database
+						var log = Logs.builder()
+								.activity(LogTypes.ONBOARDING)
+								.description(user.get().getFirstName()+" "+user.get().getLastName()+"of acc No: "+notificationBody.getAccountId()+" succeded to onboard")
+								.user(user.get())
+								.build();
+						this.logsRepository.save(log);
 						var wallet = new Wallet();
 						wallet.setAccountId(notificationBody.getAccountId());
 						wallet.setAccountType(notificationBody.getAccountType());
@@ -517,8 +529,14 @@ public class WalletService {
 					// log rejected account deletion
 					this.larkService.sendOnBoardingMessage("REJECTED ONBOARDING", "red", notificationBody);
 					var onboardingRequestId = params.get("onboardingRequestId").getAsString();
-					System.out.println(onboardingRequestId);
-					//insert into rejected accounts
+					var log = Logs.builder()
+							.activity(LogTypes.ONBOARDING)
+							.description(user.get().getFirstName()+" "+user.get().getLastName()+"of onboarding ID: "+notificationBody.getOnboardingRequestId()+" failed to onboard.Account rejected. Reason:"
+							+notificationBody.getRejectionReasonMsgs().stream().map(i->{return i.toString()+"\n";}))
+							.user(null)
+							.build();
+					this.logsRepository.save(log);
+										//insert into rejected accounts
 					var u = user.get();
 					var rejected  = RejectedAccount.builder()
 							         .address(u.getAddress())
@@ -554,7 +572,13 @@ public class WalletService {
 				} else if (notificationBody.getStatus() == 9 && user.isPresent()) {
 					// account under manual review
 					this.larkService.sendOnBoardingMessage("ACCOUNT UNDER MANUAL REVIEW", "green", notificationBody);
-
+                   //save logs to the database
+					var log = Logs.builder()
+							.activity(LogTypes.ONBOARDING)
+							.description(user.get().getFirstName()+" "+user.get().getLastName()+"of onboarding ID: "+notificationBody.getOnboardingRequestId()+" failed to onboard.Account under mnaual review.")
+							.user(null)
+							.build();
+					this.logsRepository.save(log);
 				} else {
 
 					// log any other onboarding account status
