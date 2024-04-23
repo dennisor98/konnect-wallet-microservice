@@ -134,6 +134,12 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<UserJob> userJobs;
 	
+	@OneToMany(mappedBy = "jobOwner", cascade = CascadeType.ALL)
+	private List<InvoiceJob> userInvoice;
+	
+	
+	@OneToMany(mappedBy="user",fetch=FetchType.LAZY,cascade = CascadeType.ALL)
+	private List<Logs> logs;
 	
 
 	public Map<String, Object> toBankPayload() {

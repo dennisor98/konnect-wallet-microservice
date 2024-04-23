@@ -69,19 +69,24 @@ import net.sasakonnect.wallet.ResponseDto.UserResponseDTO;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.beans.RedisBean;
 import net.sasakonnect.wallet.domain.FirebaseToken;
+import net.sasakonnect.wallet.domain.Logs;
 import net.sasakonnect.wallet.domain.Permission;
 import net.sasakonnect.wallet.domain.ProfileImage;
+import net.sasakonnect.wallet.domain.RejectedAccount;
 import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.UserPin;
 import net.sasakonnect.wallet.domain.UserRole;
 import net.sasakonnect.wallet.domain.Wallet;
 import net.sasakonnect.wallet.domain.WalletAccountUpgrade;
+import net.sasakonnect.wallet.enums.LogTypes;
 import net.sasakonnect.wallet.notification.WalletAccountUpgradeResultNotification;
 import net.sasakonnect.wallet.repository.CorporateDetailsRepository;
 import net.sasakonnect.wallet.repository.FirebaseTokenRepository;
+import net.sasakonnect.wallet.repository.LogsRepository;
 import net.sasakonnect.wallet.repository.PermissionRepository;
 import net.sasakonnect.wallet.repository.ProfileImageRepository;
+import net.sasakonnect.wallet.repository.RejectedAccountRepository;
 import net.sasakonnect.wallet.repository.RolePermissionRepository;
 import net.sasakonnect.wallet.repository.RoleRepository;
 import net.sasakonnect.wallet.repository.UserPinRepository;
@@ -127,6 +132,12 @@ public class UserService extends RestClientService implements UserDetailsService
 
 	@Autowired
 	WalletRepository walletRepository;
+	
+	@Autowired
+	RejectedAccountRepository  rejectedAccountRepository;
+	
+	@Autowired
+	LogsRepository logsRepository;
 
 	@Autowired
 	BankWebClientBean bankClientBean;
@@ -178,6 +189,7 @@ public class UserService extends RestClientService implements UserDetailsService
 				map.put("lastname", u.getLastName());
 				map.put("user_id", u.getId());
 				map.put("phone", u.getMobile());
+				map.put("status", u.getStatus());
 //	            map.put("wallet", u.getUserWallets());
 				map.put("corporate", u.getCorporate());
 				if (u.getUserRole() != null) {
@@ -228,6 +240,7 @@ public class UserService extends RestClientService implements UserDetailsService
 				usermap.put("id", u.getId());
 				usermap.put("firstname", u.getFirstName());
 				usermap.put("lastname", u.getLastName());
+				usermap.put("middlename",u.getMiddleName());	
 				usermap.put("user_id", u.getId());
 				usermap.put("phone", u.getMobile());
 //            map.put("wallet", u.getUserWallets());
@@ -357,7 +370,12 @@ public class UserService extends RestClientService implements UserDetailsService
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(json);
 
 		} else {
-
+             var log = Logs.builder()
+            		 .activity(LogTypes.LOGIN)
+            		 .description("Normal user login with acc. No:"+user.get().getUserWallets().get(0).getWallet().getAccountId())
+            		 .user(user.get())
+            		 .build();
+             this.logsRepository.save(log);
 			return this.otpsmsService.sendSms(userLogin, null, user);
 
 		}
@@ -372,6 +390,12 @@ public class UserService extends RestClientService implements UserDetailsService
 
 		if (user.isPresent()) {
 			UserRole userRole = user.get().getUserRole();
+			var log = Logs.builder()
+           		 .activity(LogTypes.LOGIN)
+           		 .description("Corporate user login with acc. No:"+user.get().getUserWallets().get(0).getWallet().getAccountId())
+           		 .user(user.get())
+           		 .build();
+            this.logsRepository.save(log);
 			if (userRole != null) {
 				ObjectMapper objectMapper = new ObjectMapper();
 				ObjectNode json = JsonNodeFactory.instance.objectNode();
@@ -401,7 +425,7 @@ public class UserService extends RestClientService implements UserDetailsService
 				ObjectNode json = JsonNodeFactory.instance.objectNode();
 				ArrayNode arrayNode = objectMapper.createArrayNode();
 				arrayNode.add("User not allowed");
-				json.put("message", "3");
+				json.put("message", "Forbidden");
 				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
 			}
 		} else {
@@ -409,7 +433,7 @@ public class UserService extends RestClientService implements UserDetailsService
 			ObjectNode json = JsonNodeFactory.instance.objectNode();
 			ArrayNode arrayNode = objectMapper.createArrayNode();
 			arrayNode.add("User not allowed");
-			json.put("message", "");
+			json.put("message", "Forbidden");
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
 
 		}
@@ -604,12 +628,26 @@ public class UserService extends RestClientService implements UserDetailsService
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("message", "Pin already set please ,try to reset");
 			map.put("success", false);
+			var log = Logs.builder()
+					.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
+					+" failed to set PIN.PIN already set")
+					.activity(LogTypes.PIN_SET)
+					.user(user)
+					.build();
+			this.logsRepository.save(log);
 			return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
 		} else if (this.walletRepository.findByUserWalletsUser(user).isEmpty()) {
 			Map<String, String> map = new HashMap<String, String>();
 			map.put("message", "Account Not Verified ");
 			map.put("success", "false");
 			map.put("code", "KWEC003");
+			var log = Logs.builder()
+					.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
+					+" failed to set PIN.Account not verified")
+					.activity(LogTypes.PIN_SET)
+					.user(user)
+					.build();
+			this.logsRepository.save(log);
 			return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
 		}
 
@@ -622,6 +660,13 @@ public class UserService extends RestClientService implements UserDetailsService
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("message", "You pin has been set");
 			map.put("success", true);
+			var log = Logs.builder()
+					.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
+					+" successfully set PIN.PIN already set")
+					.activity(LogTypes.PIN_SET)
+					.user(user)
+					.build();
+			this.logsRepository.save(log);
 			return ResponseEntity.status(HttpStatus.OK).body(map);
 
 		}
@@ -652,7 +697,16 @@ public class UserService extends RestClientService implements UserDetailsService
 						Map<String, Object> map = new HashMap<String, Object>();
 						map.put("success", false);
 						map.put("message", "Pin already blocked");
+						
+						var log = Logs.builder()
+								.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
+								+" failed to update PIN.PIN already blocked")
+								.activity(LogTypes.PIN_SET)
+								.user(user)
+								.build();
+						this.logsRepository.save(log);
 						return ResponseEntity.status(HttpStatus.OK).body(map);
+						
 					}
 					if (encoder.matches(user.getId() + setPin.getOldPin(), activeUserPin.getPin())) {
 						var passwordencoded = new BCryptPasswordEncoder().encode(user.getId() + setPin.getPin());
@@ -664,12 +718,26 @@ public class UserService extends RestClientService implements UserDetailsService
 						Map<String, Object> map = new HashMap<String, Object>();
 						map.put("message", "Pin changed Successfully");
 						map.put("success", true);
+						var log = Logs.builder()
+								.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
+								+" successfully  PIN PIN")
+								.activity(LogTypes.PIN_SET)
+								.user(user)
+								.build();
+						this.logsRepository.save(log);
 						return ResponseEntity.status(HttpStatus.OK).body(map);
 
 					} else {
 						Map<String, Object> map = new HashMap<String, Object>();
 						map.put("message", "Old pin mismatch ");
 						map.put("success", false);
+						var log = Logs.builder()
+								.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
+								+" failed to update PIN.Unable to verify old PIN")
+								.activity(LogTypes.PIN_SET)
+								.user(user)
+								.build();
+						this.logsRepository.save(log);
 						return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(map);
 
 					}
@@ -733,6 +801,12 @@ public class UserService extends RestClientService implements UserDetailsService
 				map.put("attempt_remaining", maxpinattempt - (userPinRepository.get().get(0).getPinAttempts() + 1));
 
 				map.put("success", false);
+				var log = Logs.builder()
+						.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
+						+" failed to login.Entered wrong PIN")
+						.activity(LogTypes.LOGIN)
+						.user(user)
+						.build();
 				return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
 			}
 		} else {
@@ -742,10 +816,22 @@ public class UserService extends RestClientService implements UserDetailsService
 				if ((!(userPinRepository.get().isEmpty())
 						&& userPinRepository.get().get(0).getPinAttempts() >= maxpinattempt)) {
 					map.put("message", "Pin Blocked");
-
+					var log = Logs.builder()
+							.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
+							+" failed to login.Using blocked PIN")
+							.activity(LogTypes.PIN_SET)
+							.user(user)
+							.build();
+					this.logsRepository.save(log);
 				} else {
 					map.put("message", "Pin not set");
-
+					var log = Logs.builder()
+							.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
+							+" failed to login.PIN not set")
+							.activity(LogTypes.PIN_SET)
+							.user(user)
+							.build();
+					this.logsRepository.save(log);
 				}
 			}
 
@@ -768,8 +854,6 @@ public class UserService extends RestClientService implements UserDetailsService
 
 	public User updateUser(User savedUser) {
 		return this.userRepository.save(savedUser);
-		// TODO Auto-generated method stub
-
 	}
 
 	@Transactional
@@ -783,6 +867,14 @@ public class UserService extends RestClientService implements UserDetailsService
 		}
 		// TODO Auto-generated method stub
 
+	}
+	
+	public void createRejectedAccount(RejectedAccount payload) {
+		this.rejectedAccountRepository.save(payload);
+	}
+	
+	public void deleteSuccessfulFromRejected(String IdNumber) {
+		this.rejectedAccountRepository.deleteByIdNumber(IdNumber);
 	}
 
 	public Optional<User> findUserByAccountd(String accountId) {
@@ -854,7 +946,13 @@ public class UserService extends RestClientService implements UserDetailsService
 
 					this.larkService.sendPinResetNotification(loggedInUser,
 							user.get().getUserWallets().get(0).getWallet(), "BLOCKING", "Success");
-			
+					var log = Logs.builder()
+							.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
+							+" managed to block PIN for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of id "+user.get().getId())
+							.activity(LogTypes.PIN_SET)
+							.user(loggedInUser)
+							.build();
+					this.logsRepository.save(log);
 				return ResponseEntity.status(HttpStatus.OK).body(map);
 			} else {
 				if (userPin.isPresent()) {
@@ -866,12 +964,25 @@ public class UserService extends RestClientService implements UserDetailsService
 
 							this.larkService.sendPinResetNotification(loggedInUser,
 									user.get().getUserWallets().get(0).getWallet(), "ATTEMPTS", "Success");
-
+							var log = Logs.builder()
+									.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
+									+"managed to reset PIN counts to "+counter+" for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of Id:"+user.get().id)
+									.activity(LogTypes.PIN_RESET)
+									.user(loggedInUser)
+									.build();
+							this.logsRepository.save(log);
 						return ResponseEntity.status(HttpStatus.OK).body(map);
 					} catch (Exception ex) {
 						map.put("success", false);
 						map.put("message", "Opps!!Something went wrong");
 						System.out.println("ERROR: " + ex);
+						var log = Logs.builder()
+								.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
+								+"failed to reset PIN counts to "+counter+" for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of Id:"+user.get().getId()+". System error")
+								.activity(LogTypes.PIN_RESET)
+								.user(loggedInUser)
+								.build();
+						this.logsRepository.save(log);
 						return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
 					}
 				} else {
@@ -880,9 +991,16 @@ public class UserService extends RestClientService implements UserDetailsService
 						String formattedDateTime = currentTime.format(formatter);
 
 						this.larkService.sendPinResetNotification(loggedInUser,
-								user.get().getUserWallets().get(0).getWallet(), "ATTEMPTS", "Success");
+								user.get().getUserWallets().get(0).getWallet(), "ATTEMPTS", "FAILED");
 					map.put("success", false);
 					map.put("message", "User does not have a PIN");
+					var log = Logs.builder()
+							.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
+							+"failed to reset PIN counts to "+counter+" for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of Id:"+user.get().id+". User does not have PIN.")
+							.activity(LogTypes.PIN_RESET)
+							.user(loggedInUser)
+							.build();
+					this.logsRepository.save(log);
 					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 				}
 
@@ -895,6 +1013,13 @@ public class UserService extends RestClientService implements UserDetailsService
 						"ATTEMPTS", "Failed");
 			map.put("success", false);
 			map.put("message", "User not found");
+			var log = Logs.builder()
+					.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
+					+"failed to reset PIN counts to "+counter+" for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of Id:"+user.get().id+". User not found")
+					.activity(LogTypes.PIN_RESET)
+					.user(loggedInUser)
+					.build();
+			this.logsRepository.save(log);
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 		}
 
@@ -913,31 +1038,39 @@ public class UserService extends RestClientService implements UserDetailsService
 					this.userPinRepository.delete(userPin.get());
 					map.put("success", true);
 					map.put("message", "PIN reset successfull");
+					var log = Logs.builder()
+							.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
+							+"managed to reset PIN for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of Id:"+user.get().id)
+							.activity(LogTypes.PIN_RESET)
+							.user(loggedInUser)
+							.build();
+					this.logsRepository.save(log);
 					return ResponseEntity.status(HttpStatus.OK).body(map);
 				} catch (Exception ex) {
 					map.put("success", false);
 					map.put("message", "Opps!!Something went wrong");
 					System.out.println("ERROR: " + ex);
-					return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+					var log = Logs.builder()
+							.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
+							+"failed to reset PIN  for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of Id:"+user.get().id+". A server error ocurred")
+							.activity(LogTypes.PIN_RESET)
+							.user(loggedInUser)
+							.build();
+					this.logsRepository.save(log);
+				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
 				}
 			} else {
-				try (FileWriter writer = new FileWriter("pin_reset.txt", true)) {
-					LocalDateTime currentTime = LocalDateTime.now();
-					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-					String formattedDateTime = currentTime.format(formatter);
-					writer.write(
-							formattedDateTime + " - " + loggedInUser.getFirstName() + "" + loggedInUser.getLastName()
-									+ "failed to reset PIN attempts for user(No PIN)" + user.get().getFirstName()
-									+ user.get().getLastName() + "of phone No" + user.get().getMobile());
-					this.larkService.sendPinResetNotification(loggedInUser,
-							user.get().getUserWallets().get(0).getWallet(), "RESET", "Failed");
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
 				map.put("success", false);
 				map.put("message", "User does not have a PIN");
 				this.larkService.sendPinResetNotification(loggedInUser, user.get().getUserWallets().get(0).getWallet(),
 						"RESET", "Failed");
+				var log = Logs.builder()
+						.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
+						+"failed to reset PIN for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of Id:"+user.get().id)
+						.activity(LogTypes.PIN_SET)
+						.user(loggedInUser)
+						.build();
+				this.logsRepository.save(log);
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 			}
 
@@ -947,6 +1080,12 @@ public class UserService extends RestClientService implements UserDetailsService
 						"RESET", "Failed");
 			map.put("success", false);
 			map.put("message", "User does not exist");
+			var log = Logs.builder()
+					.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
+					+"failed to reset PIN  for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of Id:"+user.get().id+". User does not exist")
+					.activity(LogTypes.PIN_SET)
+					.user(loggedInUser)
+					.build();
 //	            this.larkService.sendPinResetNotification(loggedInUser,user.get().getUserWallets().get(0).getWallet(),"RESET","Failed");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 		}
@@ -1043,7 +1182,6 @@ public class UserService extends RestClientService implements UserDetailsService
 		var firebaseToken = FirebaseToken.builder().user(u).token(userDeviceToken.getToken()).build();
 		var saveToken = this.firebaseTokenRepository.save(firebaseToken);
 		Map<String, Object> map = new HashMap<>();
-
 		map.put("message", "Firebase Token updated");
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(map);
@@ -1093,9 +1231,9 @@ public class UserService extends RestClientService implements UserDetailsService
 				
 				return tMap;
 			}).collect(Collectors.toList());
-			
 			map.put("trend", trend);
 			resMap.put("payload", map);
+			
 			return ResponseEntity.status(HttpStatus.OK).body(resMap);
 		}else {
 			Map<String,Object> map = new HashMap<>();

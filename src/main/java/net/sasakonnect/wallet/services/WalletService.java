@@ -55,6 +55,7 @@ import net.sasakonnect.wallet.ResponseDto.TransactionResponseDto;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
 import net.sasakonnect.wallet.domain.CorporateDetails;
+import net.sasakonnect.wallet.domain.RejectedAccount;
 import net.sasakonnect.wallet.domain.Transaction;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.UserJob;
@@ -389,9 +390,9 @@ public class WalletService {
 
 	public ResponseEntity<Object> createNewOnBoardingUser(@Valid EasyOnboardingRequestParams easyOnboarding) {
 		Map<String, Object> userMap = new HashMap<String, Object>();
-		userMap.put("firstName", easyOnboarding.getFirstName());
-		userMap.put("middleName", easyOnboarding.getMiddleName());
-		userMap.put("lastName", easyOnboarding.getLastName());
+		userMap.put("firstName", easyOnboarding.getFirstName().toUpperCase());
+		userMap.put("middleName", easyOnboarding.getMiddleName().toUpperCase());
+		userMap.put("lastName", easyOnboarding.getLastName().toUpperCase());
 		userMap.put("birthday", easyOnboarding.getBirthday());
 		userMap.put("gender", easyOnboarding.getGenderVerbal().getValue());
 		userMap.put("countryCode", easyOnboarding.getCountryCode());
@@ -406,8 +407,8 @@ public class WalletService {
 		userMap.put("employmentStatus", easyOnboarding.getEmploymentStatusType().getCode());
 		userMap.put("monthlyIncome", easyOnboarding.monthlyIncomeType().getCode());
 		try {
-			var user = User.builder().firstName(easyOnboarding.getFirstName()).lastName(easyOnboarding.getLastName())
-					.middleName(easyOnboarding.getMiddleName()).lastName(easyOnboarding.getLastName())
+			var user = User.builder().firstName(easyOnboarding.getFirstName().toUpperCase()).lastName(easyOnboarding.getLastName().toUpperCase())
+					.middleName(easyOnboarding.getMiddleName().toUpperCase()).lastName(easyOnboarding.getLastName().toUpperCase())
 					.birthday(easyOnboarding.parseBithDay()).address(easyOnboarding.getAddress())
 					.gender(easyOnboarding.getGenderVerbal())
 					.countryCode(Integer.parseInt(easyOnboarding.getCountryCode()))
@@ -506,8 +507,8 @@ public class WalletService {
 						var userWallet = new UserWallet();
 						userWallet.setUser(user.get());
 						userWallet.setWallet(savedwallet);
-
 						this.userWalletRepository.save(userWallet);
+						this.userService.deleteSuccessfulFromRejected(user.get().getIdNumber());
 					}
 
 				} else if (notificationBody.getStatus() == 3 && user.isPresent()) {
@@ -517,6 +518,23 @@ public class WalletService {
 					this.larkService.sendOnBoardingMessage("REJECTED ONBOARDING", "red", notificationBody);
 					var onboardingRequestId = params.get("onboardingRequestId").getAsString();
 					System.out.println(onboardingRequestId);
+					//insert into rejected accounts
+					var u = user.get();
+					var rejected  = RejectedAccount.builder()
+							         .address(u.getAddress())
+							         .employmentStatus(u.getEmploymentStatus())
+							         .countryCode(u.getCountryCode())
+							         .birthday(u.getBirthday())
+							         .gender(u.getGender())
+							         .idNumber(u.getIdNumber())
+							         .idType(u.getIdType())
+							         .middleName(u.getMiddleName())
+							         .onboardingRequestId(u.getOnboardingRequestId())
+							         .mobile(u.getMobile())							    
+							         .firstName(u.getFirstName())
+							         .lastName(u.getLastName())
+							         .build();
+					this.userService.createRejectedAccount(rejected);
 					this.userService.deletUserByOnboardingRequestId(onboardingRequestId);
 
 				} else if (notificationBody.getStatus() == 5 && user.isPresent()) {

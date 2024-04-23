@@ -37,6 +37,7 @@ import net.sasakonnect.wallet.domain.invoice.InvoiceMetaData;
 import net.sasakonnect.wallet.domain.invoice.Tariff;
 import net.sasakonnect.wallet.invoice.InvoiceManager;
 import net.sasakonnect.wallet.repository.InvoiceJobRepository;
+import net.sasakonnect.wallet.repository.RejectedAccountRepository;
 import net.sasakonnect.wallet.repository.TarrifRepository;
 import net.sasakonnect.wallet.repository.TransactionRepository;
 import net.sasakonnect.wallet.ResponseDto.InvoiceDataDTO;
@@ -61,6 +62,8 @@ public class InvoiceService {
 	@Autowired
 	InvoiceJobRepository  invoiceJobRepository;
 	
+	
+
 	@Transactional
    public ResponseEntity<Object> generateInvoice(Date startDate,Date endDate){
 	   List<ChannelType> channelTypes = new ArrayList<>(Arrays.asList(ChannelType.MPESA_ACCOUNT,
@@ -152,21 +155,30 @@ public class InvoiceService {
    
    public ResponseEntity<Object> getInvoices(Integer pageNumber,Integer pageSize) {
 	   Page<InvoiceJob> invoices = this.invoiceJobRepository.findByOrderByCreatedAtDesc(PageRequest.of(pageNumber,pageSize));
-	   Map<String,Object> map = new HashMap<>();
 	   Map<String,Object> resMap =  new HashMap<>();
 
 	   if(!invoices.isEmpty()) {
+		   
+		   Map<String,Object> map = new HashMap<>();
 		   map.put("hasMore",invoices.hasNext());
-		   map.put("nextPage",invoices.nextPageable());
+		   map.put("nextPage",invoices.hasNext() ? invoices.nextPageable().getPageNumber()  : null);
 		   map.put("hasPrevious",invoices.hasPrevious());
-		   map.put("previousPage",invoices.previousPageable());
-		   map.put("invoices",invoices.get().collect(Collectors.toList()));
+		   map.put("previousPage",invoices.hasPrevious()? invoices.previousPageable().getPageNumber() : null);
+	       map.put("invoices",invoices.get().map(i->{
+	    	   Map<String,Object> invoiceMap = new HashMap<>();
+	    	   
+	    	   invoiceMap.put("owner",i.getJobOwner().getFirstName() +" "+i.getJobOwner().getMiddleName() +" "+i.getJobOwner().getLastName());
+	    	   invoiceMap.put("period","From "+i.getStartDate().toString().split(" ")[0]+" to " +i.getEndDate().toString().split(" ")[0]);
+	    	   invoiceMap.put("link",i.getDownloadLink());
+	    	   return invoiceMap;
+	       }).collect(Collectors.toList()));
 		  resMap.put("payload",map);
-		   return ResponseEntity.status(HttpStatus.OK).body(resMap);
 	   }else {
+		   Map<String,Object> map = new HashMap<>();
 		   map.put("invoices",new ArrayList<>());
 		   resMap.put("payload",map);
 	   }
+	   log.info(invoices.getContent().get(0).toString());
 	   return ResponseEntity.status(HttpStatus.OK).body(resMap);
 
    }
