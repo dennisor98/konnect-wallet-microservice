@@ -1393,7 +1393,7 @@ public class UserService extends RestClientService implements UserDetailsService
 
            var pageable= PageRequest.of(sdkSearchCustomer.getPageNumber(),sdkSearchCustomer.getPageSize());
 
-		var results= this.userRepository.findByCreatedAtBetween(endDate,startDate,pageable);
+		var results= this.userRepository.findByCreatedAtBetween(startDate,endDate,pageable);
 		
 		 
 			var data=results.stream().map(founduser->{
