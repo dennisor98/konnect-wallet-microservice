@@ -40,17 +40,17 @@ public class RejectedAccount extends BaseWalletDomain {
 	@Column(nullable = false)
 	private int countryCode;
 
-	@Column(nullable = false, unique = true, length = 50)
+	@Column(nullable = false, unique = false, length = 50)
 	private String mobile;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private IdType idType;
 
-	@Column(nullable = false, unique = true, length = 50)
+	@Column(nullable = false, unique = false, length = 50)
 	private String idNumber;
    
-	@Column(length = 50, unique = true)
+	@Column(length = 50, unique = false)
 	private String onboardingRequestId;
 
 	@Column(nullable = false)

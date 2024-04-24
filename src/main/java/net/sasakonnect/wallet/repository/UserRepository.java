@@ -89,6 +89,6 @@ public interface UserRepository extends JpaRepository<User, String> {
      
 //     @Query("SELECT u FROM User u WHERE u.createdAt >= :startDate " +
 //             "AND u.createdAt <= :endDate")
-     Page<User> findByCreatedAtBetween( @Param("startDate") Date startDate, @Param("endDate") Date endDate, Pageable pageable);
+     Page<User> findByCreatedAtBetweenOrderByCreatedAtAsc( @Param("startDate") Date startDate, @Param("endDate") Date endDate, Pageable pageable);
 
 }

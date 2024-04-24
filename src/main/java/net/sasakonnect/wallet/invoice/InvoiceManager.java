@@ -19,7 +19,7 @@ import net.sasakonnect.wallet.domain.invoice.InvoiceMetaData;
 import net.sasakonnect.wallet.repository.InvoiceJobRepository;
 @Component
 public class InvoiceManager {
-    @Value("${invoicePath:}")
+    @Value("${invoicePath}")
     String invoicePath;
     @Autowired
     InvoiceGenerator invoicegenerator;
@@ -43,8 +43,9 @@ public class InvoiceManager {
     public void  generateBy(String name) {
     	this.invoicegenerator.generateBy(name);
     }
-    public String init(Date startDate,Date endDate) throws MalformedURLException, DocumentException, IOException {
-        if (invoicePath.isEmpty()) {
+    public void init(Date startDate,Date endDate) throws MalformedURLException, DocumentException, IOException {
+    	invoicePath = null;
+        if (invoicePath!=null && invoicePath.isEmpty()) {
             // Generate random name
         	invoicePath = UUID.randomUUID().toString()+".pdf";
         }else {
