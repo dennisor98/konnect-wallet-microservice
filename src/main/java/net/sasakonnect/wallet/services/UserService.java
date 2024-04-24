@@ -372,7 +372,7 @@ public class UserService extends RestClientService implements UserDetailsService
 		} else {
              var log = Logs.builder()
             		 .activity(LogTypes.LOGIN)
-            		 .description("Normal user login with acc. No:"+user.get().getUserWallets().get(0).getWallet().getAccountId())
+            		 .description("Normal user login with acc. No:"+user.get().getId())
             		 .user(user.get())
             		 .build();
              this.logsRepository.save(log);

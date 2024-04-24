@@ -139,7 +139,7 @@ public class SdkController {
 	@ServiceInteractionMiddleware()
 	@RateLimit(30)
 	public Object checkCustomers(
-			@Parameter(example = "d388a3ababb6c3a2851f1ad112d8037c1350b32fe93623edda82", 
+			@Parameter(example = "d6t8a3auabb6c3a2851f1ad117d0037c13y0b32fe93623edda82", 
 			name = "secret-key", description = "Provide app key of the app you created on dashboard", in = ParameterIn.HEADER, required = true) @RequestHeader("secret-key") String appSecret,
 
 			@RequestBody() @Valid() SdkSearchCustomers sdkSearchCustomer) {
