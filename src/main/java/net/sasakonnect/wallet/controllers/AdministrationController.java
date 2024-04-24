@@ -52,6 +52,7 @@ import net.sasakonnect.wallet.services.AnalyticsService;
 import net.sasakonnect.wallet.services.CorporateService;
 import net.sasakonnect.wallet.services.InvoiceService;
 import net.sasakonnect.wallet.services.LarkService;
+import net.sasakonnect.wallet.services.LogService;
 import net.sasakonnect.wallet.services.PermissionService;
 import net.sasakonnect.wallet.services.RoleService;
 import net.sasakonnect.wallet.services.TarrifService;
@@ -102,6 +103,9 @@ public class AdministrationController {
 
 	@Autowired
 	InvoiceService invoiceService;
+	
+	@Autowired
+	 LogService logService;
 	
 	@GetMapping("/upload/app")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CreateSuperApp.PERMISSION + "')")
@@ -571,9 +575,20 @@ public class AdministrationController {
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.CanViewInvoices.PERMISSION)
 	public ResponseEntity<Object> getInvoices(
-			@RequestParam("pageNumber") Integer pageNumber,@RequestParam("pageSize") Integer pageSize
-			){
+			@RequestParam(name = "pageSize", defaultValue = "100") Integer pageSize,
+			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber){
 		return this.invoiceService.getInvoices(pageNumber, pageSize);
+	}
+	
+	@GetMapping("logs")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanViewLogs.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.CanViewLogs.PERMISSION)
+	public ResponseEntity<Object> getlogs(
+			@RequestParam(name = "pageSize", defaultValue = "100") Integer pageSize,
+			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber
+			){
+		return logService.getLogs(pageNumber, pageSize);
 	}
 	
 }

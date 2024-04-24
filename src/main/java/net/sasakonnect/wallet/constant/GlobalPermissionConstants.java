@@ -35,6 +35,20 @@ public final class GlobalPermissionConstants {
 		}
 	}
 	
+	public static class CanViewLogs extends PermissionEntry {
+		public static final String PERMISSION = "can.view.logs";
+		public static final String DESCRIPTION = "Can view all system logs";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
 	public static class CanViewTariffs extends PermissionEntry {
 		public static final String PERMISSION = "can.view.tariff.all";
 		public static final String DESCRIPTION = "Can view tariffs";
