@@ -43,7 +43,7 @@ public class InvoiceManager {
     public void  generateBy(String name) {
     	this.invoicegenerator.generateBy(name);
     }
-    public void init(Date startDate,Date endDate) throws MalformedURLException, DocumentException, IOException {
+    public String init(Date startDate,Date endDate) throws MalformedURLException, DocumentException, IOException {
     	invoicePath = null;
         if (invoicePath!=null && invoicePath.isEmpty()) {
             // Generate random name
@@ -58,7 +58,7 @@ public class InvoiceManager {
 
         
         System.out.println(invoicePath);
-        
+        return invoicePath;
     }
     
     public void loadData(List<InvoiceItem> invoiceItem){
