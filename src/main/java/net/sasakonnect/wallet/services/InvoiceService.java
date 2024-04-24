@@ -101,7 +101,7 @@ public class InvoiceService {
                                .invoiceFrom(startDate)
                                .invoiceTo(endDate)
                                .invoiceDate(new Date()).build();                 
-              invoicemanager.init(startDate,endDate);
+             var docPath = invoicemanager.init(startDate,endDate);
               invoicemanager.invoiceMetaData(invoicemetaData);
               invoicemanager.loadData(ivoiceItems);
               invoicemanager.signInvoice();
@@ -113,7 +113,7 @@ public class InvoiceService {
               
               var log = Logs.builder()
              		 .activity(LogTypes.INVOICE_REQUEST)
-             		 .description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.getId()+"and acc No:"+user.getUserWallets().get(0).getWallet().getAccountId()+"requested transactions invoice")
+             		 .description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.getId()+"requested transactions invoice. fileName:{"+docPath+"}")
              		 .user(user)
              		 .build();
               this.logsRepository.save(log);
