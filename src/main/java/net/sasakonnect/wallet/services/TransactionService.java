@@ -78,14 +78,14 @@ public class TransactionService {
 					.oppoAccountName(trans.getOppoAccountName()).thirdPartyTxType(trans.getThirdPartyTxType())
 					.counterpartyName(trans.getExtInfo().getCounterpartyName())
 					.currency(trans.getCurrency()).amount(new BigDecimal(trans.getAmount())).build();
-			User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-			var log = Logs.builder()
-					.description(user.getFirstName()+" "+user.getLastName()+"of acc No:"+trans.getAccountId()
-					+" invoked a transaction with id"+trans.getTxId()+"of amount"+trans.getAmount() +"to" +"acc No:"+trans.getOppoAccountId())
-					.activity(LogTypes.TRANSACTION)
-					.user(user)
-					.build();
-			this.logsRepository.save(log);
+//			User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//			var log = Logs.builder()
+//					.description(user.getFirstName()+" "+user.getLastName()+"of acc No:"+trans.getAccountId()
+//					+" invoked a transaction with id"+trans.getTxId()+"of amount"+trans.getAmount() +"to" +"acc No:"+trans.getOppoAccountId())
+//					.activity(LogTypes.TRANSACTION)
+//					.user(user)
+//					.build();
+//			this.logsRepository.save(log);
 			return this.transactionRepository.save(transaction);
 			
 		} else {
