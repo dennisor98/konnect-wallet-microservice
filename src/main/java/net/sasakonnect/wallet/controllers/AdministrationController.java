@@ -105,7 +105,7 @@ public class AdministrationController {
 	InvoiceService invoiceService;
 	
 	@Autowired
-	LogService logService;
+	 LogService logService;
 	
 	@GetMapping("/upload/app")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CreateSuperApp.PERMISSION + "')")
@@ -585,9 +585,10 @@ public class AdministrationController {
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.CanViewLogs.PERMISSION)
 	public ResponseEntity<Object> getlogs(
-			@RequestParam("pageNumber") Integer pageNumber,@RequestParam("pageSize") Integer pageSize
+			@RequestParam(name = "pageSize", defaultValue = "100") Integer pageSize,
+			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber
 			){
-		return this.logService.getLogs(pageNumber, pageSize);
+		return logService.getLogs(pageNumber, pageSize);
 	}
 	
 }
