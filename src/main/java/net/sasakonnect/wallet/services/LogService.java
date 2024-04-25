@@ -22,7 +22,7 @@ public class LogService {
  
  
  public ResponseEntity<Object> getLogs(Integer pageNumber,Integer pageSize){
-	 Page<Logs> logs =  this.logsRepository.findAll(PageRequest.of(pageNumber,pageSize));
+	 Page<Logs> logs =  this.logsRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(pageNumber,pageSize));
 	 Map<String,Object> resMap = new HashMap<>();
 	 Map<String,Object> map = new HashMap<>();
 	 if(!logs.isEmpty()) {
