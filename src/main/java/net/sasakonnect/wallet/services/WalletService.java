@@ -509,7 +509,6 @@ public class WalletService {
 						var log = Logs.builder()
 								.activity(LogTypes.ONBOARDING)
 								.description(user.get().getFirstName()+" "+user.get().getLastName()+"of acc No: "+notificationBody.getAccountId()+" succeded to onboard")
-								.user(user.get())
 								.build();
 						this.logsRepository.save(log);
 						var wallet = new Wallet();
@@ -533,7 +532,6 @@ public class WalletService {
 							.activity(LogTypes.ONBOARDING)
 							.description(user.get().getFirstName()+" "+user.get().getLastName()+"of onboarding ID: "+notificationBody.getOnboardingRequestId()+" failed to onboard.Account rejected. Reason:"
 							+notificationBody.getRejectionReasonMsgs().stream().map(i->{return i.toString()+"\n";}))
-							.user(null)
 							.build();
 					this.logsRepository.save(log);
 										//insert into rejected accounts
@@ -576,7 +574,6 @@ public class WalletService {
 					var log = Logs.builder()
 							.activity(LogTypes.ONBOARDING)
 							.description(user.get().getFirstName()+" "+user.get().getLastName()+"of onboarding ID: "+notificationBody.getOnboardingRequestId()+" failed to onboard.Account under mnaual review.")
-							.user(null)
 							.build();
 					this.logsRepository.save(log);
 				} else {
@@ -1503,7 +1500,6 @@ public Object mpesaTillAndByGoodsSdk(@Valid MpesaBilling tillAndBuyGoods) {
 		             		 .activity(LogTypes.STATEMENT_REQUEST)
 		             		 .description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.getId()+"and acc No:"+loggedInUser.getUserWallets().get(0).getWallet().getAccountId()
 		             				 +"requested an account statement for"+user.get().getFirstName()+" "+user.get().getLastName()+"of acc No: "+currentWallet.getAccountId())
-		             		 .user(user.get())
 		             		 .build();
 		              this.logsRepository.save(log);
 				var reqId = new HashMap<String, Object>();
@@ -1582,7 +1578,6 @@ public Object mpesaTillAndByGoodsSdk(@Valid MpesaBilling tillAndBuyGoods) {
 	        		 .activity(LogTypes.STATEMENT_REQUEST)
 	        		 .description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.getId()+"and acc No:"+loggedInUser.getUserWallets().get(0).getWallet().getAccountId()
 	        				 +"requested generated user statements")
-	        		 .user(loggedInUser)
 	        		 .build();
 	         this.logsRepository.save(log);
 			List<UserJob> statements = this.userJobRepository.findAdminStatementsByUser(loggedInUser, user.get());

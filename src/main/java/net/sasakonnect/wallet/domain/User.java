@@ -138,8 +138,6 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 	private List<InvoiceJob> userInvoice;
 	
 	
-	@OneToMany(mappedBy="user",fetch=FetchType.LAZY,cascade = CascadeType.ALL)
-	private List<Logs> logs;
 	
 
 	public Map<String, Object> toBankPayload() {
