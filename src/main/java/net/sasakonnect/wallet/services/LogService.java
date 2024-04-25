@@ -38,9 +38,6 @@ public class LogService {
 		 map.put("logs",logs.get().map(l->{
 			 Map<String,Object> logMap = new HashMap<>();
 			 logMap.put("createdAt", l.getCreatedAt());
-			 logMap.put("userId",l.getUser().getId());
-			 logMap.put("accountNumber", !l.getUser().getUserWallets().isEmpty() ? l.getUser().getUserWallets().get(0).getWallet().getAccountId() : null);
-			 logMap.put("username",l.getUser().getFirstName()+" "+l.getUser().getMiddleName()+" "+l.getUser().getLastName());
 			 logMap.put("logInfo", l.getDescription());
 			 return logMap;
 		 }).collect(Collectors.toList()));

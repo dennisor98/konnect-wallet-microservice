@@ -114,7 +114,6 @@ public class InvoiceService {
               var log = Logs.builder()
              		 .activity(LogTypes.INVOICE_REQUEST)
              		 .description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.getId()+"requested transactions invoice")
-             		 .user(user)
              		 .build();
               this.logsRepository.save(log);
               } catch (DocumentException | IOException e) {

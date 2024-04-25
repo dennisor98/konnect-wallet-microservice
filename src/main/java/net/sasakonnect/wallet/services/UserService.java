@@ -373,7 +373,6 @@ public class UserService extends RestClientService implements UserDetailsService
              var log = Logs.builder()
             		 .activity(LogTypes.LOGIN)
             		 .description("Normal user login with acc. No:"+user.get().getId())
-            		 .user(user.get())
             		 .build();
              this.logsRepository.save(log);
 			return this.otpsmsService.sendSms(userLogin, null, user);
@@ -393,7 +392,6 @@ public class UserService extends RestClientService implements UserDetailsService
 			var log = Logs.builder()
            		 .activity(LogTypes.LOGIN)
            		 .description("Corporate user login with acc. No:"+user.get().getUserWallets().get(0).getWallet().getAccountId())
-           		 .user(user.get())
            		 .build();
             this.logsRepository.save(log);
 			if (userRole != null) {
@@ -632,7 +630,6 @@ public class UserService extends RestClientService implements UserDetailsService
 					.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
 					+" failed to set PIN.PIN already set")
 					.activity(LogTypes.PIN_SET)
-					.user(user)
 					.build();
 			this.logsRepository.save(log);
 			return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
@@ -645,7 +642,6 @@ public class UserService extends RestClientService implements UserDetailsService
 					.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
 					+" failed to set PIN.Account not verified")
 					.activity(LogTypes.PIN_SET)
-					.user(user)
 					.build();
 			this.logsRepository.save(log);
 			return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
@@ -662,9 +658,8 @@ public class UserService extends RestClientService implements UserDetailsService
 			map.put("success", true);
 			var log = Logs.builder()
 					.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
-					+" successfully set PIN.PIN already set")
+					+" successfully set PIN")
 					.activity(LogTypes.PIN_SET)
-					.user(user)
 					.build();
 			this.logsRepository.save(log);
 			return ResponseEntity.status(HttpStatus.OK).body(map);
@@ -702,7 +697,6 @@ public class UserService extends RestClientService implements UserDetailsService
 								.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
 								+" failed to update PIN.PIN already blocked")
 								.activity(LogTypes.PIN_SET)
-								.user(user)
 								.build();
 						this.logsRepository.save(log);
 						return ResponseEntity.status(HttpStatus.OK).body(map);
@@ -720,9 +714,8 @@ public class UserService extends RestClientService implements UserDetailsService
 						map.put("success", true);
 						var log = Logs.builder()
 								.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
-								+" successfully  PIN PIN")
+								+" successfully changed their PIN")
 								.activity(LogTypes.PIN_SET)
-								.user(user)
 								.build();
 						this.logsRepository.save(log);
 						return ResponseEntity.status(HttpStatus.OK).body(map);
@@ -735,7 +728,6 @@ public class UserService extends RestClientService implements UserDetailsService
 								.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
 								+" failed to update PIN.Unable to verify old PIN")
 								.activity(LogTypes.PIN_SET)
-								.user(user)
 								.build();
 						this.logsRepository.save(log);
 						return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(map);
@@ -805,7 +797,6 @@ public class UserService extends RestClientService implements UserDetailsService
 						.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
 						+" failed to login.Entered wrong PIN")
 						.activity(LogTypes.LOGIN)
-						.user(user)
 						.build();
 				return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
 			}
@@ -820,7 +811,6 @@ public class UserService extends RestClientService implements UserDetailsService
 							.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
 							+" failed to login.Using blocked PIN")
 							.activity(LogTypes.PIN_SET)
-							.user(user)
 							.build();
 					this.logsRepository.save(log);
 				} else {
@@ -829,7 +819,6 @@ public class UserService extends RestClientService implements UserDetailsService
 							.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
 							+" failed to login.PIN not set")
 							.activity(LogTypes.PIN_SET)
-							.user(user)
 							.build();
 					this.logsRepository.save(log);
 				}
@@ -950,7 +939,6 @@ public class UserService extends RestClientService implements UserDetailsService
 							.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
 							+" managed to block PIN for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of id "+user.get().getId())
 							.activity(LogTypes.PIN_SET)
-							.user(loggedInUser)
 							.build();
 					this.logsRepository.save(log);
 				return ResponseEntity.status(HttpStatus.OK).body(map);
@@ -968,7 +956,6 @@ public class UserService extends RestClientService implements UserDetailsService
 									.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
 									+"managed to reset PIN counts to "+counter+" for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of Id:"+user.get().id)
 									.activity(LogTypes.PIN_RESET)
-									.user(loggedInUser)
 									.build();
 							this.logsRepository.save(log);
 						return ResponseEntity.status(HttpStatus.OK).body(map);
@@ -980,7 +967,6 @@ public class UserService extends RestClientService implements UserDetailsService
 								.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
 								+"failed to reset PIN counts to "+counter+" for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of Id:"+user.get().getId()+". System error")
 								.activity(LogTypes.PIN_RESET)
-								.user(loggedInUser)
 								.build();
 						this.logsRepository.save(log);
 						return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
@@ -998,7 +984,6 @@ public class UserService extends RestClientService implements UserDetailsService
 							.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
 							+"failed to reset PIN counts to "+counter+" for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of Id:"+user.get().id+". User does not have PIN.")
 							.activity(LogTypes.PIN_RESET)
-							.user(loggedInUser)
 							.build();
 					this.logsRepository.save(log);
 					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
@@ -1017,7 +1002,6 @@ public class UserService extends RestClientService implements UserDetailsService
 					.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
 					+"failed to reset PIN counts to "+counter+" for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of Id:"+user.get().id+". User not found")
 					.activity(LogTypes.PIN_RESET)
-					.user(loggedInUser)
 					.build();
 			this.logsRepository.save(log);
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
@@ -1042,7 +1026,6 @@ public class UserService extends RestClientService implements UserDetailsService
 							.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
 							+"managed to reset PIN for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of Id:"+user.get().id)
 							.activity(LogTypes.PIN_RESET)
-							.user(loggedInUser)
 							.build();
 					this.logsRepository.save(log);
 					return ResponseEntity.status(HttpStatus.OK).body(map);
@@ -1054,7 +1037,6 @@ public class UserService extends RestClientService implements UserDetailsService
 							.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
 							+"failed to reset PIN  for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of Id:"+user.get().id+". A server error ocurred")
 							.activity(LogTypes.PIN_RESET)
-							.user(loggedInUser)
 							.build();
 					this.logsRepository.save(log);
 				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
@@ -1068,7 +1050,6 @@ public class UserService extends RestClientService implements UserDetailsService
 						.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
 						+"failed to reset PIN for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of Id:"+user.get().id)
 						.activity(LogTypes.PIN_SET)
-						.user(loggedInUser)
 						.build();
 				this.logsRepository.save(log);
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
@@ -1084,7 +1065,6 @@ public class UserService extends RestClientService implements UserDetailsService
 					.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
 					+"failed to reset PIN  for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of Id:"+user.get().id+". User does not exist")
 					.activity(LogTypes.PIN_SET)
-					.user(loggedInUser)
 					.build();
 //	            this.larkService.sendPinResetNotification(loggedInUser,user.get().getUserWallets().get(0).getWallet(),"RESET","Failed");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
@@ -1338,7 +1318,7 @@ public class UserService extends RestClientService implements UserDetailsService
 	            if (file.getSize() > 5000000) {
 	            	Map<String,Object> map =  new HashMap<>();
 	            	map.put("success",false);
-	            	map.put("message","File exists maximum size");
+	            	map.put("message","File exceeds maximum size");
 	            	
 	            	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);	       
 	            }
