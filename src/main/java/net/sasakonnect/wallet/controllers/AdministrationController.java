@@ -584,11 +584,23 @@ public class AdministrationController {
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanViewLogs.PERMISSION
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.CanViewLogs.PERMISSION)
-	public ResponseEntity<Object> getlogs(
+	public ResponseEntity<Object> getLogs(
 			@RequestParam(name = "pageSize", defaultValue = "100") Integer pageSize,
 			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber
 			){
 		return logService.getLogs(pageNumber, pageSize);
+	}
+	
+	@GetMapping("logs/search")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanViewLogs.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.CanViewLogs.PERMISSION)
+	public ResponseEntity<Object> searchLogs(
+			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
+			@RequestParam(name = "queryString") String queryString
+			){
+		return logService.searchLogs(queryString,pageNumber, pageSize);
 	}
 	
 }

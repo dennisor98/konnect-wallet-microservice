@@ -139,7 +139,6 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 	
 	
 	
-	
 
 	public Map<String, Object> toBankPayload() {
 		Map<String, Object> payload = new HashMap<>();
