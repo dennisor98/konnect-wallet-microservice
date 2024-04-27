@@ -85,7 +85,7 @@ public class InvoiceManager {
 			        .startDate(startDate)
 			        .endDate(endDate)
 			        .jobOwner(user)
-			        .downloadLink(walletBaseUrl+"ivoices/"+link.split("invoices/")[1])
+			        .downloadLink(walletBaseUrl+"invoice/"+link.split("invoices/")[1])
 			        .build();
 		 this.invoiceJobRepository.save(invoiceJob);
 			     
