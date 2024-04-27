@@ -1,6 +1,7 @@
 package net.sasakonnect.wallet.services;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,8 +22,10 @@ public class LogService {
  LogsRepository logsRepository;
  
  
- public ResponseEntity<Object> getLogs(Integer pageNumber,Integer pageSize){
-	 Page<Logs> logs =  this.logsRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(pageNumber,pageSize));
+ public ResponseEntity<Object> getLogs(Date startDate,Date endDate,Integer pageNumber,Integer pageSize){
+	 Page<Logs> logs =  startDate ==null && endDate == null ? 
+			 this.logsRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(pageNumber,pageSize)) :
+		      this.logsRepository.findAllByCreatedAtBetweenOrderByCreatedAtDesc(startDate, endDate,PageRequest.of(pageNumber,pageSize));
 	 Map<String,Object> resMap = new HashMap<>();
 	 Map<String,Object> map = new HashMap<>();
 	 if(!logs.isEmpty()) {

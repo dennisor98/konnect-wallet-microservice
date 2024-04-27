@@ -1,5 +1,7 @@
 package net.sasakonnect.wallet.repository;
 
+import java.util.Date;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,6 +12,8 @@ import net.sasakonnect.wallet.domain.Logs;
 
 public interface LogsRepository extends JpaRepository<Logs,String>{
 	Page<Logs> findAllByOrderByCreatedAtDesc(Pageable page);
+	
+	Page<Logs> findAllByCreatedAtBetweenOrderByCreatedAtDesc(Date startDate, Date endDate, Pageable pageable);
 	
 	@Query("SELECT l FROM Logs l WHERE l.description LIKE %:queryString%")
    Page<Logs> findAllByDescriptionLike(@Param("queryString") String queryString,Pageable page);

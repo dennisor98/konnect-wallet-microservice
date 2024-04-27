@@ -50,7 +50,7 @@ public interface UserRepository extends JpaRepository<User, String> {
 	@Query("SELECT u FROM User u  LEFT JOIN FETCH u.userWallets uw  LEFT JOIN FETCH uw.wallet WHERE u.id = :userId")
 	Optional<User> findUserWithWalletsById(@Param("userId") String userId);
 
-	@Query("SELECT u FROM User u LEFT JOIN FETCH u.userRole ur LEFT JOIN FETCH ur.role r  LEFT JOIN FETCH u.userWallets uw LEFT JOIN FETCH uw.wallet WHERE uw IS NOT NULL")
+	@Query("SELECT u FROM User u LEFT JOIN FETCH u.userRole ur LEFT JOIN FETCH ur.role r  LEFT JOIN FETCH u.userWallets uw LEFT JOIN FETCH uw.wallet WHERE uw IS NOT NULL ORDER BY u.createdAt DESC")
 	Page<User> findAllusers(Pageable page);
 
 	@Query("SELECT u FROM User u JOIN u.userWallets uw WHERE uw.wallet.accountId = :accountId")
