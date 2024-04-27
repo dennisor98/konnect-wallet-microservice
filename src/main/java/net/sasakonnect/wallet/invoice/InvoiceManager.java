@@ -20,7 +20,11 @@ import net.sasakonnect.wallet.repository.InvoiceJobRepository;
 @Component
 public class InvoiceManager {
     @Value("${invoicePath}")
-    String invoicePath;
+    String invoiceDirectory;
+    
+    @Value("${WALLET_BASE_URL}")
+    String walletBaseUrl;
+    
     @Autowired
     InvoiceGenerator invoicegenerator;
     
@@ -30,7 +34,7 @@ public class InvoiceManager {
     public void init(String path ) throws MalformedURLException, DocumentException, IOException {
       
             // Generate random name
-        	invoicePath = path+".pdf";
+        var	invoicePath = path+".pdf";
         
         System.out.println(invoicePath);
         this.invoicegenerator.init(invoicePath);
@@ -44,15 +48,12 @@ public class InvoiceManager {
     	this.invoicegenerator.generateBy(name);
     }
     public String init(Date startDate,Date endDate) throws MalformedURLException, DocumentException, IOException {
-    	invoicePath = null;
-        if (invoicePath!=null && invoicePath.isEmpty()) {
-            // Generate random name
-        	invoicePath = UUID.randomUUID().toString()+".pdf";
-        }else {
-        	invoicePath +="/"+UUID.randomUUID().toString()+".pdf";
-            this.invoicegenerator.init(invoicePath);
-        }
-        
+    	
+    	    String uuid = UUID.randomUUID().toString();
+    	  var  invoicePath = invoiceDirectory + "/" + uuid + ".pdf";
+    	    this.invoicegenerator.init(invoicePath);
+    	
+
         
     	this.persistMetadata(startDate,endDate, invoicePath);
 
@@ -84,7 +85,7 @@ public class InvoiceManager {
 			        .startDate(startDate)
 			        .endDate(endDate)
 			        .jobOwner(user)
-			        .downloadLink(link)
+			        .downloadLink(walletBaseUrl+"ivoices/"+link.split("invoices/")[1])
 			        .build();
 		 this.invoiceJobRepository.save(invoiceJob);
 			     
