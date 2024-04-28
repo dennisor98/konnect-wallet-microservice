@@ -471,7 +471,7 @@ public class TransactionService {
 		 var rt =  recentTransactions.stream().map(t->{
 			 Map<String,Object> map = new HashMap<>();
 			 map.put("accountId",t.getOppoAccountId());
-			 map.put("accountName",t.getOppoAccountName());
+			 map.put("accountName",t.getOppoAccountName() !=null ? t.getOppoAccountName() : t.getCounterpartyName());
 			 map.put("subAccountId",t.getOppoSubAccount());		
 			 return map;
 		   }).collect(Collectors.toList());

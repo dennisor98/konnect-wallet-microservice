@@ -658,7 +658,7 @@ public class UserService extends RestClientService implements UserDetailsService
 			map.put("success", true);
 			var log = Logs.builder()
 					.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
-					+" successfully set PIN.PIN already set")
+					+"failed to set PIN.PIN already set")
 					.activity(LogTypes.PIN_SET)
 					.build();
 			this.logsRepository.save(log);
