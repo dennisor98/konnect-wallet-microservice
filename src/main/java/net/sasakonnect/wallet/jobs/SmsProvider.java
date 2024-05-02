@@ -8,7 +8,7 @@ import net.sasakonnect.wallet.tools.redis.Queueable;
 @Data
 @PropertySource("classpath:application.properties")
 
-public abstract class SmsProvider extends Queueable {
+public abstract class SmsProvider extends Queueable<String> {
 
 	private static final long serialVersionUID = 1L;
 	String template;

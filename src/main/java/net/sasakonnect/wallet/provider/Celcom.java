@@ -52,7 +52,7 @@ public class Celcom extends SmsProvider {
 	private String otp_ttl;
 
 	@Override
-	public void executeJob(Queueable job) {
+	public void executeJob() {
 		WebClient.Builder webClient = WebClient.builder();
 
 		try {
