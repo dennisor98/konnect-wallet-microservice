@@ -21,21 +21,20 @@ public class JobConsumer<T extends Queueable<T>> {
 	}
 
 	@Scheduled(fixedRate = 1000) // Adjust the rate (in milliseconds) as needed
-
 	public void processJobs() {
 		Queueable<T> queue = redisTemplate.opsForList().rightPop(queueName);
 		if (queue != null) {
 			log.info("Picking a job with tag " + queueName);
 
 			// Process the job
-			queue.executeJob(queue);
+			queue.executeJob();
 		}
 		Queueable<T> firebaseQueue = redisTemplate.opsForList().rightPop("firebase");
 		if (firebaseQueue != null) {
 			System.out.println("Job exist");
 
 			// Process the job
-			firebaseQueue.executeJob(firebaseQueue);
+			firebaseQueue.executeJob();
 		}
 	}
 }

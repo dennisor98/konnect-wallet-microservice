@@ -31,7 +31,7 @@ public class SmsManager {
 	private static final Logger logger = LoggerFactory.getLogger(SmsManager.class);
 	private static final Marker SECURITY_MARKER = MarkerFactory.getMarker("SECURITY");
 
-	private JobProducer<Queueable> jobProducer;
+	private JobProducer<Queueable<String>> jobProducer;
 	private static List<FailedSmsJob> failedSmsJob = new ArrayList<FailedSmsJob>();
 	@Value("${PRIMARY_SMS_PROVIDER}")
 	private String primary_sms_provider;
@@ -130,7 +130,7 @@ public class SmsManager {
 
 	}
 
-	public SmsManager(JobProducer<Queueable> jobProducer) {
+	public SmsManager(JobProducer<Queueable<String>> jobProducer) {
 
 		this.jobProducer = jobProducer;
 	}

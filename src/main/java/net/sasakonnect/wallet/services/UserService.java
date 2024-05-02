@@ -658,7 +658,7 @@ public class UserService extends RestClientService implements UserDetailsService
 			map.put("success", true);
 			var log = Logs.builder()
 					.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
-					+" successfully set PIN")
+					+"failed to set PIN.PIN already set")
 					.activity(LogTypes.PIN_SET)
 					.build();
 			this.logsRepository.save(log);
@@ -672,6 +672,12 @@ public class UserService extends RestClientService implements UserDetailsService
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		Optional<List<UserPin>> userPins = this.userPinRepository.getUserPinThatIsNotArchived(user);
 		if (userPins.isPresent() && (userPins.get().size() > 0)) {
+			if(userPins.get().get(0).getResetPinAttempts() >= 10) {
+				Map<String,Object> map = new HashMap<>();
+				map.put("success", false);
+				map.put("message","Too many wrong attempts of old PIN reached");
+				return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(map);
+			}
 			var pins = this.userPinRepository.findPinsUsedWithinLastThreeMonths(user.getId(), this.threeMonthsAgo());
 			var encoder = new BCryptPasswordEncoder();
 			if (pins.isPresent()) {
@@ -706,6 +712,7 @@ public class UserService extends RestClientService implements UserDetailsService
 						var passwordencoded = new BCryptPasswordEncoder().encode(user.getId() + setPin.getPin());
 						var userpin = new UserPin();
 						userpin.setUser(user);
+						userpin.setResetPinAttempts(0);
 						userpin.setPin(passwordencoded);
 						this.userPinRepository.markUserPinAsDeleted(activeUserPin.getId());
 						this.userPinRepository.save(userpin);
@@ -721,6 +728,9 @@ public class UserService extends RestClientService implements UserDetailsService
 						return ResponseEntity.status(HttpStatus.OK).body(map);
 
 					} else {
+						var pin = userPins.get().get(0);
+						pin.setResetPinAttempts(userPins.get().get(0).getResetPinAttempts() + 1);
+						this.userPinRepository.save(pin);
 						Map<String, Object> map = new HashMap<String, Object>();
 						map.put("message", "Old pin mismatch ");
 						map.put("success", false);
@@ -932,7 +942,15 @@ public class UserService extends RestClientService implements UserDetailsService
 					LocalDateTime currentTime = LocalDateTime.now();
 					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 					String formattedDateTime = currentTime.format(formatter);
-
+					
+					if (userPin.isPresent()) {
+						userPin.get().setPinAttempts(counter);
+						try {
+							this.userPinRepository.save(userPin.get());
+						}catch(Exception ex) {
+							
+						}
+					
 					this.larkService.sendPinResetNotification(loggedInUser,
 							user.get().getUserWallets().get(0).getWallet(), "BLOCKING", "Success");
 					var log = Logs.builder()
@@ -941,7 +959,12 @@ public class UserService extends RestClientService implements UserDetailsService
 							.activity(LogTypes.PIN_SET)
 							.build();
 					this.logsRepository.save(log);
+					
 				return ResponseEntity.status(HttpStatus.OK).body(map);
+					}
+					map.put("success", false);
+					map.put("message", "Unable to block PIN");
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 			} else {
 				if (userPin.isPresent()) {
 					userPin.get().setPinAttempts(counter);

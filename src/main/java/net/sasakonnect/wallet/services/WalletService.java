@@ -115,6 +115,10 @@ public class WalletService {
 	UserWalletRepository userWalletRepository;
 	@Autowired
 	private TransactionService transactionService;
+	
+	@Autowired
+	private FinancialContactService  financialContactService;
+	
 	@Autowired
 	private ApplicationEventPublisher publisher;
 	@Value("${email.statements}")
@@ -795,6 +799,10 @@ public class WalletService {
 			log.info(responseJson);
 			// call wallet invitation thread
 			transactionEventService.notifyNewCustomer(userwallet.getAccountId(), mpesa.getReceiverMobileNumber());
+			
+			//save financial contact
+			
+			
 
 			if (responseJson != null) {
 				var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);

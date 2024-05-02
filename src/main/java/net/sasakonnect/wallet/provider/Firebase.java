@@ -23,12 +23,12 @@ public class Firebase extends PushProvider<List<FirebaseMessage>> {
 	}
 
 	@Override
-	public void executeJob(Queueable<List<FirebaseMessage>> job) {
+	public void executeJob() {
 		try {
-			var messages = job.params.stream().map(element -> Message.builder().setNotification(Notification.builder()
+			var messages = this.params.stream().map(element -> Message.builder().setNotification(Notification.builder()
 
 					.setTitle("hello").setBody("body").build()).setToken("kkk").build()).collect(Collectors.toList());
-			if (job.params.size() == 1) {
+			if (this.params.size() == 1) {
 
 				FirebaseMessaging.getInstance(firebaseProvider.getFirebaseApp()).send(messages.get(0));
 

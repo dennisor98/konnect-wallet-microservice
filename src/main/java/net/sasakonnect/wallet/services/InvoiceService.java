@@ -96,7 +96,7 @@ public class InvoiceService {
        try {
               DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
               var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-              var invoicemetaData=InvoiceMetaData.builder()
+              var invoicemetaData = InvoiceMetaData.builder()
                               .invoiceNo( LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault()).format(formatter))
                                .invoiceFrom(startDate)
                                .invoiceTo(endDate)

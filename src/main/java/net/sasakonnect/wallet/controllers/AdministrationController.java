@@ -585,10 +585,12 @@ public class AdministrationController {
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.CanViewLogs.PERMISSION)
 	public ResponseEntity<Object> getLogs(
+			@Parameter(description = "Start date (YYYY-MM-DD)", example = "2024-02-01") @RequestParam(name="startDate",required=false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startDate,
+			@Parameter(description = "End date (YYYY-MM-DD)", example = "2024-02-29") @RequestParam(name="endDate",required=false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date endDate,
 			@RequestParam(name = "pageSize", defaultValue = "100") Integer pageSize,
 			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber
 			){
-		return logService.getLogs(pageNumber, pageSize);
+		return logService.getLogs(startDate,endDate,pageNumber, pageSize);
 	}
 	
 	@GetMapping("logs/search")
