@@ -17,7 +17,7 @@ import net.sasakonnect.wallet.domain.CorporateDetails;
 import net.sasakonnect.wallet.domain.User;
 
 public interface UserRepository extends JpaRepository<User, String> {
-
+   Optional<User> findByIdNumber(String IdNumber);
 //	get all users
 //	@Query("SELECT u  FROM User u")
 //	 Optional<List<User>> findAllUsers();	
