@@ -1,5 +1,7 @@
 package net.sasakonnect.wallet.services;
 
+import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -7,70 +9,123 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.validation.Valid;
+import net.sasakonnect.wallet.RequestDto.PinResetDto;
 import net.sasakonnect.wallet.RequestDto.account.ConfirmAccDTO;
+import net.sasakonnect.wallet.domain.PinresetIssues;
+import net.sasakonnect.wallet.domain.Transaction;
 import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.domain.UserWallet;
 import net.sasakonnect.wallet.enums.IdentityType;
 import net.sasakonnect.wallet.enums.PinResetQuestionaire;
+import net.sasakonnect.wallet.repository.PinResetIssuesRepository;
 import net.sasakonnect.wallet.repository.UserRepository;
+import net.sasakonnect.wallet.repository.UserWalletRepository;
 
 @Service
 public class PinResetService {
 	@Autowired
 	UserRepository userRepository;
+	
+	
+	@Autowired
+	UserWalletRepository userWalletRepository;
+	
+	@Autowired
+	WalletService walletService;
+	
+	@Autowired
+	TransactionService  transactionService;
+	
+	@Autowired
+	LarkService larkService;
+	
+	@Autowired
+	PinResetIssuesRepository pinResetIssuesRepository;
 
 	
-  public ResponseEntity<Object> confirmAccountExists(@Valid ConfirmAccDTO identity){
-	  if(identity.getIdentityType().toString().equalsIgnoreCase(IdentityType.MOBILE_NUMBER.getValue())) {
-		  if(!this.mobileHasAccount(identity.getAnswer())) {
-			  Map<String,Object> map = new HashMap<>();
-			  map.put("proceed",false);
-			  map.put("message","Account with phone number not found");
-			  
-			  return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
-		  }else {
-			  Map<String,Object> map = new HashMap<>();
-			  map.put("proceed",true);
-			  map.put("message","Account available");
-			  
-			  return ResponseEntity.status(HttpStatus.OK).body(map);
-		  }
-	  }
-	  
-	  if(identity.getIdentityType().toString().equalsIgnoreCase(IdentityType.ID_NUMBER.getValue())) {
-		  if(!this.idNumberHasAccount(identity.getAnswer())) {
+  public ResponseEntity<Object> confirmAccountExists(String idNumber){	 
+		  if(!this.idNumberHasAccount(idNumber)) {
 			  Map<String,Object> map = new HashMap<>();
 			  map.put("proceed",false);
 			  map.put("message","Account with ID Number not found");
-			  return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
+			  return ResponseEntity.status(HttpStatus.OK).body(map);
 		  }else {
 			  Map<String,Object> map = new HashMap<>();
 			  map.put("proceed",true);
 			  map.put("message","Account available");
 			  return ResponseEntity.status(HttpStatus.OK).body(map);
 		  }
+	  
+	  
+  }
+  
+  @Transactional
+  public ResponseEntity<Object> requestPinReset(PinResetDto req){
+	  try {
+	  float totalScore  = 0;
+	  Optional<User> user  = this.userRepository.findByIdNumber(req.getIdNumber());
+	  if(user.isPresent()) {
+		  if((req.getFirstName()).equalsIgnoreCase(user.get().getFirstName()) && req.getLastName().equalsIgnoreCase(user.get().getLastName())) {
+			  totalScore+=1;  
+		  }
+		  if(req.getMobileNumber().equalsIgnoreCase(user.get().getMobile())) {
+			  totalScore+=1;
+		  }
+		  
+		  if(req.getDateofBirth().toString().equals(user.get().getBirthday())){
+			  totalScore+=1; 
+		  }
+		  
+		  if(req.getLastReceivedAmount() == this.getUserLastReceivedAmount(user.get())){
+			  totalScore+=1;
+		  }
+		  
+		  if(req.getLastSentAmount() == this.getUserLastTransactedAmount(user.get())) {
+			  totalScore+=1;
+		  }
+		  
+		  if(req.getAccountBalance() == this.getWalletBalanceByUser(user.get())) {
+			  totalScore +=1;
+		  }
+		  
+		  float percentageScore = (totalScore/6)*100;
+		  User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		  var pinReset =   PinresetIssues.builder()
+			    .accountOwner(user.get())
+			    .accountId(user.get().getUserWallets().get(0).getWallet().getAccountId())
+			    .resetReason(req.getResetReason())
+			    .validationScore(percentageScore)
+			    .requesterId(loggedInUser)
+				.build();
+		      
+		  this.pinResetIssuesRepository.save(pinReset);
+		  
+		  this.larkService.sendPinResetApprovalNotification(req.getApprover());
+		  Map<String,Object> map = new HashMap<>();
+		  map.put("success", true);
+		  map.put("message", "Request submission success");
+		  return ResponseEntity.status(HttpStatus.OK).body(map);
+	  }
+	  }catch(Exception ex) {
+		  Map<String,Object> map = new HashMap<>();
+		  map.put("success", false);
+		  map.put("message", "Error processing request");
+		  ex.printStackTrace();
+		  return ResponseEntity.status(HttpStatus.OK).body(map);
 	  }
 	  
 	  return null;
   }
-  private ResponseEntity<Object> getNextQuestionaire(int index){
-	  String[]  questions = new String []{
-                        PinResetQuestionaire.MOBILE_NUMBER.getValue(),
-                        PinResetQuestionaire.FULL_NAME.getValue(),
-                        PinResetQuestionaire.ID_NUMBER.getValue(),
-                        PinResetQuestionaire.DOB.getValue(),
-                        PinResetQuestionaire.LAST_IN_TRANSACTION.getValue(),
-                        PinResetQuestionaire.LAST_OUT_TRANSACTION.getValue(),
-  };
-	  return null;
-  }
   
-  private Object getQuestionaireAnswer(PinResetQuestionaire question,User user) {
-	  return null;
-  }
+
+
   
+
   private Boolean mobileHasAccount(String mobile) {
 	  Optional<User> user  = this.userRepository.findByMobile(mobile);
 	  
@@ -81,4 +136,36 @@ public class PinResetService {
 	  Optional<User> user  = this.userRepository.findByIdNumber(idNumber);
 	  return user.isPresent();
   }
+  
+  private Double getWalletBalanceByUser(User user) {
+		 var balance = this.walletService.getWalletBalance(user);
+	  return balance;
+  }
+  
+  private Double getUserLastReceivedAmount(User user) {
+	  Optional<UserWallet> wallet = this.userWalletRepository.findByUserId(user.getId());
+	  if(wallet.isPresent()) {
+		  Optional<Transaction> lastReceived = this.transactionService.getLastInTransaction(wallet.get().getWallet().getAccountId()); 
+		  if(lastReceived.isPresent()) {
+			  BigDecimal bigDecimalValue = new BigDecimal(lastReceived.get().getAmount().toString());
+			  double doubleValue = Double.parseDouble(bigDecimalValue.toString());
+			  return doubleValue;
+		  }
+	  }
+	 return 0.00;  
+  }
+  
+  private Double getUserLastTransactedAmount(User user) {
+	  Optional<UserWallet> wallet = this.userWalletRepository.findByUserId(user.getId());
+	  if(wallet.isPresent()) {
+		  Optional<Transaction> lastReceived = this.transactionService.getLastOutTransaction(wallet.get().getWallet().getAccountId()); 
+		  if(lastReceived.isPresent()) {
+			  BigDecimal bigDecimalValue = new BigDecimal(lastReceived.get().getAmount().toString());
+			  double doubleValue = Double.parseDouble(bigDecimalValue.toString());
+			  return doubleValue;
+		  }
+	  }
+	 return 0.00;  
+  }
+  
 }
