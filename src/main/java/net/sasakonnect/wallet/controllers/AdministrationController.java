@@ -638,10 +638,8 @@ public class AdministrationController {
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanSearchAccountInfo.PERMISSION
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.CanSearchAccountInfo.PERMISSION)
-	public ResponseEntity<Object> requestPinReset(PinResetDto request){
-		log.info(request.toString());
-		return null;
-//		return this.pinResetService.requestPinReset(request);
+	public ResponseEntity<Object> requestPinReset(@Valid @RequestBody() PinResetDto request){		
+		return this.pinResetService.requestPinReset(request);
 	}
 	
 	

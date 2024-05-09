@@ -494,7 +494,11 @@ public class UserService extends RestClientService implements UserDetailsService
 			this.otpsmsService.deleteOtp(opt.get());
 
 			if (u != null) {
-				u = this.userRepository.findUserWithUserWalletsById(u.getId()).get();
+				Optional<User> walletUser  =  this.userRepository.findUserWithUserWalletsById(u.getId());
+				if(walletUser.isPresent()) {
+					u = this.userRepository.findUserWithUserWalletsById(u.getId()).get();
+				}
+				
 
 				System.out.println(u.getCreatedAt());
 				var response = UserResponseDTO.builder().wallets(u.getUserWallets().stream().map((uw) -> {

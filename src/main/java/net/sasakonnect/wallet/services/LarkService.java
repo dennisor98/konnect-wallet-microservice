@@ -23,6 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import net.sasakonnect.wallet.RequestDto.PinResetDto;
 import net.sasakonnect.wallet.RequestDto.lark.LarkDTO;
 import net.sasakonnect.wallet.RequestDto.lark.user.LarkMessageDTO;
 import net.sasakonnect.wallet.domain.LarkUser;
@@ -99,7 +101,7 @@ class Text {
     }
 }
 
-
+@Slf4j
 @Service
 public class LarkService {
 	
@@ -509,37 +511,67 @@ public class LarkService {
     	}
     }
     
-    public void sendPinResetApprovalNotification(String openId) {
+    public void sendPinResetApprovalNotification(PinResetDto req,Wallet wa) {
      var accessToken  = this.larkSync.getBotToken(this.botId,this.botSecret);
-		var urlEndpoint = this.larkBaseUrl+"/message/v4/send/";
-  	  Map<String, Object> reqObject = new HashMap<>();
-  	reqObject.put("shouldChooseChat", true);
-  	reqObject.put("chooseChatParams", new HashMap<>());
-  	reqObject.put("chat_id","oc_af7a9bacdb2eba15ab57ce122c9eff0a");
-  	reqObject.put("triggerCode", "testCode");
+	 var urlEndpoint = this.larkBaseUrl+"/message/v4/send/";
+	        String header = "PIN RESET REQUEST";
+	        String message = 
+	        		        "Date:"+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))+"\n"+
+	        		        "Requested By:"+"\n"+
+	        		        "Approver:<at id=%s></at>".formatted(req.getApprover())+"\n"+
+	        		        "Account Name:"+req.getFirstName()+" "+req.getLastName()+"\n"+
+	        		        "Account No:"+"\n"+
+	        		        "Mobile:"+req.getMobileNumber()
+	        		          
+	        		          
+	        		          ;
 
-        Map<String, Object> cardContent = new HashMap<>();
-        cardContent.put("msg_type", "interactive");
-        cardContent.put("update_multi", false);
+	        Map<String, Object> card = new HashMap<>();
+	        card.put("msg_type", "interactive");
+	        card.put("chat_id", "oc_a9f46991cde6bf92a6b84ee331f5ea99");
+	        card.put("update_multi", false);
 
-        Map<String, Object> card = new HashMap<>();
-        Map<String, Object> element = new HashMap<>();
-        element.put("tag", "div");
+	        Map<String, Object> cardObj = new HashMap<>();
+	        Map<String, Object> config = new HashMap<>();
+	        config.put("wide_screen_mode", true);
+	        cardObj.put("config", config);
 
-        Map<String, Object> text = new HashMap<>();
-        text.put("tag", "plain_text");
-        text.put("content", "<at id="+openId+">"+"</at>");
+	        Map<String, Object> div = new HashMap<>();
+	        div.put("tag", "div");
 
-        element.put("text", text);
-        card.put("elements", Arrays.asList(element));
-        cardContent.put("card", card);
+	        Map<String, Object> field1 = new HashMap<>();
+	        field1.put("is_short", true);
+	        Map<String, Object> text1 = new HashMap<>();
+	        text1.put("tag", "lark_md");
+	        text1.put("content", "<at id=ou_58180bf0fcc619b69d7eccfd14741939></at>,<at id=ou_4902c36327956f8db2e29900b559e994></at>,<at id=ou_97ebb1bf896adf1e2f854589fe8f352f></at>"+"\n" + message.replace(",", ""));
+	        field1.put("text", text1);
 
-        reqObject.put("cardContent", cardContent);
+	        Map<String, Object> field2 = new HashMap<>();
+	        field2.put("is_short", false);
+	        Map<String, Object> text2 = new HashMap<>();
+	        text2.put("tag", "lark_md");
+	        text2.put("content", "");
+	        field2.put("text", text2);
+
+	        div.put("fields", Arrays.asList(field1, field2));
+	        cardObj.put("elements", Arrays.asList(div));
+
+	        Map<String, Object> headerMap = new HashMap<>();
+	        headerMap.put("template", "blue");
+	        Map<String, Object> title = new HashMap<>();
+	        title.put("tag", "plain_text");
+	        title.put("content", header);
+	        headerMap.put("title", title);
+	        cardObj.put("header", headerMap);
+
+	        card.put("card", cardObj);
+
+	        
         RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "Bearer "+accessToken);   
-        HttpEntity<Object> requestEntity = new HttpEntity<>(reqObject,headers);
+        HttpEntity<Object> requestEntity = new HttpEntity<>(card,headers);
 
         
         ResponseEntity<Object> responseEntity = restTemplate.exchange(
@@ -548,6 +580,11 @@ public class LarkService {
                 requestEntity,
                 Object.class
         );
+        
+        
+        log.info(card.toString());
+        
+        
     }
 
   

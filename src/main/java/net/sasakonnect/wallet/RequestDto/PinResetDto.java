@@ -31,7 +31,7 @@ public class PinResetDto {
     // private Date dateofBirth;
   
     @NotNull()
-    private float accountBalance;
+    private float balance;
   
     @NotNull()
     private float lastReceivedAmount;
