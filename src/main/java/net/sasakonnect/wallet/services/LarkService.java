@@ -511,7 +511,7 @@ public class LarkService {
     	}
     }
     
-    public void sendPinResetApprovalNotification(PinResetDto req,Wallet wa) {
+    public void sendPinResetApprovalNotification(PinResetDto req,Wallet wallet) {
      var accessToken  = this.larkSync.getBotToken(this.botId,this.botSecret);
 	 var urlEndpoint = this.larkBaseUrl+"/message/v4/send/";
 	        String header = "PIN RESET REQUEST";

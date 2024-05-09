@@ -107,7 +107,7 @@ public class PinResetService {
 		      
 //		  this.pinResetIssuesRepository.save(pinReset);
 		  
-		  this.larkService.sendPinResetApprovalNotification(req);
+		  this.larkService.sendPinResetApprovalNotification(req,wallet.isPresent()?wallet.get().getWallet():null);
 		  Map<String,Object> map = new HashMap<>();
 		  map.put("success", true);
 		  map.put("message", "Request submission success");
