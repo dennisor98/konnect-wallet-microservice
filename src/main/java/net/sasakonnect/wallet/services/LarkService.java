@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -31,6 +32,7 @@ import net.sasakonnect.wallet.enums.NotificationBody;
 import net.sasakonnect.wallet.jobs.LarkUsersSync;
 import net.sasakonnect.wallet.repository.LarkUserRepository;
 import net.sasakonnect.wallet.repository.UserRepository;
+import net.sasakonnect.wallet.tools.ResponsePagerClass;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -282,7 +284,6 @@ public class LarkService {
 	
 	public void sendPinResetNotification(User user,Wallet wallet,String type,String status) {
 		var accessToken  = this.larkSync.getBotToken(this.botId,this.botSecret);
-		System.out.println("token"+accessToken);
 		var urlEndpoint = this.larkBaseUrl+"/message/v4/send/";
 		Map<String,Object> requestMap = new HashMap<>();
 		requestMap.put("msg_type","interactive");
@@ -482,6 +483,72 @@ public class LarkService {
     	  this.larkSync.getLarkDepartments();
     }
       
+      
+    public ResponseEntity<Object> search(String searchString,Integer pageNumber,Integer pageSize){
+    	Page<LarkUser> users = this.larkUserRepository.searchLarkUser(searchString, PageRequest.of(pageNumber,pageSize));
+    	if(!users.isEmpty()) {
+    		var larkUsers = users.stream().map(l->{
+    			return l;
+    		}).collect(Collectors.toList());
+    		
+    		ResponsePagerClass<LarkUser> page =  ResponsePagerClass.<LarkUser>builder()
+		    		    .page(users)
+		    		    .build();
+    		Map<String,Object> map = new HashMap<>();
+    		map.put("success",true);
+    		map.put("users", larkUsers);
+    		map.put("page",page.getPagingInfo());
+    		
+    		return ResponseEntity.status(HttpStatus.OK).body(map);
+    	}else {
+    		Map<String,Object> map = new HashMap<>();
+    		map.put("success",true);
+    		map.put("users", new ArrayList<>());
+    		
+    		return ResponseEntity.status(HttpStatus.OK).body(map);
+    	}
+    }
+    
+    public void sendPinResetApprovalNotification(String openId) {
+     var accessToken  = this.larkSync.getBotToken(this.botId,this.botSecret);
+		var urlEndpoint = this.larkBaseUrl+"/message/v4/send/";
+  	  Map<String, Object> reqObject = new HashMap<>();
+  	reqObject.put("shouldChooseChat", true);
+  	reqObject.put("chooseChatParams", new HashMap<>());
+  	reqObject.put("chat_id","oc_af7a9bacdb2eba15ab57ce122c9eff0a");
+  	reqObject.put("triggerCode", "testCode");
+
+        Map<String, Object> cardContent = new HashMap<>();
+        cardContent.put("msg_type", "interactive");
+        cardContent.put("update_multi", false);
+
+        Map<String, Object> card = new HashMap<>();
+        Map<String, Object> element = new HashMap<>();
+        element.put("tag", "div");
+
+        Map<String, Object> text = new HashMap<>();
+        text.put("tag", "plain_text");
+        text.put("content", "<at id="+openId+">"+"</at>");
+
+        element.put("text", text);
+        card.put("elements", Arrays.asList(element));
+        cardContent.put("card", card);
+
+        reqObject.put("cardContent", cardContent);
+        RestTemplate restTemplate = new RestTemplate();
+		HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer "+accessToken);   
+        HttpEntity<Object> requestEntity = new HttpEntity<>(reqObject,headers);
+
+        
+        ResponseEntity<Object> responseEntity = restTemplate.exchange(
+        		urlEndpoint.toString(),
+                HttpMethod.POST,
+                requestEntity,
+                Object.class
+        );
+    }
 
   
 }

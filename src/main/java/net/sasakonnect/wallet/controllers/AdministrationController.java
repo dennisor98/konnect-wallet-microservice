@@ -29,9 +29,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.Corporate;
 import net.sasakonnect.wallet.RequestDto.PermissionDTO;
 import net.sasakonnect.wallet.RequestDto.PermissionsToRoleDTO;
+import net.sasakonnect.wallet.RequestDto.PinResetDto;
 import net.sasakonnect.wallet.RequestDto.RoleDTO;
 import net.sasakonnect.wallet.RequestDto.UserRoleDTO;
 import net.sasakonnect.wallet.RequestDto.VerifyCorporate;
@@ -54,6 +56,7 @@ import net.sasakonnect.wallet.services.InvoiceService;
 import net.sasakonnect.wallet.services.LarkService;
 import net.sasakonnect.wallet.services.LogService;
 import net.sasakonnect.wallet.services.PermissionService;
+import net.sasakonnect.wallet.services.PinResetService;
 import net.sasakonnect.wallet.services.RoleService;
 import net.sasakonnect.wallet.services.TarrifService;
 import net.sasakonnect.wallet.services.TransactionService;
@@ -64,6 +67,7 @@ import net.sasakonnect.wallet.services.WalletService;
 @RequestMapping("/administration")
 @Tag(name = "Administration", description = "Back Office  routes")
 @CustomController()
+@Slf4j
 @CrossOrigin(origins = "http://localhost:4200")
 public class AdministrationController {
 	@Autowired
@@ -107,6 +111,9 @@ public class AdministrationController {
 	@Autowired
 	 LogService logService;
 	
+	@Autowired
+	PinResetService pinResetService;
+	
 	@GetMapping("/upload/app")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CreateSuperApp.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CreateSuperApp.PERMISSION)
@@ -139,8 +146,8 @@ public class AdministrationController {
 	}
 
 	@GetMapping("/users/getAll")
-//	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAllUsers.PERMISSION + "')")
-//	@RequirePermission(GlobalPermissionConstants.ViewAllUsers.PERMISSION)
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAllUsers.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.ViewAllUsers.PERMISSION)
 	public ResponseEntity<Object> getAllUsers(
 			@RequestParam(name = "pageSize", defaultValue = "100") Integer pageSize,
 			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber
@@ -604,5 +611,40 @@ public class AdministrationController {
 			){
 		return logService.searchLogs(queryString,pageNumber, pageSize);
 	}
+	
+	@GetMapping("account/check")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanSearchAccountInfo.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.CanSearchAccountInfo.PERMISSION)
+	public ResponseEntity<Object> confirmAccount(
+			@RequestParam(name = "idNumber") String idNumber
+			){
+		return this.pinResetService.confirmAccountExists(idNumber);
+	}
+	
+	@GetMapping("lark/user/search")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.SearchLarkUsers.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.SearchLarkUsers.PERMISSION)
+	public ResponseEntity<Object> searchLarkUser(
+			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
+			@RequestParam(name = "queryString") String queryString
+			){
+		return this.larkService.search(queryString,pageNumber, pageSize);
+	}
+	
+	@PostMapping("pin/reset/request")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanSearchAccountInfo.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.CanSearchAccountInfo.PERMISSION)
+	public ResponseEntity<Object> requestPinReset(PinResetDto request){
+		log.info(request.toString());
+		return null;
+//		return this.pinResetService.requestPinReset(request);
+	}
+	
+	
+	
 	
 }

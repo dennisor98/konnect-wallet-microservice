@@ -171,6 +171,13 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
 	   		+ " AND :endDate)) AND t.txStatus = 8 AND t.oppoBankCode != 'M-PESA' AND t.oppoBankCode != 'CIC0018'")
   List<Transaction> findPesalinkTransactions(@Param("startDate") Date startDate,@Param("endDate") Date endDate);
   
+  
+  @Query("SELECT t FROM Transaction t WHERE t.accountId = :accountId AND t.amount > 0  ORDER BY t.createdAt DESC LIMIT 1")
+  Optional<Transaction> findWalletLatestInTransaction(String accountId);
+  
+  @Query("SELECT t FROM Transaction t WHERE t.accountId = :accountId AND t.amount < 0  ORDER BY t.createdAt DESC LIMIT 1")
+  Optional<Transaction> findWalletLatestOutTransaction(String accountId);
+  
 //  t.oppoBankCode != 'MPESA' AND t.oppoBankCode != 'CIC0018'
   
   

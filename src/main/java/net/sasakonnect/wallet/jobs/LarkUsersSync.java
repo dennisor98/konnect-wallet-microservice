@@ -126,7 +126,8 @@ public class LarkUsersSync {
 	
 	@Transactional
 @Scheduled(fixedDelay = 604800000)	
-public Object getLarkDepartments() {
+public void getLarkDepartments() {
+	Thread thread =  new Thread(() ->{
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -156,9 +157,10 @@ public Object getLarkDepartments() {
         }else {
         	
         }
+	});
+	
+	thread.start();
 		
-//       this.getBotToken(this.botId,this.botSecret);
-		return null;
 	}
 	
 	 public List<String> getDepartmentIds() {
@@ -271,18 +273,16 @@ public Object getLarkDepartments() {
 	
 	  @Scheduled(fixedDelay = 604800000)	
 	  public void syncLarkDeptUsers() {
-	   var depIds =   this.getDepartmentIds().stream().map(depId -> {
-			return depId;
-		}).collect(Collectors.toList());
-//	   this.getDepartmentUsersByDepartmentId("od-161a5bb86b9cbd14cd04140122486680");
-	   for(String i : depIds ) {
-		   this.getDepartmentUsersByDepartmentId(i);
+	       Thread thread = new Thread(()->{
+	    	   var depIds =   this.getDepartmentIds().stream().map(depId -> {
+	   			return depId;
+	   		}).collect(Collectors.toList());
+	   	   for(String i : depIds ) {
+	   		   this.getDepartmentUsersByDepartmentId(i);
+	   	   } 
+	       });
+	       thread.start();
 	   }
-//	   depIds.forEach(id -> {
-//		   this.getDepartmentUsersByDepartmentId(id);
-//	   });
-//		
-	}
 	
 
 }

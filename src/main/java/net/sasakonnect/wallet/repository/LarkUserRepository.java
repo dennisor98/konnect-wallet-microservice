@@ -33,4 +33,7 @@ public interface LarkUserRepository extends JpaRepository<LarkUser,String>{
     
     @Query("SELECT u.id,u.openId,u.name,u.avartarUrl,u.email,u.mobileNumber FROM LarkUser u")
     Page<LarkUser> findAllLarkUsers(@Param("accountId") String accountId,Pageable pageable);
+    
+    @Query("SELECT u FROM LarkUser u WHERE LOWER(u.name) LIKE LOWER(CONCAT('%', :queryString, '%'))")
+    Page<LarkUser> searchLarkUser(@Param("queryString") String queryString, Pageable pageable);
 }

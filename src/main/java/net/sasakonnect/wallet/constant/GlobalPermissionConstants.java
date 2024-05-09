@@ -20,6 +20,7 @@ public final class GlobalPermissionConstants {
 			return DESCRIPTION;
 		}
 	}
+	
 	public static class CreateUserRole extends PermissionEntry {
 		public static final String PERMISSION = "can.create.user.role";
 		public static final String DESCRIPTION = "Can create any role in the system(use with caution)";
@@ -188,6 +189,21 @@ public final class GlobalPermissionConstants {
 	public static class ViewLarkUsers extends PermissionEntry {
 		public static final String PERMISSION = "can.view.user.lark";
 		public static final String DESCRIPTION = "Can view lark users";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
+	
+	public static class SearchLarkUsers extends PermissionEntry {
+		public static final String PERMISSION = "can.search.user.lark";
+		public static final String DESCRIPTION = "Can search lark users";
 
 		@Override
 		public String getPERMISSION() {
@@ -500,8 +516,25 @@ public final class GlobalPermissionConstants {
 		public String getDESCRIPTION() {
 			return DESCRIPTION;
 		}
+		
 	}
 
+	
+	public static class CanSearchAccountInfo extends PermissionEntry {
+		public static final String PERMISSION = "can.search.account.info";
+		public static final String DESCRIPTION = "can search account information(use carefully";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+		
+	}
 	public static Map<String, String> scan() {
 		Class<?>[] innerClasses = GlobalPermissionConstants.class.getDeclaredClasses();
 

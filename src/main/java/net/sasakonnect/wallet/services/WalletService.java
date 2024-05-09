@@ -207,6 +207,54 @@ public class WalletService {
 
 		return null;
 	}
+	
+	//overloaded function to get Wallet balance by user
+	public Double getWalletBalance(User user) {
+		var user2 = this.userService.findUserWallet(user);
+
+		if (user2.isPresent()) {
+			var wallets = user2.get().getUserWallets();
+
+			if (!wallets.isEmpty()) {
+				var oneWallet = wallets.get(0);
+				var reqId = new HashMap<String, Object>();
+				reqId.put("accountId", oneWallet.getWallet().getAccountId());
+				var reqs = requestSigner.signRequest(reqId);
+
+				Mono<String> responseMono = this.bankClientBean.webClient.post()
+						.uri(ChoiceEndpointsConstants.CHECK_BALANCE).contentType(MediaType.APPLICATION_JSON)
+						.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+						.bodyToMono(String.class);
+
+				String responseJson = responseMono.block();
+
+				if (responseJson != null) {
+					JsonObject jsonObject = new Gson().fromJson(responseJson, JsonObject.class);
+					JsonObject dataObject = jsonObject.getAsJsonObject("data");
+
+					return dataObject.get("balance").getAsDouble();
+				}
+			}
+		}
+
+		return null;
+	}
+	
+	public Double getUserLastReceivedAmount(User user) {
+		var user2 = this.userService.findUserWallet(user);
+
+		if (user2.isPresent()) {
+			var wallets = user2.get().getUserWallets();
+
+			if (!wallets.isEmpty()) {
+				var oneWallet = wallets.get(0);
+				oneWallet.getWallet().getAccountId();
+				
+			}
+		}
+
+		return null;
+	}
 
 	// overloaded function to get acc.balance by accountId
 	public Object getWalletAccountBalance(String accountId) {
@@ -508,13 +556,6 @@ public class WalletService {
 				if (notificationBody.getStatus() == 7 && user.isPresent()) {
 					Optional<Wallet> existingWallet = walletRepository.findByAccountId(notificationBody.getAccountId());
 					if (existingWallet.isEmpty()) {
-						this.larkService.sendOnBoardingMessage("SUCCESSFUL ONBOARDING", "orange", notificationBody);
-						// write logs to database
-						var log = Logs.builder()
-								.activity(LogTypes.ONBOARDING)
-								.description(user.get().getFirstName()+" "+user.get().getLastName()+"of acc No: "+notificationBody.getAccountId()+" succeded to onboard")
-								.build();
-						this.logsRepository.save(log);
 						var wallet = new Wallet();
 						wallet.setAccountId(notificationBody.getAccountId());
 						wallet.setAccountType(notificationBody.getAccountType());
@@ -524,20 +565,21 @@ public class WalletService {
 						userWallet.setWallet(savedwallet);
 						this.userWalletRepository.save(userWallet);
 						this.userService.deleteSuccessfulFromRejected(user.get().getIdNumber());
+						this.larkService.sendOnBoardingMessage("SUCCESSFUL ONBOARDING", "orange", notificationBody);
+						// write logs to database
+						var log = Logs.builder()
+								.activity(LogTypes.ONBOARDING)
+								.description(user.get().getFirstName()+" "+user.get().getLastName()+"of acc No: "+notificationBody.getAccountId()+" succeded to onboard")
+								.build();
+						this.logsRepository.save(log);
 					}
 
 				} else if (notificationBody.getStatus() == 3 && user.isPresent()) {
 					this.larkService.sendOnBoardingMessage("ACCOUNT OPENING PASSED", "green", notificationBody);
 				} else if (notificationBody.getStatus() == 4 && user.isPresent()) {
 					// log rejected account deletion
-					this.larkService.sendOnBoardingMessage("REJECTED ONBOARDING", "red", notificationBody);
+					
 					var onboardingRequestId = params.get("onboardingRequestId").getAsString();
-					var log = Logs.builder()
-							.activity(LogTypes.ONBOARDING)
-							.description(user.get().getFirstName()+" "+user.get().getLastName()+"of onboarding ID: "+notificationBody.getOnboardingRequestId()+" failed to onboard.Account rejected. Reason:"
-							+notificationBody.getRejectionReasonMsgs().stream().map(i->{return i.toString()+"\n";}))
-							.build();
-					this.logsRepository.save(log);
 										//insert into rejected accounts
 					var u = user.get();
 					var rejected  = RejectedAccount.builder()
@@ -556,6 +598,13 @@ public class WalletService {
 							         .build();
 					this.userService.createRejectedAccount(rejected);
 					this.userService.deletUserByOnboardingRequestId(onboardingRequestId);
+					var log = Logs.builder()
+							.activity(LogTypes.ONBOARDING)
+							.description(user.get().getFirstName()+" "+user.get().getLastName()+"of onboarding ID: "+notificationBody.getOnboardingRequestId()+" failed to onboard.Account rejected. Reason:"
+							+notificationBody.getRejectionReasonMsgs().stream().map(i->{return i.toString()+"\n";}))
+							.build();
+					this.logsRepository.save(log);
+					this.larkService.sendOnBoardingMessage("REJECTED ONBOARDING", "red", notificationBody);
 
 				} else if (notificationBody.getStatus() == 5 && user.isPresent()) {
 					// log closed account
@@ -566,20 +615,22 @@ public class WalletService {
 
 				} else if (notificationBody.getStatus() == 8 && user.isPresent()) {
 					// log failed account opening
-					this.larkService.sendOnBoardingMessage("ACCOUNT OPENING FAILED", "red", notificationBody);
 					var onboardingRequestId = params.get("onboardingRequestId").getAsString();
 					System.out.println(onboardingRequestId);
 					// delete user from the system
 					this.userService.deletUserByOnboardingRequestId(onboardingRequestId);
+					this.larkService.sendOnBoardingMessage("ACCOUNT OPENING FAILED", "red", notificationBody);
+
 				} else if (notificationBody.getStatus() == 9 && user.isPresent()) {
 					// account under manual review
-					this.larkService.sendOnBoardingMessage("ACCOUNT UNDER MANUAL REVIEW", "green", notificationBody);
                    //save logs to the database
 					var log = Logs.builder()
 							.activity(LogTypes.ONBOARDING)
 							.description(user.get().getFirstName()+" "+user.get().getLastName()+"of onboarding ID: "+notificationBody.getOnboardingRequestId()+" failed to onboard.Account under mnaual review.")
 							.build();
 					this.logsRepository.save(log);
+					this.larkService.sendOnBoardingMessage("ACCOUNT UNDER MANUAL REVIEW", "green", notificationBody);
+
 				} else {
 
 					// log any other onboarding account status

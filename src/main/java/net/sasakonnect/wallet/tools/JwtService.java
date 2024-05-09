@@ -17,6 +17,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.UnsupportedJwtException;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.enums.JwtType;
@@ -24,6 +25,9 @@ import net.sasakonnect.wallet.enums.JwtType;
 @Slf4j
 @Service
 public class JwtService {
+	@Value("${JWT_SECRET}")
+	String jwtSecret;
+	
 	@Value("${JWT_EXPIRY_TIME:5184000}")
 	Long jwtExpiryTime;
 
@@ -32,15 +36,21 @@ public class JwtService {
 	@Value("${OPENID_JWT_EXPIRY_TIME:60000}")
 	Long openIdJwtExpiryTime;
 
-	byte[] decodedKey = Base64.getDecoder().decode("579e6ba03d08e5f57c4ec2dd9b4a8ea9ac3168f5518d1909206e46f405f32a49");
-	SecretKeySpec secretKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "HMACSHA256");
+	byte[] decodedKey =  null;
+	SecretKeySpec secretKey = null;
 
+	@PostConstruct()
+	void init(){
+		decodedKey = Base64.getDecoder().decode(jwtSecret);
+		log.info(jwtSecret);
+		secretKey =	new SecretKeySpec(decodedKey, 0, decodedKey.length, "HMACSHA256");
+	}
 	public String generateToken(User user) {
 		try {
 			Map<String, Object> claims = new HashMap<>();
 			claims.put("id", user.getId());
 			claims.put("token_type", "access_token");
-
+             log.info(jwtSecret);
 			claims.put("firstName", user.getFirstName());
 			return Jwts.builder().setClaims(claims).setSubject(user.getId().toString()).setIssuedAt(new Date())
 					.setExpiration(new Date(System.currentTimeMillis() + jwtExpiryTime))// 10

@@ -530,7 +530,13 @@ public class TransactionService {
 		return new ArrayList<>();
 	}
 	
+	public Optional<Transaction> getLastInTransaction(String accountId){
+		return this.transactionRepository.findWalletLatestInTransaction(accountId);
+	}
 		
+	public Optional<Transaction> getLastOutTransaction(String accountId){
+		return this.transactionRepository.findWalletLatestOutTransaction(accountId);
+	}
 	
 	
 	
