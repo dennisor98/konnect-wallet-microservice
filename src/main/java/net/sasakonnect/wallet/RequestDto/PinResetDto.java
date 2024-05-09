@@ -1,50 +1,47 @@
 package net.sasakonnect.wallet.RequestDto;
 
-import java.util.Date;
 
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.sasakonnect.wallet.enums.PinResetType;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class PinResetDto {
-  @NotNull()
-  String idNumber;
+	@NotNull()
+    private String idNumber;
    
-  @NotNull()
-  String mobileNumber;
+    @NotNull()
+    private String mobileNumber;
   
-  @NotNull()
-  String firstName;
+    @NotNull()
+    private String firstName;
   
-  @NotNull()
-  String lastName;
+    @NotNull()
+    private String lastName;
   
-  @NotNull()
-  Date dateofBirth;
+    // You can uncomment this if you want to validate dateofBirth
+    // @NotNull
+    // private Date dateofBirth;
   
-  @NotNull()
-  Double accountBalance;
+    @NotNull()
+    private float accountBalance;
   
-  @NotNull()
-  Double lastReceivedAmount;
+    @NotNull()
+    private float lastReceivedAmount;
   
-  @NotNull()
-  Double lastSentAmount;
+    @NotNull()
+    private float lastSentAmount;
   
-  @NotNull()
-  PinResetType resetReason;
+    @NotNull()
+    private PinResetType resetReason;
   
-  
-  @NotNull()
-  String approver;
-  
-  
-  
+    @NotNull()
+    private String approver;
 }

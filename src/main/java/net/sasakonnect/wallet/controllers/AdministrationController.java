@@ -29,6 +29,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.Corporate;
 import net.sasakonnect.wallet.RequestDto.PermissionDTO;
 import net.sasakonnect.wallet.RequestDto.PermissionsToRoleDTO;
@@ -66,6 +67,7 @@ import net.sasakonnect.wallet.services.WalletService;
 @RequestMapping("/administration")
 @Tag(name = "Administration", description = "Back Office  routes")
 @CustomController()
+@Slf4j
 @CrossOrigin(origins = "http://localhost:4200")
 public class AdministrationController {
 	@Autowired
@@ -636,8 +638,10 @@ public class AdministrationController {
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanSearchAccountInfo.PERMISSION
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.CanSearchAccountInfo.PERMISSION)
-	public ResponseEntity<Object> requestPinReset(@Valid PinResetDto request){
-		return this.pinResetService.requestPinReset(request);
+	public ResponseEntity<Object> requestPinReset(PinResetDto request){
+		log.info(request.toString());
+		return null;
+//		return this.pinResetService.requestPinReset(request);
 	}
 	
 	

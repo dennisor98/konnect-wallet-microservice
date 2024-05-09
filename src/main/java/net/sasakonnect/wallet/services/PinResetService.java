@@ -77,9 +77,9 @@ public class PinResetService {
 			  totalScore+=1;
 		  }
 		  
-		  if(req.getDateofBirth().toString().equals(user.get().getBirthday())){
-			  totalScore+=1; 
-		  }
+//		  if(req.getDateofBirth().toString().equals(user.get().getBirthday())){
+//			  totalScore+=1; 
+//		  }
 		  
 		  if(req.getLastReceivedAmount() == this.getUserLastReceivedAmount(user.get())){
 			  totalScore+=1;
