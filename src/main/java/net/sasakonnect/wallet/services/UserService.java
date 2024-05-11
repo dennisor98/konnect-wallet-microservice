@@ -68,6 +68,7 @@ import net.sasakonnect.wallet.RequestDto.UserLogin;
 import net.sasakonnect.wallet.ResponseDto.UserResponseDTO;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.beans.RedisBean;
+import net.sasakonnect.wallet.domain.CorporateDetails;
 import net.sasakonnect.wallet.domain.FirebaseToken;
 import net.sasakonnect.wallet.domain.Logs;
 import net.sasakonnect.wallet.domain.Permission;
@@ -380,59 +381,67 @@ public class UserService extends RestClientService implements UserDetailsService
 		}
 
 	}
-
+	
 	public ResponseEntity<ObjectNode> corporateLogin(UserLogin userLogin) {
-		Map<String, Object> map = new HashMap<>();
-		Map<String, Object> payloadMap = new HashMap<>();
+		Optional<User> user = Optional.empty();
+		if (profileActive.equalsIgnoreCase("dev")) {
+			if (userLogin.getPhoneNumber().equalsIgnoreCase("700000000")) {
+				log.debug("fing this phone 703454954 and country code" + userLogin.getCountryCode());
 
-		Optional<User> user = this.userRepository.findByMobile(userLogin.getPhoneNumber());
-
-		if (user.isPresent()) {
-			UserRole userRole = user.get().getUserRole();
-			var log = Logs.builder()
-           		 .activity(LogTypes.LOGIN)
-           		 .description("Corporate user login with acc. No:"+user.get().getUserWallets().get(0).getWallet().getAccountId())
-           		 .build();
-            this.logsRepository.save(log);
-			if (userRole != null) {
-				ObjectMapper objectMapper = new ObjectMapper();
-				ObjectNode json = JsonNodeFactory.instance.objectNode();
-				ArrayNode arrayNode = objectMapper.createArrayNode();
-				Optional<Role> role = this.roleRepository.findById(userRole.getRoleId());
-				if (role.isPresent()) {
-					if (role.get().getRoleName().toString().equalsIgnoreCase("CORPORATE")
-							|| role.get().getRoleName().toString().equalsIgnoreCase("SUPER_ADMIN")
-							|| role.get().getRoleName().toString().equalsIgnoreCase("ADMIN")) {
-						map.put("success", true);
-						map.put("message", "proceed to login");
-						payloadMap.put("payload", map);
-						return this.userLogin(userLogin);
-					} else {
-						arrayNode.add("User not allowed");
-						System.out.println("role" + role.get().getRoleName());
-						json.put("message", "Access denied");
-						return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
-					}
-				} else {
-					arrayNode.add("User not allowed");
-					json.put("message", "Role not found");
-					return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
-				}
+				user = this.userRepository.findByMobileAndCountryCode("703454954",
+						Integer.valueOf(userLogin.getCountryCode()));
 			} else {
-				ObjectMapper objectMapper = new ObjectMapper();
-				ObjectNode json = JsonNodeFactory.instance.objectNode();
-				ArrayNode arrayNode = objectMapper.createArrayNode();
-				arrayNode.add("User not allowed");
-				json.put("message", "Forbidden");
-				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
+				user = this.userRepository.findByMobileAndCountryCode(userLogin.getSerchablePhone(),
+						Integer.valueOf(userLogin.getCountryCode()));
 			}
 		} else {
+			user = this.userRepository.findByMobileAndCountryCode(userLogin.getSerchablePhone(),
+					Integer.valueOf(userLogin.getCountryCode()));
+		}
+		
+
+		if (user.isEmpty()) {
 			ObjectMapper objectMapper = new ObjectMapper();
+
 			ObjectNode json = JsonNodeFactory.instance.objectNode();
 			ArrayNode arrayNode = objectMapper.createArrayNode();
-			arrayNode.add("User not allowed");
-			json.put("message", "Forbidden");
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
+			arrayNode.add("User not Found");
+			json.put("statusCode", false);
+			json.putIfAbsent("message", arrayNode);
+			json.put("error", HttpStatus.BAD_REQUEST.getReasonPhrase());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(json);
+
+		} else {    
+			//check if user is added to corporate
+			if(user.get().getCorporate() == null) {
+				ObjectMapper objectMapper = new ObjectMapper();
+
+				ObjectNode json = JsonNodeFactory.instance.objectNode();
+				ArrayNode arrayNode = objectMapper.createArrayNode();
+				arrayNode.add("Access denied");
+				json.put("statusCode", false);
+				json.putIfAbsent("message", arrayNode);
+				json.put("error", HttpStatus.BAD_REQUEST.getReasonPhrase());
+				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
+			}
+			//disalow users without role
+			else if(user.get().getUserRole() == null) {
+				ObjectMapper objectMapper = new ObjectMapper();
+
+				ObjectNode json = JsonNodeFactory.instance.objectNode();
+				ArrayNode arrayNode = objectMapper.createArrayNode();
+				arrayNode.add("Access denied");
+				json.put("statusCode", false);
+				json.putIfAbsent("message", arrayNode);
+				json.put("error", HttpStatus.BAD_REQUEST.getReasonPhrase());
+				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
+			}
+			
+			else {
+				return this.otpsmsService.sendSms(userLogin, null, user);
+	
+			}
+
 
 		}
 
@@ -508,6 +517,73 @@ public class UserService extends RestClientService implements UserDetailsService
 				}).collect(Collectors.toList()))
 
 						.token(jwtService.generateToken(u)).refreshToken(jwtService.generateRefreshToken(u))
+						.middleName(u.getMiddleName()).gender(u.getGender().name()).idType(u.getIdType().name())
+						.idNumber(u.getIdNumber()).onboardingRequestId(u.getOnboardingRequestId())
+						.open_id(u.getOpenId()).birthday(formatter.format(u.getBirthday().toInstant()))
+						.updatedAt(u.getUpdatedAt()).kraPin(u.getKraPin())
+						.employmentStatus(u.getEmploymentStatus().name())
+                        .profileImage(u.getProfileImage())
+						.monthlyIncome(u.getMonthlyIncome().toString()).createdAt(u.getCreatedAt()).id(u.getId())
+						.address(u.getAddress()).firstName(u.getFirstName()).lastName(u.getLastName())
+						.mobile(u.getMobile()).countryCode(u.getCountryCode()).build();
+				ObjectMapper objectMapper = new ObjectMapper();
+				objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+				objectMapper.registerModule(new JavaTimeModule());
+				objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+				try {
+					return ResponseEntity.ok(objectMapper.writeValueAsString(response));
+				} catch (JsonProcessingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
+		} else {
+			log.error("otp not there");
+
+			ObjectNode json = JsonNodeFactory.instance.objectNode();
+			json.put("message", "otp code is Invalid");
+			return ResponseEntity.badRequest().body(json);
+		}
+		return null;
+		// TODO Auto-generated method stub
+	}
+	
+	@Transactional
+	public ResponseEntity<Object> verifyAdminOtp(@Valid ConfirmOtp confirmOtp) {
+		var opt = this.otpsmsService.verifyOtp(confirmOtp);
+
+		if (opt.isPresent()) {
+
+			if (!(opt.get().isValid())) {
+				ObjectNode json = JsonNodeFactory.instance.objectNode();
+				json.put("message", "otp code is Invalid");
+				return ResponseEntity.badRequest().body(json);
+			}
+			var u = opt.get().getUser();
+			this.otpsmsService.deleteOtp(opt.get());
+
+			if (u != null) {
+				if(u.getCorporate() == null) {
+					ObjectNode json = JsonNodeFactory.instance.objectNode();
+					json.put("message", "invalid otp type");
+					return ResponseEntity.badRequest().body(json);
+				}
+				Optional<User> walletUser  =  this.userRepository.findUserWithUserWalletsById(u.getId());
+				if(walletUser.isPresent()) {
+					u = this.userRepository.findUserWithUserWalletsById(u.getId()).get();
+				}
+				
+
+				System.out.println(u.getCreatedAt());
+				var response = UserResponseDTO.builder().wallets(u.getUserWallets().stream().map((uw) -> {
+					var wallets = uw.getWallet();
+					wallets.setUserWallets(null);
+					return wallets;
+				}).collect(Collectors.toList()))
+
+						.token(jwtService.generateAdminToken(u)).refreshToken(jwtService.generateAdminRefreshToken(u))
 						.middleName(u.getMiddleName()).gender(u.getGender().name()).idType(u.getIdType().name())
 						.idNumber(u.getIdNumber()).onboardingRequestId(u.getOnboardingRequestId())
 						.open_id(u.getOpenId()).birthday(formatter.format(u.getBirthday().toInstant()))

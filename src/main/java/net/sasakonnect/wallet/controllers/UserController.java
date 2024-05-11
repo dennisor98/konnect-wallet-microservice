@@ -68,6 +68,12 @@ public class UserController {
 	public ResponseEntity confirmOtp(@Valid @RequestBody ConfirmOtp confirmOtp) {
 		return userService.verifyOtp(confirmOtp);
 	}
+	
+	@PostMapping("admin/confirmOtp")
+	public ResponseEntity confirmAdminOtp(@Valid @RequestBody ConfirmOtp confirmOtp) {
+		return userService.verifyAdminOtp(confirmOtp);
+	}
+
 
 	@PostMapping("refresh/token")
 	@RefreshMiddleware()

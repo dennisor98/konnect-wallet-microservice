@@ -511,24 +511,23 @@ public class LarkService {
     	}
     }
     
-    public void sendPinResetApprovalNotification(PinResetDto req,Wallet wallet) {
+    public void sendPinResetApprovalNotification(PinResetDto req,Wallet wallet,User user) {
      var accessToken  = this.larkSync.getBotToken(this.botId,this.botSecret);
 	 var urlEndpoint = this.larkBaseUrl+"/message/v4/send/";
 	        String header = "PIN RESET REQUEST";
 	        String message = 
 	        		        "Date:"+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))+"\n"+
-	        		        "Requested By:"+"\n"+
-	        		        "Approver:<at id=%s></at>".formatted(req.getApprover())+"\n"+
-	        		        "Account Name:"+req.getFirstName()+" "+req.getLastName()+"\n"+
-	        		        "Account No:"+"\n"+
-	        		        "Mobile:"+req.getMobileNumber()
-	        		          
-	        		          
-	        		          ;
+	        		        "Requested By: "+user.getFirstName()+" "+user.getLastName()+"\n"+
+	        		        "Approver: <at id=%s></at>".formatted(req.getApprover())+"\n"+
+	        		        "Account Name: "+req.getFirstName()+" "+req.getLastName()+"\n"+
+	        		        "Account No: "+wallet.getAccountId()+"\n"+
+	        		        "Mobile: "+req.getMobileNumber();
 
 	        Map<String, Object> card = new HashMap<>();
 	        card.put("msg_type", "interactive");
-	        card.put("chat_id", "oc_a9f46991cde6bf92a6b84ee331f5ea99");
+//	        oc_f11965f2d1af0ecb6e39c29ff7beec86   //test group
+//	        oc_a9f46991cde6bf92a6b84ee331f5ea99
+	        card.put("chat_id", "oc_f11965f2d1af0ecb6e39c29ff7beec86");
 	        card.put("update_multi", false);
 
 	        Map<String, Object> cardObj = new HashMap<>();
