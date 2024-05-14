@@ -25,9 +25,11 @@ import org.springframework.web.client.RestTemplate;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.PinResetDto;
+import net.sasakonnect.wallet.RequestDto.ReversalDto;
 import net.sasakonnect.wallet.RequestDto.lark.LarkDTO;
 import net.sasakonnect.wallet.RequestDto.lark.user.LarkMessageDTO;
 import net.sasakonnect.wallet.domain.LarkUser;
+import net.sasakonnect.wallet.domain.Transaction;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.Wallet;
 import net.sasakonnect.wallet.enums.NotificationBody;
@@ -36,6 +38,7 @@ import net.sasakonnect.wallet.repository.LarkUserRepository;
 import net.sasakonnect.wallet.repository.UserRepository;
 import net.sasakonnect.wallet.tools.ResponsePagerClass;
 
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -527,7 +530,7 @@ public class LarkService {
 	        card.put("msg_type", "interactive");
 //	        oc_f11965f2d1af0ecb6e39c29ff7beec86   //test group
 //	        oc_a9f46991cde6bf92a6b84ee331f5ea99
-	        card.put("chat_id", "oc_f11965f2d1af0ecb6e39c29ff7beec86");
+	        card.put("chat_id", "oc_af7a9bacdb2eba15ab57ce122c9eff0a");
 	        card.put("update_multi", false);
 
 	        Map<String, Object> cardObj = new HashMap<>();
@@ -581,9 +584,85 @@ public class LarkService {
         );
         
         
-        log.info(card.toString());
         
-        
+    }
+    
+    public void sendReversalRequestNotification(User user,ReversalDto req,Wallet wallet,Transaction transaction){
+    	  var accessToken  = this.larkSync.getBotToken(this.botId,this.botSecret);
+    		 var urlEndpoint = this.larkBaseUrl+"/message/v4/send/";
+    		        String header = "TRANSACTION REVERSAL REQUEST";
+    		        String message = 
+    		        		        "**Date**:"+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))+"\n"+
+    		        		        "**Requested By**: "+user.getFirstName().toUpperCase()+" "+user.getLastName().toUpperCase()+"\n"+
+    		        		        "**Transaction Date**: "+transaction.getCreatedAt().toString()+"\n"+
+    		        		        "**Reference**: "+transaction.getTxId()+"\n"+
+    		        		        "**Account Name**: "+transaction.getAccountName().toUpperCase()+"\n"+
+    		        		        "**Account No**: "+wallet.getAccountId()+"\n"+
+    		        		        "**Mobile**: "+req.getMobileNumber()+"\n"+
+    		        		        "**Receiver Acc. No**:"+transaction.getOppoAccountId()+"\n"+
+    		        		        "**Receiver Acc Name**:"+transaction.getOppoAccountName()+"\n"+
+    		        		        "**Amount**: " +
+    		        		        transaction.getAmount().abs().add(transaction.getFeeAmount()).setScale(2, RoundingMode.HALF_UP).toPlainString()+"\n"+
+    		        		        "Description"+req.getDescription();
+
+
+    		        Map<String, Object> card = new HashMap<>();
+    		        card.put("msg_type", "interactive");
+//    		        oc_f11965f2d1af0ecb6e39c29ff7beec86   //test group
+//    		        oc_a9f46991cde6bf92a6b84ee331f5ea99
+    		        card.put("chat_id", "oc_251f1f064314a925347ecc32d9ea3d3e");
+    		        card.put("update_multi", false);
+
+    		        Map<String, Object> cardObj = new HashMap<>();
+    		        Map<String, Object> config = new HashMap<>();
+    		        config.put("wide_screen_mode", true);
+    		        cardObj.put("config", config);
+
+    		        Map<String, Object> div = new HashMap<>();
+    		        div.put("tag", "div");
+
+    		        Map<String, Object> field1 = new HashMap<>();
+    		        field1.put("is_short", true);
+    		        Map<String, Object> text1 = new HashMap<>();
+    		        text1.put("tag", "lark_md");
+    		        text1.put("content", "<at id=ou_58180bf0fcc619b69d7eccfd14741939></at>,<at id=ou_4902c36327956f8db2e29900b559e994></at>,<at id=ou_97ebb1bf896adf1e2f854589fe8f352f></at>"+"\n" + message.replace(",", ""));
+    		        field1.put("text", text1);
+
+    		        Map<String, Object> field2 = new HashMap<>();
+    		        field2.put("is_short", false);
+    		        Map<String, Object> text2 = new HashMap<>();
+    		        text2.put("tag", "lark_md");
+    		        text2.put("content", "");
+    		        field2.put("text", text2);
+
+    		        div.put("fields", Arrays.asList(field1, field2));
+    		        cardObj.put("elements", Arrays.asList(div));
+
+    		        Map<String, Object> headerMap = new HashMap<>();
+    		        headerMap.put("template", "blue");
+    		        Map<String, Object> title = new HashMap<>();
+    		        title.put("tag", "plain_text");
+    		        title.put("content", header);
+    		        headerMap.put("title", title);
+    		        cardObj.put("header", headerMap);
+
+    		        card.put("card", cardObj);
+
+    		        
+    	        RestTemplate restTemplate = new RestTemplate();
+    			HttpHeaders headers = new HttpHeaders();
+    	        headers.setContentType(MediaType.APPLICATION_JSON);
+    	        headers.set("Authorization", "Bearer "+accessToken);   
+    	        HttpEntity<Object> requestEntity = new HttpEntity<>(card,headers);
+
+    	        
+    	        ResponseEntity<Object> responseEntity = restTemplate.exchange(
+    	        		urlEndpoint.toString(),
+    	                HttpMethod.POST,
+    	                requestEntity,
+    	                Object.class
+    	        );
+    	            	
     }
 
   

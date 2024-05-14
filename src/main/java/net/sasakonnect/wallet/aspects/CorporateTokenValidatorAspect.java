@@ -1,7 +1,10 @@
 package net.sasakonnect.wallet.aspects;
 
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.crypto.spec.SecretKeySpec;
 
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -21,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import net.sasakonnect.wallet.config.KonnectHeader;
 import net.sasakonnect.wallet.domain.User;
@@ -41,6 +45,15 @@ public class CorporateTokenValidatorAspect {
 
 		this.jwtService = jwtService;
 	}
+	
+	byte[] decodedKey =  null;
+	SecretKeySpec secretKey = null;
+	
+	@PostConstruct()
+	void init(){
+		decodedKey = Base64.getDecoder().decode(jwtSecret);
+		secretKey =	new SecretKeySpec(decodedKey, 0, decodedKey.length, "HMACSHA256");
+	}
 
 	@Before("@annotation(net.sasakonnect.wallet.annotations.IsCorporate)")
 	public void beforeControllerMethodExecution() {
@@ -53,7 +66,7 @@ public class CorporateTokenValidatorAspect {
 
 	        String token = authorizationHeader.substring(7);
 	        try {
-	            Claims claims = Jwts.parser().setSigningKey(jwtSecret.getBytes()).parseClaimsJws(token).getBody();
+	        	Claims claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
 	            String tokenType = claims.get("token_type", String.class);
 
 	            if (!"corporate_access_token".equals(tokenType)) {

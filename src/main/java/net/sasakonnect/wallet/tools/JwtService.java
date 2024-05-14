@@ -42,7 +42,6 @@ public class JwtService {
 	@PostConstruct()
 	void init(){
 		decodedKey = Base64.getDecoder().decode(jwtSecret);
-		log.info(jwtSecret);
 		secretKey =	new SecretKeySpec(decodedKey, 0, decodedKey.length, "HMACSHA256");
 	}
 	public String generateToken(User user) {
