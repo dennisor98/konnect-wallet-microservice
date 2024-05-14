@@ -173,10 +173,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
   
   
   @Query("SELECT t FROM Transaction t WHERE t.accountId = :accountId AND t.amount > 0  ORDER BY t.createdAt DESC LIMIT 1")
-  Optional<Transaction> findWalletLatestInTransaction(String accountId);
+  Optional<Transaction> findWalletLatestInTransaction(@Param("accountId") String accountId);
   
   @Query("SELECT t FROM Transaction t WHERE t.accountId = :accountId AND t.amount < 0  ORDER BY t.createdAt DESC LIMIT 1")
-  Optional<Transaction> findWalletLatestOutTransaction(String accountId);
+  Optional<Transaction> findWalletLatestOutTransaction(@Param("accountId") String accountId);
   
 //  t.oppoBankCode != 'MPESA' AND t.oppoBankCode != 'CIC0018'
   

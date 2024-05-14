@@ -42,7 +42,6 @@ public class JwtService {
 	@PostConstruct()
 	void init(){
 		decodedKey = Base64.getDecoder().decode(jwtSecret);
-		log.info(jwtSecret);
 		secretKey =	new SecretKeySpec(decodedKey, 0, decodedKey.length, "HMACSHA256");
 	}
 	public String generateToken(User user) {
@@ -51,6 +50,27 @@ public class JwtService {
 			claims.put("id", user.getId());
 			claims.put("token_type", "access_token");
              log.info(jwtSecret);
+			claims.put("firstName", user.getFirstName());
+			return Jwts.builder().setClaims(claims).setSubject(user.getId().toString()).setIssuedAt(new Date())
+					.setExpiration(new Date(System.currentTimeMillis() + jwtExpiryTime))// 10
+																						// days
+																						// validity
+					.setId(UUID.randomUUID().toString())
+
+					.signWith(secretKey, SignatureAlgorithm.HS256).compact();
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public String generateAdminToken(User user) {
+		try {
+			Map<String, Object> claims = new HashMap<>();
+			claims.put("id", user.getId());
+			claims.put("token_type", "corporate_access_token");
 			claims.put("firstName", user.getFirstName());
 			return Jwts.builder().setClaims(claims).setSubject(user.getId().toString()).setIssuedAt(new Date())
 					.setExpiration(new Date(System.currentTimeMillis() + jwtExpiryTime))// 10
@@ -92,6 +112,25 @@ public class JwtService {
 			Map<String, Object> claims = new HashMap<>();
 			claims.put("id", user.getId());
 			claims.put("token_type", "refresh_token");
+			claims.put("firstName", user.getFirstName());
+			return Jwts.builder().setClaims(claims).setSubject(user.getId().toString()).setIssuedAt(new Date())
+					.setExpiration(new Date(System.currentTimeMillis() + jwtRefreshExpiryTime))// validity
+					.setId(UUID.randomUUID().toString())
+
+					.signWith(secretKey, SignatureAlgorithm.HS256).compact();
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public String generateAdminRefreshToken(User user) {
+		try {
+			Map<String, Object> claims = new HashMap<>();
+			claims.put("id", user.getId());
+			claims.put("token_type", "admin_refresh_token");
 			claims.put("firstName", user.getFirstName());
 			return Jwts.builder().setClaims(claims).setSubject(user.getId().toString()).setIssuedAt(new Date())
 					.setExpiration(new Date(System.currentTimeMillis() + jwtRefreshExpiryTime))// validity
@@ -183,6 +222,11 @@ public class JwtService {
 		Claims claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
 
 		return claims.getExpiration().before(new Date());
+	}
+	
+	private boolean isAdminToken() {
+		
+		return false;
 	}
 
 	public String generateOpenIdWithSecret(User user, String privateKey, String publicKey, String consumerKey) {

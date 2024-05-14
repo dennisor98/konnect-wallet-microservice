@@ -37,6 +37,6 @@ public class PinresetIssues extends BaseWalletDomain{
 	String approverLarkOpenId;
 	
 	@Column()
-	PinResetType resetReason;
+	String resetReason;
 	
 }

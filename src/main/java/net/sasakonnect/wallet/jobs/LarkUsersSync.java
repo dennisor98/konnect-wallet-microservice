@@ -17,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import jakarta.transaction.Transactional;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import  org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,7 @@ import net.sasakonnect.wallet.repository.lark.DepartmentRepository;
  	String tenant_access_token;
 	
 }
+@Slf4j
 @Service
 public class LarkUsersSync {
 	private final String botId = "cli_a53a08afc8b8d00a";
@@ -196,7 +198,7 @@ public void getLarkDepartments() {
 	        );
 	        
 	        UserResponseDTO responseBody  =  responseEntity.getBody();
-	        System.out.println("hasMore" + responseBody.getData().hasMore);
+	        log.info("data"+responseBody.getData());
 	        if(responseBody.getData().hasMore == true) {
 	        	   this.fetchMoreUsers(responseBody.getData().page_token, departmentId);
 	           }

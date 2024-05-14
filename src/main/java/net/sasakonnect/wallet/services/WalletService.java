@@ -77,6 +77,7 @@ import net.sasakonnect.wallet.notification.TransactionResultNotification;
 import net.sasakonnect.wallet.notification.WalletAccountUpgradeResultNotification;
 import net.sasakonnect.wallet.repository.CurrencyRepository;
 import net.sasakonnect.wallet.repository.LogsRepository;
+import net.sasakonnect.wallet.repository.RejectedAccountRepository;
 import net.sasakonnect.wallet.repository.UserJobRepository;
 import net.sasakonnect.wallet.repository.UserWalletRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
@@ -113,6 +114,10 @@ public class WalletService {
 
 	@Autowired
 	UserWalletRepository userWalletRepository;
+	
+	@Autowired
+	RejectedAccountRepository rejectedAccountRepository;
+	
 	@Autowired
 	private TransactionService transactionService;
 	
@@ -214,7 +219,6 @@ public class WalletService {
 
 		if (user2.isPresent()) {
 			var wallets = user2.get().getUserWallets();
-
 			if (!wallets.isEmpty()) {
 				var oneWallet = wallets.get(0);
 				var reqId = new HashMap<String, Object>();
@@ -1703,6 +1707,49 @@ public Object mpesaTillAndByGoodsSdk(@Valid MpesaBilling tillAndBuyGoods) {
 			return this.transactionService.getRecentTransactionContact(currentWallet.getAccountId(), txtype, pageNumber, pageSize);
 		}
 		return null;
+	}
+	
+	public ResponseEntity<Object> getAccountStatus(String mobile){
+		try {
+			Optional<User> user = this.userService.findUserByPhoneNumber(mobile);
+			if(user.isEmpty()){
+				Map<String,Object> map = new HashMap<>();
+				map.put("success",false);
+				map.put("message","No account is linked with the number");
+				return ResponseEntity.status(HttpStatus.OK).body(map);
+				
+			}
+			
+			//check account in the rejected accounts;
+			Optional<RejectedAccount> rejected = this.rejectedAccountRepository.findByMobile(mobile);
+		     if(rejected.isPresent()) {
+		    	 Map<String,Object> map = new HashMap<>();
+				 map.put("success",false);
+				 map.put("message","Account has been rejected");
+				 return ResponseEntity.status(HttpStatus.OK).body(map);
+		     }
+			
+			var userWallet = this.userWalletRepository.findByUserId(user.get().getId());
+			if(userWallet.isEmpty()) {
+				Map<String,Object> map = new HashMap<>();
+				map.put("success",false);
+				map.put("message","Account is under manual review");
+			  return ResponseEntity.status(HttpStatus.OK).body(map);
+			}
+			
+			var wallet = userWallet.get().getWallet();
+			Map<String,Object> map = new HashMap<>();
+			map.put("success", true);
+			map.put("message","Account approved");
+			return ResponseEntity.status(HttpStatus.OK).body(map);			
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","Something went wrong");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+		}
+		 		
 	}
 
 }

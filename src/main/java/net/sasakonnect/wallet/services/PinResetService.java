@@ -89,23 +89,24 @@ public class PinResetService {
 			  totalScore+=1;
 		  }
 		  
-		  if(req.getAccountBalance() == this.getWalletBalanceByUser(user.get())) {
+		  if(req.getBalance() == this.getWalletBalanceByUser(user.get())) {
 			  totalScore +=1;
 		  }
 		  
 		  float percentageScore = (totalScore/6)*100;
 		  User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		  Optional<UserWallet> wallet = this.userWalletRepository.findByUserId(user.get().getId());
 		  var pinReset =   PinresetIssues.builder()
 			    .accountOwner(user.get())
-			    .accountId(user.get().getUserWallets().get(0).getWallet().getAccountId())
-			    .resetReason(req.getResetReason())
+			    .accountId(wallet.isPresent()?wallet.get().getWallet().getAccountId():null)
+			    .approverLarkOpenId(req.getApprover())
+			    .resetReason(req.getResetReason().getValue())
 			    .validationScore(percentageScore)
 			    .requesterId(loggedInUser)
 				.build();
 		      
 		  this.pinResetIssuesRepository.save(pinReset);
-		  
-		  this.larkService.sendPinResetApprovalNotification(req.getApprover());
+		  this.larkService.sendPinResetApprovalNotification(req,wallet.isPresent()?wallet.get().getWallet():null,loggedInUser);
 		  Map<String,Object> map = new HashMap<>();
 		  map.put("success", true);
 		  map.put("message", "Request submission success");

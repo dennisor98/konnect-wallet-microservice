@@ -1,7 +1,7 @@
 package net.sasakonnect.wallet.enums;
 
 public enum PinResetType {
-	 FORGOT_PIN("FORGOT"),BLOCKED_PIN("BLOCKED");
+	 FORGOT("FORGOT"),BLOCKED("BLOCKED");
 	
 	
 		private final String  value;
