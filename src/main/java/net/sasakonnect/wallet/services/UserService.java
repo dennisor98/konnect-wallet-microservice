@@ -33,7 +33,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -43,6 +47,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -59,6 +64,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.ChangePin;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
+import net.sasakonnect.wallet.RequestDto.KompCallbackDto;
 import net.sasakonnect.wallet.RequestDto.OpenIdRequest;
 import net.sasakonnect.wallet.RequestDto.PhoneCountryPair;
 import net.sasakonnect.wallet.RequestDto.PinDto;
@@ -156,6 +162,9 @@ public class UserService extends RestClientService implements UserDetailsService
 	
 	@Value("${WALLET_BASE_URL}")
 	String wallet_base_url;
+	
+	@Value("${kompCallBackUrl}")
+	String kompCallBackUrl;
 	
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneOffset.UTC);
 	@Autowired
@@ -1511,6 +1520,30 @@ public class UserService extends RestClientService implements UserDetailsService
 	
 		// TODO Auto-generated method stub
 		
+	}
+	
+	
+	
+	public void notifyKompCallback(KompCallbackDto payLoad) {
+		Map<String,Object> map = new HashMap<>();
+		map.put("phoneNumber", payLoad.getMobileNumber());
+		map.put("verified", payLoad.getVerified());
+		map.put("description",payLoad.getDescription());
+		RestTemplate restTemplate = new RestTemplate();
+		HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Object> requestEntity = new HttpEntity<>(map,headers);
+
+        
+        ResponseEntity<Object> responseEntity = restTemplate.exchange(
+        		this.kompCallBackUrl.toString(),
+                HttpMethod.POST,
+                requestEntity,
+                Object.class
+        );
+        
+        log.info(responseEntity.toString());
+        
 	}
 	
 	
