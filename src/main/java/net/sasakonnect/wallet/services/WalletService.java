@@ -658,9 +658,11 @@ public class WalletService {
 				this.processTransaction(results);
 				
 				var reqParams =  results.getParams();
+//				if()
 				var fContact =  FinancialContact.builder()
 						.accountId(reqParams.getAccountId())
 						.oppoAccountId(reqParams.getOppoAccountId())
+						.oppoSubAccountId(reqParams.getOppoSubAccount())
 						.txType(reqParams.getTxType())
 						.oppoAccountName(reqParams.getOppoAccountName() !=null ? reqParams.getOppoAccountName() : reqParams.getCounterpartyName())
 						.oppoBankCode(reqParams.getOppoBankCode())
@@ -677,7 +679,9 @@ public class WalletService {
 //				log.info("balance update {}", results);
 
 				var transaction = this.transactionService.getTransactionById(results.getParams().getTxId());
+				
 				if(transaction.isPresent() && this.transactionService.isUpdatableTransaction(results)) {
+					var reqParams =  results.getParams();
 					log.info("existing transaction"+results);
 					transaction.get().setTxStatus(8);
 					transaction.get().setBalance(new BigDecimal(results.getParams().getBalance()));
@@ -693,8 +697,19 @@ public class WalletService {
 
 					this.publisher.publishEvent(
 							TransactionEvent.builder().userService(userService).transaction(transaction.get()).build());
+					var fContact =  FinancialContact.builder()
+							.accountId(reqParams.getAccountId())
+							.oppoAccountId(reqParams.getOppoAccountId())
+							.oppoSubAccountId(reqParams.getOppoSubAccount())
+							.txType(reqParams.getTxType())
+							.oppoAccountName(reqParams.getOppoAccountName() !=null ? reqParams.getOppoAccountName() : reqParams.getCounterpartyName())
+							.oppoBankCode(reqParams.getOppoBankCode())
+							.oppoChannelId(reqParams.getOppoChannelId())
+							.build();
+					this.financialContactService.saveTransactionContact(fContact);
 
 				} else {
+					var reqParams =  results.getParams();
 					log.info("new transaction"+results);
 					if (results.getParams().getTxStatus() == 0) {
 						results.getParams().setTxStatus(8);
@@ -713,6 +728,16 @@ public class WalletService {
 							transactionEventService.notifyNewCustomer(results.getParams().getAccountId(),results.getParams().getOppoAccountId());
 
 						}
+						var fContact =  FinancialContact.builder()
+								.accountId(reqParams.getAccountId())
+								.oppoAccountId(reqParams.getOppoAccountId())
+								.oppoSubAccountId(reqParams.getOppoSubAccount())
+								.txType(reqParams.getTxType())
+								.oppoAccountName(reqParams.getOppoAccountName() !=null ? reqParams.getOppoAccountName() : reqParams.getCounterpartyName())
+								.oppoBankCode(reqParams.getOppoBankCode())
+								.oppoChannelId(reqParams.getOppoChannelId())
+								.build();
+						this.financialContactService.saveTransactionContact(fContact);
 					}
 
 				}
