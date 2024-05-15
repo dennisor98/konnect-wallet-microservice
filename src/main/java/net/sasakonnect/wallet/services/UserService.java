@@ -801,7 +801,7 @@ public class UserService extends RestClientService implements UserDetailsService
 						map.put("success", true);
 						var log = Logs.builder()
 								.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
-								+" successfully  PIN PIN")
+								+" successfully changed their PIN")
 								.activity(LogTypes.PIN_SET)
 								.build();
 						this.logsRepository.save(log);
@@ -1421,7 +1421,7 @@ public class UserService extends RestClientService implements UserDetailsService
 	            if (file.getSize() > 5000000) {
 	            	Map<String,Object> map =  new HashMap<>();
 	            	map.put("success",false);
-	            	map.put("message","File exists maximum size");
+	            	map.put("message","File exceeds maximum size");
 	            	
 	            	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);	       
 	            }
