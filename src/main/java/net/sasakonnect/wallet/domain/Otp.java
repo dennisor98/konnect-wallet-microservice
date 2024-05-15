@@ -27,6 +27,9 @@ public class Otp extends BaseWalletDomain implements Serializable {
 
 	@Column(nullable = true)
 	private String hash;
+	
+	@Column(name = "hash_use_count", columnDefinition = "integer default 0",nullable=false)
+	private Integer hashUseCount;
 
 	@Column(nullable = false)
 	private String code;
@@ -44,12 +47,13 @@ public class Otp extends BaseWalletDomain implements Serializable {
 	public Otp() {
 	}
 
-	public Otp(String phoneNumber, String hash, String code, int ttl, User user) {
+	public Otp(String phoneNumber, String hash, String code, int ttl, User user,Integer hashUseCount) {
 		this.phoneNumber = phoneNumber;
 		this.hash = hash;
 		this.code = code;
 		this.ttl = ttl;
 		this.user = user;
+		this.hashUseCount  = hashUseCount;
 	}
 
 	public boolean isValid() {

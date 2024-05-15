@@ -19,7 +19,14 @@ public class FinancialContact extends BaseWalletDomain implements Serializable  
 
 	private static final long serialVersionUID = -8524060173356940591L;
 	@Column
-	FinancialContactType contactType;
+	String txType;
+	
+	@Column()
+	String oppoChannelId;
+	
+	@Column()
+	String oppoBankCode;
+	
 	
 	@Column
 	String accountId;
