@@ -22,6 +22,7 @@ public class TransactionResultNotification {
 	private String amount; // Updated to String
 	private String feeAmount;
 	private String balance;
+	private String counterpartyName;
 	private int txStatus; // Updated to int
 	private long createTime; // Updated to long
 	private long updateTime; // Updated to long

@@ -37,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.BuyAirtime;
 import net.sasakonnect.wallet.RequestDto.ChoiceTransferDto;
 import net.sasakonnect.wallet.RequestDto.EasyOnboardingRequestParams;
+import net.sasakonnect.wallet.RequestDto.KompCallbackDto;
 import net.sasakonnect.wallet.RequestDto.Mpesa;
 import net.sasakonnect.wallet.RequestDto.MpesaBillType;
 import net.sasakonnect.wallet.RequestDto.MpesaBilling;
@@ -577,6 +578,13 @@ public class WalletService {
 								.description(user.get().getFirstName()+" "+user.get().getLastName()+"of acc No: "+notificationBody.getAccountId()+" succeded to onboard")
 								.build();
 						this.logsRepository.save(log);
+						
+						var kompPayload = KompCallbackDto.builder()
+								          .mobileNumber(user.get().getMobile())
+								          .verified(true)
+								          .description("Account approved")
+								          .build();
+						this.userService.notifyKompCallback(kompPayload);
 					}
 
 				} else if (notificationBody.getStatus() == 3 && user.isPresent()) {
@@ -610,7 +618,12 @@ public class WalletService {
 							.build();
 					this.logsRepository.save(log);
 					this.larkService.sendOnBoardingMessage("REJECTED ONBOARDING", "red", notificationBody);
-
+					var kompPayload = KompCallbackDto.builder()
+					          .mobileNumber(user.get().getMobile())
+					          .verified(false)
+					          .description("Account rejected")
+					          .build();
+			     this.userService.notifyKompCallback(kompPayload);
 				} else if (notificationBody.getStatus() == 5 && user.isPresent()) {
 					// log closed account
 					this.larkService.sendOnBoardingMessage("ACCOUNT CLOSED", "red", notificationBody);
@@ -631,7 +644,7 @@ public class WalletService {
                    //save logs to the database
 					var log = Logs.builder()
 							.activity(LogTypes.ONBOARDING)
-							.description(user.get().getFirstName()+" "+user.get().getLastName()+"of onboarding ID: "+notificationBody.getOnboardingRequestId()+" failed to onboard.Account under mnaual review.")
+							.description(user.get().getFirstName()+" "+user.get().getLastName()+" of onboarding ID: "+notificationBody.getOnboardingRequestId()+" failed to onboard.Account under mnaual review.")
 							.build();
 					this.logsRepository.save(log);
 					this.larkService.sendOnBoardingMessage("ACCOUNT UNDER MANUAL REVIEW", "green", notificationBody);
@@ -658,11 +671,13 @@ public class WalletService {
 				this.processTransaction(results);
 				
 				var reqParams =  results.getParams();
+//				if()
 				var fContact =  FinancialContact.builder()
 						.accountId(reqParams.getAccountId())
 						.oppoAccountId(reqParams.getOppoAccountId())
+						.oppoSubAccountId(reqParams.getOppoSubAccount())
 						.txType(reqParams.getTxType())
-						.oppoAccountName(reqParams.getOppoAccountName())
+						.oppoAccountName(reqParams.getOppoAccountName() !=null ? reqParams.getOppoAccountName() : reqParams.getCounterpartyName())
 						.oppoBankCode(reqParams.getOppoBankCode())
 						.oppoChannelId(reqParams.getOppoChannelId())
 						.build();
@@ -677,7 +692,9 @@ public class WalletService {
 //				log.info("balance update {}", results);
 
 				var transaction = this.transactionService.getTransactionById(results.getParams().getTxId());
+				
 				if(transaction.isPresent() && this.transactionService.isUpdatableTransaction(results)) {
+					var reqParams =  results.getParams();
 					log.info("existing transaction"+results);
 					transaction.get().setTxStatus(8);
 					transaction.get().setBalance(new BigDecimal(results.getParams().getBalance()));
@@ -685,12 +702,27 @@ public class WalletService {
 					if(results.getParams().getExtInfo().getCounterpartyName() == null) {
 						transaction.get().setCounterpartyName(transaction.get().getCounterpartyName());
 					}
+					
+					if(results.getParams().getExtInfo().getExternalTxId() == null) {
+						transaction.get().setCounterpartyName(transaction.get().getExternalTxId());
+					}
 					this.transactionService.transactionRepository.save(transaction.get());
 
 					this.publisher.publishEvent(
 							TransactionEvent.builder().userService(userService).transaction(transaction.get()).build());
+					var fContact =  FinancialContact.builder()
+							.accountId(reqParams.getAccountId())
+							.oppoAccountId(reqParams.getOppoAccountId())
+							.oppoSubAccountId(reqParams.getOppoSubAccount())
+							.txType(reqParams.getTxType())
+							.oppoAccountName(reqParams.getOppoAccountName() !=null ? reqParams.getOppoAccountName() : reqParams.getCounterpartyName())
+							.oppoBankCode(reqParams.getOppoBankCode())
+							.oppoChannelId(reqParams.getOppoChannelId())
+							.build();
+					this.financialContactService.saveTransactionContact(fContact);
 
 				} else {
+					var reqParams =  results.getParams();
 					log.info("new transaction"+results);
 					if (results.getParams().getTxStatus() == 0) {
 						results.getParams().setTxStatus(8);
@@ -699,9 +731,26 @@ public class WalletService {
 					var createdTransaction = this.transactionService.saveTransaction(results);
 					if (createdTransaction != null) {
 //						log.info("publish transaction to socket {}", createdTransaction);
-
 						this.publisher.publishEvent(TransactionEvent.builder().userService(userService)
 								.transaction(createdTransaction).build());
+						
+						if((results.getParams().getTxType().equalsIgnoreCase(WalletTransactionType.TTID0001.getValue())  || 
+							results.getParams().getTxType().equalsIgnoreCase(WalletTransactionType.TTID0002.getValue())) && 
+						    results.getParams().getOppoAccountId().length() == 9  && (results.getParams().getOppoBankCode().equalsIgnoreCase("M-PESA") ||
+							results.getParams().getOppoChannelId().equalsIgnoreCase("M-PESA"))  ) {
+							transactionEventService.notifyNewCustomer(results.getParams().getAccountId(),results.getParams().getOppoAccountId());
+
+						}
+						var fContact =  FinancialContact.builder()
+								.accountId(reqParams.getAccountId())
+								.oppoAccountId(reqParams.getOppoAccountId())
+								.oppoSubAccountId(reqParams.getOppoSubAccount())
+								.txType(reqParams.getTxType())
+								.oppoAccountName(reqParams.getOppoAccountName() !=null ? reqParams.getOppoAccountName() : reqParams.getCounterpartyName())
+								.oppoBankCode(reqParams.getOppoBankCode())
+								.oppoChannelId(reqParams.getOppoChannelId())
+								.build();
+						this.financialContactService.saveTransactionContact(fContact);
 					}
 
 				}
@@ -769,6 +818,7 @@ public class WalletService {
 		if (transaction.isPresent()) {
 			transaction.get().setTxStatus(results.getParams().getTxStatus());
 			transaction.get().setCounterpartyName(results.getParams().getExtInfo().getCounterpartyName());
+			transaction.get().setExternalTxId(results.getParams().getExtInfo().getExternalTxId());
 			var createdTransaction = this.transactionService.transactionRepository.save(transaction.get());
 
 		} else {
@@ -865,7 +915,6 @@ public class WalletService {
 			String responseJson = responseMono.block();
 			log.info(responseJson);
 			// call wallet invitation thread
-			transactionEventService.notifyNewCustomer(userwallet.getAccountId(), mpesa.getReceiverMobileNumber());
 			
 			//save financial contact
 			

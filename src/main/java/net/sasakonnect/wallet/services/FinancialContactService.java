@@ -26,9 +26,13 @@ public class FinancialContactService {
       public void saveTransactionContact(FinancialContact finacialContact) {
     	  Optional<FinancialContact> contact = this.financialContactRepository.findByAccountIdAndOppoAccountId(finacialContact.getAccountId(), finacialContact.getOppoAccountId());
     	  if(contact.isPresent()) {
-    		  contact.get().setUpdatedAt(new Date());
+    		var c =   contact.get();
+    		c.setUpdatedAt(new Date());
+    		this.financialContactRepository.save(c);
+    	  }else {
+    		  this.financialContactRepository.save(finacialContact);
     	  }
-    	  this.financialContactRepository.save(finacialContact);
+    	  
       }
       
       
