@@ -685,6 +685,10 @@ public class WalletService {
 					if(results.getParams().getExtInfo().getCounterpartyName() == null) {
 						transaction.get().setCounterpartyName(transaction.get().getCounterpartyName());
 					}
+					
+					if(results.getParams().getExtInfo().getExternalTxId() == null) {
+						transaction.get().setCounterpartyName(transaction.get().getExternalTxId());
+					}
 					this.transactionService.transactionRepository.save(transaction.get());
 
 					this.publisher.publishEvent(
@@ -776,6 +780,7 @@ public class WalletService {
 		if (transaction.isPresent()) {
 			transaction.get().setTxStatus(results.getParams().getTxStatus());
 			transaction.get().setCounterpartyName(results.getParams().getExtInfo().getCounterpartyName());
+			transaction.get().setExternalTxId(results.getParams().getExtInfo().getExternalTxId());
 			var createdTransaction = this.transactionService.transactionRepository.save(transaction.get());
 
 		} else {
