@@ -55,6 +55,7 @@ import net.sasakonnect.wallet.ResponseDto.TransactionResponseDto;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
 import net.sasakonnect.wallet.domain.CorporateDetails;
+import net.sasakonnect.wallet.domain.FinancialContact;
 import net.sasakonnect.wallet.domain.Logs;
 import net.sasakonnect.wallet.domain.RejectedAccount;
 import net.sasakonnect.wallet.domain.Transaction;
@@ -650,12 +651,22 @@ public class WalletService {
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.TRANSACTION.getCode())) {
 
 				log.info("payload {}", body.toString());
-
+                    
 				NotificationResult<TransactionResultNotification> results = new Gson().fromJson(body.toString(),
 						new TypeToken<NotificationResult<TransactionResultNotification>>() {
 						}.getType());
 				this.processTransaction(results);
 				
+				var reqParams =  results.getParams();
+				var fContact =  FinancialContact.builder()
+						.accountId(reqParams.getAccountId())
+						.oppoAccountId(reqParams.getOppoAccountId())
+						.txType(reqParams.getTxType())
+						.oppoAccountName(reqParams.getOppoAccountName())
+						.oppoBankCode(reqParams.getOppoBankCode())
+						.oppoChannelId(reqParams.getOppoChannelId())
+						.build();
+				this.financialContactService.saveTransactionContact(fContact);
 //				log.info("transacttion {}", results);
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.BALANCE.getCode())) {
@@ -708,8 +719,9 @@ public class WalletService {
 
 				// update wallet type
 				if (wallet.isPresent()) {
-					wallet.get().setAccountType(results.getParams().getAccountType());
-					this.walletRepository.save(wallet.get());
+					var walletUpgrade = wallet.get();
+					walletUpgrade.setAccountType(results.getParams().getAccountType());
+					this.walletRepository.save(walletUpgrade);
 				}
 				this.userService.pushUpgradeNotification(results.getParams());
 
@@ -1031,11 +1043,11 @@ public class WalletService {
 			var userWallets = this.walletRepository.findByUserWalletsUser(user);
 			if (!userWallets.isEmpty()) {
 				var userwallet = userWallets.get(0);
-				reqId.put("accountId", userwallet.getAccountId());
+				reqId.put("accountId", userwallet.getAccountId().trim());
 
 			}
 		} else {
-			reqId.put("accountId", payUtiltiy.getAccountId());
+			reqId.put("accountId", payUtiltiy.getAccountId().trim());
 
 		}
 		reqId.put("billOrderNumber", payUtiltiy.getBillOrderNumber());
@@ -1074,15 +1086,15 @@ public class WalletService {
 			reqId.put("payerAccountId", userwallet.getAccountId());
 
 		}
-		var receivingUser = this.userService.findUserByAccountd(choiceTransfer.getReceiverAccount());
+		var receivingUser = this.userService.findUserByAccountd(choiceTransfer.getReceiverAccount().trim());
 		if (receivingUser.isPresent()) {
 			reqId.put("payeeMobileForNotification", receivingUser.get().getMobile());
 
 		}
 
-		reqId.put("payeeBankCode", choiceTransfer.getBankCode());
+		reqId.put("payeeBankCode", choiceTransfer.getBankCode().trim());
 
-		reqId.put("payeeAccountId", choiceTransfer.getReceiverAccount());
+		reqId.put("payeeAccountId", choiceTransfer.getReceiverAccount().trim());
 		reqId.put("payeeAccountName", choiceTransfer.getReceiverName());
 
 		reqId.put("currency", choiceTransfer.getCurrencyCode());
@@ -1126,7 +1138,7 @@ public class WalletService {
 				reqId.put("payerAccountId", userwallet.getAccountId());
 			}
 			if (user.getUserWallets().size() > 0) {
-				reqId.put("payeeAccountId", user.getUserWallets().get(0).getWallet().getAccountId());
+				reqId.put("payeeAccountId", user.getUserWallets().get(0).getWallet().getAccountId().trim());
 			} else {
 				Map<String, String> map = new HashMap<String, String>();
 				map.put("message", "user with phone " + walletTransfer.getPhoneNumber() + " not found");
@@ -1704,7 +1716,7 @@ public Object mpesaTillAndByGoodsSdk(@Valid MpesaBilling tillAndBuyGoods) {
 		var wallets = this.walletRepository.findByUserWalletsUser(loggedInUser);
 		if(!wallets.isEmpty()) {
 			var currentWallet = wallets.get(0);
-			return this.transactionService.getRecentTransactionContact(currentWallet.getAccountId(), txtype, pageNumber, pageSize);
+			return this.financialContactService.getTransactionContacts(currentWallet.getAccountId(), txtype, pageNumber, pageSize);
 		}
 		return null;
 	}
