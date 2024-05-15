@@ -1,8 +1,10 @@
 package net.sasakonnect.wallet.services;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,10 @@ public class FinancialContactService {
 	@Autowired
 	FinancialContactRepository financialContactRepository;
       public void saveTransactionContact(FinancialContact finacialContact) {
+    	  Optional<FinancialContact> contact = this.financialContactRepository.findByAccountIdAndOppoAccountId(finacialContact.getAccountId(), finacialContact.getOppoAccountId());
+    	  if(contact.isPresent()) {
+    		  contact.get().setUpdatedAt(new Date());
+    	  }
     	  this.financialContactRepository.save(finacialContact);
       }
       
@@ -55,4 +61,58 @@ public class FinancialContactService {
     	  return ResponseEntity.status(HttpStatus.OK).body(resMap) ;
     	  
       }
+      
+      public ResponseEntity<Object> searchOppoAccounIdInfo(String oppoAccountId){
+    	  Optional<FinancialContact> contact  = this.financialContactRepository.findByoppoAccountId(oppoAccountId);
+    	  if(contact.isPresent()) {
+    		  var c = contact.get();
+    		  Map<String,Object> map =  new HashMap<>();
+    		  map.put("success", true);
+    		  map.put("message","Request successful");
+    		  Map<String,Object> cmap =  new HashMap<>();
+    		  cmap.put("oppoAccountId",c.getOppoAccountId());
+    		  cmap.put("oppoAccountName",c.getOppoAccountName());
+    		  cmap.put("lastUpdatedAt", contact);
+    		  map.put("accountInfo",cmap);
+    		  
+    		  return ResponseEntity.status(HttpStatus.OK).body(map);
+    	  }
+    	  return null;
+      }
+      
+      public ResponseEntity<Object> getTransactionContacts(String txType,String accountId,Integer pageNumber,Integer pageSize){
+    	  Page<FinancialContact> recentTransactions = this.financialContactRepository.findByAccountIdAndTxType(accountId, txType,PageRequest.of(pageNumber, pageSize));
+    	  Map<String,Object> payload = new HashMap<>();
+    	  if(!recentTransactions.isEmpty()) {
+    		  var rt =  recentTransactions.stream().map(t->{
+    				 Map<String,Object> map = new HashMap<>();
+    				 map.put("accountId",t.getOppoAccountId());
+    				 map.put("accountName",t.getOppoAccountName() );
+    				 map.put("subAccountId",t.getOppoSubAccountId());		
+    				 return map;
+    			   }).collect(Collectors.toList());
+    			   Map<String,Object> map = new HashMap<>();
+    			   map.put("success",true);
+    			   map.put("message","Request completed");
+    			   map.put("contacts",rt.size() > 0 ? rt : new ArrayList<>());
+    			   map.put("pageSize", recentTransactions.getSize());
+    			   map.put("currentPage", recentTransactions.getNumber());
+    			   map.put("nextPage", recentTransactions.hasNext() ? recentTransactions.nextPageable().getPageNumber() : null);
+    			   map.put("hasNextPage", recentTransactions.hasNext());
+    			   map.put("hasPreviousPage", recentTransactions.hasPrevious());
+    			   payload.put("payload", map);
+
+    			return ResponseEntity.status(HttpStatus.OK).body(payload);
+    		   }else {
+    			   Map<String,Object> map = new HashMap<>();
+    			   map.put("success",true);
+    			   map.put("message","Request completed");
+    			   map.put("contacts",new ArrayList<>());
+    			   payload.put("payload", map);
+    			   return ResponseEntity.status(HttpStatus.OK).body(payload);
+    		   }
+    		   
+      }
+      
+     
 }

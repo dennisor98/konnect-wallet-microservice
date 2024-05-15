@@ -83,6 +83,7 @@ public class OtpSmsService {
 			otpEntity.setCode(String.valueOf(otp));
 			otpEntity.setPhoneNumber(userLogin.getFullPhone());
 			otpEntity.setUser(user.get());
+			otpEntity.setHashUseCount(0);
 			otpEntity.setTtl(otp_ttl);
 			Instant now = Instant.now();
 			long microsecondsSinceEpoch = Duration.between(Instant.EPOCH, now).toNanos() / 1_000;

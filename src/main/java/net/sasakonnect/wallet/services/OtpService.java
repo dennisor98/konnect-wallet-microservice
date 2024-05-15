@@ -78,7 +78,7 @@ public class OtpService {
 			otpRepository.delete(otpOptional.get());
 			return ResponseEntity.ok("OTP verified");
 		}
-
+		
 		return ResponseEntity.badRequest().body("OTP hash or code is Invalid");
 	}
 
@@ -88,10 +88,11 @@ public class OtpService {
 
 		if (otpOptional.isPresent()) {
 			Otp otp = otpOptional.get();
+			otp.setHashUseCount(otp.getHashUseCount()+1);
 			otpRepository.delete(otp);
 			return otp;
 		}
-
+     
 		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "OTP code is Invalid");
 	}
 
@@ -107,6 +108,15 @@ public class OtpService {
 
 			return Optional.of(otp.get());
 		} else {
+			Optional<Otp> otpHash = this.otpRepository.findByHashWithUser(hash);
+			if(otpHash.isPresent() && otp.isEmpty()) {
+				log.info("otp present"+otpHash.get().getCode());
+				Otp otpwithHash = otpHash.get();
+				if(otpwithHash.getHashUseCount() >= 5) {
+					this.deleteOtp(otpwithHash);
+				}
+				otpwithHash.setHashUseCount(otpwithHash.getHashUseCount()+1);	
+			}
 			return Optional.empty();
 		}
 	}
