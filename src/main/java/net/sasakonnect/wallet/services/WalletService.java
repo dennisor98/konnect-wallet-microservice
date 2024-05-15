@@ -37,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.BuyAirtime;
 import net.sasakonnect.wallet.RequestDto.ChoiceTransferDto;
 import net.sasakonnect.wallet.RequestDto.EasyOnboardingRequestParams;
+import net.sasakonnect.wallet.RequestDto.KompCallbackDto;
 import net.sasakonnect.wallet.RequestDto.Mpesa;
 import net.sasakonnect.wallet.RequestDto.MpesaBillType;
 import net.sasakonnect.wallet.RequestDto.MpesaBilling;
@@ -602,6 +603,13 @@ public class WalletService {
 								.description(user.get().getFirstName()+" "+user.get().getLastName()+"of acc No: "+notificationBody.getAccountId()+" succeded to onboard")
 								.build();
 						this.logsRepository.save(log);
+						
+						var kompPayload = KompCallbackDto.builder()
+								          .mobileNumber(user.get().getMobile())
+								          .verified(true)
+								          .description("Account approved")
+								          .build();
+						this.userService.notifyKompCallback(kompPayload);
 					}
 
 				} else if (notificationBody.getStatus() == 3 && user.isPresent()) {
@@ -635,7 +643,12 @@ public class WalletService {
 							.build();
 					this.logsRepository.save(log);
 					this.larkService.sendOnBoardingMessage("REJECTED ONBOARDING", "red", notificationBody);
-
+					var kompPayload = KompCallbackDto.builder()
+					          .mobileNumber(user.get().getMobile())
+					          .verified(false)
+					          .description("Account rejected")
+					          .build();
+			     this.userService.notifyKompCallback(kompPayload);
 				} else if (notificationBody.getStatus() == 5 && user.isPresent()) {
 					// log closed account
 					this.larkService.sendOnBoardingMessage("ACCOUNT CLOSED", "red", notificationBody);
