@@ -631,7 +631,7 @@ public class WalletService {
                    //save logs to the database
 					var log = Logs.builder()
 							.activity(LogTypes.ONBOARDING)
-							.description(user.get().getFirstName()+" "+user.get().getLastName()+"of onboarding ID: "+notificationBody.getOnboardingRequestId()+" failed to onboard.Account under mnaual review.")
+							.description(user.get().getFirstName()+" "+user.get().getLastName()+" of onboarding ID: "+notificationBody.getOnboardingRequestId()+" failed to onboard.Account under mnaual review.")
 							.build();
 					this.logsRepository.save(log);
 					this.larkService.sendOnBoardingMessage("ACCOUNT UNDER MANUAL REVIEW", "green", notificationBody);
@@ -662,7 +662,7 @@ public class WalletService {
 						.accountId(reqParams.getAccountId())
 						.oppoAccountId(reqParams.getOppoAccountId())
 						.txType(reqParams.getTxType())
-						.oppoAccountName(reqParams.getOppoAccountName())
+						.oppoAccountName(reqParams.getOppoAccountName() !=null ? reqParams.getOppoAccountName() : reqParams.getCounterpartyName())
 						.oppoBankCode(reqParams.getOppoBankCode())
 						.oppoChannelId(reqParams.getOppoChannelId())
 						.build();
@@ -699,9 +699,16 @@ public class WalletService {
 					var createdTransaction = this.transactionService.saveTransaction(results);
 					if (createdTransaction != null) {
 //						log.info("publish transaction to socket {}", createdTransaction);
-
 						this.publisher.publishEvent(TransactionEvent.builder().userService(userService)
 								.transaction(createdTransaction).build());
+						
+						if((results.getParams().getTxType().equalsIgnoreCase(WalletTransactionType.TTID0001.getValue())  || 
+							results.getParams().getTxType().equalsIgnoreCase(WalletTransactionType.TTID0002.getValue())) && 
+						    results.getParams().getOppoAccountId().length() == 9  && (results.getParams().getOppoBankCode().equalsIgnoreCase("M-PESA") ||
+							results.getParams().getOppoChannelId().equalsIgnoreCase("M-PESA"))  ) {
+							transactionEventService.notifyNewCustomer(results.getParams().getAccountId(),results.getParams().getOppoAccountId());
+
+						}
 					}
 
 				}
@@ -865,7 +872,6 @@ public class WalletService {
 			String responseJson = responseMono.block();
 			log.info(responseJson);
 			// call wallet invitation thread
-			transactionEventService.notifyNewCustomer(userwallet.getAccountId(), mpesa.getReceiverMobileNumber());
 			
 			//save financial contact
 			
