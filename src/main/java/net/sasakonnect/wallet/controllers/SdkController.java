@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import net.sasakonnect.wallet.RequestDto.MerchantKeyDto;
+import net.sasakonnect.wallet.RequestDto.MerchantStkPush;
 import net.sasakonnect.wallet.RequestDto.SdkPayDto;
 import net.sasakonnect.wallet.RequestDto.SdkRequestOpenId;
 import net.sasakonnect.wallet.RequestDto.SdkSearchCustomer;
@@ -31,7 +32,9 @@ import net.sasakonnect.wallet.annotations.ServiceInteractionMiddleware;
 import net.sasakonnect.wallet.annotations.TransactionMiddleware;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.beans.ClientAppsBean;
+import net.sasakonnect.wallet.domain.FinancialInstituation;
 import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.domain.WalletClientAccount;
 import net.sasakonnect.wallet.repository.TransactionRepository;
 import net.sasakonnect.wallet.services.TransactionService;
 import net.sasakonnect.wallet.services.UserService;
@@ -59,8 +62,7 @@ public class SdkController {
 	@Autowired
 	UserService userService;
 
-	@Autowired
-	private ClientAppsBean clientDataService;
+	 ClientAppsBean clientDataService;
 
 	public SdkController(TransactionService transactionService, ClientAppsBean clientDataService) {
 		this.transactionService = transactionService;
@@ -128,11 +130,45 @@ public class SdkController {
 		
 		
 	    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(message);
-//		var walletClientService = this.walletClientService.payThroughSdk(sdkpayDto);
-//
-//		// System.out.print(walletClientService.);
-//		merchantWorker.notifyMerchantIncomingPayment(walletClientService, sdkpayDto);
-//		return walletClientService;
+
+	}
+	
+	@PostMapping("customer/stkpush")
+	@ServiceInteractionMiddleware()
+	public Object invokeStkPush(
+			@Parameter(example = "d388a3ababb6c3a2851f1ad112d8037c1350b32fe93623edda82",
+			name = "secret-key", 
+			description = "Provide app key of the app you created on dashboard", 
+			in = ParameterIn.HEADER, 
+			required = true) 
+			@RequestHeader("secret-key") String appSecret,
+
+			@RequestBody() @Valid MerchantStkPush merchantStkPush) {
+		//ignored  country code just for brevity
+		Map<Object, Object> message= new HashMap<>();
+		
+		var clientData = clientDataService.getWalletClient();
+		if (clientData.getEnabled() && clientData.getDeletedAt() == null) {
+			List<WalletClientAccount>  merchantWalletAccount=clientData.getWalletClientAccount().stream()
+		    .filter(a -> a.getAccountType() == FinancialInstituation.WALLET)
+		    .collect(Collectors.toList());
+			if(!merchantWalletAccount.isEmpty()) {
+				var acc=merchantWalletAccount.get(0);
+				return this.walletClientService.invokeStkPushToLoadWallet(acc.getWalletAccountNo(),merchantStkPush.getPhoneNumber(),merchantStkPush.getAmount());
+				
+			}else {
+				message.put("message","Merchant does not support load wallet");
+				
+				
+			    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(message);
+			}
+		}
+	
+		message.put("message","could not validate key");
+		
+		
+	    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(message);
+
 	}
 
 	@PostMapping("customers")

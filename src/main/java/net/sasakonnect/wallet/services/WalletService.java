@@ -450,6 +450,31 @@ public class WalletService {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	public Object loadWalletFromMpesa(String merchantAccount,String targetNo,int amount) {
+
+	
+
+			var reqId = new HashMap<String, Object>();
+			reqId.put("accountId",merchantAccount);
+			reqId.put("amount",amount);
+			reqId.put("mobile", targetNo);
+			var reqs = this.requestSigner.signRequest(reqId);
+
+			Mono<String> responseMono = this.bankClientBean.webClient.post()
+					.uri(ChoiceEndpointsConstants.DEPOSIT_FROM_MPESA).contentType(MediaType.APPLICATION_JSON)
+					.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+					.bodyToMono(String.class);
+
+			String responseJson = responseMono.block();
+
+			if (responseJson != null) {
+				return new Gson().fromJson(responseJson, Object.class);
+
+			}
+		
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	public ResponseEntity<Object> createNewOnBoardingUser(@Valid EasyOnboardingRequestParams easyOnboarding) {
 		Map<String, Object> userMap = new HashMap<String, Object>();

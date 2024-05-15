@@ -30,6 +30,6 @@ public class Logs extends BaseWalletDomain implements Serializable{
 	private String description;
    
    @Enumerated(EnumType.STRING)
-	@Column(nullable = true)
+	@Column(nullable = true, columnDefinition = "LONGTEXT")
 	private LogTypes activity;
 }
