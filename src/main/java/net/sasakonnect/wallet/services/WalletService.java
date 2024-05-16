@@ -1795,6 +1795,16 @@ public Object mpesaTillAndByGoodsSdk(@Valid MpesaBilling tillAndBuyGoods) {
 		return null;
 	}
 	
+	public ResponseEntity<Object> searchRecentTransactionContact(String txtype,Integer pageNumber,Integer pageSize){
+		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		var wallets = this.walletRepository.findByUserWalletsUser(loggedInUser);
+		if(!wallets.isEmpty()) {
+			var currentWallet = wallets.get(0);
+			return this.financialContactService.searchTransactionContacts(currentWallet.getAccountId(), txtype, pageNumber, pageSize);
+		}
+		return null;
+	}
+	
 	public ResponseEntity<Object> getAccountStatus(String mobile){
 		try {
 			Optional<User> user = this.userService.findUserByPhoneNumber(mobile);

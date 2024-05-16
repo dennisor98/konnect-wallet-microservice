@@ -44,6 +44,8 @@ Page<FinancialContact> findPesaLinkContacts(@Param("accountId") String accountId
    @Query("SELECT f FROM FinancialContact f WHERE f.accountId =:accountId AND f.txType = 'TTID0006'")
 Page<FinancialContact> findUtilityContacts(@Param("accountId") String accountId,Pageable pageable);
    
+ @Query("SELECT f FROM FinancialContact f WHERE f.oppoAccountId LIKE '%queryString%' OR f.oppoAccountName LIKE '%queryString%'")
+ Page<FinancialContact> searchContact(@Param("queryString") String searchTerm,Pageable pageable);
 
    
  

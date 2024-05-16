@@ -87,6 +87,39 @@ public class FinancialContactService {
     	  return null;
       }
       
+      public ResponseEntity<Object> searchTransactionContacts(String accountId,String searchTerm,Integer pageNumber,Integer pageSize){
+    	  Map<String,Object> payload = new HashMap<>();
+    	  Page<FinancialContact> recentTransactions = this.financialContactRepository.searchContact(searchTerm, PageRequest.of(pageNumber,pageSize));
+    	  if(recentTransactions !=null) {
+    		  var rt =  recentTransactions.stream().map(t->{
+    				 Map<String,Object> map = new HashMap<>();
+    				 map.put("accountId",t.getOppoAccountId());
+    				 map.put("accountName",t.getOppoAccountName() );
+    				 map.put("subAccountId",t.getOppoSubAccountId());		
+    				 return map;
+    			   }).collect(Collectors.toList());
+    			   Map<String,Object> map = new HashMap<>();
+    			   map.put("success",true);
+    			   map.put("message","Request completed");
+    			   map.put("contacts",rt.size() > 0 ? rt : new ArrayList<>());
+    			   map.put("pageSize", recentTransactions.getSize());
+    			   map.put("currentPage", recentTransactions.getNumber());
+    			   map.put("nextPage", recentTransactions.hasNext() ? recentTransactions.nextPageable().getPageNumber() : null);
+    			   map.put("hasNextPage", recentTransactions.hasNext());
+    			   map.put("hasPreviousPage", recentTransactions.hasPrevious());
+    			   payload.put("payload", map);
+
+    			return ResponseEntity.status(HttpStatus.OK).body(payload);
+    		   }else {
+    			   Map<String,Object> map = new HashMap<>();
+    			   map.put("success",true);
+    			   map.put("message","Request completed");
+    			   map.put("contacts",new ArrayList<>());
+    			   payload.put("payload", map);
+    			   return ResponseEntity.status(HttpStatus.OK).body(payload);
+    		   }
+      }
+      
       public ResponseEntity<Object> getTransactionContacts(String accountId,String txType,Integer pageNumber,Integer pageSize){
     	  Page<FinancialContact> recentTransactions = null;
     	  
