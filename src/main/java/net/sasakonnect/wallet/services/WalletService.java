@@ -702,7 +702,7 @@ public class WalletService {
 						.oppoAccountId(reqParams.getOppoAccountId())
 						.oppoSubAccountId(reqParams.getOppoSubAccount())
 						.txType(reqParams.getTxType())
-						.oppoAccountName(reqParams.getCounterpartyName())
+						.oppoAccountName(reqParams.getExtInfo().getCounterpartyName())
 						.oppoBankCode(reqParams.getOppoBankCode())
 						.oppoChannelId(reqParams.getOppoChannelId())
 						.build();
@@ -740,7 +740,7 @@ public class WalletService {
 							.oppoAccountId(reqParams.getOppoAccountId())
 							.oppoSubAccountId(reqParams.getOppoSubAccount())
 							.txType(reqParams.getTxType())
-							.oppoAccountName(reqParams.getOppoAccountName() !=null ? reqParams.getOppoAccountName() : reqParams.getCounterpartyName())
+							.oppoAccountName(reqParams.getExtInfo().getCounterpartyName())
 							.oppoBankCode(reqParams.getOppoBankCode())
 							.oppoChannelId(reqParams.getOppoChannelId())
 							.build();
@@ -771,7 +771,7 @@ public class WalletService {
 								.oppoAccountId(reqParams.getOppoAccountId())
 								.oppoSubAccountId(reqParams.getOppoSubAccount())
 								.txType(reqParams.getTxType())
-								.oppoAccountName(reqParams.getOppoAccountName() !=null ? reqParams.getOppoAccountName() : reqParams.getCounterpartyName())
+								.oppoAccountName(reqParams.getExtInfo().getCounterpartyName())
 								.oppoBankCode(reqParams.getOppoBankCode())
 								.oppoChannelId(reqParams.getOppoChannelId())
 								.build();
