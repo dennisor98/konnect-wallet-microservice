@@ -30,7 +30,7 @@ public class FinancialContactService {
     	  if(contact.isPresent()) {
     		var c =   contact.get();
     		c.setUpdatedAt(new Date());
-    		c.setOppoAccountId(finacialContact.getOppoAccountName());
+    		c.setOppoAccountName(finacialContact.getOppoAccountName());
     		this.financialContactRepository.save(c);
     	  }else {
     		  this.financialContactRepository.save(finacialContact);
