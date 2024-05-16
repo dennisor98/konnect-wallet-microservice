@@ -14,21 +14,23 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.domain.FinancialContact;
 import net.sasakonnect.wallet.enums.FinancialContactType;
 import net.sasakonnect.wallet.repository.FinancialContactRepository;
 import net.sasakonnect.wallet.tools.ResponsePagerClass;
-
+@Slf4j
 @Service
 public class FinancialContactService {
 	
 	@Autowired
 	FinancialContactRepository financialContactRepository;
       public void saveTransactionContact(FinancialContact finacialContact) {
-    	  Optional<FinancialContact> contact = this.financialContactRepository.findByAccountIdAndOppoAccountId(finacialContact.getAccountId(), finacialContact.getOppoAccountId());
+    	  Optional<FinancialContact> contact = this.financialContactRepository.findByAccountIdAndOppoAccountIdAndTxType(finacialContact.getAccountId(), finacialContact.getOppoAccountId(),finacialContact.getTxType());
     	  if(contact.isPresent()) {
     		var c =   contact.get();
     		c.setUpdatedAt(new Date());
+    		c.setOppoAccountId(finacialContact.getOppoAccountName());
     		this.financialContactRepository.save(c);
     	  }else {
     		  this.financialContactRepository.save(finacialContact);
@@ -85,11 +87,13 @@ public class FinancialContactService {
     	  return null;
       }
       
-      public ResponseEntity<Object> getTransactionContacts(String txType,String accountId,Integer pageNumber,Integer pageSize){
-    	  Page<FinancialContact> recentTransactions = Page.empty();
+      public ResponseEntity<Object> getTransactionContacts(String accountId,String txType,Integer pageNumber,Integer pageSize){
+    	  Page<FinancialContact> recentTransactions = null;
     	  
     	  if(txType.equalsIgnoreCase(FinancialContactType.MPESA.getValue())) {
     		  recentTransactions = this.financialContactRepository.findMpesaTransactionContacts(accountId, PageRequest.of(pageNumber,pageSize));
+    		 
+    		  
     	  }
     	  
     	  if(txType.equalsIgnoreCase(FinancialContactType.PAYBILL.getValue())) {
@@ -109,7 +113,7 @@ public class FinancialContactService {
     	  }
     			  
     	  Map<String,Object> payload = new HashMap<>();
-    	  if(!recentTransactions.isEmpty()) {
+    	  if(recentTransactions !=null) {
     		  var rt =  recentTransactions.stream().map(t->{
     				 Map<String,Object> map = new HashMap<>();
     				 map.put("accountId",t.getOppoAccountId());

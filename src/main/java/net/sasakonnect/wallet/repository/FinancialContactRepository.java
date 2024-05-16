@@ -15,7 +15,7 @@ public interface FinancialContactRepository extends JpaRepository<FinancialConta
    
    Optional<FinancialContact> findByoppoAccountId(String oppoAccountId);
    
-   Optional<FinancialContact> findByAccountIdAndOppoAccountId(String accountId, String oppoAccountId);
+   Optional<FinancialContact> findByAccountIdAndOppoAccountIdAndTxType(String accountId, String oppoAccountId,String txType);
    
    
    @Query("SELECT f FROM FinancialContact f WHERE f.accountId =:accountId AND (f.txType = 'TTID0002'"
