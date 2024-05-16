@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import net.sasakonnect.wallet.domain.FinancialContact;
+import net.sasakonnect.wallet.enums.FinancialContactType;
 import net.sasakonnect.wallet.repository.FinancialContactRepository;
 import net.sasakonnect.wallet.tools.ResponsePagerClass;
 
@@ -85,7 +86,28 @@ public class FinancialContactService {
       }
       
       public ResponseEntity<Object> getTransactionContacts(String txType,String accountId,Integer pageNumber,Integer pageSize){
-    	  Page<FinancialContact> recentTransactions = this.financialContactRepository.findByAccountIdAndTxType(accountId, txType,PageRequest.of(pageNumber, pageSize));
+    	  Page<FinancialContact> recentTransactions = Page.empty();
+    	  
+    	  if(txType.equalsIgnoreCase(FinancialContactType.MPESA.getValue())) {
+    		  recentTransactions = this.financialContactRepository.findMpesaTransactionContacts(accountId, PageRequest.of(pageNumber,pageSize));
+    	  }
+    	  
+    	  if(txType.equalsIgnoreCase(FinancialContactType.PAYBILL.getValue())) {
+    		  recentTransactions = this.financialContactRepository.findPaybillContacts(accountId, PageRequest.of(pageNumber,pageSize));
+    	  }
+    	  
+    	  if(txType.equalsIgnoreCase(FinancialContactType.TILL.getValue())) {
+    		  recentTransactions = this.financialContactRepository.findTillContacts(accountId, PageRequest.of(pageNumber,pageSize));
+    	  }
+    	  
+    	  if(txType.equalsIgnoreCase(FinancialContactType.WALLET.getValue())) {
+    		  recentTransactions = this.financialContactRepository.findWalletContacts(accountId, PageRequest.of(pageNumber,pageSize));
+    	  }
+    	  
+    	  if(txType.equalsIgnoreCase(FinancialContactType.PESA_LINK.getValue())) {
+    		  recentTransactions = this.financialContactRepository.findPesaLinkContacts(accountId, PageRequest.of(pageNumber,pageSize));
+    	  }
+    			  
     	  Map<String,Object> payload = new HashMap<>();
     	  if(!recentTransactions.isEmpty()) {
     		  var rt =  recentTransactions.stream().map(t->{
