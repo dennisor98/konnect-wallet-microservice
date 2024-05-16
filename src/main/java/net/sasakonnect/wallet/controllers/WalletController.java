@@ -276,6 +276,14 @@ public class WalletController {
 			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
 		return this.walletService.getRecentTransactionContact(txType,pageNumber,pageSize);
 	}
+	
+	@GetMapping("/transaction/recentContact/search")
+	public ResponseEntity<Object> searchRecentTransactionContact(
+			@RequestParam(name="queryString") String searchTerm,
+			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
+			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+		return this.walletService.searchRecentTransactionContact(searchTerm,pageNumber,pageSize);
+	}
 	@GetMapping("/tarrif/cost")
 	public ResponseEntity<Object> getCostFor(
 			@RequestParam(name="amount") double amout,

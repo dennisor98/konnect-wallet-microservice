@@ -136,7 +136,9 @@ public class WalletClientService {
 		logger.info("The Object is", clientApp);
 		return this.walletService.requestWalletDeduction(sdkpayDto, clientApp);
 	}
-
+    public Object invokeStkPushToLoadWallet(String merchantAccount,String targetNo,int amount) {
+    	return this.walletService.loadWalletFromMpesa(merchantAccount,targetNo,amount);
+    }
 	public ResponseEntity createOpenidSession(@Valid SdkRequestOpenId sdkRequestOpenId, WalletClient clientData) {
 
 		if (this.userService.findUserByOpenId(sdkRequestOpenId.getOpen_id()).isEmpty()) {

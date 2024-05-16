@@ -14,20 +14,23 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.domain.FinancialContact;
+import net.sasakonnect.wallet.enums.FinancialContactType;
 import net.sasakonnect.wallet.repository.FinancialContactRepository;
 import net.sasakonnect.wallet.tools.ResponsePagerClass;
-
+@Slf4j
 @Service
 public class FinancialContactService {
 	
 	@Autowired
 	FinancialContactRepository financialContactRepository;
       public void saveTransactionContact(FinancialContact finacialContact) {
-    	  Optional<FinancialContact> contact = this.financialContactRepository.findByAccountIdAndOppoAccountId(finacialContact.getAccountId(), finacialContact.getOppoAccountId());
+    	  Optional<FinancialContact> contact = this.financialContactRepository.findByAccountIdAndOppoAccountIdAndTxType(finacialContact.getAccountId(), finacialContact.getOppoAccountId(),finacialContact.getTxType());
     	  if(contact.isPresent()) {
     		var c =   contact.get();
     		c.setUpdatedAt(new Date());
+    		c.setOppoAccountName(finacialContact.getOppoAccountName());
     		this.financialContactRepository.save(c);
     	  }else {
     		  this.financialContactRepository.save(finacialContact);
@@ -84,10 +87,66 @@ public class FinancialContactService {
     	  return null;
       }
       
-      public ResponseEntity<Object> getTransactionContacts(String txType,String accountId,Integer pageNumber,Integer pageSize){
-    	  Page<FinancialContact> recentTransactions = this.financialContactRepository.findByAccountIdAndTxType(accountId, txType,PageRequest.of(pageNumber, pageSize));
+      public ResponseEntity<Object> searchTransactionContacts(String accountId,String searchTerm,Integer pageNumber,Integer pageSize){
     	  Map<String,Object> payload = new HashMap<>();
-    	  if(!recentTransactions.isEmpty()) {
+    	  Page<FinancialContact> recentTransactions = this.financialContactRepository.searchContact(searchTerm, PageRequest.of(pageNumber,pageSize));
+    	  if(recentTransactions !=null) {
+    		  var rt =  recentTransactions.stream().map(t->{
+    				 Map<String,Object> map = new HashMap<>();
+    				 map.put("accountId",t.getOppoAccountId());
+    				 map.put("accountName",t.getOppoAccountName() );
+    				 map.put("subAccountId",t.getOppoSubAccountId());		
+    				 return map;
+    			   }).collect(Collectors.toList());
+    			   Map<String,Object> map = new HashMap<>();
+    			   map.put("success",true);
+    			   map.put("message","Request completed");
+    			   map.put("contacts",rt.size() > 0 ? rt : new ArrayList<>());
+    			   map.put("pageSize", recentTransactions.getSize());
+    			   map.put("currentPage", recentTransactions.getNumber());
+    			   map.put("nextPage", recentTransactions.hasNext() ? recentTransactions.nextPageable().getPageNumber() : null);
+    			   map.put("hasNextPage", recentTransactions.hasNext());
+    			   map.put("hasPreviousPage", recentTransactions.hasPrevious());
+    			   payload.put("payload", map);
+
+    			return ResponseEntity.status(HttpStatus.OK).body(payload);
+    		   }else {
+    			   Map<String,Object> map = new HashMap<>();
+    			   map.put("success",true);
+    			   map.put("message","Request completed");
+    			   map.put("contacts",new ArrayList<>());
+    			   payload.put("payload", map);
+    			   return ResponseEntity.status(HttpStatus.OK).body(payload);
+    		   }
+      }
+      
+      public ResponseEntity<Object> getTransactionContacts(String accountId,String txType,Integer pageNumber,Integer pageSize){
+    	  Page<FinancialContact> recentTransactions = null;
+    	  
+    	  if(txType.equalsIgnoreCase(FinancialContactType.MPESA.getValue())) {
+    		  recentTransactions = this.financialContactRepository.findMpesaTransactionContacts(accountId, PageRequest.of(pageNumber,pageSize));
+    		 
+    		  
+    	  }
+    	  
+    	  if(txType.equalsIgnoreCase(FinancialContactType.PAYBILL.getValue())) {
+    		  recentTransactions = this.financialContactRepository.findPaybillContacts(accountId, PageRequest.of(pageNumber,pageSize));
+    	  }
+    	  
+    	  if(txType.equalsIgnoreCase(FinancialContactType.TILL.getValue())) {
+    		  recentTransactions = this.financialContactRepository.findTillContacts(accountId, PageRequest.of(pageNumber,pageSize));
+    	  }
+    	  
+    	  if(txType.equalsIgnoreCase(FinancialContactType.WALLET.getValue())) {
+    		  recentTransactions = this.financialContactRepository.findWalletContacts(accountId, PageRequest.of(pageNumber,pageSize));
+    	  }
+    	  
+    	  if(txType.equalsIgnoreCase(FinancialContactType.PESA_LINK.getValue())) {
+    		  recentTransactions = this.financialContactRepository.findPesaLinkContacts(accountId, PageRequest.of(pageNumber,pageSize));
+    	  }
+    			  
+    	  Map<String,Object> payload = new HashMap<>();
+    	  if(recentTransactions !=null) {
     		  var rt =  recentTransactions.stream().map(t->{
     				 Map<String,Object> map = new HashMap<>();
     				 map.put("accountId",t.getOppoAccountId());

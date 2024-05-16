@@ -111,7 +111,7 @@ public class WebSecurityConfig {
 
 				.requestMatchers("/user/userLogin", "/user/confirmOtp","/user/admin/confirmOtp", "/konnect/callBack", "/user/refresh/token",
 						"/wallet/getOnboardingStatusById", "/sdk/transaction/{id}", "user/corporateLogin",
-						"/sdk/openId","/sdk/customer","/sdk/customers")
+						"/sdk/openId","/sdk/customer","/sdk/customers","/sdk/customer/stkpush")
 
 				.permitAll().requestMatchers("/wallet").permitAll().requestMatchers(HttpMethod.OPTIONS, "/**")
 				.permitAll() // Permit OPTIONS requests

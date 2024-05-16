@@ -5,7 +5,8 @@ public enum FinancialContactType {
    PESA_LINK("PESA_LINK"),
    PAYBILL("PAYBILL"),
    TILL("TILL"),
-   WALLET("WALLET");
+   WALLET("WALLET"),
+   UTILITY("UTILITY");
    
    private final String value;
 

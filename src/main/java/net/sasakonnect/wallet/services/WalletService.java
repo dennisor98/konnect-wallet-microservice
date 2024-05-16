@@ -451,6 +451,31 @@ public class WalletService {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	public Object loadWalletFromMpesa(String merchantAccount,String targetNo,int amount) {
+
+	
+
+			var reqId = new HashMap<String, Object>();
+			reqId.put("accountId",merchantAccount);
+			reqId.put("amount",amount);
+			reqId.put("mobile", targetNo);
+			var reqs = this.requestSigner.signRequest(reqId);
+
+			Mono<String> responseMono = this.bankClientBean.webClient.post()
+					.uri(ChoiceEndpointsConstants.DEPOSIT_FROM_MPESA).contentType(MediaType.APPLICATION_JSON)
+					.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+					.bodyToMono(String.class);
+
+			String responseJson = responseMono.block();
+
+			if (responseJson != null) {
+				return new Gson().fromJson(responseJson, Object.class);
+
+			}
+		
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	public ResponseEntity<Object> createNewOnBoardingUser(@Valid EasyOnboardingRequestParams easyOnboarding) {
 		Map<String, Object> userMap = new HashMap<String, Object>();
@@ -677,7 +702,7 @@ public class WalletService {
 						.oppoAccountId(reqParams.getOppoAccountId())
 						.oppoSubAccountId(reqParams.getOppoSubAccount())
 						.txType(reqParams.getTxType())
-						.oppoAccountName(reqParams.getOppoAccountName() !=null ? reqParams.getOppoAccountName() : reqParams.getCounterpartyName())
+						.oppoAccountName(reqParams.getExtInfo().getCounterpartyName())
 						.oppoBankCode(reqParams.getOppoBankCode())
 						.oppoChannelId(reqParams.getOppoChannelId())
 						.build();
@@ -715,7 +740,7 @@ public class WalletService {
 							.oppoAccountId(reqParams.getOppoAccountId())
 							.oppoSubAccountId(reqParams.getOppoSubAccount())
 							.txType(reqParams.getTxType())
-							.oppoAccountName(reqParams.getOppoAccountName() !=null ? reqParams.getOppoAccountName() : reqParams.getCounterpartyName())
+							.oppoAccountName(reqParams.getExtInfo().getCounterpartyName())
 							.oppoBankCode(reqParams.getOppoBankCode())
 							.oppoChannelId(reqParams.getOppoChannelId())
 							.build();
@@ -746,7 +771,7 @@ public class WalletService {
 								.oppoAccountId(reqParams.getOppoAccountId())
 								.oppoSubAccountId(reqParams.getOppoSubAccount())
 								.txType(reqParams.getTxType())
-								.oppoAccountName(reqParams.getOppoAccountName() !=null ? reqParams.getOppoAccountName() : reqParams.getCounterpartyName())
+								.oppoAccountName(reqParams.getExtInfo().getCounterpartyName())
 								.oppoBankCode(reqParams.getOppoBankCode())
 								.oppoChannelId(reqParams.getOppoChannelId())
 								.build();
@@ -1766,6 +1791,16 @@ public Object mpesaTillAndByGoodsSdk(@Valid MpesaBilling tillAndBuyGoods) {
 		if(!wallets.isEmpty()) {
 			var currentWallet = wallets.get(0);
 			return this.financialContactService.getTransactionContacts(currentWallet.getAccountId(), txtype, pageNumber, pageSize);
+		}
+		return null;
+	}
+	
+	public ResponseEntity<Object> searchRecentTransactionContact(String txtype,Integer pageNumber,Integer pageSize){
+		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		var wallets = this.walletRepository.findByUserWalletsUser(loggedInUser);
+		if(!wallets.isEmpty()) {
+			var currentWallet = wallets.get(0);
+			return this.financialContactService.searchTransactionContacts(currentWallet.getAccountId(), txtype, pageNumber, pageSize);
 		}
 		return null;
 	}
