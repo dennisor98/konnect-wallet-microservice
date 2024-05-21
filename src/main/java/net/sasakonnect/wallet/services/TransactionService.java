@@ -31,9 +31,11 @@ import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChannelType;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
+import net.sasakonnect.wallet.domain.Logs;
 import net.sasakonnect.wallet.domain.Transaction;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.Wallet;
+import net.sasakonnect.wallet.enums.LogTypes;
 import net.sasakonnect.wallet.enums.NotificationType;
 import net.sasakonnect.wallet.enums.WalletTransactionType;
 import net.sasakonnect.wallet.notification.NotificationResult;
@@ -57,6 +59,9 @@ public class TransactionService {
 	
 	@Autowired
 	LogsRepository logsRepository;
+	
+	@Autowired
+	UserService userService;
 
 	public Transaction saveTransaction(NotificationResult<TransactionResultNotification> results) {
 		var trans = results.getParams();
@@ -69,6 +74,7 @@ public class TransactionService {
 					.oppoBankCode(trans.getOppoBankCode()).requestId(results.getRequestId())
 					// .extInfo(trans.getExtInfo().toString())
 					.notificationType(trans.getTxType())
+					.remarks(trans.getErrorMsg())
 					.feeAmount(trans.getFeeAmount() != null ? new BigDecimal(trans.getFeeAmount()) : new BigDecimal(0))
 					// .mpesaBusinessPayType(trans.getMpesaBusinessPayType())
 					.txStatus(trans.getTxStatus())
@@ -76,14 +82,13 @@ public class TransactionService {
 					.oppoAccountName(trans.getOppoAccountName()).thirdPartyTxType(trans.getThirdPartyTxType())
 					.counterpartyName(trans.getExtInfo().getCounterpartyName())
 					.currency(trans.getCurrency()).amount(new BigDecimal(trans.getAmount())).build();
-//			User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//			var log = Logs.builder()
-//					.description(user.getFirstName()+" "+user.getLastName()+"of acc No:"+trans.getAccountId()
-//					+" invoked a transaction with id"+trans.getTxId()+"of amount"+trans.getAmount() +"to" +"acc No:"+trans.getOppoAccountId())
-//					.activity(LogTypes.TRANSACTION)
-//					.user(user)
-//					.build();
-//			this.logsRepository.save(log);
+			User user = this.userService.findUserByAccountd(trans.getAccountId()).get();
+			var log = Logs.builder()
+					.description(user.getFirstName()+" "+user.getLastName()+"of acc No:"+trans.getAccountId()
+					+" invoked a transaction with id"+trans.getTxId()+"of amount"+trans.getAmount() +"to" +"acc No:"+trans.getOppoAccountId())
+					.activity(LogTypes.TRANSACTION)
+					.build();
+			this.logsRepository.save(log);
 			return this.transactionRepository.save(transaction);
 			
 		} else {

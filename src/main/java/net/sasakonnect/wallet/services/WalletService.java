@@ -733,9 +733,6 @@ public class WalletService {
 						transaction.get().setCounterpartyName(transaction.get().getCounterpartyName());
 					}
 					
-					if(results.getParams().getExtInfo().getExternalTxId() == null) {
-						transaction.get().setCounterpartyName(transaction.get().getExternalTxId());
-					}
 					this.transactionService.transactionRepository.save(transaction.get());
 
 					this.publisher.publishEvent(
@@ -771,6 +768,7 @@ public class WalletService {
 							transactionEventService.notifyNewCustomer(results.getParams().getAccountId(),results.getParams().getOppoAccountId());
 
 						}
+						
 						
 						if(results.getParams().getTxType().equalsIgnoreCase(WalletTransactionType.TTID0011.getValue())){
 							var ntf = Notifications.builder()
