@@ -728,7 +728,7 @@ public class WalletService {
 					log.info("existing transaction"+results);
 					transaction.get().setTxStatus(8);
 					transaction.get().setBalance(new BigDecimal(results.getParams().getBalance()));
-					
+					transaction.get().setRemarks(results.getParams().getErrorMsg());
 					if(results.getParams().getExtInfo().getCounterpartyName() == null) {
 						transaction.get().setCounterpartyName(transaction.get().getCounterpartyName());
 					}
@@ -864,6 +864,7 @@ public class WalletService {
 			transaction.get().setTxStatus(results.getParams().getTxStatus());
 			transaction.get().setCounterpartyName(results.getParams().getExtInfo().getCounterpartyName());
 			transaction.get().setExternalTxId(results.getParams().getExtInfo().getExternalTxId());
+			transaction.get().setRemarks(results.getParams().getErrorMsg());
 			var createdTransaction = this.transactionService.transactionRepository.save(transaction.get());
 
 		} else {
