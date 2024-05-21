@@ -30,7 +30,12 @@ public class FinancialContactService {
     	  if(contact.isPresent()) {
     		var c =   contact.get();
     		c.setUpdatedAt(new Date());
-    		c.setOppoAccountName(finacialContact.getOppoAccountName());
+    		if(finacialContact.getOppoAccountName() != null) {
+        		c.setOppoAccountName(finacialContact.getOppoAccountName());
+    		}else {
+    			c.setOppoAccountName(c.getOppoAccountName());
+    		}
+    		
     		this.financialContactRepository.save(c);
     	  }else {
     		  this.financialContactRepository.save(finacialContact);
@@ -87,7 +92,7 @@ public class FinancialContactService {
     	  return null;
       }
       
-      public ResponseEntity<Object> searchTransactionContacts(String accountId,String searchTerm,Integer pageNumber,Integer pageSize){
+      public ResponseEntity<Object> searchTransactionContacts(String searchTerm,Integer pageNumber,Integer pageSize){
     	  Map<String,Object> payload = new HashMap<>();
     	  Page<FinancialContact> recentTransactions = this.financialContactRepository.searchContact(searchTerm, PageRequest.of(pageNumber,pageSize));
     	  if(recentTransactions !=null) {

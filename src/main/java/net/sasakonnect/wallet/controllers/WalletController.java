@@ -38,6 +38,7 @@ import net.sasakonnect.wallet.annotations.TransactionMiddleware;
 import net.sasakonnect.wallet.constant.ChannelType;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.invoice.Tariff;
+import net.sasakonnect.wallet.services.NotificationService;
 import net.sasakonnect.wallet.services.TarrifService;
 import net.sasakonnect.wallet.services.TransactionService;
 import net.sasakonnect.wallet.services.UserService;
@@ -57,6 +58,9 @@ public class WalletController {
 	
 	@Autowired
 	TarrifService tarrifService;
+	
+	@Autowired
+	NotificationService notificationService;
 
 	public WalletController(UserService userService, WalletService walletService) {
 		this.userService = userService;
@@ -286,10 +290,24 @@ public class WalletController {
 	}
 	@GetMapping("/tarrif/cost")
 	public ResponseEntity<Object> getCostFor(
-			@RequestParam(name="amount") double amout,
+			@RequestParam(name="amount") double amount,
 			@RequestParam(name="opponentAccount") String opponentAccount,
 			@RequestParam(name = "channel") ChannelType channelType) {
-		return this.tarrifService.getCostOn(channelType, amout,opponentAccount);
+		return this.tarrifService.getCostOn(channelType, amount,opponentAccount);
 	}
+	
+	@GetMapping("/notification")
+	public ResponseEntity<Object> getNotifications(
+			@RequestParam(name="pageNumber",required=false,defaultValue="0") Integer pageNumber,
+			@RequestParam(name="pageSize",required=false,defaultValue="10") Integer pageSize) {
+		return this.notificationService.getUserNotifications(pageNumber,pageSize);
+	}
+	
+	@PutMapping("/notification/read/update")
+	public ResponseEntity<Object> updateNotificationRead(
+			@RequestParam(name="notificationId") String notificationId) {
+		return this.notificationService.setAsRead(notificationId);
+	}
+	
 	
 }
