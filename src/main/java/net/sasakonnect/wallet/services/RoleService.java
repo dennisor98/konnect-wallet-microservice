@@ -109,13 +109,14 @@ public class RoleService {
 				map.put("success","true");
 				map.put("role",role.get());
 	        }catch(Exception ex) {
+	        	ex.printStackTrace();
 	        	map.put("message", "Internal server.Something went wrong");
-	        	map.put("success","true");
+	        	map.put("success",false);
 	        	
 	        }
 		}else {
 			map.put("message","Role not found");
-			map.put("success","true");            
+			map.put("success",false);            
 		}
         
 		

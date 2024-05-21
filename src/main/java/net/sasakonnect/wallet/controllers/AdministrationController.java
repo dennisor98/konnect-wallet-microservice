@@ -31,6 +31,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.Corporate;
+import net.sasakonnect.wallet.RequestDto.NotificationDto;
 import net.sasakonnect.wallet.RequestDto.PermissionDTO;
 import net.sasakonnect.wallet.RequestDto.PermissionsToRoleDTO;
 import net.sasakonnect.wallet.RequestDto.PinResetDto;
@@ -58,6 +59,7 @@ import net.sasakonnect.wallet.services.CorporateService;
 import net.sasakonnect.wallet.services.InvoiceService;
 import net.sasakonnect.wallet.services.LarkService;
 import net.sasakonnect.wallet.services.LogService;
+import net.sasakonnect.wallet.services.NotificationService;
 import net.sasakonnect.wallet.services.PermissionService;
 import net.sasakonnect.wallet.services.PinResetService;
 import net.sasakonnect.wallet.services.ReversalService;
@@ -120,6 +122,9 @@ public class AdministrationController {
 	
 	@Autowired
 	ReversalService reversalService;
+	
+	@Autowired
+	NotificationService notificationService;
 	
 	@GetMapping("/upload/app")
 	
@@ -768,6 +773,15 @@ public class AdministrationController {
 	@RequirePermission(GlobalPermissionConstants.CanSearchAccountInfo.PERMISSION)
 	public ResponseEntity<Object> getAccountStatus(@RequestParam("mobile") String mobile){		
 		return this.walletService.getAccountStatus(mobile.substring(mobile.length() -9));
+	}
+	
+	@PostMapping("notification")
+	@IsCorporate()
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanSearchAccountInfo.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.CanSearchAccountInfo.PERMISSION)
+	public ResponseEntity<Object> createNotification(@Valid @RequestBody() NotificationDto request){		
+		return this.notificationService.createNotification(request);
 	}
 	
 	

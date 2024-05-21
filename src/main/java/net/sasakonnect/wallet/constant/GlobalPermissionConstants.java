@@ -21,6 +21,23 @@ public final class GlobalPermissionConstants {
 		}
 	}
 	
+	public static class CanSupportCustomer extends PermissionEntry {
+		public static final String PERMISSION = "can.operate.customer.support";
+		public static final String DESCRIPTION = "can carry out customer support requests";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
+	
+	
+	
 	public static class CreateUserRole extends PermissionEntry {
 		public static final String PERMISSION = "can.create.user.role";
 		public static final String DESCRIPTION = "Can create any role in the system(use with caution)";
@@ -215,6 +232,39 @@ public final class GlobalPermissionConstants {
 			return DESCRIPTION;
 		}
 	}
+	
+	
+	public static class CanViewChats extends PermissionEntry {
+		public static final String PERMISSION = "can.view.chats";
+		public static final String DESCRIPTION = "Can view chats(Use with caution)";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
+	
+	public static class CanCreateBroadcast extends PermissionEntry {
+		public static final String PERMISSION = "can.create.message.broadcast";
+		public static final String DESCRIPTION = "Can create message broadcasts";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
+	
+	
 	
 	public static class AssignRolePermissions extends PermissionEntry {
 		public static final String PERMISSION = "can.assign.role.permissions";

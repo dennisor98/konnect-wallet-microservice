@@ -700,6 +700,28 @@ public class UserService extends RestClientService implements UserDetailsService
 
 		// TODO Auto-generated method stub
 	}
+	
+	public ResponseEntity<Map> isPinSet(User user) {
+		Optional<List<UserPin>> userPins = this.userPinRepository.getUserPinThatIsNotArchived(user);
+		if (userPins.isPresent() && (userPins.get().size() > 0)) {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("message", "Account State Valid");
+			map.put("success", "true");
+			map.put("code", "KWEC000");
+			return ResponseEntity.ok(map);
+		} else {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("message", "Pin not set");
+			map.put("code", "KWEC002");
+
+			map.put("success", "false");
+
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(map);
+
+		}
+
+		// TODO Auto-generated method stub
+	}
 
 	public Object findDeletedPinsForUser() {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
