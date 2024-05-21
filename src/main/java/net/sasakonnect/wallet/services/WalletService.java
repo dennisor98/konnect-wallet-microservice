@@ -702,16 +702,20 @@ public class WalletService {
 				
 				var reqParams =  results.getParams();
 //				if()
-				var fContact =  FinancialContact.builder()
-						.accountId(reqParams.getAccountId())
-						.oppoAccountId(reqParams.getOppoAccountId())
-						.oppoSubAccountId(reqParams.getOppoSubAccount())
-						.txType(reqParams.getTxType())
-						.oppoAccountName(reqParams.getExtInfo().getCounterpartyName())
-						.oppoBankCode(reqParams.getOppoBankCode())
-						.oppoChannelId(reqParams.getOppoChannelId())
-						.build();
-				this.financialContactService.saveTransactionContact(fContact);
+				
+				if(reqParams.getTxStatus() == 8) {
+					var fContact =  FinancialContact.builder()
+							.accountId(reqParams.getAccountId())
+							.oppoAccountId(reqParams.getOppoAccountId())
+							.oppoSubAccountId(reqParams.getOppoSubAccount())
+							.txType(reqParams.getTxType())
+							.oppoAccountName(reqParams.getExtInfo().getCounterpartyName())
+							.oppoBankCode(reqParams.getOppoBankCode())
+							.oppoChannelId(reqParams.getOppoChannelId())
+							.build();
+					this.financialContactService.saveTransactionContact(fContact);
+				}
+				
 //				log.info("transacttion {}", results);
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.BALANCE.getCode())) {
@@ -737,7 +741,8 @@ public class WalletService {
 
 					this.publisher.publishEvent(
 							TransactionEvent.builder().userService(userService).transaction(transaction.get()).build());
-					var fContact =  FinancialContact.builder()
+					if(reqParams.getTxStatus() == 8) {
+						var fContact =  FinancialContact.builder()
 							.accountId(reqParams.getAccountId())
 							.oppoAccountId(reqParams.getOppoAccountId())
 							.oppoSubAccountId(reqParams.getOppoSubAccount())
@@ -746,7 +751,12 @@ public class WalletService {
 							.oppoBankCode(reqParams.getOppoBankCode())
 							.oppoChannelId(reqParams.getOppoChannelId())
 							.build();
-					this.financialContactService.saveTransactionContact(fContact);
+						this.financialContactService.saveTransactionContact(fContact);
+
+					}else {
+						
+					}
+					
 
 				} else {
 					var reqParams =  results.getParams();
@@ -785,18 +795,21 @@ public class WalletService {
 							
 						}
 						
+						if(reqParams.getTxStatus() == 8) {
+							var fContact =  FinancialContact.builder()
+									.accountId(reqParams.getAccountId())
+									.oppoAccountId(reqParams.getOppoAccountId())
+									.oppoSubAccountId(reqParams.getOppoSubAccount())
+									.txType(reqParams.getTxType())
+									.oppoAccountName(reqParams.getExtInfo().getCounterpartyName())
+									.oppoBankCode(reqParams.getOppoBankCode())
+									.oppoChannelId(reqParams.getOppoChannelId())
+									.build();
+							this.financialContactService.saveTransactionContact(fContact);
+						}
 						
-						var fContact =  FinancialContact.builder()
-								.accountId(reqParams.getAccountId())
-								.oppoAccountId(reqParams.getOppoAccountId())
-								.oppoSubAccountId(reqParams.getOppoSubAccount())
-								.txType(reqParams.getTxType())
-								.oppoAccountName(reqParams.getExtInfo().getCounterpartyName())
-								.oppoBankCode(reqParams.getOppoBankCode())
-								.oppoChannelId(reqParams.getOppoChannelId())
-								.build();
-						this.financialContactService.saveTransactionContact(fContact);
 					}
+						
 
 				}
 
