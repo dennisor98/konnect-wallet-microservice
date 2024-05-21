@@ -544,7 +544,7 @@ public class LarkService {
 //	        oc_f11965f2d1af0ecb6e39c29ff7beec86   //test group
 //	        oc_a9f46991cde6bf92a6b84ee331f5ea99
 	        //oc_af7a9bacdb2eba15ab57ce122c9eff0a
-	        card.put("chat_id", "oc_f11965f2d1af0ecb6e39c29ff7beec86");
+	        card.put("chat_id", "oc_af7a9bacdb2eba15ab57ce122c9eff0a");
 	        card.put("update_multi", false);
 
 	        Map<String, Object> cardObj = new HashMap<>();
