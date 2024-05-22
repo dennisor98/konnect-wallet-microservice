@@ -16,4 +16,8 @@ public interface WalletClientAccountRepository extends JpaRepository<WalletClien
 	List<WalletClient> findWalletClientByTillNumberAndAccountType(@Param("tillNumber") String tillNumber,
 			@Param("accountType") FinancialInstituation accountType);
 
+	@Query("SELECT wc FROM WalletClient wc " + "LEFT JOIN FETCH wc.walletClientAccount wca "
+			+ "LEFT JOIN FETCH wc.user u " + "WHERE " + "wca.tillNumber = :account or "
+			+ "wca.paybillNumber = :account  or " + "wca.walletAccountNo = :account  ")
+	List<WalletClient> findWalletClientByAccount(@Param("account") String account);
 }

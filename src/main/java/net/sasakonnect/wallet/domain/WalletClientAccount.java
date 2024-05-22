@@ -9,16 +9,21 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class WalletClientAccount extends BaseWalletDomain {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = true)
 	private FinancialInstituation accountType;
+
+	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+	private Boolean isPrimary;
 
 	@Column(nullable = true)
 	private String paybillNumber;
@@ -33,6 +38,8 @@ public class WalletClientAccount extends BaseWalletDomain {
 	private String walletAccountNo;
 	@Column(nullable = true)
 	private String bankCode;
+	@Column(nullable = true)
+	private String bankAccount;
 
 	@ManyToOne
 	WalletClient walletClient;
