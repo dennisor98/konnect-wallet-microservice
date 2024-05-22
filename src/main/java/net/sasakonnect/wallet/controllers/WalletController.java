@@ -37,11 +37,8 @@ import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.TransactionMiddleware;
 import net.sasakonnect.wallet.constant.ChannelType;
 import net.sasakonnect.wallet.domain.User;
-<<<<<<< HEAD
-=======
 import net.sasakonnect.wallet.domain.invoice.Tariff;
 import net.sasakonnect.wallet.services.NotificationService;
->>>>>>> 8e66476357dd890d08093351a4713e11e8ea780b
 import net.sasakonnect.wallet.services.TarrifService;
 import net.sasakonnect.wallet.services.TransactionService;
 import net.sasakonnect.wallet.services.UserService;
@@ -280,16 +277,6 @@ public class WalletController {
 			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
 		return this.walletService.getRecentTransactionContact(txType, pageNumber, pageSize);
 	}
-<<<<<<< HEAD
-
-	@GetMapping("/tarrif/cost")
-	public ResponseEntity<Object> getCostFor(@RequestParam(name = "amount") double amout,
-			@RequestParam(name = "opponentAccount") String opponentAccount,
-			@RequestParam(name = "channel") ChannelType channelType) {
-		return this.tarrifService.getCostOn(channelType, amout, opponentAccount);
-	}
-
-=======
 	
 	@GetMapping("/transaction/recentContact/search")
 	public ResponseEntity<Object> searchRecentTransactionContact(
@@ -320,5 +307,4 @@ public class WalletController {
 	}
 	
 	
->>>>>>> 8e66476357dd890d08093351a4713e11e8ea780b
 }

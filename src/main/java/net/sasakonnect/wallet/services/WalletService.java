@@ -663,15 +663,6 @@ public class WalletService {
 
 				var reqParams = results.getParams();
 //				if()
-<<<<<<< HEAD
-				var fContact = FinancialContact.builder().accountId(reqParams.getAccountId())
-						.oppoAccountId(reqParams.getOppoAccountId()).oppoSubAccountId(reqParams.getOppoSubAccount())
-						.txType(reqParams.getTxType())
-						.oppoAccountName(reqParams.getOppoAccountName() != null ? reqParams.getOppoAccountName()
-								: reqParams.getCounterpartyName())
-						.oppoBankCode(reqParams.getOppoBankCode()).oppoChannelId(reqParams.getOppoChannelId()).build();
-				this.financialContactService.saveTransactionContact(fContact);
-=======
 				
 				if(reqParams.getTxStatus() == 8) {
 					var fContact =  FinancialContact.builder()
@@ -686,7 +677,6 @@ public class WalletService {
 					this.financialContactService.saveTransactionContact(fContact);
 				}
 				
->>>>>>> 8e66476357dd890d08093351a4713e11e8ea780b
 //				log.info("transacttion {}", results);
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.BALANCE.getCode())) {
@@ -703,34 +693,15 @@ public class WalletService {
 					log.info("existing transaction" + results);
 					transaction.get().setTxStatus(8);
 					transaction.get().setBalance(new BigDecimal(results.getParams().getBalance()));
-<<<<<<< HEAD
-
-					if (results.getParams().getExtInfo().getCounterpartyName() == null) {
-						transaction.get().setCounterpartyName(transaction.get().getCounterpartyName());
-					}
-
-					if (results.getParams().getExtInfo().getExternalTxId() == null) {
-						transaction.get().setCounterpartyName(transaction.get().getExternalTxId());
-					}
-=======
 					transaction.get().setRemarks(results.getParams().getErrorMsg());
 					if(results.getParams().getExtInfo().getCounterpartyName() == null) {
 						transaction.get().setCounterpartyName(transaction.get().getCounterpartyName());
 					}
 					
->>>>>>> 8e66476357dd890d08093351a4713e11e8ea780b
 					this.transactionService.transactionRepository.save(transaction.get());
 
 					this.publisher.publishEvent(
 							TransactionEvent.builder().userService(userService).transaction(transaction.get()).build());
-<<<<<<< HEAD
-					var fContact = FinancialContact.builder().accountId(reqParams.getAccountId())
-							.oppoAccountId(reqParams.getOppoAccountId()).oppoSubAccountId(reqParams.getOppoSubAccount())
-							.txType(reqParams.getTxType())
-							.oppoAccountName(reqParams.getOppoAccountName() != null ? reqParams.getOppoAccountName()
-									: reqParams.getCounterpartyName())
-							.oppoBankCode(reqParams.getOppoBankCode()).oppoChannelId(reqParams.getOppoChannelId())
-=======
 					if(reqParams.getTxStatus() == 8) {
 						var fContact =  FinancialContact.builder()
 							.accountId(reqParams.getAccountId())
@@ -740,7 +711,6 @@ public class WalletService {
 							.oppoAccountName(reqParams.getExtInfo().getCounterpartyName())
 							.oppoBankCode(reqParams.getOppoBankCode())
 							.oppoChannelId(reqParams.getOppoChannelId())
->>>>>>> 8e66476357dd890d08093351a4713e11e8ea780b
 							.build();
 						this.financialContactService.saveTransactionContact(fContact);
 
@@ -772,16 +742,6 @@ public class WalletService {
 									results.getParams().getOppoAccountId());
 
 						}
-<<<<<<< HEAD
-						var fContact = FinancialContact.builder().accountId(reqParams.getAccountId())
-								.oppoAccountId(reqParams.getOppoAccountId())
-								.oppoSubAccountId(reqParams.getOppoSubAccount()).txType(reqParams.getTxType())
-								.oppoAccountName(reqParams.getOppoAccountName() != null ? reqParams.getOppoAccountName()
-										: reqParams.getCounterpartyName())
-								.oppoBankCode(reqParams.getOppoBankCode()).oppoChannelId(reqParams.getOppoChannelId())
-								.build();
-						this.financialContactService.saveTransactionContact(fContact);
-=======
 						
 						
 						if(results.getParams().getTxType().equalsIgnoreCase(WalletTransactionType.TTID0011.getValue())){
@@ -812,7 +772,6 @@ public class WalletService {
 							this.financialContactService.saveTransactionContact(fContact);
 						}
 						
->>>>>>> 8e66476357dd890d08093351a4713e11e8ea780b
 					}
 						
 
@@ -1747,17 +1706,12 @@ public class WalletService {
 		}
 		return null;
 	}
-<<<<<<< HEAD
-
-	public ResponseEntity<Object> getAccountStatus(String mobile) {
-=======
 	
 	public ResponseEntity<Object> searchRecentTransactionContact(String txtype,Integer pageNumber,Integer pageSize){
 			return this.financialContactService.searchTransactionContacts(txtype, pageNumber, pageSize);
 	}
 	
 	public ResponseEntity<Object> getAccountStatus(String mobile){
->>>>>>> 8e66476357dd890d08093351a4713e11e8ea780b
 		try {
 			Optional<User> user = this.userService.findUserByPhoneNumber(mobile);
 			if (user.isEmpty()) {
@@ -1776,22 +1730,8 @@ public class WalletService {
 				map.put("message", "Account has been rejected");
 				return ResponseEntity.status(HttpStatus.OK).body(map);
 			}
-<<<<<<< HEAD
-
-			var userWallet = this.userWalletRepository.findByUserId(user.get().getId());
-			if (userWallet.isEmpty()) {
-				Map<String, Object> map = new HashMap<>();
-				map.put("success", false);
-				map.put("message", "Account is under manual review");
-				return ResponseEntity.status(HttpStatus.OK).body(map);
-			}
-
-			var wallet = userWallet.get().getWallet();
-			Map<String, Object> map = new HashMap<>();
-=======
 			
 			Map<String,Object> map = new HashMap<>();
->>>>>>> 8e66476357dd890d08093351a4713e11e8ea780b
 			map.put("success", true);
 			map.put("message", "Account approved");
 			return ResponseEntity.status(HttpStatus.OK).body(map);
