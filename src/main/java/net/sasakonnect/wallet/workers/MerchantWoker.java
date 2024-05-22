@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
 import net.sasakonnect.wallet.RequestDto.SdkPayDto;
+import net.sasakonnect.wallet.ResponseDto.TransactionResponseDto;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.beans.ClientAppsBean;
 import net.sasakonnect.wallet.domain.Transaction;
@@ -77,11 +78,10 @@ public class MerchantWoker {
 
 	@Async
 	@Transactional
-	public void notifyMerchantIncomingPayment(Object walletClientService, SdkPayDto pay) {
+	public void notifyMerchantIncomingPayment(TransactionResponseDto data, SdkPayDto pay) {
 		try {
 			ObjectMapper objectMapper = new ObjectMapper();
-			var data = (net.sasakonnect.wallet.ResponseDto.TransactionResponseDto) walletClientService;
-			System.out.println(walletClientService);
+			System.out.println(data);
 
 			var clientApp = clientAppsBean.getWalletClient();
 

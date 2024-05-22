@@ -145,6 +145,9 @@ public class WalletService {
 	@Value("${internetTillNumber}")
 	String internetTillNumber;
 
+	@Value("${KONNECT_BANK}")
+    private String konnectBank;
+
 	public Object getWalletInfo() {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		var reqId = new HashMap<String, Object>();
@@ -1218,7 +1221,7 @@ public class WalletService {
 				map.put("success", "false");
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(map);
 			}
-			reqId.put("payeeBankCode", "CIC0018");
+			reqId.put("payeeBankCode", konnectBank);
 			reqId.put("payeeAccountName", user.getFirstName());
 			reqId.put("currency", walletTransfer.getCurrencyCode());
 			reqId.put("amount", walletTransfer.getAmount());

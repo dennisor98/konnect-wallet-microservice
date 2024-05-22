@@ -21,6 +21,7 @@ import net.sasakonnect.wallet.RequestDto.SdkPayDto;
 import net.sasakonnect.wallet.RequestDto.SdkRequestOpenId;
 import net.sasakonnect.wallet.RequestDto.WalletClientAccountDto;
 import net.sasakonnect.wallet.RequestDto.WalletClientDTO;
+import net.sasakonnect.wallet.ResponseDto.TransactionResponseDto;
 import net.sasakonnect.wallet.beans.ClientAppsBean;
 import net.sasakonnect.wallet.beans.RedisBean;
 import net.sasakonnect.wallet.domain.User;
@@ -131,7 +132,7 @@ public class WalletClientService {
 		return this.wallectClientRepository.findByAppSecret(secretKey);
 	}
 
-	public Object payThroughSdk(@Valid SdkPayDto sdkpayDto) {
+	public TransactionResponseDto payThroughSdk(@Valid SdkPayDto sdkpayDto) {
 		var clientApp = clientAppsBean.getWalletClient();
 		logger.info("The Object is", clientApp);
 		return this.walletService.requestWalletDeduction(sdkpayDto, clientApp);

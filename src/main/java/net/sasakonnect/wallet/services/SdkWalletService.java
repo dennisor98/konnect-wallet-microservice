@@ -1,13 +1,11 @@
 package net.sasakonnect.wallet.services;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -17,7 +15,6 @@ import com.google.gson.Gson;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.ChoiceTransferDto;
-import net.sasakonnect.wallet.RequestDto.Mpesa;
 import net.sasakonnect.wallet.RequestDto.MpesaBillType;
 import net.sasakonnect.wallet.RequestDto.MpesaBilling;
 import net.sasakonnect.wallet.RequestDto.SdkPayDto;
@@ -74,8 +71,10 @@ public class SdkWalletService {
 	UserJobRepository userJobRepository;
 	@Autowired
 	LogsRepository logsRepository;
+	@Value("${KONNECT_BANK}")
+    private String konnectBank;
 
-	public Object applyForTransfer(@Valid ChoiceTransferDto choiceTransfer) {
+	public TransactionResponseDto applyForTransfer(@Valid ChoiceTransferDto choiceTransfer) {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
 		var reqId = new HashMap<String, Object>();
@@ -123,7 +122,7 @@ public class SdkWalletService {
 	}
 
 	// overload
-	public Object requestWalletDeduction(@Valid SdkPayDto sdkpayDto, WalletClient clientApp) {
+	public TransactionResponseDto requestWalletDeduction(@Valid SdkPayDto sdkpayDto, WalletClient clientApp) {
 		var account = clientApp.getWalletClientAccount();
 		var accounts = account.stream().filter(acc -> acc.getDeletedAt() == null && acc.getIsPrimary() == true)
 				.collect(Collectors.toList());
@@ -143,12 +142,13 @@ public class SdkWalletService {
 			}
 
 		}
-		return "Error while selecting merchants account";
+		return null;
 		// TODO Auto-generated method stub
 
 	}
 
-	private Object performBilling(WalletClientAccount activeAccount, int amount, WalletClient clientApp) {
+	private TransactionResponseDto performBilling(WalletClientAccount activeAccount, int amount,
+			WalletClient clientApp) {
 		log.info("transferring " + amount + " to merchant(" + clientApp.getAppName() + ")'s account type "
 				+ activeAccount.getAccountType());
 		switch (activeAccount.getAccountType()) {
@@ -185,39 +185,8 @@ public class SdkWalletService {
 			break;
 
 		}
-		return activeAccount.getAccountType().name();
-
-	}
-
-	public Object loadWalletFromMpesa(Mpesa mpesa) {
-		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-		var userWallets = this.walletRepository.findByUserWalletsUser(user);
-		if (!userWallets.isEmpty()) {
-			var userwallet = userWallets.get(0);
-
-			var reqId = new HashMap<String, Object>();
-			reqId.put("accountId", userwallet.getAccountId());
-			reqId.put("amount", mpesa.getAmount());
-
-			reqId.put("mobile", mpesa.getMpesaNumber());
-
-			var reqs = this.requestSigner.signRequest(reqId);
-
-			Mono<String> responseMono = this.bankClientBean.webClient.post()
-					.uri(ChoiceEndpointsConstants.DEPOSIT_FROM_MPESA).contentType(MediaType.APPLICATION_JSON)
-					.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
-					.bodyToMono(String.class);
-
-			String responseJson = responseMono.block();
-
-			if (responseJson != null) {
-				return new Gson().fromJson(responseJson, Object.class);
-
-			}
-		}
-		// TODO Auto-generated method stub
 		return null;
+
 	}
 
 	public Object loadWalletFromMpesa(String merchantAccount, String targetNo, int amount) {
@@ -244,7 +213,7 @@ public class SdkWalletService {
 		return null;
 	}
 
-	public Object applyFoWalletToWalletMerchant(ChoiceTransferDto walletTransfer) {
+	public TransactionResponseDto applyFoWalletToWalletMerchant(ChoiceTransferDto walletTransfer) {
 		User userLoggedIn = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
 		var userop = this.userService
@@ -259,9 +228,9 @@ public class SdkWalletService {
 				reqId.put("payerAccountId", userwallet.getAccountId());
 			}
 			reqId.put("payeeAccountId", walletTransfer.getReceiverAccount());
-			reqId.put("payeeBankCode", "CIC0018");
+			reqId.put("payeeBankCode", konnectBank);
 			reqId.put("payeeAccountName", walletTransfer.getReceiverName());
-			reqId.put("currency", "KSH");
+			reqId.put("currency", walletTransfer.getCurrencyCode());
 			reqId.put("amount", walletTransfer.getAmount());
 			reqId.put("otpMobile", userLoggedIn.getMobile());
 			reqId.put("otpType", walletTransfer.getOtpType());
@@ -272,24 +241,20 @@ public class SdkWalletService {
 			String responseJson = responseMono.block();
 
 			if (responseJson != null) {
-				return new Gson().fromJson(responseJson, Object.class);
+
+				return new Gson().fromJson(responseJson, TransactionResponseDto.class);
 
 			}
 
 			// TODO Auto-generated method stub
 			return null;
 		} else {
-			Map<String, String> map = new HashMap<String, String>();
-			map.put("message", "user with phone " + userLoggedIn.getMobile() + " not found");
-
-			map.put("success", "false");
-
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(map);
+			return null;
 		}
 		// return null;
 	}
 
-	public Object mpesaTillAndByGoodsSdk(@Valid MpesaBilling tillAndBuyGoods) {
+	public TransactionResponseDto mpesaTillAndByGoodsSdk(@Valid MpesaBilling tillAndBuyGoods) {
 
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
