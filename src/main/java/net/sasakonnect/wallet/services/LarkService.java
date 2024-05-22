@@ -514,22 +514,36 @@ public class LarkService {
     	}
     }
     
-    public void sendPinResetApprovalNotification(PinResetDto req,Wallet wallet,User user) {
+    public void sendPinResetApprovalNotification(PinResetDto req,Wallet wallet,User user,float rank) {
      var accessToken  = this.larkSync.getBotToken(this.botId,this.botSecret);
 	 var urlEndpoint = this.larkBaseUrl+"/message/v4/send/";
 	        String header = "PIN RESET REQUEST";
 	        String message = 
 	        		        "Date:"+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))+"\n"+
-	        		        "Requested By: "+user.getFirstName()+" "+user.getLastName()+"\n"+
+	        		        "Requested By(Support): "+user.getFirstName()+" "+user.getLastName()+"\n"+
 	        		        "Approver: <at id=%s></at>".formatted(req.getApprover())+"\n"+
 	        		        "Account Name: "+req.getFirstName()+" "+req.getLastName()+"\n"+
 	        		        "Account No: "+wallet.getAccountId()+"\n"+
-	        		        "Mobile: "+req.getMobileNumber();
+	        		        "Mobile: "+req.getMobileNumber() +"\n\n"+
+	        		        "**User Questions Responses**"+"\n"+
+	        		        "**Phone**: "+req.getMobileNumber()+"\n"+
+	        		        "**First Name**: "+req.getFirstName()+"\n"+
+	        		        "**Last Name**: "+req.getLastName()+"\n"+
+	        		        "**ID No**: "+req.getIdNumber()+"\n"+
+	        		        "**Acc Bal**: "+req.getBalance()+"\n"+
+	        		        "**Last Received Amount**: "+req.getLastReceivedAmount()+"\n"+
+	        		        "**Last sent Amount**: "+req.getLastSentAmount()+"\n"+
+	        		        "**Reason:** "+req.getResetReason()+"\n\n"+
+	        		        "**Response Rank(Auto)**: "+rank+"%";
+	        		       
+	        		        
+	        		        ;
 
 	        Map<String, Object> card = new HashMap<>();
 	        card.put("msg_type", "interactive");
 //	        oc_f11965f2d1af0ecb6e39c29ff7beec86   //test group
 //	        oc_a9f46991cde6bf92a6b84ee331f5ea99
+	        //oc_af7a9bacdb2eba15ab57ce122c9eff0a
 	        card.put("chat_id", "oc_af7a9bacdb2eba15ab57ce122c9eff0a");
 	        card.put("update_multi", false);
 

@@ -37,6 +37,11 @@ import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.TransactionMiddleware;
 import net.sasakonnect.wallet.constant.ChannelType;
 import net.sasakonnect.wallet.domain.User;
+<<<<<<< HEAD
+=======
+import net.sasakonnect.wallet.domain.invoice.Tariff;
+import net.sasakonnect.wallet.services.NotificationService;
+>>>>>>> 8e66476357dd890d08093351a4713e11e8ea780b
 import net.sasakonnect.wallet.services.TarrifService;
 import net.sasakonnect.wallet.services.TransactionService;
 import net.sasakonnect.wallet.services.UserService;
@@ -56,6 +61,9 @@ public class WalletController {
 
 	@Autowired
 	TarrifService tarrifService;
+	
+	@Autowired
+	NotificationService notificationService;
 
 	public WalletController(UserService userService, WalletService walletService) {
 		this.userService = userService;
@@ -272,6 +280,7 @@ public class WalletController {
 			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
 		return this.walletService.getRecentTransactionContact(txType, pageNumber, pageSize);
 	}
+<<<<<<< HEAD
 
 	@GetMapping("/tarrif/cost")
 	public ResponseEntity<Object> getCostFor(@RequestParam(name = "amount") double amout,
@@ -280,4 +289,36 @@ public class WalletController {
 		return this.tarrifService.getCostOn(channelType, amout, opponentAccount);
 	}
 
+=======
+	
+	@GetMapping("/transaction/recentContact/search")
+	public ResponseEntity<Object> searchRecentTransactionContact(
+			@RequestParam(name="queryString") String searchTerm,
+			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
+			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+		return this.walletService.searchRecentTransactionContact(searchTerm,pageNumber,pageSize);
+	}
+	@GetMapping("/tarrif/cost")
+	public ResponseEntity<Object> getCostFor(
+			@RequestParam(name="amount") double amount,
+			@RequestParam(name="opponentAccount") String opponentAccount,
+			@RequestParam(name = "channel") ChannelType channelType) {
+		return this.tarrifService.getCostOn(channelType, amount,opponentAccount);
+	}
+	
+	@GetMapping("/notification")
+	public ResponseEntity<Object> getNotifications(
+			@RequestParam(name="pageNumber",required=false,defaultValue="0") Integer pageNumber,
+			@RequestParam(name="pageSize",required=false,defaultValue="10") Integer pageSize) {
+		return this.notificationService.getUserNotifications(pageNumber,pageSize);
+	}
+	
+	@PutMapping("/notification/read/update")
+	public ResponseEntity<Object> updateNotificationRead(
+			@RequestParam(name="notificationId") String notificationId) {
+		return this.notificationService.setAsRead(notificationId);
+	}
+	
+	
+>>>>>>> 8e66476357dd890d08093351a4713e11e8ea780b
 }

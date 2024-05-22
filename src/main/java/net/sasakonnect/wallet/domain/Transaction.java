@@ -75,6 +75,9 @@ public class Transaction extends BaseWalletDomain implements Serializable {
 	@Column
 	private String requestId;
 	
+	@Column
+	private String remarks;
+	
 
 	
 }
