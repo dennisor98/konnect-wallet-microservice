@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -145,6 +146,9 @@ public class UserService extends RestClientService implements UserDetailsService
 	
 	@Autowired
 	LogsRepository logsRepository;
+	
+	@Autowired
+	SmsService smsService;
 
 	@Autowired
 	BankWebClientBean bankClientBean;
@@ -828,7 +832,7 @@ public class UserService extends RestClientService implements UserDetailsService
 						this.userPinRepository.markUserPinAsDeleted(activeUserPin.getId());
 						this.userPinRepository.save(userpin);
 						Map<String, Object> map = new HashMap<String, Object>();
-						map.put("message", "Pin changed Successfully");
+						map.put("message", "Pin changed successfully");
 						map.put("success", true);
 						var log = Logs.builder()
 								.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
@@ -890,6 +894,11 @@ public class UserService extends RestClientService implements UserDetailsService
 		if (userPinRepository.isPresent() && userPinRepository.get().size() > 0
 				&& !(userPinRepository.get().get(0).getPinAttempts() >= this.maxpinattempt)) {
 			if (bycryp.matches(user.getId() + setPin.getPin(), userPinRepository.get().get(0).getPin())) {
+				if(userPinRepository.get().get(0).isDeafult() == true) {
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("message", "Please update your PIN.This is a default PIN");
+					map.put("success", false);
+				}
 				var token = this.jwtService.generateTokenForWindow(user);
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("window", token);
@@ -900,22 +909,13 @@ public class UserService extends RestClientService implements UserDetailsService
 			} else {
 				// var userPins =
 				this.userPinRepository.incrementPinAttempts(user);
-//				if (userPins.isPresent()) {
-//					var updatedpin = userPins.get();
-//					Map<String, Object> map = new HashMap<String, Object>();
-//					map.put("message", "Pin Entered does not match");
-//					map.put("attempt_remaining", maxpinattempt - updatedpin.getPinAttempts());
-//					map.put("success", false);
-//					return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
-//
-//				}
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("message", "Pin Entered does not match");
 				map.put("attempt_remaining", maxpinattempt - (userPinRepository.get().get(0).getPinAttempts() + 1));
 
 				map.put("success", false);
 				var log = Logs.builder()
-						.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
+						.description(user.getFirstName()+" "+user.getLastName()+"of id: "+user.id
 						+" failed to login.Entered wrong PIN")
 						.activity(LogTypes.LOGIN)
 						.build();
@@ -937,7 +937,7 @@ public class UserService extends RestClientService implements UserDetailsService
 				} else {
 					map.put("message", "Pin not set");
 					var log = Logs.builder()
-							.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
+							.description(user.getFirstName()+" "+user.getLastName()+" of id: "+user.id
 							+" failed to login.PIN not set")
 							.activity(LogTypes.PIN_SET)
 							.build();
@@ -1151,11 +1151,21 @@ public class UserService extends RestClientService implements UserDetailsService
 			Optional<UserPin> userPin = this.userPinRepository.getUserPinByUser(user.get());
 			if (userPin.isPresent()) {
 				try {
-					this.larkService.sendPinResetNotification(loggedInUser,
-								user.get().getUserWallets().get(0).getWallet(), "RESET", "Success");
+					
 					this.userPinRepository.delete(userPin.get());
+//					this.larkService.sendPinResetNotification(loggedInUser,
+//							user.get().getUserWallets().get(0).getWallet(), "RESET", "Success");
+					var defaultPin = this.generateRandomPin();
+					var passwordencoded = new BCryptPasswordEncoder().encode(user.get().getId() + defaultPin);
+					var userpin = new UserPin();
+					userpin.setUser(user.get());
+					userpin.setResetPinAttempts(0);
+					userpin.setPin(passwordencoded);
+					userpin.setDeafult(true);
+					this.userPinRepository.save(userpin);					
+					this.smsService.sendSms("Your PIN has been reset."+defaultPin+" is your Konnect Wallet default PIN.Kindly update immediately", "+254"+user.get().getMobile());
 					map.put("success", true);
-					map.put("message", "PIN reset successfull");
+					map.put("message", "PIN reset successful");
 					var log = Logs.builder()
 							.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
 							+"managed to reset PIN for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of Id:"+user.get().id)
@@ -1205,7 +1215,19 @@ public class UserService extends RestClientService implements UserDetailsService
 		}
 
 	}
+   
+	private int generateRandomPin() {
+	    int NUM_DIGITS = 4;
+	    int minValue = (int) Math.pow(10, NUM_DIGITS - 1);
+	    int maxValue = (int) Math.pow(10, NUM_DIGITS) - 1;
 
+	    Random random = new Random(); // Create Random instance without a seed value
+	    return random.nextInt(maxValue - minValue + 1) + minValue;
+	}
+	
+	private void sendDefaultPinSms() {
+		
+	}
 	public ResponseEntity createUserOpenId(@Valid OpenIdRequest openId) {
 		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 

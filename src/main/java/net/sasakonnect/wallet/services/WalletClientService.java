@@ -1,5 +1,6 @@
 package net.sasakonnect.wallet.services;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,8 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.SdkPayDto;
 import net.sasakonnect.wallet.RequestDto.SdkRequestOpenId;
 import net.sasakonnect.wallet.RequestDto.WalletClientAccountDto;
+import net.sasakonnect.wallet.RequestDto.WalletClientAccountUpdateDto;
 import net.sasakonnect.wallet.RequestDto.WalletClientDTO;
 import net.sasakonnect.wallet.beans.ClientAppsBean;
 import net.sasakonnect.wallet.beans.RedisBean;
@@ -92,6 +96,44 @@ public class WalletClientService {
 		}
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public ResponseEntity<Object> getWalletClients(Integer pageNumber,Integer pageSize){
+		try {
+			Page<WalletClient> clients = this.wallectClientRepository.findAll(PageRequest.of(pageNumber, pageSize));
+			if(!clients.isEmpty()) {
+				Map<String,Object> map = new HashMap<>();
+				map.put("success",true);
+				map.put("message","Request completed successful");
+				var clientsMap = clients.stream().map(cl->{
+					Map<String,Object> cMap =  new HashMap<>();
+					cMap.put("id", cl.getId());
+					cMap.put("createdAt", cl.getCreatedAt());
+					cMap.put("description",cl.getAppDescription());
+					cMap.put("appName",cl.getAppName());
+					cMap.put("appKey", cl.getAppKey());
+					cMap.put("appSecret",cl.getAppSecret());
+					cMap.put("callBackUrl",cl.getCallBackUrl());
+			        cMap.put("enabled",cl.getEnabled());
+			        cMap.put("primary",cl.getIsPrimary());
+					return cMap;
+				}).collect(Collectors.toList());
+				map.put("walletClients", clientsMap);
+				
+				return ResponseEntity.status(HttpStatus.OK).body(map);
+			}
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",true);
+			map.put("message","Request completed successful");
+			map.put("walletClients",new ArrayList<>());
+			return ResponseEntity.status(HttpStatus.OK).body(map);
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","Something went wrong");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+		}
 	}
 
 	public Optional<List<WalletClient>> findBuyKeyAndSecret(String client_app_key, String appSecret) {
@@ -172,5 +214,35 @@ public class WalletClientService {
 		return ResponseEntity.status(HttpStatus.LOCKED).body(map);
 
 	}
+	
+	public ResponseEntity<Object> updatePrimaryWalletClientAccount(WalletClientAccountUpdateDto clientAccount ) {
+		try {
+			Optional<WalletClient> currentprimaryAcc = this.wallectClientRepository.findPrimaryWalletClientaccount(clientAccount.getWalletClientId());
+			Optional<WalletClient> newprimaryAcc = this.wallectClientRepository.findByAppIdAndClientAccountId(clientAccount.getWalletClientId(),clientAccount.getWalletClientAccountId());
+			if(currentprimaryAcc.isPresent() && newprimaryAcc.isPresent()) {
+				var pc  = currentprimaryAcc.get();
+				pc.setIsPrimary(false);
+				
+				this.wallectClientRepository.save(pc);
+				var npc = newprimaryAcc.get();
+				npc.setIsPrimary(true);
+				this.wallectClientRepository.save(npc);
+			}
+			Map<String,Object> map =  new HashMap<>();
+			map.put("success",true);
+			map.put("message","Primary account updated for client");
+			var npc = newprimaryAcc.get();
+			npc.setIsPrimary(true);
+			this.wallectClientRepository.save(npc);
+		return ResponseEntity.status(HttpStatus.OK).body(map);	
+		}catch(Exception ex) {
+			Map<String,Object> map =  new HashMap<>();
+			map.put("success",false);
+			map.put("message","Something went wrong");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);	
+		}
+		
+		
+		}
 
 }

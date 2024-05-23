@@ -139,14 +139,10 @@ public class WalletService {
 	UserJobRepository userJobRepository;
 	@Autowired
 	private ApplicationContext applicationContext;
-	
 	@Autowired
 	LogsRepository logsRepository;
-
 	@Autowired
 	TransactionEventService transactionEventService;
-
-	
 	@Value("${internetTillNumber}")
 	String internetTillNumber;
 	
@@ -774,7 +770,7 @@ public class WalletService {
 						if((results.getParams().getTxType().equalsIgnoreCase(WalletTransactionType.TTID0001.getValue())  || 
 							results.getParams().getTxType().equalsIgnoreCase(WalletTransactionType.TTID0002.getValue())) && 
 						    results.getParams().getOppoAccountId().length() == 9  && (results.getParams().getOppoBankCode().equalsIgnoreCase("M-PESA") ||
-							results.getParams().getOppoChannelId().equalsIgnoreCase("M-PESA"))  ) {
+							results.getParams().getOppoChannelId().equalsIgnoreCase("M-PESA"))  && results.getParams().getTxStatus() == 8) {
 							transactionEventService.notifyNewCustomer(results.getParams().getAccountId(),results.getParams().getOppoAccountId());
 
 						}

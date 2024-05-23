@@ -24,12 +24,12 @@ public class SmsService {
 	public void sendSms(String template,String contact) {
 		StringBuilder stringbuilder = new StringBuilder();
 
-//		if (template == null) {
-//			template = this.template;
-//		}
-		stringbuilder.append(this.template);
-		log.info(stringbuilder.toString());
+		if (template == null) {
+			template = this.template;
+		}
+		stringbuilder.append(template);
 	    smsManager.sendMessage(stringbuilder.toString(),contact);
 			
 	}
+	
 }

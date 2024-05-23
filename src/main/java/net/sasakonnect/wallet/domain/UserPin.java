@@ -30,6 +30,9 @@ public class UserPin extends BaseWalletDomain implements Serializable {
 	@Column(nullable = false, columnDefinition = "int default 0")
 	private int resetPinAttempts;
 	
+	@Column(nullable = false, columnDefinition = "bool default 0")
+	private boolean isDeafult;
+	
 	
 	
 
