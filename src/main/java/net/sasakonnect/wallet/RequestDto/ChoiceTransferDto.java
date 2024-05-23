@@ -19,6 +19,6 @@ public class ChoiceTransferDto {
 	String amount;
 	String remarks;
 	@Builder.Default
-	String otpType = "OTP";
+	String otpType = "SMS";
 	String payeeMobileForNotification;
 }

@@ -55,7 +55,7 @@ public class WalletController {
 
 	@Autowired
 	TransactionService transactionService;
-	
+
 	@Autowired
 	TarrifService tarrifService;
 	
@@ -212,7 +212,7 @@ public class WalletController {
 	@TransactionMiddleware()
 	public Object sendToWallet(@RequestBody() @Valid() WalletTransferDto choiceTransfer) {
 		// return "error";
-		return this.walletService.applyFoWalletToWallet(choiceTransfer);
+		return this.walletService.applyForWalletToWallet(choiceTransfer);
 	}
 
 	@PostMapping("checkAccount")
@@ -245,12 +245,10 @@ public class WalletController {
 
 	@GetMapping("spending")
 	public ResponseEntity<Object> getTransactionBehaviour(
-			@RequestParam(name = "month",required=false,defaultValue = "#{T(java.time.LocalDate).now().getMonthValue()}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) int month,
-			@RequestParam(name = "year",required=false,defaultValue="#{T(java.time.LocalDate).now().getYear()}") int year
-			) {
-		return this.transactionService.getWalletTransactionBehaviour(year,month);
+			@RequestParam(name = "month", required = false, defaultValue = "#{T(java.time.LocalDate).now().getMonthValue()}") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) int month,
+			@RequestParam(name = "year", required = false, defaultValue = "#{T(java.time.LocalDate).now().getYear()}") int year) {
+		return this.transactionService.getWalletTransactionBehaviour(year, month);
 	}
-
 
 	@PostMapping("account/statement")
 	@Operation(summary = "Get account statement", description = "Get account statement between start and end dates")
@@ -272,13 +270,12 @@ public class WalletController {
 	public Object updateStatementRead(@RequestParam(name = "jobId") String jobId) {
 		return walletService.updateStamentRead(jobId);
 	}
-	
+
 	@GetMapping("/transaction/recentContact")
-	public ResponseEntity<Object> getRecentTransactionContact(
-			@RequestParam(name="txType") String txType,
+	public ResponseEntity<Object> getRecentTransactionContact(@RequestParam(name = "txType") String txType,
 			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
 			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
-		return this.walletService.getRecentTransactionContact(txType,pageNumber,pageSize);
+		return this.walletService.getRecentTransactionContact(txType, pageNumber, pageSize);
 	}
 	
 	@GetMapping("/transaction/recentContact/search")

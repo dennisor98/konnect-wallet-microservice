@@ -113,5 +113,10 @@
     "name": "MAX_PIN_ATTEMPT",
     "type": "java.lang.String",
     "description": "A description for 'MAX_PIN_ATTEMPT'"
+  },
+  {
+    "name": "konnect.wallet.roles",
+    "type": "java.lang.String",
+    "description": "A description for 'konnect.wallet.roles'"
   }
 ]}

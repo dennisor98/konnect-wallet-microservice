@@ -4,9 +4,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
-import org.springframework.stereotype.Component;
-
-@Component
 public class Helper {
 	public static String generateHashBasedUUID() {
 		try {
