@@ -35,6 +35,7 @@ import net.sasakonnect.wallet.repository.WalletClientAccountRepository;
 import net.sasakonnect.wallet.repository.WalletClientRepository;
 import net.sasakonnect.wallet.tools.Helper;
 import net.sasakonnect.wallet.tools.JwtService;
+import net.sasakonnect.wallet.tools.ResponsePagerClass;
 
 @Slf4j
 @Service
@@ -106,6 +107,10 @@ public class WalletClientService {
 				Map<String,Object> map = new HashMap<>();
 				map.put("success",true);
 				map.put("message","Request completed successful");
+				ResponsePagerClass<WalletClient> page =  ResponsePagerClass.<WalletClient>builder()
+  		    		    .page(clients)
+  		    		    .build();
+				map.putAll(page.getPagingInfo());
 				var clientsMap = clients.stream().map(cl->{
 					Map<String,Object> cMap =  new HashMap<>();
 					cMap.put("id", cl.getId());
@@ -218,6 +223,8 @@ public class WalletClientService {
 
 	}
 	
+	
+	@Transactional
 	public ResponseEntity<Object> updatePrimaryWalletClientAccount(WalletClientAccountUpdateDto clientAccount ) {
 		try {
 			Optional<WalletClient> currentprimaryAcc = this.wallectClientRepository.findPrimaryWalletClientaccount(clientAccount.getWalletClientId());

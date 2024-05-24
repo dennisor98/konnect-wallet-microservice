@@ -12,13 +12,15 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import net.sasakonnect.wallet.domain.Role;
+import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.UserRole;
 
 public interface UserRoleRepository extends JpaRepository<UserRole, String> {
 	@Query("SELECT ur.role FROM UserRole ur JOIN ur.role r WHERE ur.user.id = :userId")
 	List<Role> findRolesByUserId(@Param("userId") String userId);
 	
-	Optional<UserRole> findUserRoleByUserId(@Param("userId") String userId);
+	@Query("SELECT ur FROM UserRole ur  JOIN FETCH ur.role r WHERE ur.user =:user")
+	Optional<UserRole> findUserRoleByUserId(@Param("user") User userId);
 	
 	Page<UserRole> findUserRoleByRole(Role role,Pageable page);
 	
