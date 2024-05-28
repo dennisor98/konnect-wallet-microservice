@@ -4,12 +4,15 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import net.sasakonnect.wallet.domain.sme.SmeAccount;
 
 @Data
 @Entity
@@ -43,5 +46,9 @@ public class WalletClientAccount extends BaseWalletDomain {
 
 	@ManyToOne
 	WalletClient walletClient;
+
+	@OneToOne(optional = true)
+	@JoinColumn(name = "sme_account_id", unique = true, nullable = true, updatable = false)
+	SmeAccount smeAccount;
 
 }
