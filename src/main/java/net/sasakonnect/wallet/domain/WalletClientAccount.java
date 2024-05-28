@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -41,7 +42,7 @@ public class WalletClientAccount extends BaseWalletDomain {
 	@Column(nullable = true)
 	private String bankAccount;
 
-	@ManyToOne
+	@ManyToOne()
 	WalletClient walletClient;
 
 }

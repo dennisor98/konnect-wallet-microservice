@@ -1,6 +1,7 @@
 package net.sasakonnect.wallet.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,4 +21,8 @@ public interface WalletClientAccountRepository extends JpaRepository<WalletClien
 			+ "LEFT JOIN FETCH wc.user u " + "WHERE " + "wca.tillNumber = :account or "
 			+ "wca.paybillNumber = :account  or " + "wca.walletAccountNo = :account  ")
 	List<WalletClient> findWalletClientByAccount(@Param("account") String account);
+	
+	@Query("SELECT wa FROM WalletClientAccount wa WHERE wa.walletClient =:walletClient AND wa.isPrimary = true")
+	Optional<WalletClientAccount> findPrimaryWalletClientaccount(@Param("walletClient") String client);
+	
 }

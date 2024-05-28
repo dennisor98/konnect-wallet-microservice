@@ -25,6 +25,7 @@ import net.sasakonnect.wallet.RequestDto.SdkRequestOpenId;
 import net.sasakonnect.wallet.RequestDto.WalletClientAccountDto;
 import net.sasakonnect.wallet.RequestDto.WalletClientAccountUpdateDto;
 import net.sasakonnect.wallet.RequestDto.WalletClientDTO;
+import net.sasakonnect.wallet.RequestDto.WalletClientUpdateDto;
 import net.sasakonnect.wallet.ResponseDto.TransactionResponseDto;
 import net.sasakonnect.wallet.beans.ClientAppsBean;
 import net.sasakonnect.wallet.beans.RedisBean;
@@ -57,21 +58,51 @@ public class WalletClientService {
 	@Autowired
 	private JwtService jwtService;
 
-	public WalletClient createWallectClientApp(WalletClientDTO walleClientDto) {
-		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	public ResponseEntity<Object> createWallectClientApp(WalletClientDTO walleClientDto) {
+		try {
+			User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		user.setUserWallets(null);
 		user.setPins(null);
 		user.setFirebaseTokens(null);
 		user.setNotifications(null);
 		user.setUserDevices(null);
 		user.setUserPins(null);
-
+		user.setUserRole(null);
 		var wallectClientApp = WalletClient.builder().appName(walleClientDto.getAppName())
 				.callBackUrl(walleClientDto.getCallBackUrl()).appDescription(walleClientDto.getAppDescription())
 				.appKey(Helper.generateHashBasedUUID()).appSecret(Helper.generateHashBasedUUID().substring(12))
 				.user(user).build();
-		return this.wallectClientRepository.save(wallectClientApp);
-
+		this.wallectClientRepository.save(wallectClientApp);
+		wallectClientApp.setUser(null);
+		Map<String,Object> map = new HashMap<>();
+		map.put("success", true);
+		map.put("message","Client created successfully");
+		map.put("wallectClient",wallectClientApp);
+		return ResponseEntity.status(HttpStatus.OK).body(map);
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			Map<String,Object> map = new HashMap<>();
+			map.put("success", false);
+			map.put("message","Something went wrong");
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+		}
+		
+	}
+	
+	public ResponseEntity<Object> deleteWalletClient(String clientId){
+		Optional<WalletClient> walletClient = this.wallectClientRepository.findById(clientId);
+		if(walletClient.isPresent()) {
+			this.wallectClientRepository.delete(walletClient.get());
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",true);
+			map.put("message","Client deleted");
+			
+			return ResponseEntity.status(HttpStatus.OK).body(map);
+		}
+		Map<String,Object> map =  new HashMap<>();
+		map.put("success", false);
+		map.put("message", "Client not found");
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 	}
 
 	@Transactional
@@ -100,9 +131,43 @@ public class WalletClientService {
 		return null;
 	}
 	
+	public Object updateWalletClientApp(WalletClientUpdateDto walletClientUpdateDto) {
+		try {
+			var walletClientApp =  this.wallectClientRepository.findById(walletClientUpdateDto.getId());
+			if(walletClientApp.isPresent()) {
+				var app = walletClientApp.get();
+				
+				app.setAppDescription(walletClientUpdateDto.getDescription());		
+				app.setAppName(walletClientUpdateDto.getAppName());	
+				app.setAppKey(walletClientUpdateDto.getAppKey());
+			    app.setAppSecret(walletClientUpdateDto.getAppSecret());	
+			    app.setCallBackUrl(walletClientUpdateDto.getCallBackUrl());
+			    app.setEnabled(walletClientUpdateDto.getEnabled());
+			    this.wallectClientRepository.save(app);
+			    
+			    Map<String,Object> map = new HashMap<>();
+			    map.put("success",true);
+			    map.put("message","Client update successful");
+			    return ResponseEntity.status(HttpStatus.OK).body(map);	
+			    
+			}
+			Map<String,Object> map = new HashMap<>();
+		    map.put("success",false);
+		    map.put("message","Client not found");
+		    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+			
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			 Map<String,Object> map = new HashMap<>();
+			    map.put("success",false);
+			    map.put("message","Something went wrong");
+			 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+		}
+	}
+	
 	public ResponseEntity<Object> getWalletClients(Integer pageNumber,Integer pageSize){
 		try {
-			Page<WalletClient> clients = this.wallectClientRepository.findAll(PageRequest.of(pageNumber, pageSize));
+			Page<WalletClient> clients = this.wallectClientRepository.findAllByOrderByUpdatedAtDesc(PageRequest.of(pageNumber, pageSize));
 			if(!clients.isEmpty()) {
 				Map<String,Object> map = new HashMap<>();
 				map.put("success",true);
@@ -115,13 +180,27 @@ public class WalletClientService {
 					Map<String,Object> cMap =  new HashMap<>();
 					cMap.put("id", cl.getId());
 					cMap.put("createdAt", cl.getCreatedAt());
+					cMap.put("updatedAt", cl.getUpdatedAt());
 					cMap.put("description",cl.getAppDescription());
 					cMap.put("appName",cl.getAppName());
 					cMap.put("appKey", cl.getAppKey());
 					cMap.put("appSecret",cl.getAppSecret());
 					cMap.put("callBackUrl",cl.getCallBackUrl());
 			        cMap.put("enabled",cl.getEnabled());
-			        cMap.put("primary",cl.getIsPrimary());
+			        cMap.put("accounts",cl.getWalletClientAccount().stream().map(a->{	
+			        	Map<String,Object> aMap = new HashMap<>();
+			        	aMap.put("createdAt", a.getCreatedAt());
+			        	aMap.put("updatedAt", a.getUpdatedAt());
+			        	aMap.put("id",a.getId());
+			        	aMap.put("isPrimary", a.getIsPrimary());
+			        	aMap.put("payBillNumber", a.getPaybillNumber());
+			        	aMap.put("payBillAccountNumber", a.getPayBillAccountNo());
+			        	aMap.put("tillNumber", a.getTillNumber());
+			        	aMap.put("walletAccountNo",a.getWalletAccountNo());
+			        	aMap.put("bankCode", a.getBankCode());
+			        	aMap.put("bankAccount", a.getBankAccount());
+			        	return aMap;
+			        }).collect(Collectors.toList()));
 					return cMap;
 				}).collect(Collectors.toList());
 				map.put("walletClients", clientsMap);
@@ -227,25 +306,33 @@ public class WalletClientService {
 	@Transactional
 	public ResponseEntity<Object> updatePrimaryWalletClientAccount(WalletClientAccountUpdateDto clientAccount ) {
 		try {
-			Optional<WalletClient> currentprimaryAcc = this.wallectClientRepository.findPrimaryWalletClientaccount(clientAccount.getWalletClientId());
-			Optional<WalletClient> newprimaryAcc = this.wallectClientRepository.findByAppIdAndClientAccountId(clientAccount.getWalletClientId(),clientAccount.getWalletClientAccountId());
-			if(currentprimaryAcc.isPresent() && newprimaryAcc.isPresent()) {
-				var pc  = currentprimaryAcc.get();
-				pc.setIsPrimary(false);
-				
-				this.wallectClientRepository.save(pc);
-				var npc = newprimaryAcc.get();
-				npc.setIsPrimary(true);
-				this.wallectClientRepository.save(npc);
+			Optional<WalletClient> walletClient = this.wallectClientRepository.findById(clientAccount.getWalletClientAccountId());
+			
+			if(walletClient.isPresent()) {
+			      Optional<WalletClientAccount> currentprimaryAcc = this.walletClientAccountRepository.findPrimaryWalletClientaccount(clientAccount.getWalletClientId());
+			      Optional<WalletClientAccount> newprimaryAcc = this.walletClientAccountRepository.findById(clientAccount.getWalletClientAccountId());
+			      if(currentprimaryAcc.isPresent() && newprimaryAcc.isPresent()) {
+				      var pc  = currentprimaryAcc.get();
+				      pc.setIsPrimary(false);
+				      this.walletClientAccountRepository.save(pc);
+				      var npc = newprimaryAcc.get();
+				      npc.setIsPrimary(true);
+				      this.walletClientAccountRepository.save(npc);
 			}
 			Map<String,Object> map =  new HashMap<>();
 			map.put("success",true);
 			map.put("message","Primary account updated for client");
 			var npc = newprimaryAcc.get();
 			npc.setIsPrimary(true);
-			this.wallectClientRepository.save(npc);
-		return ResponseEntity.status(HttpStatus.OK).body(map);	
+			this.walletClientAccountRepository.save(npc);
+		    return ResponseEntity.status(HttpStatus.OK).body(map);
+			}
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","Wallet client not found");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);	
 		}catch(Exception ex) {
+			ex.printStackTrace();
 			Map<String,Object> map =  new HashMap<>();
 			map.put("success",false);
 			map.put("message","Something went wrong");

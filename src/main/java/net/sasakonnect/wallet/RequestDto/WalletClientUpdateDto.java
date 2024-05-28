@@ -6,12 +6,12 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-public class WalletClientDTO {
-	@NotNull(message = "appName is required")
+public class WalletClientUpdateDto {
+	private String id;
+	
 	private String appName;
 
-	@NotNull(message = "appDescription is required")
-	private String appDescription;
+	private String description;
 	@Schema(hidden = true)
 	private String appKey;
 	
@@ -22,6 +22,4 @@ public class WalletClientDTO {
 
 	@Size(max = 255)
 	private String callBackUrl;
-
-	private Long walletClientAccountId;
 }
