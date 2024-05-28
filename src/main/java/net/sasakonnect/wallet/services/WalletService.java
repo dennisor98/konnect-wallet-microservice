@@ -138,7 +138,6 @@ public class WalletService {
 
 	@Autowired
 	LogsRepository logsRepository;
-
 	@Autowired
 	TransactionEventService transactionEventService;
 

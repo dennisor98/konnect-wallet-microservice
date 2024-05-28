@@ -126,6 +126,8 @@ public class AdministrationController {
 	@Autowired
 	NotificationService notificationService;
 	
+	
+	
 	@GetMapping("/upload/app")
 	
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CreateSuperApp.PERMISSION + "')")
@@ -148,13 +150,20 @@ public class AdministrationController {
 	
 	@PostMapping("/attach/paymentAccount")
 	@IsCorporate()
-	
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CreateWalletClient.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CreateWalletClient.PERMISSION)
 	public Object attachPaymentAccount(@Valid @RequestBody() WalletClientAccountDto walletClientAccount) {
 		return this.walletClientService.createWalletClientAccount(walletClientAccount);
 	}
 
+	
+	@PutMapping("/attach/paymentAccount")
+	@IsCorporate()
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CreateWalletClient.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.CreateWalletClient.PERMISSION)
+     public Object updatePrimaryWalletClientAccount() {
+		return null;
+	}
 	
 	@PostMapping("/check/account/status")
 	@IsCorporate()
@@ -782,6 +791,17 @@ public class AdministrationController {
 	@RequirePermission(GlobalPermissionConstants.CanSearchAccountInfo.PERMISSION)
 	public ResponseEntity<Object> createNotification(@Valid @RequestBody() NotificationDto request){		
 		return this.notificationService.createNotification(request);
+	}
+	
+	@GetMapping("apps/clients")
+	@IsCorporate()
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanSearchAccountInfo.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.CanSearchAccountInfo.PERMISSION)
+	public ResponseEntity<Object> getWalletClients(
+			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber){		
+		return this.walletClientService.getWalletClients(pageNumber, pageSize);
 	}
 	
 	

@@ -15,8 +15,12 @@ public interface WalletClientRepository extends JpaRepository<WalletClient, Stri
 
 	@Query("SELECT wc FROM WalletClient wc JOIN FETCH wc.walletClientAccount WHERE wc.appKey = :key AND wc.enabled = true ORDER BY wc.createdAt DESC")
 	Optional<List<WalletClient>> findByAppKeyAnd(@Param("key") String client_app_key);
-
+	
 	@Query("SELECT wc FROM WalletClient wc WHERE  wc.appSecret = :secret AND wc.enabled = true ORDER BY wc.createdAt DESC")
 	Optional<List<WalletClient>> findByAppSecret(@Param("secret") String secret);
-
+	
+	@Query("SELECT wc FROM WalletClient wc JOIN wc.walletClientAccount wca WHERE wc.id = :id AND wca.id IN :accountId")
+	Optional<WalletClient> findByAppIdAndClientAccountId(@Param("id") String id, @Param("accountId") String accountId);
+	@Query("SELECT wc FROM WalletClient wc WHERE wc.id =:id AND wc.isPrimary = true")
+	Optional<WalletClient> findPrimaryWalletClientaccount(@Param("id") String id);
 }
