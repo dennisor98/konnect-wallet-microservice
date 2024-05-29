@@ -12,13 +12,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.sme.ConfirmSmeDto;
 import net.sasakonnect.wallet.RequestDto.sme.CreateEnterpriseDto;
 import net.sasakonnect.wallet.RequestDto.sme.CreateSmeDto;
 import net.sasakonnect.wallet.RequestDto.sme.LLCInformationDto;
+import net.sasakonnect.wallet.RequestDto.sme.SmeAccountDocuments;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.RequirePermission;
 import net.sasakonnect.wallet.constant.GlobalPermissionConstants;
@@ -103,6 +106,13 @@ public class SmeAdminController {
 	@RequirePermission(GlobalPermissionConstants.CanConfirmOnboardingSmeAccountOtp.PERMISSION)
 	public Object confirmSmePhoneNumber(@RequestBody LLCInformationDto confirmsmeDto) {
 		return this.smeService.registerLccInformation(confirmsmeDto);
+
+	}
+
+	@PostMapping("/sme/documents")
+	@Operation(summary = "Upload SME Account Document", description = "Upload an SME account document")
+	public Object uploadDocument(@Valid @RequestBody SmeAccountDocuments document) {
+		return this.smeService.uploadSmeAccountDocuments(document);
 
 	}
 

@@ -19,12 +19,18 @@ import net.sasakonnect.wallet.RequestDto.sme.ConfirmSmeDto;
 import net.sasakonnect.wallet.RequestDto.sme.CreateEnterpriseDto;
 import net.sasakonnect.wallet.RequestDto.sme.CreateSmeDto;
 import net.sasakonnect.wallet.RequestDto.sme.LLCInformationDto;
+import net.sasakonnect.wallet.RequestDto.sme.SmeAccountDocuments;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
+import net.sasakonnect.wallet.domain.Logs;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.sme.Enterprise;
 import net.sasakonnect.wallet.domain.sme.SmeAccount;
 import net.sasakonnect.wallet.domain.sme.SmeAccountDetails;
+import net.sasakonnect.wallet.enums.LogTypes;
+import net.sasakonnect.wallet.notification.NotificationResult;
+import net.sasakonnect.wallet.notification.SmeAccountOpeningResultNotification;
+import net.sasakonnect.wallet.repository.LogsRepository;
 import net.sasakonnect.wallet.repository.sme.EnterpriseRepository;
 import net.sasakonnect.wallet.repository.sme.SmeAccountRepository;
 import net.sasakonnect.wallet.repository.sme.SmeInformationRepository;
@@ -48,6 +54,8 @@ public class SmeService {
 	RequestSigner requestSigner;
 	@Autowired
 	ChoiceBankSmsService choiceBankSmsService;
+	@Autowired
+	LogsRepository logsRepository;
 
 	public Enterprise createEnterprise(CreateEnterpriseDto ced) {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -195,6 +203,38 @@ public class SmeService {
 		return null;
 	}
 
+	public Object uploadSmeAccountDocuments(SmeAccountDocuments smeInfo) {
+
+		var sme = this.smeAccountRepository.findSmeByOnboardingId(smeInfo.getOnboardingRequestId());
+		if (sme.isPresent()) {
+
+			var reqId = new HashMap<String, Object>();
+			reqId.put("onboardingRequestId", sme.get().getOnboardingRequestId());
+			reqId.put("mediaBase64", smeInfo.getBase64Document());
+			reqId.put("mediaType", smeInfo.getMediaType().name());
+			reqId.put("contentType", smeInfo.getContentType().getValue());
+
+			var reqs = requestSigner.signRequest(reqId);
+
+			Mono<String> responseMono = this.bankClientBean.webClient.post()
+					.uri(ChoiceEndpointsConstants.UPLOAD_SME_DOCUMENT).contentType(MediaType.APPLICATION_JSON)
+					.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+					.bodyToMono(String.class);
+
+			String responseJson = responseMono.block();
+
+			if (responseJson != null) {
+				var gson = new Gson().fromJson(responseJson, HashMap.class);
+
+				return gson;
+
+			}
+		}
+
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	public Object verifyOtpForSms(CreateSmeDto createSmeSto) {
 		var enterprise = this.enterpriseRepository.findById(createSmeSto.getEnterprise_id());
 		if (enterprise.isPresent()) {
@@ -302,6 +342,27 @@ public class SmeService {
 
 		}
 		return null;
+	}
+
+	public void updateAccountinfo(NotificationResult<SmeAccountOpeningResultNotification> results) {
+		var body = results.getParams();
+		var sme = this.smeAccountRepository.findSmeByOnboardingId(body.getOnboardingRequestId());
+		var json_results = new Gson().toJson(results);
+		var log = Logs.builder().description("new wallet account " + json_results).activity(LogTypes.SME).build();
+		this.logsRepository.save(log);
+		if (sme.isPresent()) {
+			var currentSme = sme.get();
+			if (currentSme.getAccountNo() == null) {
+				currentSme.setAccountNo(body.getAccountId());
+				currentSme.setCompleteTime(body.getCompleteTime());
+				currentSme.setStatus(body.getStatus());
+				this.smeAccountRepository.save(currentSme);
+
+			}
+		}
+
+		// TODO Auto-generated method stub
+
 	}
 
 }
