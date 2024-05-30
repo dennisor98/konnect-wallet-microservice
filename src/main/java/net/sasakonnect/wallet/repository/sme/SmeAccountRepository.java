@@ -19,4 +19,7 @@ public interface SmeAccountRepository extends JpaRepository<SmeAccount, String> 
 
 	@Query("SELECT sa FROM SmeAccount sa  WHERE sa.onboardingRequestId = :onboardingRequestId")
 	Optional<SmeAccount> findSmeByOnboardingId(@Param("onboardingRequestId") String onboardingRequestId);
+
+	@Query("SELECT sa FROM SmeAccount sa  WHERE sa.id = :id")
+	Optional<SmeAccount> findSmeById(@Param("id") String id);
 }

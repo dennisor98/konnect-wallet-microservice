@@ -627,6 +627,22 @@ public final class GlobalPermissionConstants {
 
 	}
 
+	public static class CanRegisterMemberToLlc extends PermissionEntry {
+		public static final String PERMISSION = "can.register.member.llc";
+		public static final String DESCRIPTION = "user can add member to lls when creating sme";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+
+	}
+
 	public static class CanUploadLccInformation extends PermissionEntry {
 		public static final String PERMISSION = "can.upload.lcc.information";
 		public static final String DESCRIPTION = "can upload limited liability company information";
