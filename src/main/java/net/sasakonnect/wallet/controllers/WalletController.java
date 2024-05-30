@@ -295,8 +295,12 @@ public class WalletController {
 	
 	@GetMapping("/notification")
 	public ResponseEntity<Object> getNotifications(
+			@RequestParam(name="isRead",required=false) Boolean isRead,
 			@RequestParam(name="pageNumber",required=false,defaultValue="0") Integer pageNumber,
 			@RequestParam(name="pageSize",required=false,defaultValue="10") Integer pageSize) {
+		if(isRead !=null) {
+		  return this.notificationService.filterNotificationsByReadstatus(isRead, pageNumber, pageSize);
+		}
 		return this.notificationService.getUserNotifications(pageNumber,pageSize);
 	}
 	
