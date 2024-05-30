@@ -1,11 +1,13 @@
 package net.sasakonnect.wallet.domain.sme;
 
 import java.io.Serializable;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,7 +25,8 @@ public class SmeAccount extends BaseWalletDomain implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "enterprise_id")
 	private Enterprise enterprise;
-
+	@OneToMany(mappedBy = "sme_account")
+	private List<SmeMember> smeMembers;
 	private static final long serialVersionUID = -2020925333315146974L;
 	@Column(name = "country_code", nullable = false)
 	private String countryCode;

@@ -19,6 +19,7 @@ import net.sasakonnect.wallet.RequestDto.sme.ConfirmSmeDto;
 import net.sasakonnect.wallet.RequestDto.sme.CreateEnterpriseDto;
 import net.sasakonnect.wallet.RequestDto.sme.CreateSmeDto;
 import net.sasakonnect.wallet.RequestDto.sme.LLCInformationDto;
+import net.sasakonnect.wallet.RequestDto.sme.LlcSmeMemberDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmeAccountDocuments;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
@@ -27,10 +28,13 @@ import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.sme.Enterprise;
 import net.sasakonnect.wallet.domain.sme.SmeAccount;
 import net.sasakonnect.wallet.domain.sme.SmeAccountDetails;
+import net.sasakonnect.wallet.domain.sme.SmeMember;
 import net.sasakonnect.wallet.enums.LogTypes;
 import net.sasakonnect.wallet.notification.NotificationResult;
 import net.sasakonnect.wallet.notification.SmeAccountOpeningResultNotification;
 import net.sasakonnect.wallet.repository.LogsRepository;
+import net.sasakonnect.wallet.repository.SmeMemberRepository;
+import net.sasakonnect.wallet.repository.UserRepository;
 import net.sasakonnect.wallet.repository.sme.EnterpriseRepository;
 import net.sasakonnect.wallet.repository.sme.SmeAccountRepository;
 import net.sasakonnect.wallet.repository.sme.SmeInformationRepository;
@@ -56,6 +60,10 @@ public class SmeService {
 	ChoiceBankSmsService choiceBankSmsService;
 	@Autowired
 	LogsRepository logsRepository;
+	@Autowired
+	UserRepository userRepository;
+	@Autowired
+	SmeMemberRepository smeMemberRepository;
 
 	public Enterprise createEnterprise(CreateEnterpriseDto ced) {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -75,6 +83,8 @@ public class SmeService {
 			var enterprises = pagedEnterprices.getContent().stream().map(enterprise -> {
 				var enterpriseResponse = new HashMap<String, Object>();
 				enterpriseResponse.put("name", enterprise.getName());
+				enterpriseResponse.put("id", enterprise.getId());
+
 				enterpriseResponse.put("industry", enterprise.getIndustry());
 				enterpriseResponse.put("ownership", enterprise.getOwnership());
 				enterpriseResponse.put("mission", enterprise.getMission());
@@ -120,6 +130,8 @@ public class SmeService {
 				enterpriseResponse.put("account", sme.getAccountNo());
 				enterpriseResponse.put("email", sme.getEmail());
 				enterpriseResponse.put("createdOn", sme.getCreatedAt());
+				enterpriseResponse.put("id", sme.id);
+
 				return enterpriseResponse;
 			}).collect(Collectors.toList());
 
@@ -288,6 +300,65 @@ public class SmeService {
 
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public Object registerLLcMember(LlcSmeMemberDto lccSmemeberDto) {
+		var sme = this.smeAccountRepository.findSmeById(lccSmemeberDto.getSme_id());
+		if (sme.isPresent()) {
+			var foundSme = sme.get();
+			var user = this.userRepository.findUserWithWalletsById(lccSmemeberDto.getUser_id());
+			if (user.isPresent()) {
+				var foundUser = user.get();
+				HashMap<String, Object> registrationData = new HashMap<>();
+
+				// Mandatory fields
+				registrationData.put("onboardingRequestId", foundSme.getOnboardingRequestId());
+				registrationData.put("userId", foundSme.id);
+				registrationData.put("idType", foundUser.getIdType().evaluateId()); // Kenyan ID example
+				registrationData.put("firstName", foundUser.getFirstName());
+				registrationData.put("lastName", foundUser.getLastName());
+				registrationData.put("idNumber", foundUser.getIdNumber());
+				registrationData.put("gender", foundUser.getGender().getValue()); // Male
+				registrationData.put("countryCode", foundUser.getCountryCode());
+				registrationData.put("mobile", foundUser.getMobile());
+				registrationData.put("kraPin", foundUser.getKraPin());
+				registrationData.put("idFrontSideFile", lccSmemeberDto.getIdFrontSideFile());
+				registrationData.put("idFrontSideFileType", lccSmemeberDto.getIdFrontSideFileType().getValue());
+				registrationData.put("idBackSideFile", lccSmemeberDto.getIdBackSideFile());
+				registrationData.put("idBackSideFileType", lccSmemeberDto.getIdBackSideFileType().getValue());
+				registrationData.put("selfieFile", lccSmemeberDto.getSelfieFile());
+				registrationData.put("selfieFileType", lccSmemeberDto.getSelfieFileType().getValue());
+				registrationData.put("kraPinFile", lccSmemeberDto.getKraPin());
+				registrationData.put("kraPinFileType", lccSmemeberDto.getKraPinFileType().getValue());
+				var reqs = requestSigner.signRequest(registrationData);
+
+				Mono<String> responseMono = this.bankClientBean.webClient.post()
+						.uri(ChoiceEndpointsConstants.UPLOAD_SME_MEMBER).contentType(MediaType.APPLICATION_JSON)
+						.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+						.bodyToMono(String.class);
+				String responseJson = responseMono.block();
+				if (responseJson != null) {
+					var gson = new Gson().fromJson(responseJson, HashMap.class);
+					if (((String) gson.get("code")).equalsIgnoreCase("00000")) {
+						var memberid = ((Map<?, ?>) gson.get("data")).get("memberId").toString();
+						var smeMember = SmeMember.builder().member_id(memberid).sme_account(foundSme).user(foundUser)
+								.build();
+
+						this.smeMemberRepository.save(smeMember);
+
+						// this.smeAccountInfoRepository.delete(smeInfo);
+					} else {
+
+					}
+					return gson;
+
+				}
+
+			}
+
+		}
+		return null;
+
 	}
 
 	public Object registerLccInformation(LLCInformationDto createSmeSto) {

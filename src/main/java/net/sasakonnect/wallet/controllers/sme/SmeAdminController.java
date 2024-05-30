@@ -21,6 +21,7 @@ import net.sasakonnect.wallet.RequestDto.sme.ConfirmSmeDto;
 import net.sasakonnect.wallet.RequestDto.sme.CreateEnterpriseDto;
 import net.sasakonnect.wallet.RequestDto.sme.CreateSmeDto;
 import net.sasakonnect.wallet.RequestDto.sme.LLCInformationDto;
+import net.sasakonnect.wallet.RequestDto.sme.LlcSmeMemberDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmeAccountDocuments;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.RequirePermission;
@@ -106,6 +107,15 @@ public class SmeAdminController {
 	@RequirePermission(GlobalPermissionConstants.CanConfirmOnboardingSmeAccountOtp.PERMISSION)
 	public Object confirmSmePhoneNumber(@RequestBody LLCInformationDto confirmsmeDto) {
 		return this.smeService.registerLccInformation(confirmsmeDto);
+
+	}
+
+	@PostMapping("/sme/member")
+//	@IsCorporate()
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanRegisterMemberToLlc.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.CanRegisterMemberToLlc.PERMISSION)
+	public Object addLccMember(@RequestBody LlcSmeMemberDto llcSmeMember) {
+		return this.smeService.registerLLcMember(llcSmeMember);
 
 	}
 
