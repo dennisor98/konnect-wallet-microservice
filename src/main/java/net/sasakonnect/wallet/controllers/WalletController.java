@@ -306,8 +306,13 @@ public class WalletController {
 	
 	@PutMapping("/notification/read/update")
 	public ResponseEntity<Object> updateNotificationRead(
-			@RequestParam(name="notificationId") String notificationId) {
-		return this.notificationService.setAsRead(notificationId);
+			@RequestParam(name="notificationId",required=false) String notificationId) {
+		if(notificationId == null) {
+			return this.notificationService.setAllAsRead();
+		}else {
+			return this.notificationService.setAsRead(notificationId);
+		}
+		
 	}
 	
 	

@@ -2,6 +2,7 @@ package net.sasakonnect.wallet.services;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import net.sasakonnect.wallet.RequestDto.NotificationDto;
 import net.sasakonnect.wallet.domain.LarkUser;
@@ -44,6 +46,13 @@ public class NotificationService {
 	   User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 	   Optional<Notifications> notification = this.notificationsRepository.findById(notificationId);
 	   if(notification.isPresent()) {
+		   if(notification.get().getMessageRead() !=null) {
+			   Map<String,Object> map = new HashMap<>();
+			   map.put("success",false);
+			   map.put("message","Message already read");
+			   
+			   return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		   }
 		  var ntfRead = NotificationsRead.builder()
 		   .message(notification.get())
 		   .user(user)
@@ -62,6 +71,43 @@ public class NotificationService {
 		   map.put("message","Notification not found");
 		   return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 	   }
+   }
+   
+   @Transactional
+   public ResponseEntity<Object> setAllAsRead() {
+	   User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	   List<Notifications> userNotifications = this.notificationsRepository.findAllUnreadNotifications(user);
+	   if(userNotifications.isEmpty()) {
+		   Map<String,Object> map = new HashMap<>();
+		   map.put("success",false);
+		   map.put("message","No notifications to update");
+		   
+		   return ResponseEntity.status(HttpStatus.OK).body(map);
+	   }
+	   
+	   try {
+		  userNotifications.stream().map(n->{
+		 var ntfs =   NotificationsRead.builder()
+		   .message(n)
+		   .user(user)
+		   .build();
+		var isRead = this.notificationsReadRepository.save(ntfs);
+		 n.setMessageRead(isRead);
+		return this.notificationsRepository.save(n);
+	   }).collect(Collectors.toList());  
+		  Map<String,Object> map =  new HashMap<>();
+		  map.put("success",true);
+		  map.put("message","Notification update successful");
+		  return ResponseEntity.status(HttpStatus.OK).body(map);
+	   }catch(Exception ex) {
+		   ex.printStackTrace();
+		   Map<String,Object> map =  new HashMap<>();
+			  map.put("success",false);
+			  map.put("message","Something went wrong");
+			  
+			  return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+	   }
+	  
    }
    
    public ResponseEntity<Object> createNotification(NotificationDto notification) {
