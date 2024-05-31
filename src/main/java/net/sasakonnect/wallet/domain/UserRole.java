@@ -2,6 +2,7 @@ package net.sasakonnect.wallet.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
@@ -23,7 +24,7 @@ public class UserRole extends BaseWalletDomain {
     @Column(name = "user_id")
     private String userId;
 
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
     @JsonIgnore
     private User user;
@@ -32,7 +33,7 @@ public class UserRole extends BaseWalletDomain {
     @Column(name = "role_id")
     private String roleId;
 
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "role_id", referencedColumnName = "id", insertable = false, updatable = false)
     @JsonIgnore
     private Role role;

@@ -74,6 +74,7 @@ import net.sasakonnect.wallet.events.StatementGenerationEvent;
 import net.sasakonnect.wallet.events.TransactionEvent;
 import net.sasakonnect.wallet.notification.AccountStatementReportNotification;
 import net.sasakonnect.wallet.notification.NotificationResult;
+import net.sasakonnect.wallet.notification.SmeAccountOpeningResultNotification;
 import net.sasakonnect.wallet.notification.TransactionResultNotification;
 import net.sasakonnect.wallet.notification.WalletAccountUpgradeResultNotification;
 import net.sasakonnect.wallet.repository.CurrencyRepository;
@@ -83,6 +84,7 @@ import net.sasakonnect.wallet.repository.UserJobRepository;
 import net.sasakonnect.wallet.repository.UserWalletRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.services.extensions.LarkUtilityService;
+import net.sasakonnect.wallet.services.sme.SmeService;
 import net.sasakonnect.wallet.tools.RequestSigner;
 import reactor.core.publisher.Mono;
 
@@ -106,6 +108,8 @@ public class WalletService {
 
 	@Autowired
 	LarkUtilityService larkUtilityService;
+	@Autowired
+	SmeService smeAccountService;
 
 	@Autowired
 	WalletRepository walletRepository;
@@ -126,7 +130,7 @@ public class WalletService {
 
 	@Autowired
 	private NotificationService notificationService;
-	
+
 	@Autowired
 	private ApplicationEventPublisher publisher;
 	@Value("${email.statements}")
@@ -145,7 +149,7 @@ public class WalletService {
 	String internetTillNumber;
 
 	@Value("${KONNECT_BANK}")
-    private String konnectBank;
+	private String konnectBank;
 
 	public Object getWalletInfo() {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -665,20 +669,16 @@ public class WalletService {
 
 				var reqParams = results.getParams();
 //				if()
-				
-				if(reqParams.getTxStatus() == 8) {
-					var fContact =  FinancialContact.builder()
-							.accountId(reqParams.getAccountId())
-							.oppoAccountId(reqParams.getOppoAccountId())
-							.oppoSubAccountId(reqParams.getOppoSubAccount())
-							.txType(reqParams.getTxType())
-							.oppoAccountName(reqParams.getExtInfo().getCounterpartyName())
-							.oppoBankCode(reqParams.getOppoBankCode())
-							.oppoChannelId(reqParams.getOppoChannelId())
+
+				if (reqParams.getTxStatus() == 8) {
+					var fContact = FinancialContact.builder().accountId(reqParams.getAccountId())
+							.oppoAccountId(reqParams.getOppoAccountId()).oppoSubAccountId(reqParams.getOppoSubAccount())
+							.txType(reqParams.getTxType()).oppoAccountName(reqParams.getExtInfo().getCounterpartyName())
+							.oppoBankCode(reqParams.getOppoBankCode()).oppoChannelId(reqParams.getOppoChannelId())
 							.build();
 					this.financialContactService.saveTransactionContact(fContact);
 				}
-				
+
 //				log.info("transacttion {}", results);
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.BALANCE.getCode())) {
@@ -696,30 +696,26 @@ public class WalletService {
 					transaction.get().setTxStatus(8);
 					transaction.get().setBalance(new BigDecimal(results.getParams().getBalance()));
 					transaction.get().setRemarks(results.getParams().getErrorMsg());
-					if(results.getParams().getExtInfo().getCounterpartyName() == null) {
+					if (results.getParams().getExtInfo().getCounterpartyName() == null) {
 						transaction.get().setCounterpartyName(transaction.get().getCounterpartyName());
 					}
-					
+
 					this.transactionService.transactionRepository.save(transaction.get());
 
 					this.publisher.publishEvent(
 							TransactionEvent.builder().userService(userService).transaction(transaction.get()).build());
-					if(reqParams.getTxStatus() == 8) {
-						var fContact =  FinancialContact.builder()
-							.accountId(reqParams.getAccountId())
-							.oppoAccountId(reqParams.getOppoAccountId())
-							.oppoSubAccountId(reqParams.getOppoSubAccount())
-							.txType(reqParams.getTxType())
-							.oppoAccountName(reqParams.getExtInfo().getCounterpartyName())
-							.oppoBankCode(reqParams.getOppoBankCode())
-							.oppoChannelId(reqParams.getOppoChannelId())
-							.build();
+					if (reqParams.getTxStatus() == 8) {
+						var fContact = FinancialContact.builder().accountId(reqParams.getAccountId())
+								.oppoAccountId(reqParams.getOppoAccountId())
+								.oppoSubAccountId(reqParams.getOppoSubAccount()).txType(reqParams.getTxType())
+								.oppoAccountName(reqParams.getExtInfo().getCounterpartyName())
+								.oppoBankCode(reqParams.getOppoBankCode()).oppoChannelId(reqParams.getOppoChannelId())
+								.build();
 						this.financialContactService.saveTransactionContact(fContact);
 
-					}else {
-						
+					} else {
+
 					}
-					
 
 				} else {
 					var reqParams = results.getParams();
@@ -744,38 +740,35 @@ public class WalletService {
 									results.getParams().getOppoAccountId());
 
 						}
-						
-						
-						if(results.getParams().getTxType().equalsIgnoreCase(WalletTransactionType.TTID0011.getValue())){
-							var ntf = Notifications.builder()
-							  .title("REVERSAL ALERT")
-							  .message("Your request for reversal of "+(new BigDecimal(results.getParams().getAmount()).abs() + results.getParams().getFeeAmount())
-									  +"was successful.ID: "+results.getParams().getTxId()+"\n"+" Ref: "+results.getParams().getExtInfo().getExternalTxId()
-									  )
-							  .isRead(false)
-							  .targetType(NotificationTargetType.INDIVIDUAL.getValue())
-							  .targetUser(this.userService.findUserByAccountd(results.getParams().getAccountId()).get())
-							  .build();
-							
+
+						if (results.getParams().getTxType()
+								.equalsIgnoreCase(WalletTransactionType.TTID0011.getValue())) {
+							var ntf = Notifications.builder().title("REVERSAL ALERT")
+									.message("Your request for reversal of "
+											+ (new BigDecimal(results.getParams().getAmount()).abs()
+													+ results.getParams().getFeeAmount())
+											+ "was successful.ID: " + results.getParams().getTxId() + "\n" + " Ref: "
+											+ results.getParams().getExtInfo().getExternalTxId())
+									  .targetType(NotificationTargetType.INDIVIDUAL.getValue())
+									.targetUser(this.userService.findUserByAccountd(results.getParams().getAccountId())
+											.get())
+									.build();
+
 							this.notificationService.save(ntf);
-							
+
 						}
-						
-						if(reqParams.getTxStatus() == 8) {
-							var fContact =  FinancialContact.builder()
-									.accountId(reqParams.getAccountId())
+
+						if (reqParams.getTxStatus() == 8) {
+							var fContact = FinancialContact.builder().accountId(reqParams.getAccountId())
 									.oppoAccountId(reqParams.getOppoAccountId())
-									.oppoSubAccountId(reqParams.getOppoSubAccount())
-									.txType(reqParams.getTxType())
+									.oppoSubAccountId(reqParams.getOppoSubAccount()).txType(reqParams.getTxType())
 									.oppoAccountName(reqParams.getExtInfo().getCounterpartyName())
 									.oppoBankCode(reqParams.getOppoBankCode())
-									.oppoChannelId(reqParams.getOppoChannelId())
-									.build();
+									.oppoChannelId(reqParams.getOppoChannelId()).build();
 							this.financialContactService.saveTransactionContact(fContact);
 						}
-						
+
 					}
-						
 
 				}
 
@@ -799,6 +792,11 @@ public class WalletService {
 				this.userService.pushUpgradeNotification(results.getParams());
 
 			} else if (notification_Type == NotificationType.SME_ACCOUNT_OPEN.getCode()) {
+				NotificationResult<SmeAccountOpeningResultNotification> results = new Gson().fromJson(body.toString(),
+						new TypeToken<NotificationResult<SmeAccountOpeningResultNotification>>() {
+						}.getType());
+				log.info("Sme account Opening", results);
+				this.smeAccountService.updateAccountinfo(results);
 
 			} else if (notification_Type == NotificationType.UTILITY.getCode()) {
 
@@ -1039,7 +1037,7 @@ public class WalletService {
 
 	public Object getAccountStatusByMobileNumber(String phone) {
 		Optional<User> user = this.userService.findUserByPhoneNumber(phone);
-		if(user.isPresent()) {
+		if (user.isPresent()) {
 			var res = this.userService.isPinSet(user.get());
 			List<Wallet> wallets = this.walletRepository.findByUserWalletsUser(user.get());
 			if (wallets != null && wallets.isEmpty()) {
@@ -1058,10 +1056,9 @@ public class WalletService {
 			}
 		}
 		return null;
-		
 
 	}
-	
+
 	public Object currencyIso() {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("message", currencyRepository.findAll());
@@ -1708,12 +1705,12 @@ public class WalletService {
 		}
 		return null;
 	}
-	
-	public ResponseEntity<Object> searchRecentTransactionContact(String txtype,Integer pageNumber,Integer pageSize){
-			return this.financialContactService.searchTransactionContacts(txtype, pageNumber, pageSize);
+
+	public ResponseEntity<Object> searchRecentTransactionContact(String txtype, Integer pageNumber, Integer pageSize) {
+		return this.financialContactService.searchTransactionContacts(txtype, pageNumber, pageSize);
 	}
-	
-	public ResponseEntity<Object> getAccountStatus(String mobile){
+
+	public ResponseEntity<Object> getAccountStatus(String mobile) {
 		try {
 			Optional<User> user = this.userService.findUserByPhoneNumber(mobile);
 			if (user.isEmpty()) {
@@ -1732,8 +1729,8 @@ public class WalletService {
 				map.put("message", "Account has been rejected");
 				return ResponseEntity.status(HttpStatus.OK).body(map);
 			}
-			
-			Map<String,Object> map = new HashMap<>();
+
+			Map<String, Object> map = new HashMap<>();
 			map.put("success", true);
 			map.put("message", "Account approved");
 			return ResponseEntity.status(HttpStatus.OK).body(map);

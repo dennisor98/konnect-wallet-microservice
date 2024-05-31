@@ -14,9 +14,10 @@ public class WalletClientDTO {
 	private String appDescription;
 	@Schema(hidden = true)
 	private String appKey;
+	
 	@Schema(hidden = true)
-
 	private String appSecret;
+	
 	private Boolean enabled;
 
 	@Size(max = 255)

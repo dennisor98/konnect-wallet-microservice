@@ -3,6 +3,8 @@ package net.sasakonnect.wallet.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,6 +23,8 @@ public interface WalletClientRepository extends JpaRepository<WalletClient, Stri
 	
 	@Query("SELECT wc FROM WalletClient wc JOIN wc.walletClientAccount wca WHERE wc.id = :id AND wca.id IN :accountId")
 	Optional<WalletClient> findByAppIdAndClientAccountId(@Param("id") String id, @Param("accountId") String accountId);
-	@Query("SELECT wc FROM WalletClient wc WHERE wc.id =:id AND wc.isPrimary = true")
-	Optional<WalletClient> findPrimaryWalletClientaccount(@Param("id") String id);
+	
+	
+	Page<WalletClient>findAllByOrderByUpdatedAtDesc(Pageable pageable);
+	
 }
