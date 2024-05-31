@@ -220,8 +220,13 @@ public class NotificationService {
 					  nMap.put("title",n.getTitle());
 					  nMap.put("message",n.getMessage());
 					  nMap.put("target",n.getTargetType());
-					  nMap.put("isRead",n.getMessageRead().getUser().getId().equalsIgnoreCase(user.getId()) || n.getMessageRead() != null  ? true : false);
-				   return nMap;
+					  if (n.getMessageRead() != null && n.getMessageRead().getUser() != null) {
+						    boolean isRead = n.getMessageRead().getUser().getId().equalsIgnoreCase(user.getId());
+						    nMap.put("isRead", isRead);
+						} else {
+						    nMap.put("isRead", false);
+						}
+					  return nMap;
 			   }).collect(Collectors.toList());
 			   map.putIfAbsent("notifications",ntfs);
 			   ResponsePagerClass<Notifications> page =  ResponsePagerClass.<Notifications>builder()
