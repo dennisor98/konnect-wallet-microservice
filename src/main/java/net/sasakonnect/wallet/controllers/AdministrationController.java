@@ -40,7 +40,9 @@ import net.sasakonnect.wallet.RequestDto.RoleDTO;
 import net.sasakonnect.wallet.RequestDto.UserRoleDTO;
 import net.sasakonnect.wallet.RequestDto.VerifyCorporate;
 import net.sasakonnect.wallet.RequestDto.WalletClientAccountDto;
+import net.sasakonnect.wallet.RequestDto.WalletClientAccountUpdateDto;
 import net.sasakonnect.wallet.RequestDto.WalletClientDTO;
+import net.sasakonnect.wallet.RequestDto.WalletClientUpdateDto;
 import net.sasakonnect.wallet.RequestDto.admin.CheckUserAccount;
 import net.sasakonnect.wallet.RequestDto.admin.PinReset;
 import net.sasakonnect.wallet.RequestDto.tarrif.TariffDTO;
@@ -146,6 +148,32 @@ public class AdministrationController {
 	public Object createApp(@Valid @RequestBody() WalletClientDTO walletClientDto) {
 		return this.walletClientService.createWallectClientApp(walletClientDto);
 	}
+	
+	@PutMapping("/update/app")
+	@IsCorporate()
+	
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CreateWalletClient.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.CreateWalletClient.PERMISSION)
+	public Object updateWallectClientApp(@Valid @RequestBody() WalletClientUpdateDto walletClientUpdateDto) {
+		return this.walletClientService.updateWalletClientApp(walletClientUpdateDto);
+	}
+	
+	@PutMapping("/set/app/account/primary")
+	@IsCorporate()
+	
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CreateWalletClient.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.CreateWalletClient.PERMISSION)
+	public Object setPrimaryWallectClientAccount(@Valid @RequestBody() WalletClientAccountUpdateDto walletClientUpdateDto) {
+		return this.walletClientService.updatePrimaryWalletClientAccount(walletClientUpdateDto);
+	}
+	
+	@DeleteMapping("/delete/app")
+	@IsCorporate()
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CreateWalletClient.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.CreateWalletClient.PERMISSION)
+	public Object deleteApp(@RequestParam("clientId") String clientId) {
+		return this.walletClientService.deleteWalletClient(clientId);
+ 	}
 
 	
 	@PostMapping("/attach/paymentAccount")

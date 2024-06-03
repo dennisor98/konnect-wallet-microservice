@@ -105,7 +105,7 @@ import net.sasakonnect.wallet.repository.WalletClientRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.tools.JwtService;
 import net.sasakonnect.wallet.tools.RequestSigner;
-
+import net.sasakonnect.wallet.domain.RolePermission;
 @Service
 @Slf4j
 public class UserService extends RestClientService implements UserDetailsService {
@@ -1326,21 +1326,25 @@ public class UserService extends RestClientService implements UserDetailsService
 	
 	public ResponseEntity<Object> getUserPermissions(){
 		User u = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-	Optional<UserRole> role = this.userRoleRepository.findUserRoleByUserId(u.getId());
-		if(role.isPresent()) {
+		
+	Optional<UserRole> userRole = this.userRoleRepository.findUserRoleByUserId(u);
+//	Optional<Role> role = this.roleRepository
+	if(userRole.isPresent()) {
+		   List<Permission> rolePermissions = this.rolePermissionRepository.findPermissionsByRole(userRole.get().getRole());
 			Map<String,Object> map = new HashMap<String,Object>();
 			map.put("success",true);
 			map.put("message","Request complete");
-			map.put("role",role.get().getRole().getRoleName());
-			map.put("permissions",role.get().getRole().getRolePermissions().stream().map(r->{
+			map.put("role",userRole.get().getRole().getRoleName());
+//			log.info(userRole.get().getRole().getRolePermissions()+"");
+//			System.out.println(userRole.get().getRole().getRolePermissions());
+			var perms = rolePermissions.stream().map(r->{
 				Map<String,Object> per = new HashMap<String,Object>();
-				var p=r.getPermission();
-				per.put("id",p.getId());
-				per.put("name",p.getName());
-				per.put("description", p.getDescription());
-
+				per.put("id",r.getId());
+				per.put("name",r.getName());
+				per.put("description", r.getDescription());
 				return per;
-			}).collect(Collectors.toList()));
+			}).collect(Collectors.toList());
+			map.put("permissions",perms);
 			return ResponseEntity.status(HttpStatus.OK).body(map);
 		}else {
 			Map<String,Object> map = new HashMap<String,Object>();

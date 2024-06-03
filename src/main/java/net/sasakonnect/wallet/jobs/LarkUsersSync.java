@@ -127,7 +127,7 @@ public class LarkUsersSync {
 	
 	
 	@Transactional
-@Scheduled(fixedDelay = 604800000)	
+//@Scheduled(fixedDelay = 604800000)	
 public void getLarkDepartments() {
 	Thread thread =  new Thread(() ->{
 		RestTemplate restTemplate = new RestTemplate();
@@ -273,7 +273,7 @@ public void getLarkDepartments() {
 	        }
 	  }
 	
-	  @Scheduled(fixedDelay = 604800000)	
+//	  @Scheduled(fixedDelay = 604800000)	
 	  public void syncLarkDeptUsers() {
 	       Thread thread = new Thread(()->{
 	    	   var depIds =   this.getDepartmentIds().stream().map(depId -> {

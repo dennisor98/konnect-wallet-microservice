@@ -44,7 +44,7 @@ public class WalletClientAccount extends BaseWalletDomain {
 	@Column(nullable = true)
 	private String bankAccount;
 
-	@ManyToOne
+	@ManyToOne()
 	WalletClient walletClient;
 
 	@OneToOne(optional = true)

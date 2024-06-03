@@ -130,8 +130,6 @@ public class FinancialContactService {
     	  
     	  if(txType.equalsIgnoreCase(FinancialContactType.MPESA.getValue())) {
     		  recentTransactions = this.financialContactRepository.findMpesaTransactionContacts(accountId, PageRequest.of(pageNumber,pageSize));
-    		 
-    		  
     	  }
     	  
     	  if(txType.equalsIgnoreCase(FinancialContactType.PAYBILL.getValue())) {

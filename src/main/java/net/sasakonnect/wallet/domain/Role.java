@@ -33,7 +33,7 @@ public class Role extends BaseWalletDomain implements Serializable {
 	@Column
 	private String description;
 
-	@ManyToOne()
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name = "creator_id", referencedColumnName = "id")
 	@JsonIgnore()
 	private User user;

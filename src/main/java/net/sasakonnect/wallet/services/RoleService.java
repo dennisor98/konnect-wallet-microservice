@@ -337,7 +337,7 @@ public class RoleService {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 			}else {
 //				List<Role> userHasRole = this.userRoleRepository.findRolesByUserId(user.get().getId());
-				Optional<UserRole> userHasRole  = this.userRoleRepository.findUserRoleByUserId(user.get().getId());
+				Optional<UserRole> userHasRole  = this.userRoleRepository.findUserRoleByUserId(user.get());
 				if(userHasRole.isEmpty()) {
 					var userRol= UserRole.builder().roleId(rol.id).userId(usr.id).assigner(loggedInUsr).build();
 				   try {

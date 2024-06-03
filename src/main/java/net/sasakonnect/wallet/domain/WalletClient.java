@@ -38,9 +38,6 @@ public class WalletClient extends BaseWalletDomain {
 	@Column(nullable = true)
 	String callBackUrl;
 	
-	@Column(nullable = true, columnDefinition = "boolean default false")
-	Boolean isPrimary;
-
 	@OneToMany(mappedBy = "walletClient")
 	private List<WalletClientAccount> walletClientAccount;
 

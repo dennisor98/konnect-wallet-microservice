@@ -749,7 +749,7 @@ public class WalletService {
 													+ results.getParams().getFeeAmount())
 											+ "was successful.ID: " + results.getParams().getTxId() + "\n" + " Ref: "
 											+ results.getParams().getExtInfo().getExternalTxId())
-									.isRead(false).targetType(NotificationTargetType.INDIVIDUAL.getValue())
+									  .targetType(NotificationTargetType.INDIVIDUAL.getValue())
 									.targetUser(this.userService.findUserByAccountd(results.getParams().getAccountId())
 											.get())
 									.build();

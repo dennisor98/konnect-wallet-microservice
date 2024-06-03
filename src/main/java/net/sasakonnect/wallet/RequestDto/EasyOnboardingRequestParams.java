@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,6 +25,7 @@ import net.sasakonnect.wallet.enums.MonthlyIncome;
 @NoArgsConstructor
 public class EasyOnboardingRequestParams {
 	@NotBlank
+    @Pattern(regexp = "^[a-zA-Z]+$", message = "Only alphabetical characters are allowed")
 	String firstName;
 
 	String middleName;

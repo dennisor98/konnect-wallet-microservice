@@ -3,7 +3,9 @@ package net.sasakonnect.wallet.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,9 +31,7 @@ public class Notifications extends BaseWalletDomain {
 	@Column()
 	String targetType;
 	
-	@Column()
-	Boolean isRead;
-	
-	
-  
+	@OneToOne(mappedBy="message")
+	NotificationsRead messageRead;
+   
 }
