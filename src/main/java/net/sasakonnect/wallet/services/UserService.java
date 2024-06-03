@@ -260,7 +260,7 @@ public class UserService extends RestClientService implements UserDetailsService
 //            map.put("wallet", u.getUserWallets());
 				usermap.put("corporate", u.getCorporate());
 				if (u.getUserRole() != null) {
-					usermap.put("role", u.getUserRole().getRole());
+					usermap.put("role",u.getUserRole() !=null ? u.getUserRole().getRole() : null);
 
 				} else {
 					usermap.put("role", null);

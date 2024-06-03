@@ -113,17 +113,16 @@ public class WalletClientService {
 					.bankCode(walletClientAccount.getBankCode())
 					.payBillAccountNo(walletClientAccount.getPayBillAccountNo())
 					.paybillNumber(walletClientAccount.getPaybillNumber())
+					.isPrimary(false)
 					.tillNumber(walletClientAccount.getTillNumber()).walletClient(walletClient.get()).build();
 
 			var walletclientAccount = this.walletClientAccountRepository.save(walletAccount);
 			var client = walletClient.get();
-
-			client.setWalletClientAccount(List.of(walletclientAccount));
-
+            client.getWalletClientAccount().add(walletclientAccount);
 			this.wallectClientRepository.save(client);
 			Map<String, String> map = new HashMap<String, String>();
-
 			map.put("success", "true");
+			map.put("message","client account created for "+client.getAppName());
 
 			return ResponseEntity.status(HttpStatus.OK).body(map);
 		}
@@ -341,5 +340,35 @@ public class WalletClientService {
 		
 		
 		}
+	
+	public ResponseEntity<Object> updateWalletClientAccount(WalletClientAccountDto clientAccountPayload){
+		Optional<WalletClientAccount> clientAccount = this.walletClientAccountRepository.findById(clientAccountPayload.getAppId());
+        if(clientAccount.isEmpty()) {
+        	Map<String,Object> map  = new HashMap<>();
+        	map.put("success",true);
+        	map.put("message","Client account not found");
+        	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+        }
+        try {
+        	WalletClientAccount account = clientAccount.get();
+        	account.setBankAccount(clientAccountPayload.getBankAccountNo());
+        	account.setBankCode(clientAccountPayload.getBankCode());
+        	account.setPayBillAccountNo(clientAccountPayload.getPayBillAccountNo());
+        	account.setPaybillNumber(clientAccountPayload.getPaybillNumber());
+        	account.setTillNumber(clientAccountPayload.getTillNumber());
+        	account.setWalletAccountNo(clientAccountPayload.getWalletAccountNo());
+        	this.walletClientAccountRepository.save(account);
+        	Map<String,Object> map = new HashMap<>();
+        	map.put("success",true);
+        	map.put("message","Client account updated");
+        	return ResponseEntity.status(HttpStatus.OK).body(map); 
+        }catch(Exception ex) {
+        	ex.printStackTrace();
+        	Map<String,Object> map = new HashMap<>();
+        	map.put("success",false);
+        	map.put("message","Something went wrong");
+        	return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map); 
+        }
+	}
 
 }

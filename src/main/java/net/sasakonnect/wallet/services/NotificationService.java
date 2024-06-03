@@ -151,7 +151,7 @@ public class NotificationService {
 	   try {
 		   User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 	   
-	   Page<Notifications> notifications = this.notificationsRepository.findUserNotifications(user,PageRequest.of(pageNumber, pageSize));
+	   Page<Notifications> notifications = this.notificationsRepository.findUserNotifications(user,user.getCreatedAt(),PageRequest.of(pageNumber, pageSize));
 	   Map<String,Object> map = new HashMap<>();
 	   
 	   map.put("success", true);
@@ -204,7 +204,7 @@ public class NotificationService {
 				   notifications = this.notificationsRepository.findReadNotifications(user,PageRequest.of(pageNumber,pageSize));
 				   
 			   }else {
-				   notifications = this.notificationsRepository.findUnreadNotifications(user,PageRequest.of(pageNumber,pageSize));
+				   notifications = this.notificationsRepository.findUnreadNotifications(user,user.getCreatedAt(),PageRequest.of(pageNumber,pageSize));
 			   }
 			   
 			   Map<String,Object> map  = new HashMap<>();
