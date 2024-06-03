@@ -17,7 +17,7 @@ public class SmeDocuments extends BaseWalletDomain implements Serializable {
 
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "sme_account_id", nullable = false)
-	private SmeAccount account;
+	private Sme account;
 
 	@Column(nullable = false)
 	private String mediaBase64;

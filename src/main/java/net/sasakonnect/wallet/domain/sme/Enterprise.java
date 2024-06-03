@@ -25,7 +25,7 @@ public class Enterprise extends BaseWalletDomain implements Serializable {
 
 	private static final long serialVersionUID = -4463864574321745687L;
 	@OneToMany(mappedBy = "enterprise", cascade = CascadeType.ALL)
-	private List<SmeAccount> smeAccounts;
+	private List<Sme> smeAccounts;
 
 	@OneToOne
 	@JoinColumn(name = "creator_id")
