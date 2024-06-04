@@ -11,7 +11,7 @@ import jakarta.persistence.ManyToOne;
 import lombok.Builder;
 import net.sasakonnect.wallet.domain.BaseWalletDomain;
 import net.sasakonnect.wallet.domain.User;
-import net.sasakonnect.wallet.domain.sme.SmeAccount;
+import net.sasakonnect.wallet.domain.sme.Sme;
 
 @Entity
 
@@ -26,7 +26,7 @@ public class SmeUserRole extends BaseWalletDomain implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "sme_account_id", referencedColumnName = "id")
 	@OnDelete(action = OnDeleteAction.CASCADE)
-	private SmeAccount smeAccount;
+	private Sme smeAccount;
 
 	@ManyToOne
 	@JoinColumn(name = "sme_role_id", referencedColumnName = "id")

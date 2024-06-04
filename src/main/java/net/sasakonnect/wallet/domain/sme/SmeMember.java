@@ -26,7 +26,7 @@ public class SmeMember extends BaseWalletDomain implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "sme_account_id")
-	private SmeAccount sme_account;
+	private Sme sme_account;
 	@ManyToOne
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;

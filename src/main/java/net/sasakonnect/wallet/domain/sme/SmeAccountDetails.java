@@ -7,9 +7,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import net.sasakonnect.wallet.domain.BaseWalletDomain;
 import net.sasakonnect.wallet.enums.sme.BusinessIndustry;
 import net.sasakonnect.wallet.enums.sme.OperatingMode;
@@ -19,13 +21,15 @@ import net.sasakonnect.wallet.serde.OperatingModeConverter;
 @Entity
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class SmeAccountDetails extends BaseWalletDomain implements Serializable {
 
 	private static final long serialVersionUID = -557798343708381347L;
 
-	@ManyToOne(optional = false)
+	@OneToOne(optional = false)
 	@JoinColumn(name = "sme_account_id", nullable = false)
-	private SmeAccount account;
+	private Sme account;
 
 	@Column(nullable = false)
 	private String businessName;
