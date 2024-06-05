@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 import net.sasakonnect.wallet.domain.sme.SmeAccount;
 
 public interface SmeAccountRepository extends JpaRepository<SmeAccount, String> {
-	@Query("SELECT sa FROM SmeAccount sa ")
+	@Query("SELECT sa FROM SmeAccount sa  JOIN FETCH sme ")
 	Page<SmeAccount> findAllWithEnterprise(Pageable pageable);
 
 	@Query("SELECT sa FROM SmeAccount sa  WHERE sa.id = :id")
@@ -19,4 +19,7 @@ public interface SmeAccountRepository extends JpaRepository<SmeAccount, String> 
 
 	@Query("SELECT sa FROM SmeAccount sa  WHERE sa.id = :id")
 	Optional<SmeAccount> findSmeAccountById(@Param("id") String id);
+
+	@Query("SELECT sa FROM SmeAccount sa  WHERE sa.appliactionId = :id")
+	Optional<SmeAccount> findSmeAccountByApplicationId(@Param("id") String id);
 }

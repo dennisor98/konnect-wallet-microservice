@@ -38,5 +38,6 @@ public class ChoiceEndpointsConstants {
 	public static final String UPDATE_LLC_SME_INFO = "/onboarding/business/submitCompanyOnboardingRequest";
 	public static final String UPLOAD_SME_DOCUMENT = "/onboarding/business/uploadMedia";
 	public static final String UPLOAD_SME_MEMBER = "/onboarding/business/submitCompanyMember";
+	public static final String SUBMIT_SME_FOR_CONFIRMATION = "/onboarding/business/submitOrPullBackRequest";
 
 }
