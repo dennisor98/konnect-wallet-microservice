@@ -15,19 +15,23 @@ import org.springframework.web.reactive.function.BodyInserters;
 
 import com.google.gson.Gson;
 
+import jakarta.validation.Valid;
 import net.sasakonnect.wallet.RequestDto.sme.ConfirmSmeDto;
 import net.sasakonnect.wallet.RequestDto.sme.CreateEnterpriseDto;
 import net.sasakonnect.wallet.RequestDto.sme.CreateSmeDto;
 import net.sasakonnect.wallet.RequestDto.sme.LLCInformationDto;
 import net.sasakonnect.wallet.RequestDto.sme.LlcSmeMemberDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmeAccountDocuments;
+import net.sasakonnect.wallet.RequestDto.sme.SubmitSmeAccount;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.sme.Enterprise;
 import net.sasakonnect.wallet.domain.sme.Sme;
+import net.sasakonnect.wallet.domain.sme.SmeAccount;
 import net.sasakonnect.wallet.domain.sme.SmeAccountDetails;
 import net.sasakonnect.wallet.domain.sme.SmeMember;
+import net.sasakonnect.wallet.notification.MultipleAccountOpeningResultNotification;
 import net.sasakonnect.wallet.notification.NotificationResult;
 import net.sasakonnect.wallet.notification.SmeAccountOpeningResultNotification;
 import net.sasakonnect.wallet.repository.LogsRepository;
@@ -417,22 +421,53 @@ public class SmeService {
 
 	public void updateAccountinfo(NotificationResult<SmeAccountOpeningResultNotification> results) {
 		var body = results.getParams();
-//		var sme = this.smeAccountRepository.findSmeByOnboardingId(body.getOnboardingRequestId());
-//		var json_results = new Gson().toJson(results);
-//		var log = Logs.builder().description("new sme  account " + json_results).activity(LogTypes.SME).build();
-		// this.logsRepository.save(log);
-		// if (sme.isPresent()) {
-		// var currentSme = sme.get();
-//			if (currentSme.getAccountNo() == null) {
-//				currentSme.setAccountNo(body.getAccountId());
-//				currentSme.setCompleteTime(body.getCompleteTime());
-//				currentSme.setStatus(body.getStatus());
-//				this.smeAccountRepository.save(currentSme);
-//
-//			}
-//		}
+		if (body.getOnboardingRequestId() != null) {
+			var sme = this.smeRepository.findSmeByOnboardingId(body.getOnboardingRequestId());
+			var smedata = sme.get();
+			var smeAccount = SmeAccount.builder().accountName("default_Account").accountNo(body.getAccountId())
+					.sme(smedata).build();
+			smedata.getSmeAccounts().add(smeAccount);
+			this.smeRepository.save(smedata);
 
+		} else {
+			// this.smeAccountRepository.save(null)
+		}
+
+	}
+
+	public void updateMulitpleAccountinfo(NotificationResult<MultipleAccountOpeningResultNotification> results) {
+		var body = results.getParams();
+
+		var smeAccount = this.smeAccountRepository.findSmeAccountByApplicationId(body.getApplicationId());
+		if (smeAccount.isPresent()) {
+			var acc = smeAccount.get();
+			acc.setAccountNo(body.getAccountId());
+			acc.setAccountName(body.getAccountName());
+			this.smeAccountRepository.save(acc);
+		}
 		// TODO Auto-generated method stub
+
+	}
+
+	public Object submitSmeMaterials(@Valid SubmitSmeAccount document) {
+		var smeRepo = this.smeRepository.findSmeByOnboardingId(document.getOnboardingRequestId());
+		if (!smeRepo.isEmpty()) {
+			var sm = smeRepo.get();
+			var reqId = new HashMap<String, Object>();
+			reqId.put("onboardingRequestId", sm.getOnboardingRequestId());
+			reqId.put("action", 1);
+
+			var reqs = requestSigner.signRequest(reqId);
+			Mono<String> responseMono = this.bankClientBean.webClient.post()
+					.uri(ChoiceEndpointsConstants.SUBMIT_SME_FOR_CONFIRMATION).contentType(MediaType.APPLICATION_JSON)
+					.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+					.bodyToMono(String.class);
+
+			String responseJson = responseMono.block();
+			return responseJson;
+
+		}
+		return null;
 
 	}
 

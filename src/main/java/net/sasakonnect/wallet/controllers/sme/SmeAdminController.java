@@ -23,6 +23,7 @@ import net.sasakonnect.wallet.RequestDto.sme.CreateSmeDto;
 import net.sasakonnect.wallet.RequestDto.sme.LLCInformationDto;
 import net.sasakonnect.wallet.RequestDto.sme.LlcSmeMemberDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmeAccountDocuments;
+import net.sasakonnect.wallet.RequestDto.sme.SubmitSmeAccount;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.RequirePermission;
 import net.sasakonnect.wallet.constant.GlobalPermissionConstants;
@@ -120,9 +121,22 @@ public class SmeAdminController {
 	}
 
 	@PostMapping("/sme/documents")
+//	@IsCorporate()
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanRegisterMemberToLlc.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.CanRegisterMemberToLlc.PERMISSION)
 	@Operation(summary = "Upload SME Account Document", description = "Upload an SME account document")
 	public Object uploadDocument(@Valid @RequestBody SmeAccountDocuments document) {
 		return this.smeService.uploadSmeAccountDocuments(document);
+
+	}
+
+	@PostMapping("/sme/submit")
+//	@IsCorporate()
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanRegisterMemberToLlc.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.CanRegisterMemberToLlc.PERMISSION)
+	@Operation(summary = "submit onboarding materials ", description = "submit onboarding materials ")
+	public Object submitSmeMaterials(@Valid @RequestBody SubmitSmeAccount document) {
+		return this.smeService.submitSmeMaterials(document);
 
 	}
 

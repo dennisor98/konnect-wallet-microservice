@@ -21,6 +21,11 @@ public class SmeAccount extends BaseWalletDomain implements Serializable {
 	private static final long serialVersionUID = 1L;
 	@Column(name = "accountNo", nullable = true)
 	private String accountNo;
+	@Column(name = "appliactionId", nullable = true)
+	private String appliactionId;
+
+	@Column(name = "accountName", nullable = true)
+	private String accountName;
 
 	@ManyToOne
 	@JoinColumn(name = "sme_id")

@@ -73,6 +73,7 @@ import net.sasakonnect.wallet.enums.WalletTransactionType;
 import net.sasakonnect.wallet.events.StatementGenerationEvent;
 import net.sasakonnect.wallet.events.TransactionEvent;
 import net.sasakonnect.wallet.notification.AccountStatementReportNotification;
+import net.sasakonnect.wallet.notification.MultipleAccountOpeningResultNotification;
 import net.sasakonnect.wallet.notification.NotificationResult;
 import net.sasakonnect.wallet.notification.SmeAccountOpeningResultNotification;
 import net.sasakonnect.wallet.notification.TransactionResultNotification;
@@ -749,7 +750,7 @@ public class WalletService {
 													+ results.getParams().getFeeAmount())
 											+ "was successful.ID: " + results.getParams().getTxId() + "\n" + " Ref: "
 											+ results.getParams().getExtInfo().getExternalTxId())
-									  .targetType(NotificationTargetType.INDIVIDUAL.getValue())
+									.targetType(NotificationTargetType.INDIVIDUAL.getValue())
 									.targetUser(this.userService.findUserByAccountd(results.getParams().getAccountId())
 											.get())
 									.build();
@@ -817,6 +818,11 @@ public class WalletService {
 			} else if (notification_Type == NotificationType.FOREIGN_CURRENCY_OUTBOUND_TRANSACTION.getCode()) {
 
 			} else if (notification_Type == NotificationType.MULTIPLE_ACCOUNT_OPENING.getCode()) {
+				NotificationResult<MultipleAccountOpeningResultNotification> results = new Gson().fromJson(
+						body.toString(), new TypeToken<NotificationResult<MultipleAccountOpeningResultNotification>>() {
+						}.getType());
+				log.info("Sme account Opening", results);
+				this.smeAccountService.updateMulitpleAccountinfo(results);
 
 			} else if (notification_Type == NotificationType.FOREIGN_CURRENCY_EXCHANGE.getCode()) {
 
