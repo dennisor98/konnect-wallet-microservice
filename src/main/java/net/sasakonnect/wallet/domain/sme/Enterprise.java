@@ -7,6 +7,7 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
@@ -27,13 +28,13 @@ public class Enterprise extends BaseWalletDomain implements Serializable {
 	@OneToMany(mappedBy = "enterprise", cascade = CascadeType.ALL)
 	private List<Sme> smeAccounts;
 
-	@OneToOne
+	@ManyToOne()
 	@JoinColumn(name = "creator_id")
 	private User creator;
 
 	@Column(nullable = false)
 	private String name;
-	@Column(nullable = false)
+	@Column(nullable = false,unique=true)
 
 	private String ownership;
 	@Column(nullable = false)

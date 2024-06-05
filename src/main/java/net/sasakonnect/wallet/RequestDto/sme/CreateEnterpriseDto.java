@@ -25,8 +25,10 @@ public class CreateEnterpriseDto {
 	private String ownership;
 
 	@Schema(description = "Mission statement of the enterprise")
+	@NotBlank
 	private String mission;
 
+	@NotBlank
 	@Schema(description = "Vision statement of the enterprise")
 	private String vision;
 

@@ -18,7 +18,7 @@ public class SmeAccountOpeningResultNotification {
 	private String accountId;
 	private String accountType;
 	private long completeTime;
-	private List<String> rejectionReasonIds;
-	private List<String> rejectionReasonMsgs;
+	private List<Object> rejectionReasonIds;
+	private List<Object> rejectionReasonMsgs;
 
 }

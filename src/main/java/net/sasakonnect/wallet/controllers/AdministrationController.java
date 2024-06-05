@@ -212,6 +212,9 @@ public class AdministrationController {
 			@RequestParam(name = "pageSize", defaultValue = "100") Integer pageSize,
 			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber
 			) {
+		if(pageSize > 100) {
+			pageSize = 100;
+		}
 		return this.userService.getAllUsers(pageNumber,pageSize);
 	}
 
@@ -234,7 +237,9 @@ public class AdministrationController {
 			@RequestParam(name="pageNumber",required=false,defaultValue="0") Integer pageNumber,
 			@RequestParam(name="pageSize",required=false,defaultValue="10") Integer pageSize
 			) {
-		
+		if(pageSize > 10) {
+			pageSize = 10;
+		}
 		if(!phone.isEmpty()) {
 			return this.userService.searchUser(phone, pageNumber, pageSize);
 		}

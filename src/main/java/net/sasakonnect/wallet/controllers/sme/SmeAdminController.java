@@ -24,6 +24,7 @@ import net.sasakonnect.wallet.RequestDto.sme.LLCInformationDto;
 import net.sasakonnect.wallet.RequestDto.sme.LlcSmeMemberDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmeAccountDocuments;
 import net.sasakonnect.wallet.annotations.CustomController;
+import net.sasakonnect.wallet.annotations.IsCorporate;
 import net.sasakonnect.wallet.annotations.RequirePermission;
 import net.sasakonnect.wallet.constant.GlobalPermissionConstants;
 import net.sasakonnect.wallet.services.sme.SmeService;
@@ -38,38 +39,27 @@ public class SmeAdminController {
 	SmeService smeService;
 
 	@PostMapping("/create")
-//	@IsCorporate()
+	@IsCorporate()
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanCreateAnEnterprise.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CanCreateAnEnterprise.PERMISSION)
 	public Object createEnterprise(@RequestBody CreateEnterpriseDto createEnterpriseDto) {
-		var enterprise = this.smeService.createEnterprise(createEnterpriseDto);
-		var enterpriseResponse = new HashMap<String, Object>();
-		enterpriseResponse.put("name", enterprise.getName());
-		enterpriseResponse.put("industry", enterprise.getIndustry());
-		enterpriseResponse.put("ownership", enterprise.getOwnership());
-		enterpriseResponse.put("mission", enterprise.getMission());
-		enterpriseResponse.put("createdBy",
-				enterprise.getCreator().getFirstName() + " " + enterprise.getCreator().getLastName());
-
-		enterpriseResponse.put("vision", enterprise.getVision());
-		return ResponseEntity.ok(enterpriseResponse);
-
+		return this.smeService.createEnterprise(createEnterpriseDto);
 	}
 
-	@GetMapping("/list")
+//	@GetMapping("/list")
 //	@IsCorporate()
-	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanViewAnEnterpriseListing.PERMISSION
-			+ "')")
-	@RequirePermission(GlobalPermissionConstants.CanViewAnEnterpriseListing.PERMISSION)
-	public Object listAllEnterprise(
-			@Parameter(description = "Page number (starts from 0)", example = "0") @RequestParam(defaultValue = "0") int page,
-			@Parameter(description = "Number of items per page", example = "10") @RequestParam(defaultValue = "10") int size) {
-		return this.smeService.getEnterprise(page, size);
-
-	}
+//	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanViewAnEnterpriseListing.PERMISSION
+//			+ "')")
+//	@RequirePermission(GlobalPermissionConstants.CanViewAnEnterpriseListing.PERMISSION)
+//	public Object listAllEnterprise(
+//			@Parameter(description = "Page number (starts from 0)", example = "0") @RequestParam(defaultValue = "0") int page,
+//			@Parameter(description = "Number of items per page", example = "10") @RequestParam(defaultValue = "10") int size) {
+//		return this.smeService.getEnterprise(page, size);
+//
+//	}
 
 	@GetMapping("/sme")
-//	@IsCorporate()
+	@IsCorporate()
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanViewAnEnterpriseListing.PERMISSION
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.CanViewAnEnterpriseListing.PERMISSION)
@@ -81,7 +71,7 @@ public class SmeAdminController {
 	}
 
 	@PostMapping("/sme")
-//	@IsCorporate()
+	@IsCorporate()
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanViewAnEnterpriseListing.PERMISSION
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.CanViewAnEnterpriseListing.PERMISSION)
@@ -91,7 +81,7 @@ public class SmeAdminController {
 	}
 
 	@PostMapping("/sme/confirmPhone")
-//	@IsCorporate()
+	@IsCorporate()
 	@PreAuthorize("hasPermission(#apartmentId, '"
 			+ GlobalPermissionConstants.CanConfirmOnboardingSmeAccountOtp.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CanConfirmOnboardingSmeAccountOtp.PERMISSION)
@@ -101,7 +91,7 @@ public class SmeAdminController {
 	}
 
 	@PostMapping("/sme/information")
-//	@IsCorporate()
+ 	@IsCorporate()
 	@PreAuthorize("hasPermission(#apartmentId, '"
 			+ GlobalPermissionConstants.CanConfirmOnboardingSmeAccountOtp.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CanConfirmOnboardingSmeAccountOtp.PERMISSION)
@@ -111,7 +101,7 @@ public class SmeAdminController {
 	}
 
 	@PostMapping("/sme/member")
-//	@IsCorporate()
+    @IsCorporate()
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanRegisterMemberToLlc.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CanRegisterMemberToLlc.PERMISSION)
 	public Object addLccMember(@RequestBody LlcSmeMemberDto llcSmeMember) {
@@ -125,5 +115,47 @@ public class SmeAdminController {
 		return this.smeService.uploadSmeAccountDocuments(document);
 
 	}
+	
+	@GetMapping("/sme/metaInfo")
+    @IsCorporate()
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanRegisterMemberToLlc.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.CanRegisterMemberToLlc.PERMISSION)
+	public ResponseEntity<Object> getSmeMetaInfo(@RequestParam("requestTypeId") String requestTypeId) {
+		if(requestTypeId.equalsIgnoreCase("001")) {
+			return this.smeService.getBusinessTypes();
+		}
+		
+		if(requestTypeId.equalsIgnoreCase("002")) {
+			return this.smeService.getIndustryTypes();
+		}
+		
+		if(requestTypeId.equalsIgnoreCase("003")) {
+			return this.smeService.getOperatingModes();
+		}
+		
+		if(requestTypeId.equalsIgnoreCase("004")) {
+			return this.smeService.getSmeDocumentTypes();
+		}
+		
+		if(requestTypeId.equalsIgnoreCase("005")) {
+			return this.smeService.getSmeDocumentMediaTypes();
+		}
+    return null;
+	}
+	
+	@GetMapping("/list")
+	@IsCorporate()
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanGetEnterprise.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.CanGetEnterprise.PERMISSION)
+	public ResponseEntity<Object> getEnterprises(
+			@RequestParam(name = "pageSize", defaultValue = "100") Integer pageSize,
+			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber
+			) {
+		if(pageSize > 100) {
+			pageSize = 100;
+		}
+		return this.smeService.getEnterprise(pageNumber,pageSize);
+	}
 
+	
 }

@@ -658,6 +658,22 @@ public final class GlobalPermissionConstants {
 		}
 
 	}
+	
+	public static class CanGetEnterprise extends PermissionEntry {
+		public static final String PERMISSION = "can.get.enterprise";
+		public static final String DESCRIPTION = "can get enterprise information";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+
+	}
 
 	public static Map<String, String> scan() {
 		Class<?>[] innerClasses = GlobalPermissionConstants.class.getDeclaredClasses();

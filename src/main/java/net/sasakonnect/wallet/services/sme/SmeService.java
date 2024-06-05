@@ -1,12 +1,15 @@
 package net.sasakonnect.wallet.services.sme;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,6 +31,11 @@ import net.sasakonnect.wallet.domain.sme.Enterprise;
 import net.sasakonnect.wallet.domain.sme.Sme;
 import net.sasakonnect.wallet.domain.sme.SmeAccountDetails;
 import net.sasakonnect.wallet.domain.sme.SmeMember;
+import net.sasakonnect.wallet.enums.sme.BusinessIndustry;
+import net.sasakonnect.wallet.enums.sme.BusinessType;
+import net.sasakonnect.wallet.enums.sme.OperatingMode;
+import net.sasakonnect.wallet.enums.sme.SmeDocumentContentType;
+import net.sasakonnect.wallet.enums.sme.SmeDocumentMediaType;
 import net.sasakonnect.wallet.notification.NotificationResult;
 import net.sasakonnect.wallet.notification.SmeAccountOpeningResultNotification;
 import net.sasakonnect.wallet.repository.LogsRepository;
@@ -67,16 +75,41 @@ public class SmeService {
 	@Autowired
 	SmeMemberRepository smeMemberRepository;
 
-	public Enterprise createEnterprise(CreateEnterpriseDto ced) {
-		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	public ResponseEntity<Object> createEnterprise(CreateEnterpriseDto ced) {
+		
+		if(findEnterpriseByName(ced.getName()).isPresent()) {
+		   Map<String,Object> map = new HashMap<>();
+		   map.put("success",false);
+		   map.put("message","Enterprise name ,"+ced.getName()+" is not availabe");
+		   
+		   return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		try {
+			User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-		var enterprise = Enterprise.builder().name(ced.getName()).industry(ced.getIndustry()).mission(ced.getMission())
+	     	var enterprise = Enterprise.builder().name(ced.getName()).industry(ced.getIndustry()).mission(ced.getMission())
 				.vision(ced.getVision()).ownership(ced.getOwnership()).creator(user).build();
-		return this.enterpriseRepository.save(enterprise);
+	     	  this.enterpriseRepository.save(enterprise);
+	     	Map<String,Object> map = new HashMap<>();
+	     	map.put("success",true);
+	     	map.put("message","Enterprise created");
+	     	return ResponseEntity.status(HttpStatus.OK).body(map);
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			Map<String,Object> map = new HashMap<>();
+	     	map.put("success",false);
+	     	map.put("message","Something went wrong on creating enterprise");
+	     	return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);	
+		}
+       
 
 	}
+	
+	private Optional<Enterprise> findEnterpriseByName(String name){
+		return 	this.enterpriseRepository.findByName(name);
+	}
 
-	public Object getEnterprise(int page, int size) {
+	public ResponseEntity<Object> getEnterprise(int page, int size) {
 		PageRequest pageable = PageRequest.of(page, size);
 		var pagedEnterprices = enterpriseRepository.findAllWithCreator(pageable);
 		Map<String, Object> enterpriseResponsePaged = new HashMap<>();
@@ -435,5 +468,66 @@ public class SmeService {
 		// TODO Auto-generated method stub
 
 	}
+	
+	//001
+	public ResponseEntity<Object> getBusinessTypes(){
+		EnumSet<BusinessType> bsType = EnumSet.allOf(BusinessType.class);
+		ArrayList<BusinessType> bsTypeList = new ArrayList<>(bsType);
+		Map<String,Object> map = new HashMap<>();
+		map.put("success",true);
+		map.put("message","Request successful");
+		map.put("businessTypes", bsTypeList);
+		return ResponseEntity.status(HttpStatus.OK).body(map);
+	}
+	
+	
+	//002
+	public ResponseEntity<Object> getIndustryTypes(){
+		EnumSet<BusinessIndustry> bsIndustry = EnumSet.allOf(BusinessIndustry.class);
+		ArrayList<BusinessIndustry> bsIndustryList = new ArrayList<>(bsIndustry);
+		Map<String,Object> map = new HashMap<>();
+		map.put("success",true);
+		map.put("message","Request successful");
+		map.put("industryTypes", bsIndustryList);
+		return ResponseEntity.status(HttpStatus.OK).body(map);
+	}
 
+	
+	//003
+	public ResponseEntity<Object> getOperatingModes(){
+		EnumSet<OperatingMode> enumSet = EnumSet.allOf(OperatingMode.class);
+		ArrayList<OperatingMode> operatingModes = new ArrayList<>(enumSet);
+		Map<String,Object> map = new HashMap<>();
+		map.put("success",true);
+		map.put("message","Request successful");
+		map.put("operatingModes", operatingModes);
+		
+		return ResponseEntity.status(HttpStatus.OK).body(map);
+	}
+	
+	
+	//004
+	public ResponseEntity<Object> getSmeDocumentTypes(){
+		EnumSet<SmeDocumentContentType> enumSet = EnumSet.allOf(SmeDocumentContentType.class);
+		ArrayList<SmeDocumentContentType> documentType = new ArrayList<>(enumSet);
+		Map<String,Object> map = new HashMap<>();
+		map.put("success",true);
+		map.put("message","Request successful");
+		map.put("documentTypes", documentType);
+		return ResponseEntity.status(HttpStatus.OK).body(map);
+	}
+	
+	
+	//005
+	public ResponseEntity<Object> getSmeDocumentMediaTypes(){
+		EnumSet<SmeDocumentMediaType> enumSet = EnumSet.allOf(SmeDocumentMediaType.class);
+		ArrayList<SmeDocumentMediaType> documentType = new ArrayList<>(enumSet);
+		Map<String,Object> map = new HashMap<>();
+		map.put("success",true);
+		map.put("message","Request successful");
+		map.put("documentMediaTypes", documentType);
+		return ResponseEntity.status(HttpStatus.OK).body(map);
+	}
+
+	
 }
