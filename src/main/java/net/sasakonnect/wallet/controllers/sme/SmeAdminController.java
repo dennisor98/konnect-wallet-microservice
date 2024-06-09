@@ -65,8 +65,8 @@ public class SmeAdminController {
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.CanViewAnEnterpriseListing.PERMISSION)
 	public Object getSmeAccount(
-			@Parameter(description = "Page number (starts from 0)", example = "0") @RequestParam(defaultValue = "0") int page,
-			@Parameter(description = "Number of items per page", example = "10") @RequestParam(defaultValue = "10") int size) {
+			@RequestParam(name="pageNumber",defaultValue = "0") Integer page,
+			@RequestParam(name="pageNumber",defaultValue = "10") Integer size) {
 		return this.smeService.getSmeAccount(page, size);
 
 	}

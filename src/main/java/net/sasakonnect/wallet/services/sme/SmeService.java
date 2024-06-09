@@ -158,7 +158,7 @@ public class SmeService {
 		return ResponseEntity.ok(enterpriseResponsePaged);
 	}
 
-	public Object getSmeAccount(int page, int size) {
+	public Object getSmeAccount(Integer page, Integer size) {
 		PageRequest pageable = PageRequest.of(page, size);
 		var pagedsme = smeAccountRepository.findAllWithEnterprise(pageable);
 		Map<String, Object> enterpriseResponsePaged = new HashMap<>();
@@ -342,7 +342,7 @@ public class SmeService {
 //	}
 
 	public Object registerLLcMember(LlcSmeMemberDto lccSmemeberDto) {
-		var sme = this.smeRepository.findSmeById(lccSmemeberDto.getSme_id());
+		var sme = this.smeRepository.findSmeByOnboardingId(lccSmemeberDto.getOnboardingRequestId());
 		if (sme.isPresent()) {
 			var foundSme = sme.get();
 			var user = this.userRepository.findUserWithWalletsById(lccSmemeberDto.getUser_id());
@@ -407,7 +407,7 @@ public class SmeService {
 					.businessAddress(createSmeSto.getBusinessAddress()).businessName(createSmeSto.getBusinessName())
 					.businessIndustry(createSmeSto.getBusinessIndustry()).operatingMode(createSmeSto.getOperatingMode())
 					.businessCerNum(createSmeSto.getBusinessCerNum()).kraPin(createSmeSto.getKraPin()).build();
-			var smeInfo = smeAccountInfoRepository.save(smeInformation);
+			var smeInfo = this.smeAccountInfoRepository.save(smeInformation);
 			var reqId = new HashMap<String, Object>();
 			reqId.put("onboardingRequestId", sme.get().getOnboardingRequestId());
 			reqId.put("businessName", smeInfo.getBusinessName());

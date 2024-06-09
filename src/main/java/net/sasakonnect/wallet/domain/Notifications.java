@@ -21,7 +21,7 @@ public class Notifications extends BaseWalletDomain {
 	@Column()
     String title;
 	
-	@Column()
+	@Column(columnDefinition = "LONGTEXT")
 	String message;
 	
 	@ManyToOne()

@@ -13,16 +13,12 @@ import net.sasakonnect.wallet.enums.sme.SmeDocumentContentType;
 @NoArgsConstructor
 public class LlcSmeMemberDto {
 	@NotNull(message = "user_id must not be null")
-
 	String user_id;
-	@NotNull(message = "sme_id must not be null")
-
-	String sme_id;
+	@NotNull(message = "onboardingRequestId must not be null")
+	String onboardingRequestId;
 	@NotNull(message = "kraPin must not be null")
-
 	String kraPin;
 	@NotNull(message = "idFrontSideFileType must not be null")
-
 	String idFrontSideFile;
 	@NotNull(message = "idFrontSideFileType must not be null")
 	private SmeDocumentContentType idFrontSideFileType;

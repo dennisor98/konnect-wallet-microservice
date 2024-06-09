@@ -271,6 +271,7 @@ public class UserService extends RestClientService implements UserDetailsService
 				} else {
 					usermap.put("wallet", "null");
 				}
+				usermap.put("profileImage", u.getProfileImage());
 				return usermap;
 			}).collect(Collectors.toList());
 			map.put("success", "true");

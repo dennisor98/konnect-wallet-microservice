@@ -46,7 +46,7 @@ public class NotificationService {
 	   User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 	   Optional<Notifications> notification = this.notificationsRepository.findById(notificationId);
 	   if(notification.isPresent()) {
-		   if(notification.get().getMessageRead() !=null) {
+		   if(notification.get().getMessageRead() !=null && notification.get().getMessageRead().getUser().getId().equalsIgnoreCase(user.getId())  ) {
 			   Map<String,Object> map = new HashMap<>();
 			   map.put("success",false);
 			   map.put("message","Message already read");
