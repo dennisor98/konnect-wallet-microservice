@@ -14,17 +14,21 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.function.BodyInserters;
 
 import com.google.gson.Gson;
 
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import net.sasakonnect.wallet.RequestDto.sme.ConfirmSmeBusinessDto;
 import net.sasakonnect.wallet.RequestDto.sme.ConfirmSmeDto;
 import net.sasakonnect.wallet.RequestDto.sme.CreateEnterpriseDto;
 import net.sasakonnect.wallet.RequestDto.sme.CreateSmeDto;
 import net.sasakonnect.wallet.RequestDto.sme.LLCInformationDto;
 import net.sasakonnect.wallet.RequestDto.sme.LlcSmeMemberDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmeAccountDocuments;
+import net.sasakonnect.wallet.RequestDto.sme.SmeBusinessAccountDto;
 import net.sasakonnect.wallet.RequestDto.sme.SubmitSmeAccount;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
@@ -52,7 +56,7 @@ import net.sasakonnect.wallet.repository.sme.SmeRepository;
 import net.sasakonnect.wallet.services.ChoiceBankSmsService;
 import net.sasakonnect.wallet.tools.RequestSigner;
 import reactor.core.publisher.Mono;
-
+@Slf4j
 @Service
 public class SmeService {
 
@@ -458,10 +462,11 @@ public class SmeService {
 			var sme = this.smeRepository.findSmeByOnboardingId(body.getOnboardingRequestId());
 			var smedata = sme.get();
 			var smeAccount = SmeAccount.builder().accountName("default_Account").accountNo(body.getAccountId())
+					
 					.sme(smedata).build();
-			smedata.getSmeAccounts().add(smeAccount);
-			this.smeRepository.save(smedata);
-
+//			smedata.getSmeAccounts().add(smeAccount);
+			this.smeAccountRepository.save(smeAccount);
+//           log.info(smeAccount+"");
 		} else {
 			// this.smeAccountRepository.save(null)
 		}
@@ -566,4 +571,46 @@ public class SmeService {
 	}
 
 	
+	public Object createSmeBusinessAccount(SmeBusinessAccountDto smeBusinessDto) {
+		Optional<Sme> sme =  this.smeRepository.findById(smeBusinessDto.getSme_id());
+		if(sme.isPresent()) {
+			var smeData = sme.get();
+			var reqId = new HashMap<String, Object>();
+			reqId.put("businessName",smeData.getAccountDetails().getBusinessName());
+			reqId.put("businessCertId",smeData.getAccountDetails().getBusinessCerNum());
+			reqId.put("currency","KES");
+			reqId.put("operatingMode",smeBusinessDto.getOperatingmode());
+			var reqs = requestSigner.signRequest(reqId);
+			Mono<String> responseMono = this.bankClientBean.webClient.post()
+					.uri(ChoiceEndpointsConstants.APPLY_FOR_MULTIPLE_SME_ACCOUNT).contentType(MediaType.APPLICATION_JSON)
+					.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+					.bodyToMono(String.class);
+			String responseJson = responseMono.block();
+			if (responseJson != null) {
+				var gson = new Gson().fromJson(responseJson, HashMap.class);
+				return gson;
+
+			}
+		}
+		
+		return null;
+	}
+	
+public Object confirmSmeBusinesOpeningOtp(@Valid @RequestBody() ConfirmSmeBusinessDto confirmDto) {
+	var reqId = new HashMap<String, Object>();
+	reqId.put("applicationId", confirmDto.getApplicationId());
+    reqId.put("smsCode", confirmDto.getSmsCode());
+    var reqs = requestSigner.signRequest(reqId);
+	Mono<String> responseMono = this.bankClientBean.webClient.post()
+			.uri(ChoiceEndpointsConstants.VERIFY_SME_MULTIPLE_ACCOUNT_OTP).contentType(MediaType.APPLICATION_JSON)
+			.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+			.bodyToMono(String.class);
+	String responseJson = responseMono.block();
+	if (responseJson != null) {
+		var gson = new Gson().fromJson(responseJson, HashMap.class);
+		return gson;
+
+	}
+	return null;
+}
 }

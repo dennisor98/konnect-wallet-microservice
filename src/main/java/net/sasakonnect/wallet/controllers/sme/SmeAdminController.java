@@ -23,6 +23,7 @@ import net.sasakonnect.wallet.RequestDto.sme.CreateSmeDto;
 import net.sasakonnect.wallet.RequestDto.sme.LLCInformationDto;
 import net.sasakonnect.wallet.RequestDto.sme.LlcSmeMemberDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmeAccountDocuments;
+import net.sasakonnect.wallet.RequestDto.sme.SmeBusinessAccountDto;
 import net.sasakonnect.wallet.RequestDto.sme.SubmitSmeAccount;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.IsCorporate;
@@ -66,7 +67,7 @@ public class SmeAdminController {
 	@RequirePermission(GlobalPermissionConstants.CanViewAnEnterpriseListing.PERMISSION)
 	public Object getSmeAccount(
 			@RequestParam(name="pageNumber",defaultValue = "0") Integer page,
-			@RequestParam(name="pageNumber",defaultValue = "10") Integer size) {
+			@RequestParam(name="pageSize",defaultValue = "10") Integer size) {
 		return this.smeService.getSmeAccount(page, size);
 
 	}
@@ -79,6 +80,14 @@ public class SmeAdminController {
 	public Object createSmeAccount(@RequestBody CreateSmeDto createSmeSto) {
 		return this.smeService.createSme(createSmeSto);
 
+	}
+	
+	@PostMapping("/sme/business")
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanViewAnEnterpriseListing.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.CanViewAnEnterpriseListing.PERMISSION)
+	public Object createSmeBusinessAccount(@RequestBody SmeBusinessAccountDto createSmeBusinessDto) {
+		return this.smeService.createSmeBusinessAccount(createSmeBusinessDto);
 	}
 
 	@PostMapping("/sme/confirmPhone")

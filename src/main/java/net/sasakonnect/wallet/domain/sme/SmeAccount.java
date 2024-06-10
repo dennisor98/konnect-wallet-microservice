@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import net.sasakonnect.wallet.domain.BaseWalletDomain;
 
 @Entity
@@ -17,6 +18,7 @@ import net.sasakonnect.wallet.domain.BaseWalletDomain;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class SmeAccount extends BaseWalletDomain implements Serializable {
 	private static final long serialVersionUID = 1L;
 	@Column(name = "accountNo", nullable = true)

@@ -792,7 +792,7 @@ public class WalletService {
 				}
 				this.userService.pushUpgradeNotification(results.getParams());
 
-			} else if (notification_Type == NotificationType.SME_ACCOUNT_OPEN.getCode()) {
+			} else if (notification_Type.equalsIgnoreCase(NotificationType.SME_ACCOUNT_OPEN.getCode())) {
 				NotificationResult<SmeAccountOpeningResultNotification> results = new Gson().fromJson(body.toString(),
 						new TypeToken<NotificationResult<SmeAccountOpeningResultNotification>>() {
 						}.getType());
