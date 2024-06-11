@@ -281,9 +281,10 @@ public class WalletController {
 	@GetMapping("/transaction/recentContact/search")
 	public ResponseEntity<Object> searchRecentTransactionContact(
 			@RequestParam(name="queryString") String searchTerm,
+			@RequestParam(name="txType",required=false) String txType,
 			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
 			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
-		return this.walletService.searchRecentTransactionContact(searchTerm,pageNumber,pageSize);
+		return this.walletService.searchRecentTransactionContact(searchTerm,txType,pageNumber,pageSize);
 	}
 	@GetMapping("/tarrif/cost")
 	public ResponseEntity<Object> getCostFor(

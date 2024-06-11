@@ -1712,8 +1712,8 @@ public class WalletService {
 		return null;
 	}
 
-	public ResponseEntity<Object> searchRecentTransactionContact(String txtype, Integer pageNumber, Integer pageSize) {
-		return this.financialContactService.searchTransactionContacts(txtype, pageNumber, pageSize);
+	public ResponseEntity<Object> searchRecentTransactionContact(String queryString,String txtype, Integer pageNumber, Integer pageSize) {
+		return this.financialContactService.searchTransactionContacts(queryString,txtype, pageNumber, pageSize);
 	}
 
 	public ResponseEntity<Object> getAccountStatus(String mobile) {

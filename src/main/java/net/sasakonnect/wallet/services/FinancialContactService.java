@@ -3,6 +3,7 @@ package net.sasakonnect.wallet.services;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.domain.FinancialContact;
 import net.sasakonnect.wallet.enums.FinancialContactType;
+import net.sasakonnect.wallet.enums.WalletTransactionType;
 import net.sasakonnect.wallet.repository.FinancialContactRepository;
 import net.sasakonnect.wallet.tools.ResponsePagerClass;
 @Slf4j
@@ -92,15 +94,28 @@ public class FinancialContactService {
     	  return null;
       }
       
-      public ResponseEntity<Object> searchTransactionContacts(String searchTerm,Integer pageNumber,Integer pageSize){
+      public ResponseEntity<Object> searchTransactionContacts(String searchTerm,String txType,Integer pageNumber,Integer pageSize){
     	  Map<String,Object> payload = new HashMap<>();
-    	  Page<FinancialContact> recentTransactions = this.financialContactRepository.searchContact(searchTerm, PageRequest.of(pageNumber,pageSize));
+//    	  if(txType.equalsIgnoreCase(FinancialContactType.MPESA.getValue())) {
+//    		  txType = WalletTransactionType.TTID0001.getValue() ;
+//    	  }
+//    	  
+//    	  if(txType.equalsIgnoreCase(FinancialContactType.PAYBILL.getValue())) {
+//    		  txType = WalletTransactionType.TTID0006.getValue() ;
+//    	  }
+//    	  if(txType.equalsIgnoreCase(FinancialContactType.TILL.getValue())) {
+//    		  txType = WalletTransactionType.TTID0005.getValue() ;
+//    	  }
+//    	  if(txType.equalsIgnoreCase(FinancialContactType.WALLET.getValue())) {
+//    		  txType = WalletTransactionType.TTID0002.getValue() ;
+//    	  }
+    	  Page<Object[]> recentTransactions = this.financialContactRepository.searchContact(searchTerm,PageRequest.of(pageNumber,pageSize));
     	  if(recentTransactions !=null) {
     		  var rt =  recentTransactions.stream().map(t->{
     				 Map<String,Object> map = new HashMap<>();
-    				 map.put("accountId",t.getOppoAccountId());
-    				 map.put("accountName",t.getOppoAccountName() );
-    				 map.put("subAccountId",t.getOppoSubAccountId());		
+    				 map.put("accountId",t[0]);
+    				 map.put("accountName",t[2]);
+    				 map.put("subAccountId",t[3]);		
     				 return map;
     			   }).collect(Collectors.toList());
     			   Map<String,Object> map = new HashMap<>();

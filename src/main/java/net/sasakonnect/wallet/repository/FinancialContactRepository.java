@@ -1,5 +1,6 @@
 package net.sasakonnect.wallet.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -46,8 +47,8 @@ Page<FinancialContact> findPesaLinkContacts(@Param("accountId") String accountId
    @Query("SELECT f FROM FinancialContact f WHERE f.accountId =:accountId AND f.txType = 'TTID0006' ORDER BY f.updatedAt DESC")
 Page<FinancialContact> findUtilityContacts(@Param("accountId") String accountId,Pageable pageable);
    
- @Query("SELECT f FROM FinancialContact f WHERE (f.oppoAccountId LIKE %:queryString% OR f.oppoAccountName LIKE %:queryString%) AND f.txType = : txType ORDER BY f.updatedAt DESC")
- Page<FinancialContact> searchContact(@Param("queryString") String searchTerm,Pageable pageable);
+ @Query("SELECT f.oppoAccountId,MAX(f.updatedAt) updated,MAX(f.oppoAccountName) accountName,MAX(f.oppoSubAccountId)  FROM FinancialContact f WHERE (f.oppoAccountId LIKE %:queryString% OR f.oppoAccountName LIKE %:queryString%) AND f.oppoAccountName IS NOT NULL  GROUP BY f.oppoAccountId  ORDER BY updated DESC")
+ Page<Object[]> searchContact(@Param("queryString") String searchTerm,Pageable pageable);
 
    
  
