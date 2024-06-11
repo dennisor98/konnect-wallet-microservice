@@ -30,7 +30,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import net.bytebuddy.asm.Advice.This;
 import net.sasakonnect.wallet.RequestDto.Corporate;
 import net.sasakonnect.wallet.RequestDto.NotificationDto;
 import net.sasakonnect.wallet.RequestDto.PermissionDTO;
