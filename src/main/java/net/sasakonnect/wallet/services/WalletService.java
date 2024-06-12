@@ -744,15 +744,13 @@ public class WalletService {
 
 						if (results.getParams().getTxType()
 								.equalsIgnoreCase(WalletTransactionType.TTID0011.getValue())) {
+							Optional<User> user = this.userService.findUserByAccountd(results.getParams().getAccountId());
 							var ntf = Notifications.builder().title("REVERSAL ALERT")
-									.message("Your request for reversal of "
-											+ (new BigDecimal(results.getParams().getAmount()).abs()
-													+ results.getParams().getFeeAmount())
-											+ "was successful.ID: " + results.getParams().getTxId() + "\n" + " Ref: "
-											+ results.getParams().getExtInfo().getExternalTxId())
+									.message("Dear "+user.get().getFirstName()+" "+user.get().getLastName()+",your request for reversal of "
+											+ (new BigDecimal(results.getParams().getAmount()).abs())
+											+ "was successful. Transaction ID: " + results.getParams().getTxId())
 									.targetType(NotificationTargetType.INDIVIDUAL.getValue())
-									.targetUser(this.userService.findUserByAccountd(results.getParams().getAccountId())
-											.get())
+									.targetUser(user.get())
 									.build();
 
 							this.notificationService.save(ntf);

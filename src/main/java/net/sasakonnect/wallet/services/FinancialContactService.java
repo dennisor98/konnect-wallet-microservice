@@ -32,7 +32,7 @@ public class FinancialContactService {
     	  if(contact.isPresent()) {
     		var c =   contact.get();
     		c.setUpdatedAt(new Date());
-    		if(finacialContact.getOppoAccountName() != null || !finacialContact.getOppoAccountName().isEmpty()) {
+    		if(finacialContact.getOppoAccountName() != null && !finacialContact.getOppoAccountName().is) {
         		c.setOppoAccountName(finacialContact.getOppoAccountName());
     		}else {
     			c.setOppoAccountName(c.getOppoAccountName());
