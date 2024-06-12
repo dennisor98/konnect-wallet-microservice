@@ -82,9 +82,12 @@ public class SdkController {
 			@Parameter(example = "37c8043a43adca4368607e5742a10d501c0cb990a26906603818f18ad8d15882", name = "app-key", description = "Provide app key of the app you created on dashboard", in = ParameterIn.HEADER, required = true) @RequestHeader("app-key") String appKey,
 			@RequestBody() @Valid SdkPayDto sdkpayDto) {
 		var walletClientService = this.walletClientService.payThroughSdk(sdkpayDto);
+		if (walletClientService.getCode().equalsIgnoreCase("00000")) {
+			merchantWorker.notifyMerchantIncomingPayment(walletClientService, sdkpayDto);
+
+		}
 
 		// System.out.print(walletClientService.);
-		merchantWorker.notifyMerchantIncomingPayment(walletClientService, sdkpayDto);
 		return walletClientService;
 	}
 
