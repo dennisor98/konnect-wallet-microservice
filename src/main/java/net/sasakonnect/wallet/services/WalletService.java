@@ -744,15 +744,13 @@ public class WalletService {
 
 						if (results.getParams().getTxType()
 								.equalsIgnoreCase(WalletTransactionType.TTID0011.getValue())) {
+							Optional<User> user = this.userService.findUserByAccountd(results.getParams().getAccountId());
 							var ntf = Notifications.builder().title("REVERSAL ALERT")
-									.message("Your request for reversal of "
-											+ (new BigDecimal(results.getParams().getAmount()).abs()
-													+ results.getParams().getFeeAmount())
-											+ "was successful.ID: " + results.getParams().getTxId() + "\n" + " Ref: "
-											+ results.getParams().getExtInfo().getExternalTxId())
+									.message("Dear "+user.get().getFirstName()+" "+user.get().getLastName()+",your request for reversal of "
+											+ (new BigDecimal(results.getParams().getAmount()).abs())
+											+ "was successful. Transaction ID: " + results.getParams().getTxId())
 									.targetType(NotificationTargetType.INDIVIDUAL.getValue())
-									.targetUser(this.userService.findUserByAccountd(results.getParams().getAccountId())
-											.get())
+									.targetUser(user.get())
 									.build();
 
 							this.notificationService.save(ntf);
@@ -773,15 +771,15 @@ public class WalletService {
 
 				}
 
-			} else if (notification_Type == NotificationType.INTERNAL_BATCH_TRANSACTION.getCode()) {
+			} else if (notification_Type.equalsIgnoreCase(NotificationType.INTERNAL_BATCH_TRANSACTION.getCode())) {
 
-			} else if (notification_Type == NotificationType.WALLET_ACCOUNT_UPGRADE.getCode()) {
+			} else if (notification_Type.equalsIgnoreCase(NotificationType.WALLET_ACCOUNT_UPGRADE.getCode())) {
 
 				//
 				NotificationResult<WalletAccountUpgradeResultNotification> results = new Gson().fromJson(
 						body.toString(), new TypeToken<NotificationResult<WalletAccountUpgradeResultNotification>>() {
 						}.getType());
-				log.info("balance update {}", results);
+				log.info("account upgrade {}", results);
 				Optional<Wallet> wallet = this.walletRepository.findByAccountId(results.getParams().getAccountId());
 
 				// update wallet type
@@ -791,6 +789,29 @@ public class WalletService {
 					this.walletRepository.save(walletUpgrade);
 				}
 				this.userService.pushUpgradeNotification(results.getParams());
+				
+				Optional<User> user = this.userService.findUserByAccountd(results.getParams().getAccountId());
+				
+				var message = "";
+				if(results.getParams().getStatus() == net.sasakonnect.wallet.enums.OnboardingStatus.FAILED_TO_OPEN_ACCOUNT.getCode()) {
+					message ="Dear "+user.get().getFirstName()+" "+user.get().getLastName()+",your account upgrade request failed.Kindly resubmit valid documents and details.\nThanks"+"Regards,"+"\n"+"Konnect Wallet";
+				}
+				
+				if(results.getParams().getStatus() == net.sasakonnect.wallet.enums.OnboardingStatus.MANUAL_REVIEWING.getCode()) {
+					message ="Dear "+user.get().getFirstName()+" "+user.get().getLastName()+",account upgrade is on manual review.We will let you know the status.Thanks."+"\n"+"Regards,"+"\n"+"Konnect Wallet";
+				}
+				
+				if(results.getParams().getStatus() == net.sasakonnect.wallet.enums.OnboardingStatus.ACCOUNT_OPENED.getCode()) {
+					message = "Dear "+user.get().getFirstName()+" "+user.get().getLastName()+",account has been upgraded succesfully. You can now enjoy higher transaction limits"+"\n"+"Cheers."+"\n"+"Konnect Wallet";
+				}
+				var ntf = Notifications.builder().title("ACCOUNT UPGARDE BRIEFING")
+						.message(message)
+						.targetType(NotificationTargetType.INDIVIDUAL.getValue())
+						.targetUser(user.get())
+						.build();
+
+				this.notificationService.save(ntf);
+
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.SME_ACCOUNT_OPEN.getCode())) {
 				NotificationResult<SmeAccountOpeningResultNotification> results = new Gson().fromJson(body.toString(),
@@ -799,9 +820,9 @@ public class WalletService {
 				log.info("Sme account Opening", results);
 				this.smeAccountService.updateAccountinfo(results);
 
-			} else if (notification_Type == NotificationType.UTILITY.getCode()) {
+			} else if (notification_Type.equalsIgnoreCase(NotificationType.UTILITY.getCode())) {
 
-			} else if (notification_Type == NotificationType.BULK_PAYMENT.getCode()) {
+			} else if (notification_Type.equalsIgnoreCase(NotificationType.BULK_PAYMENT.getCode())) {
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.ACCOUNT_STATEMENT.getCode())) {
 				NotificationResult<AccountStatementReportNotification> results = new Gson().fromJson(body.toString(),
@@ -813,20 +834,20 @@ public class WalletService {
 
 				/// this.userJobRepository.updateByJobId()
 
-			} else if (notification_Type == NotificationType.FOREIGN_CURRENCY_DEPOSIT.getCode()) {
+			} else if (notification_Type.equalsIgnoreCase(NotificationType.FOREIGN_CURRENCY_DEPOSIT.getCode())) {
 
-			} else if (notification_Type == NotificationType.FOREIGN_CURRENCY_OUTBOUND_TRANSACTION.getCode()) {
+			} else if (notification_Type.equalsIgnoreCase(NotificationType.FOREIGN_CURRENCY_OUTBOUND_TRANSACTION.getCode())) {
 
-			} else if (notification_Type == NotificationType.MULTIPLE_ACCOUNT_OPENING.getCode()) {
+			} else if (notification_Type.equalsIgnoreCase(NotificationType.MULTIPLE_ACCOUNT_OPENING.getCode())) {
 				NotificationResult<MultipleAccountOpeningResultNotification> results = new Gson().fromJson(
 						body.toString(), new TypeToken<NotificationResult<MultipleAccountOpeningResultNotification>>() {
 						}.getType());
 				log.info("Sme account Opening", results);
 				this.smeAccountService.updateMulitpleAccountinfo(results);
 
-			} else if (notification_Type == NotificationType.FOREIGN_CURRENCY_EXCHANGE.getCode()) {
+			} else if (notification_Type.equalsIgnoreCase(NotificationType.FOREIGN_CURRENCY_EXCHANGE.getCode())) {
 
-			} else if (notification_Type == NotificationType.BULK_UTILITY_PAYMENT.getCode()) {
+			} else if (notification_Type.equalsIgnoreCase(NotificationType.BULK_UTILITY_PAYMENT.getCode())) {
 
 			}
 		} catch (JsonSyntaxException e) {
