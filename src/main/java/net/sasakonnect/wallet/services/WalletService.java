@@ -789,6 +789,29 @@ public class WalletService {
 					this.walletRepository.save(walletUpgrade);
 				}
 				this.userService.pushUpgradeNotification(results.getParams());
+				
+				Optional<User> user = this.userService.findUserByAccountd(results.getParams().getAccountId());
+				
+				var message = "";
+				if(results.getParams().getStatus() == net.sasakonnect.wallet.enums.OnboardingStatus.FAILED_TO_OPEN_ACCOUNT.getCode()) {
+					message ="Dear "+user.get().getFirstName()+" "+user.get().getLastName()+",your account upgrade request failed.Kindly resubmit valid documents and details.\nThanks"+"Regards,"+"\n"+"Konnect Wallet";
+				}
+				
+				if(results.getParams().getStatus() == net.sasakonnect.wallet.enums.OnboardingStatus.MANUAL_REVIEWING.getCode()) {
+					message ="Dear "+user.get().getFirstName()+" "+user.get().getLastName()+",account upgrade is on manual review.We will let you know the status.Thanks."+"\n"+"Regards,"+"\n"+"Konnect Wallet";
+				}
+				
+				if(results.getParams().getStatus() == net.sasakonnect.wallet.enums.OnboardingStatus.ACCOUNT_OPENED.getCode()) {
+					message = "Dear "+user.get().getFirstName()+" "+user.get().getLastName()+",account has been upgraded succesfully. You can now enjoy higher transaction limits"+"\n"+"Cheers."+"\n"+"Konnect Wallet";
+				}
+				var ntf = Notifications.builder().title("ACCOUNT UPGARDE BRIEFING")
+						.message(message)
+						.targetType(NotificationTargetType.INDIVIDUAL.getValue())
+						.targetUser(user.get())
+						.build();
+
+				this.notificationService.save(ntf);
+
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.SME_ACCOUNT_OPEN.getCode())) {
 				NotificationResult<SmeAccountOpeningResultNotification> results = new Gson().fromJson(body.toString(),
