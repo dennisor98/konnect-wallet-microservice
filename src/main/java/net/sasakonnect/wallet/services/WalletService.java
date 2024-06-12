@@ -771,15 +771,15 @@ public class WalletService {
 
 				}
 
-			} else if (notification_Type == NotificationType.INTERNAL_BATCH_TRANSACTION.getCode()) {
+			} else if (notification_Type.equalsIgnoreCase(NotificationType.INTERNAL_BATCH_TRANSACTION.getCode())) {
 
-			} else if (notification_Type == NotificationType.WALLET_ACCOUNT_UPGRADE.getCode()) {
+			} else if (notification_Type.equalsIgnoreCase(NotificationType.WALLET_ACCOUNT_UPGRADE.getCode())) {
 
 				//
 				NotificationResult<WalletAccountUpgradeResultNotification> results = new Gson().fromJson(
 						body.toString(), new TypeToken<NotificationResult<WalletAccountUpgradeResultNotification>>() {
 						}.getType());
-				log.info("balance update {}", results);
+				log.info("account upgrade {}", results);
 				Optional<Wallet> wallet = this.walletRepository.findByAccountId(results.getParams().getAccountId());
 
 				// update wallet type
@@ -797,9 +797,9 @@ public class WalletService {
 				log.info("Sme account Opening", results);
 				this.smeAccountService.updateAccountinfo(results);
 
-			} else if (notification_Type == NotificationType.UTILITY.getCode()) {
+			} else if (notification_Type.equalsIgnoreCase(NotificationType.UTILITY.getCode())) {
 
-			} else if (notification_Type == NotificationType.BULK_PAYMENT.getCode()) {
+			} else if (notification_Type.equalsIgnoreCase(NotificationType.BULK_PAYMENT.getCode())) {
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.ACCOUNT_STATEMENT.getCode())) {
 				NotificationResult<AccountStatementReportNotification> results = new Gson().fromJson(body.toString(),
@@ -811,20 +811,20 @@ public class WalletService {
 
 				/// this.userJobRepository.updateByJobId()
 
-			} else if (notification_Type == NotificationType.FOREIGN_CURRENCY_DEPOSIT.getCode()) {
+			} else if (notification_Type.equalsIgnoreCase(NotificationType.FOREIGN_CURRENCY_DEPOSIT.getCode())) {
 
-			} else if (notification_Type == NotificationType.FOREIGN_CURRENCY_OUTBOUND_TRANSACTION.getCode()) {
+			} else if (notification_Type.equalsIgnoreCase(NotificationType.FOREIGN_CURRENCY_OUTBOUND_TRANSACTION.getCode())) {
 
-			} else if (notification_Type == NotificationType.MULTIPLE_ACCOUNT_OPENING.getCode()) {
+			} else if (notification_Type.equalsIgnoreCase(NotificationType.MULTIPLE_ACCOUNT_OPENING.getCode())) {
 				NotificationResult<MultipleAccountOpeningResultNotification> results = new Gson().fromJson(
 						body.toString(), new TypeToken<NotificationResult<MultipleAccountOpeningResultNotification>>() {
 						}.getType());
 				log.info("Sme account Opening", results);
 				this.smeAccountService.updateMulitpleAccountinfo(results);
 
-			} else if (notification_Type == NotificationType.FOREIGN_CURRENCY_EXCHANGE.getCode()) {
+			} else if (notification_Type.equalsIgnoreCase(NotificationType.FOREIGN_CURRENCY_EXCHANGE.getCode())) {
 
-			} else if (notification_Type == NotificationType.BULK_UTILITY_PAYMENT.getCode()) {
+			} else if (notification_Type.equalsIgnoreCase(NotificationType.BULK_UTILITY_PAYMENT.getCode())) {
 
 			}
 		} catch (JsonSyntaxException e) {
