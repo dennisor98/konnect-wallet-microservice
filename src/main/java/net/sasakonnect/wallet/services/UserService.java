@@ -1514,7 +1514,13 @@ public class UserService extends RestClientService implements UserDetailsService
                 
 	          return ResponseEntity.status(HttpStatus.OK).body(resMap);
 	        } catch (IOException ex) {
-	            throw new RuntimeException("Could not store file " + fileName + ". Please try again!", ex);
+	        	ex.printStackTrace();
+	        	Map<String,Object> map =  new HashMap<>();
+	        	map.put("message", "Something went wrong when processing request");
+	        	map.put("success",false);
+	        	Map<String,Object> resMap = new HashMap<>();
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);	
+	        	//throw new RuntimeException("Could not store file " + fileName + ". Please try again!", ex);
 	        }
 	}
 	
