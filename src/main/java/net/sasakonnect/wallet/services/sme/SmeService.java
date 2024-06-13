@@ -21,7 +21,6 @@ import com.google.gson.Gson;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import net.sasakonnect.wallet.RequestDto.sme.ConfirmSmeBusinessDto;
 import net.sasakonnect.wallet.RequestDto.sme.ConfirmSmeDto;
 import net.sasakonnect.wallet.RequestDto.sme.CreateEnterpriseDto;
 import net.sasakonnect.wallet.RequestDto.sme.CreateSmeDto;

@@ -68,6 +68,7 @@ import net.sasakonnect.wallet.enums.LogTypes;
 import net.sasakonnect.wallet.enums.NotificationBody;
 import net.sasakonnect.wallet.enums.NotificationTargetType;
 import net.sasakonnect.wallet.enums.NotificationType;
+import net.sasakonnect.wallet.enums.OnboardingStatusType;
 import net.sasakonnect.wallet.enums.TransactionStatus;
 import net.sasakonnect.wallet.enums.WalletTransactionType;
 import net.sasakonnect.wallet.events.StatementGenerationEvent;
@@ -793,15 +794,15 @@ public class WalletService {
 				Optional<User> user = this.userService.findUserByAccountd(results.getParams().getAccountId());
 				
 				var message = "";
-				if(results.getParams().getStatus() == net.sasakonnect.wallet.enums.OnboardingStatus.FAILED_TO_OPEN_ACCOUNT.getCode()) {
+				if(results.getParams().getStatus() == OnboardingStatusType.FAILED_TO_OPEN_ACCOUNT.getCode()) {
 					message ="Dear "+user.get().getFirstName()+" "+user.get().getLastName()+",your account upgrade request failed.Kindly resubmit valid documents and details.\nThanks"+"Regards,"+"\n"+"Konnect Wallet";
 				}
 				
-				if(results.getParams().getStatus() == net.sasakonnect.wallet.enums.OnboardingStatus.MANUAL_REVIEWING.getCode()) {
+				if(results.getParams().getStatus() == OnboardingStatusType.MANUAL_REVIEWING.getCode()) {
 					message ="Dear "+user.get().getFirstName()+" "+user.get().getLastName()+",account upgrade is on manual review.We will let you know the status.Thanks."+"\n"+"Regards,"+"\n"+"Konnect Wallet";
 				}
 				
-				if(results.getParams().getStatus() == net.sasakonnect.wallet.enums.OnboardingStatus.ACCOUNT_OPENED.getCode()) {
+				if(results.getParams().getStatus() == OnboardingStatusType.ACCOUNT_OPENED.getCode()) {
 					message = "Dear "+user.get().getFirstName()+" "+user.get().getLastName()+",account has been upgraded succesfully. You can now enjoy higher transaction limits"+"\n"+"Cheers."+"\n"+"Konnect Wallet";
 				}
 				var ntf = Notifications.builder().title("ACCOUNT UPGARDE BRIEFING")

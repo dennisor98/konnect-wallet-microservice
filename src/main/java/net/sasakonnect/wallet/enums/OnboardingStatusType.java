@@ -1,6 +1,6 @@
 package net.sasakonnect.wallet.enums;
 
-public enum OnboardingStatus {
+public enum OnboardingStatusType {
 	NOT_SUBMIT(0),
     SUBMITTED(1),
     PROCESSING(2),
@@ -14,7 +14,7 @@ public enum OnboardingStatus {
 
     private final int code;
 
-    OnboardingStatus(int code) {
+    OnboardingStatusType(int code) {
         this.code = code;
     }
 
