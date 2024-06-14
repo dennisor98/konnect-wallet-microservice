@@ -27,6 +27,7 @@ out/
 !**/src/test/**/out/
 wallet.log.*
 wallet.log
+.gitlab-ci.yml
 
 ### NetBeans ###
 /nbproject/private/
