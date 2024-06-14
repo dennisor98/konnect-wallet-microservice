@@ -85,7 +85,7 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 	@OneToOne
 	@JoinColumn(name = "corporate_id", referencedColumnName = "id", nullable = true)
 	private CorporateDetails corporate;
-	
+
 	@OneToOne
 	@JoinColumn(name = "profileImage", referencedColumnName = "id", nullable = true)
 	private ProfileImage profileImage;
@@ -117,7 +117,7 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 	@OneToMany(mappedBy = "user")
 	private List<UserPin> pins;
 
-	@OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<FirebaseToken> firebaseTokens;
 
 	@ManyToMany(mappedBy = "user_notified")
@@ -135,12 +135,12 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 	private String status;
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<UserJob> userJobs;
-	
+
 	@OneToMany(mappedBy = "jobOwner", cascade = CascadeType.ALL)
 	private List<InvoiceJob> userInvoice;
-	
-	
-	
+
+	@Column(nullable = true, length = 50)
+	private String currentAppVersion;
 
 	public Map<String, Object> toBankPayload() {
 		Map<String, Object> payload = new HashMap<>();

@@ -2,7 +2,7 @@ package net.sasakonnect.wallet.config;
 
 public enum KonnectHeader {
 	X_TRANSACTION_HEADER("x-transaction-id"), CLIENT_APP_KEY_HEADER("app-key"), SECRET_APP_KEY_HEADER("secret-key"),
-	REFRESH_TOKEN_HEADER("refresh-token-header");
+	REFRESH_TOKEN_HEADER("refresh-token-header"), KONNECT_APP_VERSION("app_version");
 
 	private String value;
 
