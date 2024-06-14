@@ -23,6 +23,7 @@ move:
     - pwd
 
 
+    - ssh wallet "rm -rf /home/ahdev/application/wallet-dev/*"
 
     - scp -o StrictHostKeyChecking=no   -r ./*  wallet:/home/ahdev/application/wallet-dev/ 
 
