@@ -2,6 +2,7 @@
 package net.sasakonnect.wallet.config;
 
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,10 +66,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter implements Han
 					UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
 							null, null);
 					authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
 					SecurityContextHolder.getContext().setAuthentication(authToken);
 					var appVersion = request.getHeader(KonnectHeader.KONNECT_APP_VERSION.toString());
 					log.warn("Konnect App Version is {} and user version recorded is {}", appVersion,
 							userDetails.getCurrentAppVersion());
+					Enumeration<String> headerNames = request.getHeaderNames();
+					while (headerNames.hasMoreElements()) {
+						String headerName = headerNames.nextElement();
+						String headerValue = request.getHeader(headerName);
+						log.debug("Header Name: {}, Header Value: {}", headerName, headerValue);
+					}
 
 					if (appVersion != null && (!appVersion.equalsIgnoreCase(userDetails.getCurrentAppVersion())
 							|| userDetails.getCurrentAppVersion() == null)) {
