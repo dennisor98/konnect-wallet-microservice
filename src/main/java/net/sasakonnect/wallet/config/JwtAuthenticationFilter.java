@@ -20,12 +20,14 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.enums.JwtType;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.tools.JwtService;
 
 @Component
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter implements HandshakeInterceptor {
 	@Autowired
 	UserService userService;
@@ -65,6 +67,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter implements Han
 					authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 					SecurityContextHolder.getContext().setAuthentication(authToken);
 					var appVersion = request.getHeader(KonnectHeader.KONNECT_APP_VERSION.toString());
+					log.debug("Konect App Version is {} and user version recorded is {}", appVersion,
+							userDetails.getCurrentAppVersion());
 
 					if (appVersion != null && (!appVersion.equalsIgnoreCase(userDetails.getCurrentAppVersion())
 							|| userDetails.getCurrentAppVersion() == null)) {
