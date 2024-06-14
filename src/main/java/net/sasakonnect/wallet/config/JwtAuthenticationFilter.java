@@ -64,6 +64,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter implements Han
 							null, null);
 					authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 					SecurityContextHolder.getContext().setAuthentication(authToken);
+					var appVersion = request.getHeader(KonnectHeader.KONNECT_APP_VERSION.toString());
+
+					if (appVersion != null && (!appVersion.equalsIgnoreCase(userDetails.getCurrentAppVersion())
+							|| userDetails.getCurrentAppVersion() == null)) {
+						userDetails.setCurrentAppVersion(appVersion);
+						this.userService.save(userDetails);
+					}
+
 				}
 			} catch (Exception e) {
 				System.err.println(e.getMessage());
