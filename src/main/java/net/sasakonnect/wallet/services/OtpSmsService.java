@@ -39,17 +39,16 @@ public class OtpSmsService {
 
 	@Value("${OTP_TTL}")
 	private Integer otp_ttl;
-	
 
 	@Value("${spring.profiles.active}")
 	String profileActive;
 
 	@Value("${WALLET_TEMPLATE_LOGIN}")
 	private String template;
-	
+
 	@Value("${SME_TEMPLATE_LOGIN}")
 	private String sme_template;
-	
+
 	private SmsManager smsManager;
 
 	public OtpSmsService(OtpService otpService, SmsManager smsManager) {
@@ -122,7 +121,7 @@ public class OtpSmsService {
 			return ResponseEntity.status(HttpStatus.OK).body(errorResponse);
 		}
 	}
-	
+
 	public ResponseEntity<ObjectNode> sendSmeUserSms(SmeUserLogin userLogin, String template, Optional<User> user) {
 		StringBuilder stringbuilder = new StringBuilder();
 
@@ -164,7 +163,7 @@ public class OtpSmsService {
 			log.error("otp saved is " + otp);
 			Otp savedOtp = this.otpService.saveOtp(otpEntity);
 			stringbuilder.append(":" + savedOtp.getCode());
-		
+
 			smsManager.sendMessage(stringbuilder.toString(), userLogin.getFullPhone());
 			ObjectNode json = JsonNodeFactory.instance.objectNode();
 			json.put("hash", otpEntity.getHash());
