@@ -52,9 +52,7 @@ public class JwtService {
              log.info(jwtSecret);
 			claims.put("firstName", user.getFirstName());
 			return Jwts.builder().setClaims(claims).setSubject(user.getId().toString()).setIssuedAt(new Date())
-					.setExpiration(new Date(System.currentTimeMillis() + jwtExpiryTime))// 10
-																						// days
-																						// validity
+					.setExpiration(new Date(System.currentTimeMillis() + 3600000))// 1 hour validity
 					.setId(UUID.randomUUID().toString())
 
 					.signWith(secretKey, SignatureAlgorithm.HS256).compact();
@@ -71,6 +69,28 @@ public class JwtService {
 			Map<String, Object> claims = new HashMap<>();
 			claims.put("id", user.getId());
 			claims.put("token_type", "corporate_access_token");
+			claims.put("firstName", user.getFirstName());
+			return Jwts.builder().setClaims(claims).setSubject(user.getId().toString()).setIssuedAt(new Date())
+					.setExpiration(new Date(System.currentTimeMillis() + jwtExpiryTime))// 10
+																						// days
+																						// validity
+					.setId(UUID.randomUUID().toString())
+
+					.signWith(secretKey, SignatureAlgorithm.HS256).compact();
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public String generateSmeMemberToken(User user) {
+		try {
+			Map<String, Object> claims = new HashMap<>();
+			claims.put("id", user.getId());
+			claims.put("token_type", "sme_member_token");
+             log.info(jwtSecret);
 			claims.put("firstName", user.getFirstName());
 			return Jwts.builder().setClaims(claims).setSubject(user.getId().toString()).setIssuedAt(new Date())
 					.setExpiration(new Date(System.currentTimeMillis() + jwtExpiryTime))// 10

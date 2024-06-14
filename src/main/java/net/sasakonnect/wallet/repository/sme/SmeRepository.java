@@ -14,5 +14,7 @@ public interface SmeRepository extends JpaRepository<Sme, String> {
 
 	@Query("SELECT sa FROM Sme sa  WHERE sa.id = :id")
 	Optional<Sme> findSmeById(@Param("id") String id);
+	
+	Optional<Sme> findSmeByMobile(@Param("id") String id);
 
 }
