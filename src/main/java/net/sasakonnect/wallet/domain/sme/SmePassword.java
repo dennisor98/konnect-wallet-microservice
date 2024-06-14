@@ -1,6 +1,7 @@
 package net.sasakonnect.wallet.domain.sme;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
@@ -14,6 +15,7 @@ import net.sasakonnect.wallet.domain.BaseWalletDomain;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
 public class SmePassword extends BaseWalletDomain{
    @Column()
    String password;

@@ -308,7 +308,11 @@ public class UserService extends RestClientService implements UserDetailsService
 				map.put("phone", u.getMobile());
 				map.put("corporate", u.getCorporate());
 				if (u.getUserRole() != null) {
-					map.put("role", u.getUserRole().getRole());
+					Map<String,Object> roleMap =  new HashMap<>();
+					var role =  u.getUserRole().getRole();
+					roleMap.put("id",role.getId());		
+					roleMap.put("roleName",role.getRoleName());		
+					map.put("role",roleMap);
 
 				} else {
 					map.put("role", null);

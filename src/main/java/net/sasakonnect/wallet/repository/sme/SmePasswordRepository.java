@@ -10,6 +10,6 @@ import net.sasakonnect.wallet.domain.sme.SmePassword;
 
 public interface SmePasswordRepository extends JpaRepository<SmePassword,String> {
 	
-	@Query("SELECT p FROM SmePassword WHERE p.member_id = :member_id")
+	@Query("SELECT p FROM SmePassword p WHERE p.member_id = :member_id")
      Optional<SmePassword> findSmePasswordBySmeMemberId(@Param("member_id") String member_id);
 }

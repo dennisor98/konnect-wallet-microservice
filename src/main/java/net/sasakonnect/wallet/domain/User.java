@@ -29,6 +29,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import net.sasakonnect.wallet.enums.EmploymentStatus;
 import net.sasakonnect.wallet.enums.Gender;
 import net.sasakonnect.wallet.enums.IdType;
@@ -39,6 +40,7 @@ import net.sasakonnect.wallet.enums.MonthlyIncome;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class User extends BaseWalletDomain implements Serializable, UserDetails {
 	Set<SimpleGrantedAuthority> simple = new HashSet<SimpleGrantedAuthority>();
 	@Column(nullable = false)

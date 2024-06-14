@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
 import net.sasakonnect.wallet.RequestDto.sme.SmeUserLogin;
 import net.sasakonnect.wallet.ResponseDto.sme.SmeUserResponseDto;
@@ -28,17 +29,15 @@ import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.sme.Sme;
 import net.sasakonnect.wallet.domain.sme.SmeMember;
 import net.sasakonnect.wallet.domain.sme.SmePassword;
-import net.sasakonnect.wallet.domain.sme.SmeRequestProceed;
 import net.sasakonnect.wallet.repository.UserRepository;
 import net.sasakonnect.wallet.repository.sme.SmeMemberRepository;
 import net.sasakonnect.wallet.repository.sme.SmePasswordRepository;
 import net.sasakonnect.wallet.repository.sme.SmeRepository;
-import net.sasakonnect.wallet.repository.sme.SmeRequestRepository;
 import net.sasakonnect.wallet.services.OtpService;
 import net.sasakonnect.wallet.services.OtpSmsService;
 import net.sasakonnect.wallet.tools.JwtService;
 import net.sasakonnect.wallet.tools.RequestSigner;
-
+@Slf4j
 @Service
 public class SmeUserService {
 	@Autowired
@@ -58,8 +57,7 @@ public class SmeUserService {
 	OtpService otpService;
 	@Autowired
 	OtpSmsService otpSmsService;
-	@Autowired
-	SmeRequestRepository smeRequestRepository;
+
 	
   public ResponseEntity<ObjectNode> smeLogin(SmeUserLogin loginDto){
 	  
@@ -77,6 +75,8 @@ public class SmeUserService {
 		  map.put("message","User not found");
 		 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
 	  }
+	  log.info(user.toString());
+	  
 	  Optional<SmeMember> smeMember = this.smeMemberRepository.findSmeMemberByUser(user.get());
 	 if(smeMember.isEmpty()) {
 		 map.put("success", false);
