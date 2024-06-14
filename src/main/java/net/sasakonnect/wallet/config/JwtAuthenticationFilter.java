@@ -67,7 +67,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter implements Han
 					authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 					SecurityContextHolder.getContext().setAuthentication(authToken);
 					var appVersion = request.getHeader(KonnectHeader.KONNECT_APP_VERSION.toString());
-					log.debug("Konect App Version is {} and user version recorded is {}", appVersion,
+					log.warn("Konnect App Version is {} and user version recorded is {}", appVersion,
 							userDetails.getCurrentAppVersion());
 
 					if (appVersion != null && (!appVersion.equalsIgnoreCase(userDetails.getCurrentAppVersion())
