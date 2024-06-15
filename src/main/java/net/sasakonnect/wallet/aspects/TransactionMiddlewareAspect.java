@@ -42,6 +42,7 @@ public class TransactionMiddlewareAspect {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		var transaction_token = request.getHeader(KonnectHeader.X_TRANSACTION_HEADER.toString());
 		if (transaction_token == null) {
+
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("message", "x-transaction-id is required");
 			map.put("success", false);

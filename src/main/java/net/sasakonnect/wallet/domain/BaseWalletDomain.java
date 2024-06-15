@@ -20,9 +20,9 @@ import lombok.Data;
 import lombok.ToString;
 import net.sasakonnect.wallet.serde.CustomDateSerializer;
 
-@Data
 @MappedSuperclass
 @ToString
+@Data
 public abstract class BaseWalletDomain {
 
 	@Id

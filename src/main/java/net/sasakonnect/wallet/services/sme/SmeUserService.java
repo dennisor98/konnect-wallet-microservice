@@ -85,21 +85,23 @@ public class SmeUserService {
 	 }
 	 
 	 var smeUser = smeMember.get();
-	 Optional<SmePassword> smePassword = this.smePasswordRepository.findSmePasswordBySmeMemberId(smeUser.getMember_id());
-	 if(smePassword.isEmpty()) {
-		 map.put("success", false);
-		 map.put("message","Password not set");
-		 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
-	 }else {
-		 if(this.validatePassword(loginDto.getPassword(), smePassword.get().getPassword())) {
-			  return this.otpSmsService.sendSmeUserSms(loginDto, null, user);	
-//			 return ResponseEntity.status(HttpStatus.OK).body(map);
-		 }
-		 map.put("success", false);
-		 map.put("message", "Incorrect cridentials");
-		 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
-		 
-	 }
+//	 map.put("sme", smeUser);
+	  return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
+//	 Optional<SmePassword> smePassword = this.smePasswordRepository.findSmePasswordBySmeMemberId(smeUser.getMember_id());
+//	 if(smePassword.isEmpty()) {
+//		 map.put("success", false);
+//		 map.put("message","Password not set");
+//		 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
+//	 }else {
+//		 if(this.validatePassword(loginDto.getPassword(), smePassword.get().getPassword())) {
+//			  return this.otpSmsService.sendSmeUserSms(loginDto, null, user);	
+////			 return ResponseEntity.status(HttpStatus.OK).body(map);
+//		 }
+//		 map.put("success", false);
+//		 map.put("message", "Incorrect cridentials");
+//		 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
+//		 
+//	 }
 	 
   }
   

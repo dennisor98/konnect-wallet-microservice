@@ -27,7 +27,7 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
 //				+ targetDomainObject + " for permission " + permission);
 		System.out.print("check error");
 		Optional<Role> role = this.userService
-				.getUserRoleByUserId(((User) authentication.getPrincipal()).getId().toString());
+				.getUserRoleByUserId(((User) authentication.getPrincipal()).getId());
 		if (role.isEmpty() && permission == null) {
 			return true;
 		}

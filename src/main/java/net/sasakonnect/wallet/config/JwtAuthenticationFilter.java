@@ -2,6 +2,7 @@
 package net.sasakonnect.wallet.config;
 
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +21,14 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.enums.JwtType;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.tools.JwtService;
 
 @Component
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter implements HandshakeInterceptor {
 	@Autowired
 	UserService userService;
@@ -63,7 +66,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter implements Han
 					UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
 							null, null);
 					authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
 					SecurityContextHolder.getContext().setAuthentication(authToken);
+					var appVersion = request.getHeader(KonnectHeader.KONNECT_APP_VERSION.toString());
+					log.warn("Konnect App Version is {} and user version recorded is {}", appVersion,
+							userDetails.getCurrentAppVersion());
+					Enumeration<String> headerNames = request.getHeaderNames();
+					while (headerNames.hasMoreElements()) {
+						String headerName = headerNames.nextElement();
+						String headerValue = request.getHeader(headerName);
+						log.warn("Header Name: {}, Header Value: {}", headerName, headerValue);
+					}
+
+					if (appVersion != null && (!appVersion.equalsIgnoreCase(userDetails.getCurrentAppVersion())
+							|| userDetails.getCurrentAppVersion() == null)) {
+						userDetails.setCurrentAppVersion(appVersion);
+						this.userService.save(userDetails);
+					}
+
 				}
 			} catch (Exception e) {
 				System.err.println(e.getMessage());
