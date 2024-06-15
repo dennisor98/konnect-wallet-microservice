@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 import net.sasakonnect.wallet.domain.Notifications;
 import net.sasakonnect.wallet.domain.User;
 public interface NotificationsRepository extends JpaRepository<Notifications,String> {
-	@Query("SELECT n FROM Notifications n LEFT JOIN NotificationsRead nr ON nr.message = n WHERE (nr.user = :user OR n.targetType = 'GENERAL') AND n.createdAt >= :userCreatedAt ORDER BY n.createdAt DESC")
+	@Query("SELECT n FROM Notifications n   WHERE (n.targetUser = :user OR n.targetType = 'GENERAL') AND n.createdAt >= :userCreatedAt ORDER BY n.createdAt DESC")
 	Page<Notifications> findUserNotifications(@Param("user") User user,@Param("userCreatedAt") Date userCreatedAt,Pageable pageable);
 	
 	@Query("SELECT n FROM Notifications n LEFT JOIN NotificationsRead nr ON nr.message = n AND nr.user = :user WHERE (n.targetUser = :user OR n.targetType = 'GENERAL') AND nr.id IS NULL AND n.createdAt >= :userCreatedAt ORDER BY n.createdAt DESC")
