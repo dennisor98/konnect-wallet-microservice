@@ -1,11 +1,13 @@
 package net.sasakonnect.wallet.services.sme;
 
+import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -85,7 +87,8 @@ public class SmeUserService {
 	 }
 	 
 	 var smeUser = smeMember.get();
-	 Optional<SmePassword> smePassword = this.smePasswordRepository.findSmePasswordBySmeMemberId(smeUser.getMember_id());
+//	 map.put("sme", smeUser);
+	 Optional<SmePassword> smePassword = this.smePasswordRepository.findSmePasswordBySmeMemberId(smeUser);
 	 if(smePassword.isEmpty()) {
 		 map.put("success", false);
 		 map.put("message","Password not set");
@@ -107,6 +110,65 @@ public class SmeUserService {
 		 return passwordEncoder.matches(rawPassword, encryptedPassword);
   }
   
+  
+  public ResponseEntity<Object> createDefaultPassword(String memberId){
+	  Optional<SmeMember> smeMemberOptional =  this.smeMemberRepository.findById(memberId);
+	  if(smeMemberOptional.isEmpty()) {
+		  Map<String,Object> map =  new HashMap<>();
+		  map.put("success",false);
+		  map.put("message","Invalid sme member");
+		  return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+	  }
+	  
+	  var smeMember = smeMemberOptional.get();
+	  var password =  this.generateRandomString();
+	  var defaultPassword =  SmePassword.builder()
+	  .isDefault(true)
+	  .member_id(smeMember)
+	  .password(this.passwordEncoder.encode(password))
+	  .build();
+	  
+	  try {
+		  this.smePasswordRepository.save(defaultPassword);
+		  Map<String,Object> map  = new HashMap<>();
+		  map.put("success",true);
+		  map.put("message","Default password created successful");
+		  map.put("default_password",password);
+		  return ResponseEntity.status(HttpStatus.OK).body(map);
+	  }catch(Exception ex) {
+		  ex.printStackTrace();
+		  Map<String,Object> map  = new HashMap<>();
+		  map.put("success",false);
+		  map.put("message","Something went wrong");
+		  return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+	  }
+	  
+	  
+  }
+  
+
+  private  String generateRandomString() {
+      String regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8}$";
+      Pattern pattern = Pattern.compile(regex);
+
+      String randomString;
+      do {
+          randomString = generateRandomStringInternal();
+      } while (!pattern.matcher(randomString).matches());
+
+      return randomString;
+  }
+  private  String generateRandomStringInternal() {
+	  SecureRandom random = new SecureRandom();
+      StringBuilder sb = new StringBuilder(8);
+      String chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@$!%*?&";
+      for (int i = 0; i < 8; i++) {
+          int randomIndex = random.nextInt(chars.length());
+          char randomChar = chars.charAt(randomIndex);
+          sb.append(randomChar);
+      }
+      return sb.toString();
+  }
  
  
   

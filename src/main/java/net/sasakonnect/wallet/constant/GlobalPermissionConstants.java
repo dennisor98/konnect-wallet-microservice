@@ -674,6 +674,23 @@ public final class GlobalPermissionConstants {
 		}
 
 	}
+	
+	public static class CanGenerateSmePassword extends PermissionEntry {
+		public static final String PERMISSION = "can.generate.sme.member.password";
+		public static final String DESCRIPTION = "can generate sme member password";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+
+	}
+
 
 	public static Map<String, String> scan() {
 		Class<?>[] innerClasses = GlobalPermissionConstants.class.getDeclaredClasses();

@@ -37,6 +37,7 @@ import net.sasakonnect.wallet.RequestDto.PermissionsToRoleDTO;
 import net.sasakonnect.wallet.RequestDto.PinResetDto;
 import net.sasakonnect.wallet.RequestDto.ReversalDto;
 import net.sasakonnect.wallet.RequestDto.RoleDTO;
+import net.sasakonnect.wallet.RequestDto.SmePasswordDto;
 import net.sasakonnect.wallet.RequestDto.UserRoleDTO;
 import net.sasakonnect.wallet.RequestDto.VerifyCorporate;
 import net.sasakonnect.wallet.RequestDto.WalletClientAccountDto;
@@ -71,6 +72,7 @@ import net.sasakonnect.wallet.services.TransactionService;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.services.WalletClientService;
 import net.sasakonnect.wallet.services.WalletService;
+import net.sasakonnect.wallet.services.sme.SmeUserService;
 
 @RequestMapping("/administration")
 @Tag(name = "Administration", description = "Back Office  routes")
@@ -128,6 +130,8 @@ public class AdministrationController {
 	@Autowired
 	NotificationService notificationService;
 	
+	@Autowired
+	SmeUserService smeUserService;
 	
 	
 	@GetMapping("/upload/app")
@@ -835,6 +839,16 @@ public class AdministrationController {
 			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
 			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber){		
 		return this.walletClientService.getWalletClients(pageNumber, pageSize);
+	}
+	
+	
+	@PostMapping("sme/member/password")
+	@IsCorporate()
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanGenerateSmePassword.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.CanGenerateSmePassword.PERMISSION)
+	public ResponseEntity<Object> generateSmememberPassword(@Valid @RequestBody() SmePasswordDto request){		
+		return this.smeUserService.createDefaultPassword(request.getMember_id());
 	}
 	
 	
