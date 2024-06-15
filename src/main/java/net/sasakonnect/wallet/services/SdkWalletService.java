@@ -72,7 +72,7 @@ public class SdkWalletService {
 	@Autowired
 	LogsRepository logsRepository;
 	@Value("${KONNECT_BANK}")
-    private String konnectBank;
+	private String konnectBank;
 
 	public TransactionResponseDto applyForTransfer(@Valid ChoiceTransferDto choiceTransfer) {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -109,7 +109,7 @@ public class SdkWalletService {
 				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 
 		String responseJson = responseMono.block();
-
+		log.info(responseJson);
 		if (responseJson != null) {
 			var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
 			choiceBankSmsService.invokeSms(resp.getData().txId);
@@ -203,7 +203,7 @@ public class SdkWalletService {
 				.bodyToMono(String.class);
 
 		String responseJson = responseMono.block();
-
+		log.info(responseJson);
 		if (responseJson != null) {
 			return new Gson().fromJson(responseJson, Object.class);
 
@@ -239,7 +239,7 @@ public class SdkWalletService {
 					.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
 					.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 			String responseJson = responseMono.block();
-
+			log.info(responseJson);
 			if (responseJson != null) {
 
 				return new Gson().fromJson(responseJson, TransactionResponseDto.class);
@@ -294,7 +294,7 @@ public class SdkWalletService {
 				.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
 				.bodyToMono(String.class);
 		String responseJson = responseMono.block();
-
+		log.info(responseJson);
 		if (responseJson != null) {
 			var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
 			choiceBankSmsService.invokeSms(resp.getData().txId);
