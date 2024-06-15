@@ -1,10 +1,13 @@
 package net.sasakonnect.wallet.domain;
 
+import java.util.List;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,7 +34,7 @@ public class Notifications extends BaseWalletDomain {
 	@Column()
 	String targetType;
 	
-	@OneToOne(mappedBy="message")
-	NotificationsRead messageRead;
+	@OneToMany(mappedBy="message")
+	List<NotificationsRead> messageRead;
    
 }
