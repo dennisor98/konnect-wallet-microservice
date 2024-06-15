@@ -85,7 +85,7 @@ public class SmeUserService {
 	 }
 	 
 	 var smeUser = smeMember.get();
-	 map.put("sme", smeUser);
+//	 map.put("sme", smeUser);
 	  return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
 //	 Optional<SmePassword> smePassword = this.smePasswordRepository.findSmePasswordBySmeMemberId(smeUser.getMember_id());
 //	 if(smePassword.isEmpty()) {
