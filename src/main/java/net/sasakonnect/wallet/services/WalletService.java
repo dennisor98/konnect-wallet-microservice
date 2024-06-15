@@ -523,7 +523,7 @@ public class WalletService {
 						}
 					});
 			var jsonNode = responseMono.block();
-			log.info(jsonNode);
+			log.info(jsonNode.toPrettyString());
 			var onboardingRequestId = jsonNode.path("data").path("onboardingRequestId");
 			if (onboardingRequestId.isNull()) {
 				this.userService.deleteUserById(savedUser.getId());
@@ -1608,7 +1608,7 @@ public class WalletService {
 						.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 
 				String responseJson = responseMono.block();
-				log.info(responseJson);
+
 				if (responseJson != null) {
 					var jsonObject = new Gson().fromJson(responseJson, JsonObject.class);
 					System.out.println(responseJson);
