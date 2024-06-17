@@ -93,11 +93,8 @@ public class JwtService {
              log.info(jwtSecret);
 			claims.put("firstName", user.getFirstName());
 			return Jwts.builder().setClaims(claims).setSubject(user.getId().toString()).setIssuedAt(new Date())
-					.setExpiration(new Date(System.currentTimeMillis() + jwtExpiryTime))// 10
-																						// days
-																						// validity
+					.setExpiration(new Date(System.currentTimeMillis() + jwtExpiryTime))// 10 days	validity
 					.setId(UUID.randomUUID().toString())
-
 					.signWith(secretKey, SignatureAlgorithm.HS256).compact();
 
 		} catch (Exception e) {

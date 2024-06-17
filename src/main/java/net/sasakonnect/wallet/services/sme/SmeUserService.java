@@ -187,7 +187,7 @@ public class SmeUserService {
 		  
 		  if(user !=null) {
 			var response =  SmeUserResponseDto.builder()
-				 .token(jwtService.generateToken(user)).refreshToken(jwtService.generateRefreshToken(user))
+				 .token(jwtService.generateSmeMemberToken(user)).refreshToken(jwtService.generateRefreshToken(user))
 					.middleName(user.getMiddleName())
 					.open_id(user.getOpenId())
 					.updatedAt(user.getUpdatedAt())
