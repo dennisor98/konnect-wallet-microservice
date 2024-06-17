@@ -164,6 +164,7 @@ public class WalletService {
 				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 
 		String responseJson = responseMono.block();
+		log.info(responseJson);
 
 		if (responseJson != null) {
 			return new Gson().fromJson(responseJson, Object.class);
@@ -184,7 +185,7 @@ public class WalletService {
 				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 
 		String responseJson = responseMono.block();
-
+		log.info(responseJson);
 		if (responseJson != null) {
 			return new Gson().fromJson(responseJson, Object.class);
 
@@ -212,7 +213,7 @@ public class WalletService {
 						.bodyToMono(String.class);
 
 				String responseJson = responseMono.block();
-
+				log.info(responseJson);
 				if (responseJson != null) {
 					return new Gson().fromJson(responseJson, Object.class);
 
@@ -241,7 +242,7 @@ public class WalletService {
 						.bodyToMono(String.class);
 
 				String responseJson = responseMono.block();
-
+				log.info(responseJson);
 				if (responseJson != null) {
 					JsonObject jsonObject = new Gson().fromJson(responseJson, JsonObject.class);
 					JsonObject dataObject = jsonObject.getAsJsonObject("data");
@@ -290,7 +291,7 @@ public class WalletService {
 						.bodyToMono(String.class);
 
 				String responseJson = responseMono.block();
-
+				log.info(responseJson);
 				if (responseJson != null) {
 					return (new Gson().fromJson(responseJson, Object.class));
 
@@ -341,7 +342,7 @@ public class WalletService {
 						.bodyToMono(String.class);
 
 				String responseJson = responseMono.block();
-
+				log.info(responseJson);
 				if (responseJson != null) {
 					return new Gson().fromJson(responseJson, Object.class);
 
@@ -393,7 +394,7 @@ public class WalletService {
 						.bodyToMono(String.class);
 
 				String responseJson = responseMono.block();
-
+				log.info(responseJson);
 				if (responseJson != null) {
 					return new Gson().fromJson(responseJson, Object.class);
 
@@ -418,7 +419,7 @@ public class WalletService {
 					.bodyToMono(String.class);
 
 			String responseJson = responseMono.block();
-
+			log.info(responseJson);
 			if (responseJson != null) {
 				return new Gson().fromJson(responseJson, Object.class);
 
@@ -450,7 +451,7 @@ public class WalletService {
 					.bodyToMono(String.class);
 
 			String responseJson = responseMono.block();
-
+			log.info(responseJson);
 			if (responseJson != null) {
 				return new Gson().fromJson(responseJson, Object.class);
 
@@ -522,6 +523,7 @@ public class WalletService {
 						}
 					});
 			var jsonNode = responseMono.block();
+			log.info(jsonNode.toPrettyString());
 			var onboardingRequestId = jsonNode.path("data").path("onboardingRequestId");
 			if (onboardingRequestId.isNull()) {
 				this.userService.deleteUserById(savedUser.getId());
@@ -745,13 +747,14 @@ public class WalletService {
 
 						if (results.getParams().getTxType()
 								.equalsIgnoreCase(WalletTransactionType.TTID0011.getValue())) {
-							Optional<User> user = this.userService.findUserByAccountd(results.getParams().getAccountId());
+							Optional<User> user = this.userService
+									.findUserByAccountd(results.getParams().getAccountId());
 							var ntf = Notifications.builder().title("REVERSAL ALERT")
-									.message("Dear "+user.get().getFirstName()+" "+user.get().getLastName()+",your request for reversal of "
+									.message("Dear " + user.get().getFirstName() + " " + user.get().getLastName()
+											+ ",your request for reversal of "
 											+ (new BigDecimal(results.getParams().getAmount()).abs())
 											+ "was successful. Transaction ID: " + results.getParams().getTxId())
-									.targetType(NotificationTargetType.INDIVIDUAL.getValue())
-									.targetUser(user.get())
+									.targetType(NotificationTargetType.INDIVIDUAL.getValue()).targetUser(user.get())
 									.build();
 
 							this.notificationService.save(ntf);
@@ -790,29 +793,31 @@ public class WalletService {
 					this.walletRepository.save(walletUpgrade);
 				}
 				this.userService.pushUpgradeNotification(results.getParams());
-				
+
 				Optional<User> user = this.userService.findUserByAccountd(results.getParams().getAccountId());
-				
+
 				var message = "";
-				if(results.getParams().getStatus() == OnboardingStatusType.FAILED_TO_OPEN_ACCOUNT.getCode()) {
-					message ="Dear "+user.get().getFirstName()+" "+user.get().getLastName()+",your account upgrade request failed.Kindly resubmit valid documents and details.\nThanks"+"Regards,"+"\n"+"Konnect Wallet";
+				if (results.getParams().getStatus() == OnboardingStatusType.FAILED_TO_OPEN_ACCOUNT.getCode()) {
+					message = "Dear " + user.get().getFirstName() + " " + user.get().getLastName()
+							+ ",your account upgrade request failed.Kindly resubmit valid documents and details.\nThanks"
+							+ "Regards," + "\n" + "Konnect Wallet";
 				}
-				
-				if(results.getParams().getStatus() == OnboardingStatusType.MANUAL_REVIEWING.getCode()) {
-					message ="Dear "+user.get().getFirstName()+" "+user.get().getLastName()+",account upgrade is on manual review.We will let you know the status.Thanks."+"\n"+"Regards,"+"\n"+"Konnect Wallet";
+
+				if (results.getParams().getStatus() == OnboardingStatusType.MANUAL_REVIEWING.getCode()) {
+					message = "Dear " + user.get().getFirstName() + " " + user.get().getLastName()
+							+ ",account upgrade is on manual review.We will let you know the status.Thanks." + "\n"
+							+ "Regards," + "\n" + "Konnect Wallet";
 				}
-				
-				if(results.getParams().getStatus() == OnboardingStatusType.ACCOUNT_OPENED.getCode()) {
-					message = "Dear "+user.get().getFirstName()+" "+user.get().getLastName()+",account has been upgraded succesfully. You can now enjoy higher transaction limits"+"\n"+"Cheers."+"\n"+"Konnect Wallet";
+
+				if (results.getParams().getStatus() == OnboardingStatusType.ACCOUNT_OPENED.getCode()) {
+					message = "Dear " + user.get().getFirstName() + " " + user.get().getLastName()
+							+ ",account has been upgraded succesfully. You can now enjoy higher transaction limits"
+							+ "\n" + "Cheers." + "\n" + "Konnect Wallet";
 				}
-				var ntf = Notifications.builder().title("ACCOUNT UPGARDE BRIEFING")
-						.message(message)
-						.targetType(NotificationTargetType.INDIVIDUAL.getValue())
-						.targetUser(user.get())
-						.build();
+				var ntf = Notifications.builder().title("ACCOUNT UPGARDE BRIEFING").message(message)
+						.targetType(NotificationTargetType.INDIVIDUAL.getValue()).targetUser(user.get()).build();
 
 				this.notificationService.save(ntf);
-
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.SME_ACCOUNT_OPEN.getCode())) {
 				NotificationResult<SmeAccountOpeningResultNotification> results = new Gson().fromJson(body.toString(),
@@ -837,7 +842,8 @@ public class WalletService {
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.FOREIGN_CURRENCY_DEPOSIT.getCode())) {
 
-			} else if (notification_Type.equalsIgnoreCase(NotificationType.FOREIGN_CURRENCY_OUTBOUND_TRANSACTION.getCode())) {
+			} else if (notification_Type
+					.equalsIgnoreCase(NotificationType.FOREIGN_CURRENCY_OUTBOUND_TRANSACTION.getCode())) {
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.MULTIPLE_ACCOUNT_OPENING.getCode())) {
 				NotificationResult<MultipleAccountOpeningResultNotification> results = new Gson().fromJson(
@@ -903,7 +909,7 @@ public class WalletService {
 				.bodyToMono(String.class);
 
 		String responseJson = responseMono.block();
-
+		log.info(responseJson);
 		if (responseJson != null) {
 			return new Gson().fromJson(responseJson, Object.class);
 
@@ -982,7 +988,7 @@ public class WalletService {
 					.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 
 			String responseJson = responseMono.block();
-
+			log.info(responseJson);
 			if (responseJson != null) {
 				// return new Gson().fromJson(responseJson, Object.class);
 				var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
@@ -1009,7 +1015,7 @@ public class WalletService {
 				.bodyToMono(String.class);
 
 		String responseJson = responseMono.block();
-
+		log.info(responseJson);
 		if (responseJson != null) {
 			return new Gson().fromJson(responseJson, Object.class);
 
@@ -1032,7 +1038,7 @@ public class WalletService {
 				.bodyToMono(String.class);
 
 		String responseJson = responseMono.block();
-
+		log.info(responseJson);
 		if (responseJson != null) {
 			return new Gson().fromJson(responseJson, Object.class);
 
@@ -1123,7 +1129,7 @@ public class WalletService {
 				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 
 		String responseJson = responseMono.block();
-
+		log.info(responseJson);
 		if (responseJson != null) {
 			var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
 			choiceBankSmsService.invokeSms(resp.getData().txId);
@@ -1163,7 +1169,7 @@ public class WalletService {
 				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 
 		String responseJson = responseMono.block();
-
+		log.info(responseJson);
 		if (responseJson != null) {
 			var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
 			choiceBankSmsService.invokeSms(resp.getData().txId);
@@ -1210,7 +1216,7 @@ public class WalletService {
 				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 
 		String responseJson = responseMono.block();
-
+		log.info(responseJson);
 		if (responseJson != null) {
 			var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
 			choiceBankSmsService.invokeSms(resp.getData().txId);
@@ -1256,7 +1262,7 @@ public class WalletService {
 					.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
 					.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 			String responseJson = responseMono.block();
-
+			log.info(responseJson);
 			if (responseJson != null) {
 				return new Gson().fromJson(responseJson, Object.class);
 
@@ -1320,7 +1326,7 @@ public class WalletService {
 				.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
 				.bodyToMono(String.class);
 		String responseJson = responseMono.block();
-
+		log.info(responseJson);
 		if (tillAndBuyGoods.getBillType().toString().equalsIgnoreCase("TILL")
 				&& tillAndBuyGoods.getShortCode().trim().equalsIgnoreCase(internetTillNumber)) {
 			return null;
@@ -1351,7 +1357,7 @@ public class WalletService {
 					.bodyToMono(String.class);
 
 			String responseJson = responseMono.block();
-
+			log.info(responseJson);
 			if (responseJson != null) {
 				return new Gson().fromJson(responseJson, Object.class);
 
@@ -1449,7 +1455,7 @@ public class WalletService {
 				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 
 		String responseJson = responseMono.block();
-
+		log.info(responseJson);
 		if (responseJson != null) {
 			return new Gson().fromJson(responseJson, Object.class);
 
@@ -1478,7 +1484,7 @@ public class WalletService {
 				.bodyToMono(String.class);
 
 		String responseJson = responseMono.block();
-
+		log.info(responseJson);
 		if (responseJson != null) {
 			return new Gson().fromJson(responseJson, Object.class);
 
@@ -1509,7 +1515,7 @@ public class WalletService {
 					.bodyToMono(String.class);
 
 			String responseJson = responseMono.block();
-
+			log.info(responseJson);
 			if (responseJson != null) {
 				var jsonObject = new Gson().fromJson(responseJson, JsonObject.class);
 				System.out.println(responseJson);
@@ -1734,8 +1740,9 @@ public class WalletService {
 		return null;
 	}
 
-	public ResponseEntity<Object> searchRecentTransactionContact(String queryString,String txtype, Integer pageNumber, Integer pageSize) {
-		return this.financialContactService.searchTransactionContacts(queryString,txtype, pageNumber, pageSize);
+	public ResponseEntity<Object> searchRecentTransactionContact(String queryString, String txtype, Integer pageNumber,
+			Integer pageSize) {
+		return this.financialContactService.searchTransactionContacts(queryString, txtype, pageNumber, pageSize);
 	}
 
 	public ResponseEntity<Object> getAccountStatus(String mobile) {
