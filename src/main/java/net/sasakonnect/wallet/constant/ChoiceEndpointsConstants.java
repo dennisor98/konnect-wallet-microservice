@@ -35,11 +35,12 @@ public class ChoiceEndpointsConstants {
 	public static final String GET_TRANSACTION_STATUS = "/query/getTransResult";
 	public static final String UPGRADE_ACCOUNT = "/onboarding/walletAccountUpgrade";
 	public static final String APPLY_FOR_SME = "/onboarding/business/applyForSmeOnboarding";
-	public static final String APPLY_FOR_MULTIPLE_SME_ACCOUNT="/account/businessOpenAccount";
-	public static final String VERIFY_SME_MULTIPLE_ACCOUNT_OTP="/account/confirmAccountApplicationOtp";
+	public static final String APPLY_FOR_MULTIPLE_SME_ACCOUNT = "/account/businessOpenAccount";
+	public static final String VERIFY_SME_MULTIPLE_ACCOUNT_OTP = "/account/confirmAccountApplicationOtp";
 	public static final String UPDATE_LLC_SME_INFO = "/onboarding/business/submitCompanyOnboardingRequest";
 	public static final String UPLOAD_SME_DOCUMENT = "/onboarding/business/uploadMedia";
 	public static final String UPLOAD_SME_MEMBER = "/onboarding/business/submitCompanyMember";
 	public static final String SUBMIT_SME_FOR_CONFIRMATION = "/onboarding/business/submitOrPullBackRequest";
+	public static final String UPDATE_USER_EMAIL = "/user/addOrUpdateEmail";
 
 }

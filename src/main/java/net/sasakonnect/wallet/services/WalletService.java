@@ -570,6 +570,12 @@ public class WalletService {
 
 			if (notification_Type.equalsIgnoreCase(NotificationType.ONBOARD.getCode())) {
 				var user = this.userService.getUserById(params.get("userId").getAsString());
+				if (user.isPresent()) {
+					var u = user.get();
+					u.setStatus(String.valueOf(notificationBody.getStatus()));
+					this.userService.save(u);
+
+				}
 				if (notificationBody.getStatus() == 7 && user.isPresent()) {
 					Optional<Wallet> existingWallet = walletRepository.findByAccountId(notificationBody.getAccountId());
 					if (existingWallet.isEmpty()) {
@@ -611,13 +617,11 @@ public class WalletService {
 							.firstName(u.getFirstName()).lastName(u.getLastName()).build();
 					this.userService.createRejectedAccount(rejected);
 					this.userService.deletUserByOnboardingRequestId(onboardingRequestId);
-					var log = Logs.builder().activity(LogTypes.ONBOARDING)
-							.description(user.get().getFirstName() + " " + user.get().getLastName()
-									+ "of onboarding ID: " + notificationBody.getOnboardingRequestId()
-									+ " failed to onboard.Account rejected. Reason:"
-									+ notificationBody.getRejectionReasonMsgs().stream().map(i -> {
-										return i.toString() + "\n";
-									}))
+					var log = Logs.builder().activity(LogTypes.ONBOARDING).description(user.get().getFirstName() + " "
+							+ user.get().getLastName() + " of onboarding ID: "
+							+ notificationBody.getOnboardingRequestId() + " with status " + notificationBody.getStatus()
+							+ " failed to onboard.Account rejected. Reason:" + notificationBody.getRejectionReasonMsgs()
+									.stream().map(Object::toString).collect(Collectors.joining("\n")))
 							.build();
 					this.logsRepository.save(log);
 					this.larkService.sendOnBoardingMessage("REJECTED ONBOARDING", "red", notificationBody);
@@ -654,8 +658,9 @@ public class WalletService {
 
 					// log any other onboarding account status
 					if (user.isPresent()) {
-						user.get().setStatus(params.get("status").getAsString());
-						this.userService.save(user.get());
+						var u = user.get();
+						u.setStatus(params.get("status").getAsString());
+						this.userService.save(u);
 
 					}
 				}
@@ -1574,6 +1579,50 @@ public class WalletService {
 			}
 
 		}
+	}
+
+	public Object updateUserEmail(String email) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		var reqId = new HashMap<String, Object>();
+
+		reqId.put("onboardType", "personal");
+		reqId.put("personalIdType", user.getIdType().evaluateId());
+		reqId.put("email", email);
+
+		reqId.put("documentNumber", user.getIdNumber());
+
+		var reqs = requestSigner.signRequest(reqId);
+
+		Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.UPDATE_USER_EMAIL)
+				.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
+				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
+
+		String responseJson = responseMono.block();
+		log.info(responseJson);
+
+		if (responseJson != null) {
+			var jsonObject = new Gson().fromJson(responseJson, JsonObject.class);
+			var applaictionObject = jsonObject.getAsJsonObject("data").get("applicationId");
+			if (applaictionObject == null) {
+				return jsonObject.toString();
+			}
+
+			var applicationId = applaictionObject.getAsString();
+
+			user.setEmailVerificationId(applicationId);
+			user.setEmail(email);
+			this.userService.save(user);
+			var log = Logs.builder().activity(LogTypes.EMAIL_UPDATE).description(user.getFirstName() + " "
+					+ user.getLastName() + " of id:" + user.getId() + " requested email update").build();
+			this.logsRepository.save(log);
+			choiceBankSmsService.invokeSms(applicationId, "email");
+			// ACCMD114552219057004544
+
+			return responseJson;
+
+		}
+		return responseJson;
+
 	}
 
 	// Overloaded method
