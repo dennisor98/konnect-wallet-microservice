@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
 import net.sasakonnect.wallet.RequestDto.sme.SmeUserLogin;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.services.sme.SmeUserService;
@@ -30,7 +31,8 @@ public class SmeController {
 		return this.smeUserService.smeLogin(loginDto);
 	}
 	
-	
-	
-
+	@PostMapping("/verifyOtp")
+	public ResponseEntity<Object> verifySmeOtp(@Valid @RequestBody ConfirmOtp SmeotpDto ){
+		return this.smeUserService.verifySmeUserOtp(SmeotpDto);
+	}
 }
