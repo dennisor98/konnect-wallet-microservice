@@ -92,6 +92,10 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 
 	@Column(length = 50, unique = true)
 	private String onboardingRequestId;
+	@Column(length = 50, unique = true, nullable = true)
+	private String email;
+	@Column(length = 50, unique = true, nullable = true)
+	private String emailVerificationId;
 
 	@Column(nullable = false)
 	private Date birthday;

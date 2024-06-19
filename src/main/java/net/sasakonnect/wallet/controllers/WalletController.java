@@ -33,11 +33,11 @@ import net.sasakonnect.wallet.RequestDto.TransactionPeriod;
 import net.sasakonnect.wallet.RequestDto.TransferToMpesa;
 import net.sasakonnect.wallet.RequestDto.UpgradeWalletAccountDto;
 import net.sasakonnect.wallet.RequestDto.WalletTransferDto;
+import net.sasakonnect.wallet.RequestDto.account.UpdateEmailDto;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.TransactionMiddleware;
 import net.sasakonnect.wallet.constant.ChannelType;
 import net.sasakonnect.wallet.domain.User;
-import net.sasakonnect.wallet.domain.invoice.Tariff;
 import net.sasakonnect.wallet.services.NotificationService;
 import net.sasakonnect.wallet.services.TarrifService;
 import net.sasakonnect.wallet.services.TransactionService;
@@ -58,7 +58,7 @@ public class WalletController {
 
 	@Autowired
 	TarrifService tarrifService;
-	
+
 	@Autowired
 	NotificationService notificationService;
 
@@ -106,6 +106,11 @@ public class WalletController {
 	@PostMapping("/from/mpesa/deposit")
 	public Object depositFromMpesa(@Valid @RequestBody Mpesa mpesa) {
 		return this.walletService.loadWalletFromMpesa(mpesa);
+	}
+
+	@PostMapping("/registerEmail")
+	public Object registerUserEmail(@Valid @RequestBody UpdateEmailDto email) {
+		return this.walletService.updateUserEmail(email.getEmail());
 	}
 
 	@PostMapping("/to/mpesa")
@@ -277,44 +282,41 @@ public class WalletController {
 			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
 		return this.walletService.getRecentTransactionContact(txType, pageNumber, pageSize);
 	}
-	
+
 	@GetMapping("/transaction/recentContact/search")
-	public ResponseEntity<Object> searchRecentTransactionContact(
-			@RequestParam(name="queryString") String searchTerm,
-			@RequestParam(name="txType",required=false) String txType,
+	public ResponseEntity<Object> searchRecentTransactionContact(@RequestParam(name = "queryString") String searchTerm,
+			@RequestParam(name = "txType", required = false) String txType,
 			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
 			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
-		return this.walletService.searchRecentTransactionContact(searchTerm,txType,pageNumber,pageSize);
+		return this.walletService.searchRecentTransactionContact(searchTerm, txType, pageNumber, pageSize);
 	}
+
 	@GetMapping("/tarrif/cost")
-	public ResponseEntity<Object> getCostFor(
-			@RequestParam(name="amount") double amount,
-			@RequestParam(name="opponentAccount") String opponentAccount,
+	public ResponseEntity<Object> getCostFor(@RequestParam(name = "amount") double amount,
+			@RequestParam(name = "opponentAccount") String opponentAccount,
 			@RequestParam(name = "channel") ChannelType channelType) {
-		return this.tarrifService.getCostOn(channelType, amount,opponentAccount);
+		return this.tarrifService.getCostOn(channelType, amount, opponentAccount);
 	}
-	
+
 	@GetMapping("/notification")
-	public ResponseEntity<Object> getNotifications(
-			@RequestParam(name="isRead",required=false) Boolean isRead,
-			@RequestParam(name="pageNumber",required=false,defaultValue="0") Integer pageNumber,
-			@RequestParam(name="pageSize",required=false,defaultValue="10") Integer pageSize) {
-		if(isRead !=null) {
-		  return this.notificationService.filterNotificationsByReadstatus(isRead, pageNumber, pageSize);
+	public ResponseEntity<Object> getNotifications(@RequestParam(name = "isRead", required = false) Boolean isRead,
+			@RequestParam(name = "pageNumber", required = false, defaultValue = "0") Integer pageNumber,
+			@RequestParam(name = "pageSize", required = false, defaultValue = "10") Integer pageSize) {
+		if (isRead != null) {
+			return this.notificationService.filterNotificationsByReadstatus(isRead, pageNumber, pageSize);
 		}
-		return this.notificationService.getUserNotifications(pageNumber,pageSize);
+		return this.notificationService.getUserNotifications(pageNumber, pageSize);
 	}
-	
+
 	@PutMapping("/notification/read/update")
 	public ResponseEntity<Object> updateNotificationRead(
-			@RequestParam(name="notificationId",required=false) String notificationId) {
-		if(notificationId == null) {
+			@RequestParam(name = "notificationId", required = false) String notificationId) {
+		if (notificationId == null) {
 			return this.notificationService.setAllAsRead();
-		}else {
+		} else {
 			return this.notificationService.setAsRead(notificationId);
 		}
-		
+
 	}
-	
-	
+
 }
