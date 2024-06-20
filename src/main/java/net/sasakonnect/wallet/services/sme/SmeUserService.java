@@ -199,9 +199,12 @@ public class SmeUserService {
 			objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
 			objectMapper.registerModule(new JavaTimeModule());
 			objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+			
+			Map<String,Object> map = new HashMap<>();
+			map.put("payload", response);
 				try {
-					return ResponseEntity.ok(objectMapper.writeValueAsString(response));
-				} catch (JsonProcessingException e) {
+					return ResponseEntity.ok(map);
+				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
