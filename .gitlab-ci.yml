@@ -30,4 +30,4 @@ move:
 
     - echo "Artifacts uploaded to GitLab CI/CD."
   only:
-    - dev
+    - main
