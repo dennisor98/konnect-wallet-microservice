@@ -27,10 +27,14 @@ import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.PinResetDto;
 import net.sasakonnect.wallet.RequestDto.ReversalDto;
 import net.sasakonnect.wallet.RequestDto.lark.LarkDTO;
+import net.sasakonnect.wallet.RequestDto.lark.ReplyBody;
 import net.sasakonnect.wallet.RequestDto.lark.user.LarkMessageDTO;
+import net.sasakonnect.wallet.ResponseDto.lark.Event;
+import net.sasakonnect.wallet.ResponseDto.lark.EventCallbackDto;
 import net.sasakonnect.wallet.domain.LarkUser;
 import net.sasakonnect.wallet.domain.Transaction;
 import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.domain.UserWallet;
 import net.sasakonnect.wallet.domain.Wallet;
 import net.sasakonnect.wallet.enums.NotificationBody;
 import net.sasakonnect.wallet.jobs.LarkUsersSync;
@@ -116,6 +120,7 @@ public class LarkService {
 	
 	@Autowired
 	UserRepository userRepository;
+
 	
 	protected final String botId = "cli_a53a08afc8b8d00a";
 	protected String botSecret = "v0SWDp3ppqPHuKQ0ihtTefQiazd7lUFh";
@@ -603,7 +608,7 @@ public class LarkService {
     
     public void sendReversalRequestNotification(User user,ReversalDto req,Wallet wallet,Transaction transaction){
     	  var accessToken  = this.larkSync.getBotToken(this.botId,this.botSecret);
-    		 var urlEndpoint = this.larkBaseUrl+"/message/v4/send/";
+    		 var urlEndpoint = this.larkBaseUrl+"/im/v1/messages/";
     		        String header = "TRANSACTION REVERSAL REQUEST";
     		        String message = 
     		        		        "**Date**:"+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))+"\n"+
@@ -678,6 +683,65 @@ public class LarkService {
     	        );
     	            	
     }
+    
+    public void replyMessageTag(EventCallbackDto callBackData) {
+   	 var urlEndpoint = this.larkBaseUrl+"/im/v1/messages/";
+    	Event event = callBackData.getEvent();
+//    	if(event.is_mention()) {
+       
+   String message;
+    Optional<User> user =  this.userRepository.findByMobile(event.getText_without_at_bot().trim());
+    log.info(event.getText_without_at_bot());
+    if(user.isPresent()) {
+    	var u = user.get();
+    	List<UserWallet> wallets = u.getUserWallets();
+    	
+    	String status;
+    	if(wallets.isEmpty()) {
+    		status = "Pending";
+    	}else {
+    		status =  "Approved";
+    	}
+    	String template = 
+    	        "Date: "+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))+"\n"+
+    	        "Mobile: "+u.getMobile()+"\n"+
+    	        "Acc Name: "+u.getFirstName()+" "+u.getLastName()+"\n"+
+    	        "Status: "+status;
+        message = "{\"text\":\"<at open_id="+event.getUser_open_id()+"></at>" + template.replace("\n", "\\n").replace("\"", "\\\"") + "\"}";
+
+    }else {
+    	message = "{\"text\":\"No account found\"}";
+    }
+    
+    
+	  String template = 
+	        "Date:"+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))+"\n"+
+	        "Mobile: \n"+
+	        "Acc Name:\n"+
+	        "Status: ";
+    		var messageBody =  ReplyBody.builder()
+    				           .content(message)
+    				           .msg_type("text")
+    				           .uuid(callBackData.getUuid())
+    				           .receive_id_type("open_id")
+    				           .build();
+    		
+    		 RestTemplate restTemplate = new RestTemplate();
+ 			HttpHeaders headers = new HttpHeaders();
+ 	        headers.setContentType(MediaType.APPLICATION_JSON);
+ 	        headers.set("Authorization", "Bearer "+this.larkSync.getBotToken(botId, botSecret));   
+ 	        HttpEntity<Object> requestEntity = new HttpEntity<>(messageBody,headers);
+    		log.info("{reply response}"+urlEndpoint+event.getOpen_message_id()+"/reply");		        		   
+
+ 	        
+ 	        ResponseEntity<Object> responseEntity = restTemplate.exchange(
+ 	        		(urlEndpoint+event.getOpen_message_id()+"/reply").toString(),
+ 	                HttpMethod.POST,
+ 	                requestEntity,
+ 	                Object.class
+ 	        );
+    	}
+//    }
 
   
 }

@@ -158,10 +158,10 @@ public class WalletController {
 		return ResponseEntity.ok(userService.getUserById("0"));
 	}
 
-	@GetMapping("pin/reset/otp")
-	public ResponseEntity<Optional<User>> resetPin() {
-		return ResponseEntity.ok(userService.getUserById("0"));
-	}
+//	@GetMapping("pin/reset/otp")
+//	public ResponseEntity<Optional<User>> resetPin() {
+//		return ResponseEntity.ok(userService.getUserById("0"));
+//	}
 
 	@PostMapping("/confirmOtp")
 	public ResponseEntity<Optional<User>> confirmOtp() {

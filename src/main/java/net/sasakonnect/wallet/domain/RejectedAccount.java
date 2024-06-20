@@ -69,4 +69,7 @@ public class RejectedAccount extends BaseWalletDomain {
 	
 	@Column(nullable = true)
 	private String status;
+	
+	@Column(nullable=true)
+	private String rejectionReason;
 }

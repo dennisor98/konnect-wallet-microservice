@@ -1605,6 +1605,10 @@ public class UserService extends RestClientService implements UserDetailsService
         
 	}
 	
+	public Optional<User> findUserByOnboardingRequestId(String onbId){
+		return this.userRepository.findByOnboardingRequestId(onbId);
+	}
+	
 	
 
 	
