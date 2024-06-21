@@ -25,7 +25,7 @@ public class LarkController {
    LarkService larkService;
    private final Gson gson = new Gson();
 	@PostMapping("/callback")
-	  public ResponseEntity<?> callBack(@RequestBody String larkResponse) {
+	  public ResponseEntity callBack(@RequestBody String larkResponse) {
         log.info(larkResponse);
         try {
             EventCallbackDto eventCallbackDto = gson.fromJson(larkResponse, EventCallbackDto.class);
@@ -35,7 +35,7 @@ public class LarkController {
             return ResponseEntity.badRequest().body("Invalid JSON format");
         } catch (Exception ex) {
             ex.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
+            return ResponseEntity.ok(larkResponse);
         }
         return ResponseEntity.ok(larkResponse);
     }
