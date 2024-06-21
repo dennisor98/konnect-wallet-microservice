@@ -702,7 +702,9 @@ public class LarkService {
    String mobileNumber = mobile_string.substring(mobile_string.length() -9);
     Optional<User> user =  this.userRepository.findByMobile(mobileNumber);
     log.info(event.getText_without_at_bot());
-
+ if(mobile_string.length() < 9) {
+	 template = "Invalid phone number";
+ }
     if(user.isPresent()) {
     	var u = user.get();
     	List<UserWallet> wallets = u.getUserWallets();
@@ -792,20 +794,20 @@ public class LarkService {
     card.put("card", cardObj);
 
     		
-    		 RestTemplate restTemplate = new RestTemplate();
- 			HttpHeaders headers = new HttpHeaders();
- 	        headers.setContentType(MediaType.APPLICATION_JSON);
- 	        headers.set("Authorization", "Bearer "+this.larkSync.getBotToken(botId, botSecret));   
- 	        HttpEntity<Object> requestEntity = new HttpEntity<>(card,headers);
-    		log.info("{reply response}"+urlEndpoint+event.getOpen_message_id()+"/reply");		        		   
+    RestTemplate restTemplate = new RestTemplate();
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    headers.set("Authorization", "Bearer "+this.larkSync.getBotToken(botId, botSecret));   
+    HttpEntity<Object> requestEntity = new HttpEntity<>(card,headers);
+    log.info("{reply response}"+urlEndpoint+event.getOpen_message_id()+"/reply");		        		   
 
- 	        
- 	        ResponseEntity<Object> responseEntity = restTemplate.exchange(
- 	        		urlEndpoint.toString(),
- 	                HttpMethod.POST,
- 	                requestEntity,
- 	                Object.class
- 	        );
+
+    ResponseEntity<Object> responseEntity = restTemplate.exchange(
+    		urlEndpoint.toString(),
+    		HttpMethod.POST,
+    		requestEntity,
+    		Object.class
+    		);
     	}
 //    }
 
