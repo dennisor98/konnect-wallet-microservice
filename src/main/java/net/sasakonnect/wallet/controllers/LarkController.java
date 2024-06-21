@@ -20,9 +20,16 @@ public class LarkController {
    @Autowired
    LarkService larkService;
 	@PostMapping("/callback")
-	public ResponseEntity callBack(@RequestBody() EventCallbackDto larkResponse) {
+	public ResponseEntity callBack(@RequestBody() Object larkResponse) {
 		log.info(larkResponse+"");
-		this.larkService.replyMessageTag(larkResponse);
+		try {
+			this.larkService.replyMessageTag((EventCallbackDto)larkResponse);
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			return ResponseEntity.ok(larkResponse);
+
+		}
 		return ResponseEntity.ok(larkResponse);
+
 	}
 }
