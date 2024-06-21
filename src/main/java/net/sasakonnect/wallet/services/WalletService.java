@@ -614,7 +614,7 @@ public class WalletService {
 							.birthday(u.getBirthday()).gender(u.getGender()).idNumber(u.getIdNumber())
 							.rejectionReason(notificationBody.getRejectionReasonMsgs()
 									.stream().map(Object::toString).collect(Collectors.joining("\n")))
-							.idType(u.getIdType()).middleName(u.getMiddleName())
+							.idType(u.getIdType()).middleName(u.getMiddleName()).dateCreated(u.getCreatedAt())
 							.onboardingRequestId(u.getOnboardingRequestId()).mobile(u.getMobile())
 							.firstName(u.getFirstName()).lastName(u.getLastName()).build();
 					this.userService.createRejectedAccount(rejected);

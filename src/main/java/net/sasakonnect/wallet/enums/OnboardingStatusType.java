@@ -1,5 +1,8 @@
 package net.sasakonnect.wallet.enums;
 
+import lombok.ToString;
+
+@ToString
 public enum OnboardingStatusType {
 	NOT_SUBMIT(0),
     SUBMITTED(1),

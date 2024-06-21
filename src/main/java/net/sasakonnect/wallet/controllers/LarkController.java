@@ -1,10 +1,15 @@
 package net.sasakonnect.wallet.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -17,12 +22,41 @@ import net.sasakonnect.wallet.services.LarkService;
 @CustomController()
 @Slf4j
 public class LarkController {
-   @Autowired
-   LarkService larkService;
+	@Autowired
+	LarkService larkService;
+	private final Gson gson = new Gson();
 	@PostMapping("/callback")
-	public ResponseEntity callBack(@RequestBody() EventCallbackDto larkResponse) {
-		log.info(larkResponse+"");
-		this.larkService.replyMessageTag(larkResponse);
+	public ResponseEntity callBack(@RequestBody String larkResponse) {
+		log.info(larkResponse);
+		if(larkResponse == null) {
+			return null;
+		}else {
+			var response =  gson.fromJson(larkResponse, JsonObject.class);
+			if(response.has("event") ) {
+				try {
+					EventCallbackDto eventCallbackDto = gson.fromJson(larkResponse, EventCallbackDto.class);
+					var event =  eventCallbackDto.getEvent();
+					if(!event.getType().equalsIgnoreCase("message")) {
+						return null;
+					}else {
+						if(event.getText_without_at_bot() == null) {
+							return null;
+						}
+						this.larkService.replyMessageTag(eventCallbackDto);
+					}
+
+				} catch (JsonSyntaxException ex) {
+					ex.printStackTrace();
+					return ResponseEntity.badRequest().body("Invalid JSON format");
+				} catch (Exception ex) {
+					ex.printStackTrace();
+					return ResponseEntity.ok(larkResponse);
+				}
+			}
+		}
+
+
+
 		return ResponseEntity.ok(larkResponse);
 	}
 }
