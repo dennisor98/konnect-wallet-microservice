@@ -42,7 +42,12 @@ public class LarkController {
 						if(event.getText_without_at_bot() == null) {
 							return null;
 						}
-						this.larkService.replyMessageTag(eventCallbackDto);
+						if(event.getChat_type().equalsIgnoreCase("private")) {
+							this.larkService.replyMessageTag(eventCallbackDto);
+						}else {
+							return null;
+						}
+						
 					}
 
 				} catch (JsonSyntaxException ex) {
