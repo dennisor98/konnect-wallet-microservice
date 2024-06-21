@@ -708,12 +708,12 @@ public class LarkService {
     	List<UserWallet> wallets = u.getUserWallets();
     	if(wallets.isEmpty()) {
     		if(u.getStatus() !=null) {
-    			if(u.getStatus().equals(OnboardingStatusType.MANUAL_REVIEWING.getCode())) {
+    			if(Integer.valueOf(u.getStatus()) == (OnboardingStatusType.MANUAL_REVIEWING.getCode())) {
     				status  = "Account on Manual reviewing";
     				template += 
     		       	        "**\nStatus**: "+status;
     			}
-    			if(u.getStatus().equals(OnboardingStatusType.PROCESSING)) {
+    			if(Integer.valueOf(u.getStatus()) ==OnboardingStatusType.PROCESSING.getCode()) {
     				status  = "Account on processing stage";
     				template += 
     		       	        "**\nStatus**: "+status;
@@ -743,8 +743,10 @@ public class LarkService {
     				 "**\nStatus**: "+status+
     				 "**\nReason: **"+u.getRejectionReason();
     				
+    	}else {
+    		template += ",\nNo account found";
     	}
-    	template += ",\nNo account found";
+    	
     }
     message =template;
 
