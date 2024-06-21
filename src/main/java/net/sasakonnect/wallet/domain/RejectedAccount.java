@@ -71,5 +71,8 @@ public class RejectedAccount extends BaseWalletDomain {
 	private String status;
 	
 	@Column(nullable=true)
+	Date dateCreated;
+	
+	@Column(nullable=true)
 	private String rejectionReason;
 }

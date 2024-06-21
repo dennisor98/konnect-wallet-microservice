@@ -32,13 +32,16 @@ import net.sasakonnect.wallet.RequestDto.lark.user.LarkMessageDTO;
 import net.sasakonnect.wallet.ResponseDto.lark.Event;
 import net.sasakonnect.wallet.ResponseDto.lark.EventCallbackDto;
 import net.sasakonnect.wallet.domain.LarkUser;
+import net.sasakonnect.wallet.domain.RejectedAccount;
 import net.sasakonnect.wallet.domain.Transaction;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.UserWallet;
 import net.sasakonnect.wallet.domain.Wallet;
 import net.sasakonnect.wallet.enums.NotificationBody;
+import net.sasakonnect.wallet.enums.OnboardingStatusType;
 import net.sasakonnect.wallet.jobs.LarkUsersSync;
 import net.sasakonnect.wallet.repository.LarkUserRepository;
+import net.sasakonnect.wallet.repository.RejectedAccountRepository;
 import net.sasakonnect.wallet.repository.UserRepository;
 import net.sasakonnect.wallet.tools.ResponsePagerClass;
 
@@ -121,6 +124,8 @@ public class LarkService {
 	@Autowired
 	UserRepository userRepository;
 
+	@Autowired
+	RejectedAccountRepository rejectedaccuntRepository;
 	
 	protected final String botId = "cli_a53a08afc8b8d00a";
 	protected String botSecret = "v0SWDp3ppqPHuKQ0ihtTefQiazd7lUFh";
@@ -685,57 +690,116 @@ public class LarkService {
     }
     
     public void replyMessageTag(EventCallbackDto callBackData) {
-   	 var urlEndpoint = this.larkBaseUrl+"/im/v1/messages/";
+   	 var urlEndpoint = this.larkBaseUrl+"/message/v4/send";
     	Event event = callBackData.getEvent();
 //    	if(event.is_mention()) {
        
    String message;
-    Optional<User> user =  this.userRepository.findByMobile(event.getText_without_at_bot().trim());
+   String template =  "<at id="+event.getUser_open_id()+"></at>";
+	String status;
+
+   String mobile_string  = event.getText_without_at_bot().trim();
+   String mobileNumber = mobile_string.substring(mobile_string.length() -9);
+    Optional<User> user =  this.userRepository.findByMobile(mobileNumber);
     log.info(event.getText_without_at_bot());
+
     if(user.isPresent()) {
     	var u = user.get();
     	List<UserWallet> wallets = u.getUserWallets();
-    	
-    	String status;
     	if(wallets.isEmpty()) {
-    		status = "Pending";
+    		if(u.getStatus() !=null) {
+    			if(u.getStatus().equals(OnboardingStatusType.MANUAL_REVIEWING.getCode())) {
+    				status  = "Account on Manual reviewing";
+    				template += 
+    		       	        "**\nStatus**: "+status;
+    			}
+    			if(u.getStatus().equals(OnboardingStatusType.PROCESSING)) {
+    				status  = "Account on processing stage";
+    				template += 
+    		       	        "**\nStatus**: "+status;
+    			}
+    		}else {
+    			status = "Unknown. Consult Systems Admin";
+    			template += 
+    	       	        "**\nStatus**: "+status;
+    		}
+    		
     	}else {
-    		status =  "Approved";
+    		status =  "Account Approved";
+    		 template += 
+       	        "**\nStatus**: "+status;
     	}
-    	String template = 
-    	        "Date: "+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))+"\n"+
-    	        "Mobile: "+u.getMobile()+"\n"+
-    	        "Acc Name: "+u.getFirstName()+" "+u.getLastName()+"\n"+
-    	        "Status: "+status;
-        message = "{\"text\":\"<at open_id="+event.getUser_open_id()+"></at>" + template.replace("\n", "\\n").replace("\"", "\\\"") + "\"}";
+    	
 
     }else {
-    	message = "{\"text\":\"No account found\"}";
+    	//check user in rejected accounts
+    	Optional<RejectedAccount> rejectedOptional = this.rejectedaccuntRepository.findByMobile(mobileNumber);
+    	
+    	if(rejectedOptional.isPresent()) {
+    		var u  = rejectedOptional.get();
+    		status = "Account Rejected";
+    		template +="**\nMobile**: "+u.getMobile()+
+    				   "**\nAcc Name:** "+u.getFirstName()+" "+u.getLastName()+
+    				 "**\nStatus**: "+status+
+    				 "**\nReason: **"+u.getRejectionReason();
+    				
+    	}
+    	template += ",\nNo account found";
     }
-    
-    
-	  String template = 
-	        "Date:"+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))+"\n"+
-	        "Mobile: \n"+
-	        "Acc Name:\n"+
-	        "Status: ";
-    		var messageBody =  ReplyBody.builder()
-    				           .content(message)
-    				           .msg_type("text")
-    				           .uuid(callBackData.getUuid())
-    				           .receive_id_type("open_id")
-    				           .build();
+    message =template;
+
+    Map<String, Object> card = new HashMap<>();
+    card.put("msg_type", "interactive");
+//    oc_f11965f2d1af0ecb6e39c29ff7beec86   //test group
+//    oc_a9f46991cde6bf92a6b84ee331f5ea99
+    card.put("chat_id",event.getOpen_chat_id());
+    card.put("update_multi", false);
+    card.put("root_id",event.getOpen_message_id());
+    Map<String, Object> cardObj = new HashMap<>();
+    Map<String, Object> config = new HashMap<>();
+    config.put("wide_screen_mode", true);
+    cardObj.put("config", config);
+
+    Map<String, Object> div = new HashMap<>();
+    div.put("tag", "div");
+
+    Map<String, Object> field1 = new HashMap<>();
+    field1.put("is_short", true);
+    Map<String, Object> text1 = new HashMap<>();
+    text1.put("tag", "lark_md");
+    text1.put("content",message.replace(",", ""));
+    field1.put("text", text1);
+
+    Map<String, Object> field2 = new HashMap<>();
+    field2.put("is_short", false);
+    Map<String, Object> text2 = new HashMap<>();
+    text2.put("tag", "lark_md");
+    text2.put("content", "");
+    field2.put("text", text2);
+
+    div.put("fields", Arrays.asList(field1, field2));
+    cardObj.put("elements", Arrays.asList(div));
+
+    Map<String, Object> headerMap = new HashMap<>();
+    headerMap.put("template", "blue");
+    Map<String, Object> title = new HashMap<>();
+    title.put("tag", "plain_text");
+    title.put("content", "Account Status");
+    headerMap.put("title", title);
+    cardObj.put("header", headerMap);
+    card.put("card", cardObj);
+
     		
     		 RestTemplate restTemplate = new RestTemplate();
  			HttpHeaders headers = new HttpHeaders();
  	        headers.setContentType(MediaType.APPLICATION_JSON);
  	        headers.set("Authorization", "Bearer "+this.larkSync.getBotToken(botId, botSecret));   
- 	        HttpEntity<Object> requestEntity = new HttpEntity<>(messageBody,headers);
+ 	        HttpEntity<Object> requestEntity = new HttpEntity<>(card,headers);
     		log.info("{reply response}"+urlEndpoint+event.getOpen_message_id()+"/reply");		        		   
 
  	        
  	        ResponseEntity<Object> responseEntity = restTemplate.exchange(
- 	        		(urlEndpoint+event.getOpen_message_id()+"/reply").toString(),
+ 	        		urlEndpoint.toString(),
  	                HttpMethod.POST,
  	                requestEntity,
  	                Object.class
