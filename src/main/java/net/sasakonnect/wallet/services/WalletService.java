@@ -19,6 +19,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -560,6 +561,8 @@ public class WalletService {
 
 	}
 
+	@Async("singleThreadExecutor")
+	@Transactional
 	private Object callBackContentResolver(JsonObject body) {
 		try {
 			var notification_Type = body.get("notificationType").getAsString();
@@ -612,8 +615,8 @@ public class WalletService {
 					var rejected = RejectedAccount.builder().address(u.getAddress())
 							.employmentStatus(u.getEmploymentStatus()).countryCode(u.getCountryCode())
 							.birthday(u.getBirthday()).gender(u.getGender()).idNumber(u.getIdNumber())
-							.rejectionReason(notificationBody.getRejectionReasonMsgs()
-									.stream().map(Object::toString).collect(Collectors.joining("\n")))
+							.rejectionReason(notificationBody.getRejectionReasonMsgs().stream().map(Object::toString)
+									.collect(Collectors.joining("\n")))
 							.idType(u.getIdType()).middleName(u.getMiddleName()).dateCreated(u.getCreatedAt())
 							.onboardingRequestId(u.getOnboardingRequestId()).mobile(u.getMobile())
 							.firstName(u.getFirstName()).lastName(u.getLastName()).build();
