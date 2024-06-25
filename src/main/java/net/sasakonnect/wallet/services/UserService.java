@@ -1,14 +1,10 @@
 package net.sasakonnect.wallet.services;
 
-import net.coobird.thumbnailator.Thumbnails;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,10 +22,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
-import org.springdoc.core.converters.models.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -63,6 +56,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import net.coobird.thumbnailator.Thumbnails;
 import net.sasakonnect.wallet.RequestDto.ChangePin;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
 import net.sasakonnect.wallet.RequestDto.KompCallbackDto;
@@ -75,7 +69,6 @@ import net.sasakonnect.wallet.RequestDto.UserLogin;
 import net.sasakonnect.wallet.ResponseDto.UserResponseDTO;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.beans.RedisBean;
-import net.sasakonnect.wallet.domain.CorporateDetails;
 import net.sasakonnect.wallet.domain.FirebaseToken;
 import net.sasakonnect.wallet.domain.Logs;
 import net.sasakonnect.wallet.domain.Permission;
@@ -105,7 +98,7 @@ import net.sasakonnect.wallet.repository.WalletClientRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.tools.JwtService;
 import net.sasakonnect.wallet.tools.RequestSigner;
-import net.sasakonnect.wallet.domain.RolePermission;
+
 @Service
 @Slf4j
 public class UserService extends RestClientService implements UserDetailsService {
@@ -140,13 +133,13 @@ public class UserService extends RestClientService implements UserDetailsService
 
 	@Autowired
 	WalletRepository walletRepository;
-	
+
 	@Autowired
-	RejectedAccountRepository  rejectedAccountRepository;
-	
+	RejectedAccountRepository rejectedAccountRepository;
+
 	@Autowired
 	LogsRepository logsRepository;
-	
+
 	@Autowired
 	SmsService smsService;
 
@@ -154,28 +147,28 @@ public class UserService extends RestClientService implements UserDetailsService
 	BankWebClientBean bankClientBean;
 	@Value("${MAX_PIN_ATTEMPT:3}")
 	private int maxpinattempt;
-	
+
 	@Value("${PROFILE_IMAGE_PATH}")
-    private Path profileImageDir;
-	
-	 private final int compressedImageWidth = 300; // Adjust the width as needed
-	 private final float imageQuality = 0.5f;
-    
+	private Path profileImageDir;
+
+	private final int compressedImageWidth = 300; // Adjust the width as needed
+	private final float imageQuality = 0.5f;
+
 	@Value("${spring.profiles.active}")
 	String profileActive;
-	
+
 	@Value("${WALLET_BASE_URL}")
 	String wallet_base_url;
-	
+
 	@Value("${kompCallBackUrl}")
 	String kompCallBackUrl;
-	
+
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneOffset.UTC);
 	@Autowired
 	private RedisBean<String> redisBean;
 	@Autowired
 	RequestSigner requestSigner;
-	
+
 	@Autowired
 	ProfileImageRepository profileImageRepository;
 
@@ -199,7 +192,7 @@ public class UserService extends RestClientService implements UserDetailsService
 				Map<String, Object> map = new HashMap<>();
 				map.put("id", u.getId());
 				map.put("firstname", u.getFirstName());
-				map.put("middlename",u.getMiddleName());
+				map.put("middlename", u.getMiddleName());
 				map.put("lastname", u.getLastName());
 				map.put("user_id", u.getId());
 				map.put("phone", u.getMobile());
@@ -254,13 +247,13 @@ public class UserService extends RestClientService implements UserDetailsService
 				usermap.put("id", u.getId());
 				usermap.put("firstname", u.getFirstName());
 				usermap.put("lastname", u.getLastName());
-				usermap.put("middlename",u.getMiddleName());	
+				usermap.put("middlename", u.getMiddleName());
 				usermap.put("user_id", u.getId());
 				usermap.put("phone", u.getMobile());
 //            map.put("wallet", u.getUserWallets());
 				usermap.put("corporate", u.getCorporate());
 				if (u.getUserRole() != null) {
-					usermap.put("role",u.getUserRole() !=null ? u.getUserRole().getRole() : null);
+					usermap.put("role", u.getUserRole() != null ? u.getUserRole().getRole() : null);
 
 				} else {
 					usermap.put("role", null);
@@ -308,11 +301,11 @@ public class UserService extends RestClientService implements UserDetailsService
 				map.put("phone", u.getMobile());
 				map.put("corporate", u.getCorporate());
 				if (u.getUserRole() != null) {
-					Map<String,Object> roleMap =  new HashMap<>();
-					var role =  u.getUserRole().getRole();
-					roleMap.put("id",role.getId());		
-					roleMap.put("roleName",role.getRoleName());		
-					map.put("role",roleMap);
+					Map<String, Object> roleMap = new HashMap<>();
+					var role = u.getUserRole().getRole();
+					roleMap.put("id", role.getId());
+					roleMap.put("roleName", role.getRoleName());
+					map.put("role", roleMap);
 
 				} else {
 					map.put("role", null);
@@ -389,17 +382,15 @@ public class UserService extends RestClientService implements UserDetailsService
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(json);
 
 		} else {
-             var log = Logs.builder()
-            		 .activity(LogTypes.LOGIN)
-            		 .description("Normal user login with acc. No:"+user.get().getId())
-            		 .build();
-             this.logsRepository.save(log);
+			var log = Logs.builder().activity(LogTypes.LOGIN)
+					.description("Normal user login with acc. No:" + user.get().getId()).build();
+			this.logsRepository.save(log);
 			return this.otpsmsService.sendSms(userLogin, null, user);
 
 		}
 
 	}
-	
+
 	public ResponseEntity<ObjectNode> corporateLogin(UserLogin userLogin) {
 		Optional<User> user = Optional.empty();
 		if (profileActive.equalsIgnoreCase("dev")) {
@@ -416,7 +407,6 @@ public class UserService extends RestClientService implements UserDetailsService
 			user = this.userRepository.findByMobileAndCountryCode(userLogin.getSerchablePhone(),
 					Integer.valueOf(userLogin.getCountryCode()));
 		}
-		
 
 		if (user.isEmpty()) {
 			ObjectMapper objectMapper = new ObjectMapper();
@@ -429,9 +419,9 @@ public class UserService extends RestClientService implements UserDetailsService
 			json.put("error", HttpStatus.BAD_REQUEST.getReasonPhrase());
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(json);
 
-		} else {    
-			//check if user is added to corporate
-			if(user.get().getCorporate() == null) {
+		} else {
+			// check if user is added to corporate
+			if (user.get().getCorporate() == null) {
 				ObjectMapper objectMapper = new ObjectMapper();
 
 				ObjectNode json = JsonNodeFactory.instance.objectNode();
@@ -442,8 +432,8 @@ public class UserService extends RestClientService implements UserDetailsService
 				json.put("error", HttpStatus.BAD_REQUEST.getReasonPhrase());
 				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
 			}
-			//disalow users without role
-			else if(user.get().getUserRole() == null) {
+			// disalow users without role
+			else if (user.get().getUserRole() == null) {
 				ObjectMapper objectMapper = new ObjectMapper();
 
 				ObjectNode json = JsonNodeFactory.instance.objectNode();
@@ -454,12 +444,11 @@ public class UserService extends RestClientService implements UserDetailsService
 				json.put("error", HttpStatus.BAD_REQUEST.getReasonPhrase());
 				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
 			}
-			
+
 			else {
 				return this.otpsmsService.sendSms(userLogin, null, user);
-	
-			}
 
+			}
 
 		}
 
@@ -521,11 +510,10 @@ public class UserService extends RestClientService implements UserDetailsService
 			this.otpsmsService.deleteOtp(opt.get());
 
 			if (u != null) {
-				Optional<User> walletUser  =  this.userRepository.findUserWithUserWalletsById(u.getId());
-				if(walletUser.isPresent()) {
+				Optional<User> walletUser = this.userRepository.findUserWithUserWalletsById(u.getId());
+				if (walletUser.isPresent()) {
 					u = this.userRepository.findUserWithUserWalletsById(u.getId()).get();
 				}
-				
 
 				System.out.println(u.getCreatedAt());
 				var response = UserResponseDTO.builder().wallets(u.getUserWallets().stream().map((uw) -> {
@@ -539,8 +527,7 @@ public class UserService extends RestClientService implements UserDetailsService
 						.idNumber(u.getIdNumber()).onboardingRequestId(u.getOnboardingRequestId())
 						.open_id(u.getOpenId()).birthday(formatter.format(u.getBirthday().toInstant()))
 						.updatedAt(u.getUpdatedAt()).kraPin(u.getKraPin())
-						.employmentStatus(u.getEmploymentStatus().name())
-                        .profileImage(u.getProfileImage())
+						.employmentStatus(u.getEmploymentStatus().name()).profileImage(u.getProfileImage())
 						.monthlyIncome(u.getMonthlyIncome().toString()).createdAt(u.getCreatedAt()).id(u.getId())
 						.address(u.getAddress()).firstName(u.getFirstName()).lastName(u.getLastName())
 						.mobile(u.getMobile()).countryCode(u.getCountryCode()).build();
@@ -567,7 +554,7 @@ public class UserService extends RestClientService implements UserDetailsService
 		return null;
 		// TODO Auto-generated method stub
 	}
-	
+
 	@Transactional
 	public ResponseEntity<Object> verifyAdminOtp(@Valid ConfirmOtp confirmOtp) {
 		var opt = this.otpsmsService.verifyOtp(confirmOtp);
@@ -583,16 +570,15 @@ public class UserService extends RestClientService implements UserDetailsService
 			this.otpsmsService.deleteOtp(opt.get());
 
 			if (u != null) {
-				if(u.getCorporate() == null) {
+				if (u.getCorporate() == null) {
 					ObjectNode json = JsonNodeFactory.instance.objectNode();
 					json.put("message", "invalid otp type");
 					return ResponseEntity.badRequest().body(json);
 				}
-				Optional<User> walletUser  =  this.userRepository.findUserWithUserWalletsById(u.getId());
-				if(walletUser.isPresent()) {
+				Optional<User> walletUser = this.userRepository.findUserWithUserWalletsById(u.getId());
+				if (walletUser.isPresent()) {
 					u = this.userRepository.findUserWithUserWalletsById(u.getId()).get();
 				}
-				
 
 				System.out.println(u.getCreatedAt());
 				var response = UserResponseDTO.builder().wallets(u.getUserWallets().stream().map((uw) -> {
@@ -606,8 +592,7 @@ public class UserService extends RestClientService implements UserDetailsService
 						.idNumber(u.getIdNumber()).onboardingRequestId(u.getOnboardingRequestId())
 						.open_id(u.getOpenId()).birthday(formatter.format(u.getBirthday().toInstant()))
 						.updatedAt(u.getUpdatedAt()).kraPin(u.getKraPin())
-						.employmentStatus(u.getEmploymentStatus().name())
-                        .profileImage(u.getProfileImage())
+						.employmentStatus(u.getEmploymentStatus().name()).profileImage(u.getProfileImage())
 						.monthlyIncome(u.getMonthlyIncome().toString()).createdAt(u.getCreatedAt()).id(u.getId())
 						.address(u.getAddress()).firstName(u.getFirstName()).lastName(u.getLastName())
 						.mobile(u.getMobile()).countryCode(u.getCountryCode()).build();
@@ -709,7 +694,7 @@ public class UserService extends RestClientService implements UserDetailsService
 
 		// TODO Auto-generated method stub
 	}
-	
+
 	public ResponseEntity<Map> isPinSet(User user) {
 		Optional<List<UserPin>> userPins = this.userPinRepository.getUserPinThatIsNotArchived(user);
 		if (userPins.isPresent() && (userPins.get().size() > 0)) {
@@ -746,11 +731,8 @@ public class UserService extends RestClientService implements UserDetailsService
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("message", "Pin already set please ,try to reset");
 			map.put("success", false);
-			var log = Logs.builder()
-					.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
-					+" failed to set PIN.PIN already set")
-					.activity(LogTypes.PIN_SET)
-					.build();
+			var log = Logs.builder().description(user.getFirstName() + " " + user.getLastName() + "of id:" + user.id
+					+ " failed to set PIN.PIN already set").activity(LogTypes.PIN_SET).build();
 			this.logsRepository.save(log);
 			return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
 		} else if (this.walletRepository.findByUserWalletsUser(user).isEmpty()) {
@@ -758,11 +740,8 @@ public class UserService extends RestClientService implements UserDetailsService
 			map.put("message", "Account Not Verified ");
 			map.put("success", "false");
 			map.put("code", "KWEC003");
-			var log = Logs.builder()
-					.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
-					+" failed to set PIN.Account not verified")
-					.activity(LogTypes.PIN_SET)
-					.build();
+			var log = Logs.builder().description(user.getFirstName() + " " + user.getLastName() + "of id:" + user.id
+					+ " failed to set PIN.Account not verified").activity(LogTypes.PIN_SET).build();
 			this.logsRepository.save(log);
 			return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
 		}
@@ -776,11 +755,8 @@ public class UserService extends RestClientService implements UserDetailsService
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("message", "You pin has been set");
 			map.put("success", true);
-			var log = Logs.builder()
-					.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
-					+"failed to set PIN.PIN already set")
-					.activity(LogTypes.PIN_SET)
-					.build();
+			var log = Logs.builder().description(user.getFirstName() + " " + user.getLastName() + "of id:" + user.id
+					+ "failed to set PIN.PIN already set").activity(LogTypes.PIN_SET).build();
 			this.logsRepository.save(log);
 			return ResponseEntity.status(HttpStatus.OK).body(map);
 
@@ -792,10 +768,10 @@ public class UserService extends RestClientService implements UserDetailsService
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		Optional<List<UserPin>> userPins = this.userPinRepository.getUserPinThatIsNotArchived(user);
 		if (userPins.isPresent() && (userPins.get().size() > 0)) {
-			if(userPins.get().get(0).getResetPinAttempts() >= 10) {
-				Map<String,Object> map = new HashMap<>();
+			if (userPins.get().get(0).getResetPinAttempts() >= 10) {
+				Map<String, Object> map = new HashMap<>();
 				map.put("success", false);
-				map.put("message","Too many wrong attempts of old PIN reached");
+				map.put("message", "Too many wrong attempts of old PIN reached");
 				return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(map);
 			}
 			var pins = this.userPinRepository.findPinsUsedWithinLastThreeMonths(user.getId(), this.threeMonthsAgo());
@@ -818,15 +794,14 @@ public class UserService extends RestClientService implements UserDetailsService
 						Map<String, Object> map = new HashMap<String, Object>();
 						map.put("success", false);
 						map.put("message", "Pin already blocked");
-						
+
 						var log = Logs.builder()
-								.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
-								+" failed to update PIN.PIN already blocked")
-								.activity(LogTypes.PIN_SET)
-								.build();
+								.description(user.getFirstName() + " " + user.getLastName() + "of id:" + user.id
+										+ " failed to update PIN.PIN already blocked")
+								.activity(LogTypes.PIN_SET).build();
 						this.logsRepository.save(log);
 						return ResponseEntity.status(HttpStatus.OK).body(map);
-						
+
 					}
 					if (encoder.matches(user.getId() + setPin.getOldPin(), activeUserPin.getPin())) {
 						var passwordencoded = new BCryptPasswordEncoder().encode(user.getId() + setPin.getPin());
@@ -839,11 +814,10 @@ public class UserService extends RestClientService implements UserDetailsService
 						Map<String, Object> map = new HashMap<String, Object>();
 						map.put("message", "Pin changed successfully");
 						map.put("success", true);
-						var log = Logs.builder()
-								.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
-								+" successfully changed their PIN")
-								.activity(LogTypes.PIN_SET)
-								.build();
+						var log = Logs
+								.builder().description(user.getFirstName() + " " + user.getLastName() + "of id:"
+										+ user.id + " successfully changed their PIN")
+								.activity(LogTypes.PIN_SET).build();
 						this.logsRepository.save(log);
 						return ResponseEntity.status(HttpStatus.OK).body(map);
 
@@ -855,10 +829,9 @@ public class UserService extends RestClientService implements UserDetailsService
 						map.put("message", "Old pin mismatch ");
 						map.put("success", false);
 						var log = Logs.builder()
-								.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
-								+" failed to update PIN.Unable to verify old PIN")
-								.activity(LogTypes.PIN_SET)
-								.build();
+								.description(user.getFirstName() + " " + user.getLastName() + "of id:" + user.id
+										+ " failed to update PIN.Unable to verify old PIN")
+								.activity(LogTypes.PIN_SET).build();
 						this.logsRepository.save(log);
 						return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(map);
 
@@ -899,7 +872,7 @@ public class UserService extends RestClientService implements UserDetailsService
 		if (userPinRepository.isPresent() && userPinRepository.get().size() > 0
 				&& !(userPinRepository.get().get(0).getPinAttempts() >= this.maxpinattempt)) {
 			if (bycryp.matches(user.getId() + setPin.getPin(), userPinRepository.get().get(0).getPin())) {
-				if(userPinRepository.get().get(0).isDeafult() == true) {
+				if (userPinRepository.get().get(0).isDeafult() == true) {
 					Map<String, Object> map = new HashMap<String, Object>();
 					map.put("message", "Please update your PIN.This is a default PIN");
 					map.put("success", false);
@@ -919,11 +892,8 @@ public class UserService extends RestClientService implements UserDetailsService
 				map.put("attempt_remaining", maxpinattempt - (userPinRepository.get().get(0).getPinAttempts() + 1));
 
 				map.put("success", false);
-				var log = Logs.builder()
-						.description(user.getFirstName()+" "+user.getLastName()+"of id: "+user.id
-						+" failed to login.Entered wrong PIN")
-						.activity(LogTypes.LOGIN)
-						.build();
+				var log = Logs.builder().description(user.getFirstName() + " " + user.getLastName() + "of id: "
+						+ user.id + " failed to login.Entered wrong PIN").activity(LogTypes.LOGIN).build();
 				return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
 			}
 		} else {
@@ -933,19 +903,13 @@ public class UserService extends RestClientService implements UserDetailsService
 				if ((!(userPinRepository.get().isEmpty())
 						&& userPinRepository.get().get(0).getPinAttempts() >= maxpinattempt)) {
 					map.put("message", "Pin Blocked");
-					var log = Logs.builder()
-							.description(user.getFirstName()+" "+user.getLastName()+"of id:"+user.id
-							+" failed to login.Using blocked PIN")
-							.activity(LogTypes.PIN_SET)
-							.build();
+					var log = Logs.builder().description(user.getFirstName() + " " + user.getLastName() + "of id:"
+							+ user.id + " failed to login.Using blocked PIN").activity(LogTypes.PIN_SET).build();
 					this.logsRepository.save(log);
 				} else {
 					map.put("message", "Pin not set");
-					var log = Logs.builder()
-							.description(user.getFirstName()+" "+user.getLastName()+" of id: "+user.id
-							+" failed to login.PIN not set")
-							.activity(LogTypes.PIN_SET)
-							.build();
+					var log = Logs.builder().description(user.getFirstName() + " " + user.getLastName() + " of id: "
+							+ user.id + " failed to login.PIN not set").activity(LogTypes.PIN_SET).build();
 					this.logsRepository.save(log);
 				}
 			}
@@ -983,11 +947,12 @@ public class UserService extends RestClientService implements UserDetailsService
 		// TODO Auto-generated method stub
 
 	}
-	
+
+	@Transactional
 	public void createRejectedAccount(RejectedAccount payload) {
 		this.rejectedAccountRepository.save(payload);
 	}
-	
+
 	public void deleteSuccessfulFromRejected(String IdNumber) {
 		this.rejectedAccountRepository.deleteByIdNumber(IdNumber);
 	}
@@ -1021,20 +986,21 @@ public class UserService extends RestClientService implements UserDetailsService
 		// TODO Auto-generated method stub
 
 	}
+
 	public Optional<User> findUserByPhoneNumberLoadUserWallet(String phoneNumber, String countrycode) {
 		// log.error(phoneNumber);
-		return this.userRepository.findByMobileAndJoinWalletCountryCode(phoneNumber,Integer.parseInt(countrycode));
+		return this.userRepository.findByMobileAndJoinWalletCountryCode(phoneNumber, Integer.parseInt(countrycode));
 		// TODO Auto-generated method stub
 
 	}
-	
+
 	public List<User> findUserPhoneNumberAndCountryCode(List<PhoneCountryPair> listCountryCode) {
 		// log.error(phoneNumber);
-		return this.userRepository.findCustomersByMultiplePhoneAndCountry(listCountryCode.stream().map(data->data.getMobile()).collect(Collectors.toList()));
+		return this.userRepository.findCustomersByMultiplePhoneAndCountry(
+				listCountryCode.stream().map(data -> data.getMobile()).collect(Collectors.toList()));
 		// TODO Auto-generated method stub
 
 	}
-	
 
 	public Optional<User> findUserByWalletAccountId(String receiverAccount) {
 		return this.userRepository.findUserByWalletAccountId(receiverAccount);
@@ -1055,32 +1021,32 @@ public class UserService extends RestClientService implements UserDetailsService
 			if (counter >= maxpinattempt) {
 				map.put("success", true);
 				map.put("message", "PIN blocked successfully");
-					LocalDateTime currentTime = LocalDateTime.now();
-					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-					String formattedDateTime = currentTime.format(formatter);
-					
-					if (userPin.isPresent()) {
-						userPin.get().setPinAttempts(counter);
-						try {
-							this.userPinRepository.save(userPin.get());
-						}catch(Exception ex) {
-							
-						}
-					
+				LocalDateTime currentTime = LocalDateTime.now();
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+				String formattedDateTime = currentTime.format(formatter);
+
+				if (userPin.isPresent()) {
+					userPin.get().setPinAttempts(counter);
+					try {
+						this.userPinRepository.save(userPin.get());
+					} catch (Exception ex) {
+
+					}
+
 					this.larkService.sendPinResetNotification(loggedInUser,
 							user.get().getUserWallets().get(0).getWallet(), "BLOCKING", "Success");
 					var log = Logs.builder()
-							.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
-							+" managed to block PIN for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of id "+user.get().getId())
-							.activity(LogTypes.PIN_SET)
-							.build();
+							.description(loggedInUser.getFirstName() + " " + loggedInUser.getLastName() + "of id:"
+									+ loggedInUser.id + " managed to block PIN for user " + user.get().getFirstName()
+									+ " " + user.get().getLastName() + " of id " + user.get().getId())
+							.activity(LogTypes.PIN_SET).build();
 					this.logsRepository.save(log);
-					
-				return ResponseEntity.status(HttpStatus.OK).body(map);
-					}
-					map.put("success", false);
-					map.put("message", "Unable to block PIN");
-					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+
+					return ResponseEntity.status(HttpStatus.OK).body(map);
+				}
+				map.put("success", false);
+				map.put("message", "Unable to block PIN");
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 			} else {
 				if (userPin.isPresent()) {
 					userPin.get().setPinAttempts(counter);
@@ -1089,59 +1055,63 @@ public class UserService extends RestClientService implements UserDetailsService
 						map.put("success", true);
 						map.put("message", "Pin attempts updated");
 
-							this.larkService.sendPinResetNotification(loggedInUser,
-									user.get().getUserWallets().get(0).getWallet(), "ATTEMPTS", "Success");
-							var log = Logs.builder()
-									.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
-									+"managed to reset PIN counts to "+counter+" for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of Id:"+user.get().id)
-									.activity(LogTypes.PIN_RESET)
-									.build();
-							this.logsRepository.save(log);
+						this.larkService.sendPinResetNotification(loggedInUser,
+								user.get().getUserWallets().get(0).getWallet(), "ATTEMPTS", "Success");
+						var log = Logs.builder()
+								.description(loggedInUser.getFirstName() + " " + loggedInUser.getLastName() + "of id:"
+										+ loggedInUser.id + "managed to reset PIN counts to " + counter + " for user "
+										+ user.get().getFirstName() + " " + user.get().getLastName() + " of Id:"
+										+ user.get().id)
+								.activity(LogTypes.PIN_RESET).build();
+						this.logsRepository.save(log);
 						return ResponseEntity.status(HttpStatus.OK).body(map);
 					} catch (Exception ex) {
 						map.put("success", false);
 						map.put("message", "Opps!!Something went wrong");
 						System.out.println("ERROR: " + ex);
 						var log = Logs.builder()
-								.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
-								+"failed to reset PIN counts to "+counter+" for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of Id:"+user.get().getId()+". System error")
-								.activity(LogTypes.PIN_RESET)
-								.build();
+								.description(loggedInUser.getFirstName() + " " + loggedInUser.getLastName() + "of id:"
+										+ loggedInUser.id + "failed to reset PIN counts to " + counter + " for user "
+										+ user.get().getFirstName() + " " + user.get().getLastName() + " of Id:"
+										+ user.get().getId() + ". System error")
+								.activity(LogTypes.PIN_RESET).build();
 						this.logsRepository.save(log);
 						return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
 					}
 				} else {
-						LocalDateTime currentTime = LocalDateTime.now();
-						DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-						String formattedDateTime = currentTime.format(formatter);
+					LocalDateTime currentTime = LocalDateTime.now();
+					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+					String formattedDateTime = currentTime.format(formatter);
 
-						this.larkService.sendPinResetNotification(loggedInUser,
-								user.get().getUserWallets().get(0).getWallet(), "ATTEMPTS", "FAILED");
+					this.larkService.sendPinResetNotification(loggedInUser,
+							user.get().getUserWallets().get(0).getWallet(), "ATTEMPTS", "FAILED");
 					map.put("success", false);
 					map.put("message", "User does not have a PIN");
 					var log = Logs.builder()
-							.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
-							+"failed to reset PIN counts to "+counter+" for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of Id:"+user.get().id+". User does not have PIN.")
-							.activity(LogTypes.PIN_RESET)
-							.build();
+							.description(loggedInUser.getFirstName() + " " + loggedInUser.getLastName() + "of id:"
+									+ loggedInUser.id + "failed to reset PIN counts to " + counter + " for user "
+									+ user.get().getFirstName() + " " + user.get().getLastName() + " of Id:"
+									+ user.get().id + ". User does not have PIN.")
+							.activity(LogTypes.PIN_RESET).build();
 					this.logsRepository.save(log);
 					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 				}
 
 			}
 		} else {
-				LocalDateTime currentTime = LocalDateTime.now();
-				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-				String formattedDateTime = currentTime.format(formatter);
-				this.larkService.sendPinResetNotification(loggedInUser, user.get().getUserWallets().get(0).getWallet(),
-						"ATTEMPTS", "Failed");
+			LocalDateTime currentTime = LocalDateTime.now();
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			String formattedDateTime = currentTime.format(formatter);
+			this.larkService.sendPinResetNotification(loggedInUser, user.get().getUserWallets().get(0).getWallet(),
+					"ATTEMPTS", "Failed");
 			map.put("success", false);
 			map.put("message", "User not found");
 			var log = Logs.builder()
-					.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
-					+"failed to reset PIN counts to "+counter+" for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of Id:"+user.get().id+". User not found")
-					.activity(LogTypes.PIN_RESET)
-					.build();
+					.description(loggedInUser.getFirstName() + " " + loggedInUser.getLastName() + "of id:"
+							+ loggedInUser.id + "failed to reset PIN counts to " + counter + " for user "
+							+ user.get().getFirstName() + " " + user.get().getLastName() + " of Id:" + user.get().id
+							+ ". User not found")
+					.activity(LogTypes.PIN_RESET).build();
 			this.logsRepository.save(log);
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 		}
@@ -1156,7 +1126,7 @@ public class UserService extends RestClientService implements UserDetailsService
 			Optional<UserPin> userPin = this.userPinRepository.getUserPinByUser(user.get());
 			if (userPin.isPresent()) {
 				try {
-					
+
 					this.userPinRepository.delete(userPin.get());
 //					this.larkService.sendPinResetNotification(loggedInUser,
 //							user.get().getUserWallets().get(0).getWallet(), "RESET", "Success");
@@ -1167,15 +1137,18 @@ public class UserService extends RestClientService implements UserDetailsService
 					userpin.setResetPinAttempts(0);
 					userpin.setPin(passwordencoded);
 					userpin.setDeafult(true);
-					this.userPinRepository.save(userpin);					
-					this.smsService.sendSms("Your PIN has been reset."+defaultPin+" is your Konnect Wallet default PIN.Kindly update immediately", "+254"+user.get().getMobile());
+					this.userPinRepository.save(userpin);
+					this.smsService.sendSms(
+							"Your PIN has been reset." + defaultPin
+									+ " is your Konnect Wallet default PIN.Kindly update immediately",
+							"+254" + user.get().getMobile());
 					map.put("success", true);
 					map.put("message", "PIN reset successful");
 					var log = Logs.builder()
-							.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
-							+"managed to reset PIN for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of Id:"+user.get().id)
-							.activity(LogTypes.PIN_RESET)
-							.build();
+							.description(loggedInUser.getFirstName() + " " + loggedInUser.getLastName() + "of id:"
+									+ loggedInUser.id + "managed to reset PIN for user " + user.get().getFirstName()
+									+ " " + user.get().getLastName() + " of Id:" + user.get().id)
+							.activity(LogTypes.PIN_RESET).build();
 					this.logsRepository.save(log);
 					return ResponseEntity.status(HttpStatus.OK).body(map);
 				} catch (Exception ex) {
@@ -1183,12 +1156,13 @@ public class UserService extends RestClientService implements UserDetailsService
 					map.put("message", "Opps!!Something went wrong");
 					System.out.println("ERROR: " + ex);
 					var log = Logs.builder()
-							.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
-							+"failed to reset PIN  for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of Id:"+user.get().id+". A server error ocurred")
-							.activity(LogTypes.PIN_RESET)
-							.build();
+							.description(loggedInUser.getFirstName() + " " + loggedInUser.getLastName() + "of id:"
+									+ loggedInUser.id + "failed to reset PIN  for user " + user.get().getFirstName()
+									+ " " + user.get().getLastName() + " of Id:" + user.get().id
+									+ ". A server error ocurred")
+							.activity(LogTypes.PIN_RESET).build();
 					this.logsRepository.save(log);
-				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+					return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
 				}
 			} else {
 				map.put("success", false);
@@ -1196,43 +1170,44 @@ public class UserService extends RestClientService implements UserDetailsService
 				this.larkService.sendPinResetNotification(loggedInUser, user.get().getUserWallets().get(0).getWallet(),
 						"RESET", "Failed");
 				var log = Logs.builder()
-						.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
-						+"failed to reset PIN for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of Id:"+user.get().id)
-						.activity(LogTypes.PIN_SET)
-						.build();
+						.description(loggedInUser.getFirstName() + " " + loggedInUser.getLastName() + "of id:"
+								+ loggedInUser.id + "failed to reset PIN for user " + user.get().getFirstName() + " "
+								+ user.get().getLastName() + " of Id:" + user.get().id)
+						.activity(LogTypes.PIN_SET).build();
 				this.logsRepository.save(log);
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 			}
 
 		} else {
-			
-				this.larkService.sendPinResetNotification(loggedInUser, user.get().getUserWallets().get(0).getWallet(),
-						"RESET", "Failed");
+
+			this.larkService.sendPinResetNotification(loggedInUser, user.get().getUserWallets().get(0).getWallet(),
+					"RESET", "Failed");
 			map.put("success", false);
 			map.put("message", "User does not exist");
 			var log = Logs.builder()
-					.description(loggedInUser.getFirstName()+" "+loggedInUser.getLastName()+"of id:"+loggedInUser.id
-					+"failed to reset PIN  for user "+user.get().getFirstName()+" "+user.get().getLastName()+" of Id:"+user.get().id+". User does not exist")
-					.activity(LogTypes.PIN_SET)
-					.build();
+					.description(loggedInUser.getFirstName() + " " + loggedInUser.getLastName() + "of id:"
+							+ loggedInUser.id + "failed to reset PIN  for user " + user.get().getFirstName() + " "
+							+ user.get().getLastName() + " of Id:" + user.get().id + ". User does not exist")
+					.activity(LogTypes.PIN_SET).build();
 //	            this.larkService.sendPinResetNotification(loggedInUser,user.get().getUserWallets().get(0).getWallet(),"RESET","Failed");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 		}
 
 	}
-   
-	private int generateRandomPin() {
-	    int NUM_DIGITS = 4;
-	    int minValue = (int) Math.pow(10, NUM_DIGITS - 1);
-	    int maxValue = (int) Math.pow(10, NUM_DIGITS) - 1;
 
-	    Random random = new Random(); // Create Random instance without a seed value
-	    return random.nextInt(maxValue - minValue + 1) + minValue;
+	private int generateRandomPin() {
+		int NUM_DIGITS = 4;
+		int minValue = (int) Math.pow(10, NUM_DIGITS - 1);
+		int maxValue = (int) Math.pow(10, NUM_DIGITS) - 1;
+
+		Random random = new Random(); // Create Random instance without a seed value
+		return random.nextInt(maxValue - minValue + 1) + minValue;
 	}
-	
+
 	private void sendDefaultPinSms() {
-		
+
 	}
+
 	public ResponseEntity createUserOpenId(@Valid OpenIdRequest openId) {
 		User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -1280,27 +1255,14 @@ public class UserService extends RestClientService implements UserDetailsService
 	public ResponseEntity<Object> getAuthenticatedUserProfile() {
 		User u = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		List<Wallet> wallet = this.walletRepository.findByUserWalletsUser(u);
-		var response = UserResponseDTO.builder().wallets(wallet.stream().toList())
-				.middleName(u.getMiddleName())
-				.gender(u.getGender()
-				.name())
-				.idType(u.getIdType().name())
-				.idNumber(u.getIdNumber())
+		var response = UserResponseDTO.builder().wallets(wallet.stream().toList()).middleName(u.getMiddleName())
+				.gender(u.getGender().name()).idType(u.getIdType().name()).idNumber(u.getIdNumber())
 				.onboardingRequestId(u.getOnboardingRequestId()).open_id(u.getOpenId())
-				.birthday(formatter.format(u.getBirthday().toInstant()))
-				.updatedAt(u.getUpdatedAt())
-				.kraPin(u.getKraPin())
-				.employmentStatus(u.getEmploymentStatus().name())
-				.monthlyIncome(u.getMonthlyIncome().toString())
-				.createdAt(u.getCreatedAt())
-				.id(u.getId())
-				.address(u.getAddress())
-				.firstName(u.getFirstName())
-				.lastName(u.getLastName())
-				.mobile(u.getMobile())
-				.countryCode(u.getCountryCode())
-				.profileImage(u.getProfileImage())
-				.build();
+				.birthday(formatter.format(u.getBirthday().toInstant())).updatedAt(u.getUpdatedAt())
+				.kraPin(u.getKraPin()).employmentStatus(u.getEmploymentStatus().name())
+				.monthlyIncome(u.getMonthlyIncome().toString()).createdAt(u.getCreatedAt()).id(u.getId())
+				.address(u.getAddress()).firstName(u.getFirstName()).lastName(u.getLastName()).mobile(u.getMobile())
+				.countryCode(u.getCountryCode()).profileImage(u.getProfileImage()).build();
 
 		ObjectMapper objectMapper = new ObjectMapper();
 		objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
@@ -1328,289 +1290,275 @@ public class UserService extends RestClientService implements UserDetailsService
 		return ResponseEntity.status(HttpStatus.CREATED).body(map);
 
 	}
-	
-	public ResponseEntity<Object> getUserPermissions(){
+
+	public ResponseEntity<Object> getUserPermissions() {
 		User u = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		
-	Optional<UserRole> userRole = this.userRoleRepository.findUserRoleByUserId(u);
+
+		Optional<UserRole> userRole = this.userRoleRepository.findUserRoleByUserId(u);
 //	Optional<Role> role = this.roleRepository
-	if(userRole.isPresent()) {
-		   List<Permission> rolePermissions = this.rolePermissionRepository.findPermissionsByRole(userRole.get().getRole());
-			Map<String,Object> map = new HashMap<String,Object>();
-			map.put("success",true);
-			map.put("message","Request complete");
-			map.put("role",userRole.get().getRole().getRoleName());
+		if (userRole.isPresent()) {
+			List<Permission> rolePermissions = this.rolePermissionRepository
+					.findPermissionsByRole(userRole.get().getRole());
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("success", true);
+			map.put("message", "Request complete");
+			map.put("role", userRole.get().getRole().getRoleName());
 //			log.info(userRole.get().getRole().getRolePermissions()+"");
 //			System.out.println(userRole.get().getRole().getRolePermissions());
-			var perms = rolePermissions.stream().map(r->{
-				Map<String,Object> per = new HashMap<String,Object>();
-				per.put("id",r.getId());
-				per.put("name",r.getName());
+			var perms = rolePermissions.stream().map(r -> {
+				Map<String, Object> per = new HashMap<String, Object>();
+				per.put("id", r.getId());
+				per.put("name", r.getName());
 				per.put("description", r.getDescription());
 				return per;
 			}).collect(Collectors.toList());
-			map.put("permissions",perms);
+			map.put("permissions", perms);
 			return ResponseEntity.status(HttpStatus.OK).body(map);
-		}else {
-			Map<String,Object> map = new HashMap<String,Object>();
-			map.put("success",true);
-			map.put("message","Request complete");
-			map.put("role",null);
-			map.put("permissions",new ArrayList<>());
-			return ResponseEntity.status(HttpStatus.OK).body(map); 
+		} else {
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("success", true);
+			map.put("message", "Request complete");
+			map.put("role", null);
+			map.put("permissions", new ArrayList<>());
+			return ResponseEntity.status(HttpStatus.OK).body(map);
 		}
 	}
-	
-	public ResponseEntity<Object> getDailyOnboardingTrend(int month,int year){
+
+	public ResponseEntity<Object> getDailyOnboardingTrend(int month, int year) {
 		List<Object[]> obTrend = this.userRepository.findDailyOnBoardingTrend(month, year);
-		Map<String,Object> resMap = new HashMap<>();
-		if(!obTrend.isEmpty()) {
-			Map<String,Object> map = new HashMap<>();
+		Map<String, Object> resMap = new HashMap<>();
+		if (!obTrend.isEmpty()) {
+			Map<String, Object> map = new HashMap<>();
 			map.put("success", true);
 			map.put("message", "Request succcessful");
-			
-			var trend =  obTrend.stream().map(obt->{
-				Map<String,Object> tMap = new HashMap<>();
+
+			var trend = obTrend.stream().map(obt -> {
+				Map<String, Object> tMap = new HashMap<>();
 				tMap.put("date", obt[0]);
-				tMap.put("users",obt[1]);
-				
+				tMap.put("users", obt[1]);
+
 				return tMap;
 			}).collect(Collectors.toList());
 			map.put("trend", trend);
 			resMap.put("payload", map);
-			
+
 			return ResponseEntity.status(HttpStatus.OK).body(resMap);
-		}else {
-			Map<String,Object> map = new HashMap<>();
+		} else {
+			Map<String, Object> map = new HashMap<>();
 			map.put("success", true);
 			map.put("message", "Request succcessful");
-			map.put("trend",new ArrayList<>());
+			map.put("trend", new ArrayList<>());
 			resMap.put("payload", map);
-			
+
 			return ResponseEntity.status(HttpStatus.OK).body(resMap);
 		}
 	}
-	
-	public ResponseEntity<Object> getMonthlyOnboardingTrend(int month,int year){
+
+	public ResponseEntity<Object> getMonthlyOnboardingTrend(int month, int year) {
 		List<Object[]> obTrend = this.userRepository.findMonthlyOnBoardingTrend(year);
-		Map<String,Object> resMap = new HashMap<>();
-		if(!obTrend.isEmpty()) {
-			Map<String,Object> map = new HashMap<>();
+		Map<String, Object> resMap = new HashMap<>();
+		if (!obTrend.isEmpty()) {
+			Map<String, Object> map = new HashMap<>();
 			map.put("success", true);
 			map.put("message", "Request succcessful");
-			
-			var trend =  obTrend.stream().map(obt->{
-				Map<String,Object> tMap = new HashMap<>();
+
+			var trend = obTrend.stream().map(obt -> {
+				Map<String, Object> tMap = new HashMap<>();
 				tMap.put("date", obt[0]);
-				tMap.put("users",obt[1]);
-				
+				tMap.put("users", obt[1]);
+
 				return tMap;
 			}).collect(Collectors.toList());
-			
+
 			map.put("trend", trend);
 			resMap.put("payload", map);
 			return ResponseEntity.status(HttpStatus.OK).body(resMap);
-		}else {
-			Map<String,Object> map = new HashMap<>();
+		} else {
+			Map<String, Object> map = new HashMap<>();
 			map.put("success", true);
 			map.put("message", "Request succcessful");
-			map.put("trend",new ArrayList<>());
+			map.put("trend", new ArrayList<>());
 			resMap.put("payload", map);
-			
+
 			return ResponseEntity.status(HttpStatus.OK).body(resMap);
 		}
 	}
-	
-	
-	public ResponseEntity<Object> getAnnualOnboardingTrend(){
+
+	public ResponseEntity<Object> getAnnualOnboardingTrend() {
 		List<Object[]> obTrend = this.userRepository.findAnnualOnBoardingTrend();
-		Map<String,Object> resMap = new HashMap<>();
-		if(!obTrend.isEmpty()) {
-			Map<String,Object> map = new HashMap<>();
+		Map<String, Object> resMap = new HashMap<>();
+		if (!obTrend.isEmpty()) {
+			Map<String, Object> map = new HashMap<>();
 			map.put("success", true);
 			map.put("message", "Request succcessful");
-			
-			var trend =  obTrend.stream().map(obt->{
-				Map<String,Object> tMap = new HashMap<>();
+
+			var trend = obTrend.stream().map(obt -> {
+				Map<String, Object> tMap = new HashMap<>();
 				tMap.put("date", obt[0]);
-				tMap.put("users",obt[1]);
-				
+				tMap.put("users", obt[1]);
+
 				return tMap;
 			}).collect(Collectors.toList());
-			
+
 			map.put("trend", trend);
 			resMap.put("payload", map);
 			return ResponseEntity.status(HttpStatus.OK).body(resMap);
-		}else {
-			Map<String,Object> map = new HashMap<>();
+		} else {
+			Map<String, Object> map = new HashMap<>();
 			map.put("success", true);
 			map.put("message", "Request succcessful");
-			map.put("trend",new ArrayList<>());
+			map.put("trend", new ArrayList<>());
 			resMap.put("payload", map);
-			
+
 			return ResponseEntity.status(HttpStatus.OK).body(resMap);
 		}
 	}
-	
-	
-	public ResponseEntity<Object> getOnBoardingDeviation(){
-		
-		List<Object[]> deviation =  this.userRepository.findOnBoardingDeviation();
-		if(!deviation.isEmpty()) {
-		      Map<String,Object> devMap = new HashMap<>();
-		      devMap.put("today",deviation.get(0)[0]);//				
-		      devMap.put("yesterday",deviation.get(0)[1]);
-		Map<String,Object> map =  new HashMap<>();
-		map.put("success",true);
-		map.put("message","Request successful");
-		map.put("deviation", devMap);
-		Map<String,Object> resMap =  new HashMap<>();
-		
-		resMap.put("payload",map);
-		return ResponseEntity.status(HttpStatus.OK).body(resMap);
+
+	public ResponseEntity<Object> getOnBoardingDeviation() {
+
+		List<Object[]> deviation = this.userRepository.findOnBoardingDeviation();
+		if (!deviation.isEmpty()) {
+			Map<String, Object> devMap = new HashMap<>();
+			devMap.put("today", deviation.get(0)[0]);//
+			devMap.put("yesterday", deviation.get(0)[1]);
+			Map<String, Object> map = new HashMap<>();
+			map.put("success", true);
+			map.put("message", "Request successful");
+			map.put("deviation", devMap);
+			Map<String, Object> resMap = new HashMap<>();
+
+			resMap.put("payload", map);
+			return ResponseEntity.status(HttpStatus.OK).body(resMap);
 		}
 		return null;
 	}
-	
-	public ResponseEntity<Object> uploadProfileImage(MultipartFile file){
+
+	public ResponseEntity<Object> uploadProfileImage(MultipartFile file) {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		 String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+		String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 
-	        try {
-	            if (fileName.contains("..")) {
-	                throw new RuntimeException("Sorry! Filename contains invalid path sequence " + fileName);
-	            }
-	            if (file.getSize() > 5000000) {
-	            	Map<String,Object> map =  new HashMap<>();
-	            	map.put("success",false);
-	            	map.put("message","File exceeds maximum size");
-	            	
-	            	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);	       
-	            }
-	            
-	            //check if file type is image
-	            if (!file.getContentType().equalsIgnoreCase("image/png") && !file.getContentType().equalsIgnoreCase("image/jpg") && !file.getContentType().equalsIgnoreCase("image/jpeg")) {
-	            	Map<String,Object> map =  new HashMap<>();
-	            	map.put("success",false);
-	            	map.put("message","Invalid file format.Allowed types:.png,.jpg,.jpeg");	            
-	            	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);	       
-	            }
-	            byte[] compressedImageData = compressImage(file.getBytes());
-	            String newFileName = UUID.randomUUID().toString() + "_" + user.getId()+"."+file.getContentType().split("/")[1];
-	            Path targetLocation = this.profileImageDir.resolve(newFileName);
-	            Files.write(targetLocation, compressedImageData);
-	            ProfileImage profileImage  = ProfileImage.builder()
-	            		.name(fileName)
-	            		.type(file.getContentType())
-	            		.filePath(this.wallet_base_url+targetLocation.toString().substring(targetLocation.toString().indexOf("/profiles")))
-	            		.build();
-	            
-	            this.profileImageRepository.save(profileImage);
-	            
-	             user.setProfileImage(profileImage);
-	            this.userRepository.save(user);
-                Map<String,Object> map =  new HashMap<>();
-                map.put("success",true);
-                map.put("message","Request completed");
-                map.put("profileImage",profileImage);
-                Map<String,Object> resMap = new HashMap<>();
-                resMap.put("payload",map);
-                
-	          return ResponseEntity.status(HttpStatus.OK).body(resMap);
-	        } catch (IOException ex) {
-	        	ex.printStackTrace();
-	        	Map<String,Object> map =  new HashMap<>();
-	        	map.put("message", "Something went wrong when processing request");
-	        	map.put("success",false);
-	        	Map<String,Object> resMap = new HashMap<>();
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);	
-	        	//throw new RuntimeException("Could not store file " + fileName + ". Please try again!", ex);
-	        }
+		try {
+			if (fileName.contains("..")) {
+				throw new RuntimeException("Sorry! Filename contains invalid path sequence " + fileName);
+			}
+			if (file.getSize() > 5000000) {
+				Map<String, Object> map = new HashMap<>();
+				map.put("success", false);
+				map.put("message", "File exceeds maximum size");
+
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+			}
+
+			// check if file type is image
+			if (!file.getContentType().equalsIgnoreCase("image/png")
+					&& !file.getContentType().equalsIgnoreCase("image/jpg")
+					&& !file.getContentType().equalsIgnoreCase("image/jpeg")) {
+				Map<String, Object> map = new HashMap<>();
+				map.put("success", false);
+				map.put("message", "Invalid file format.Allowed types:.png,.jpg,.jpeg");
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+			}
+			byte[] compressedImageData = compressImage(file.getBytes());
+			String newFileName = UUID.randomUUID().toString() + "_" + user.getId() + "."
+					+ file.getContentType().split("/")[1];
+			Path targetLocation = this.profileImageDir.resolve(newFileName);
+			Files.write(targetLocation, compressedImageData);
+			ProfileImage profileImage = ProfileImage.builder().name(fileName).type(file.getContentType())
+					.filePath(this.wallet_base_url
+							+ targetLocation.toString().substring(targetLocation.toString().indexOf("/profiles")))
+					.build();
+
+			this.profileImageRepository.save(profileImage);
+
+			user.setProfileImage(profileImage);
+			this.userRepository.save(user);
+			Map<String, Object> map = new HashMap<>();
+			map.put("success", true);
+			map.put("message", "Request completed");
+			map.put("profileImage", profileImage);
+			Map<String, Object> resMap = new HashMap<>();
+			resMap.put("payload", map);
+
+			return ResponseEntity.status(HttpStatus.OK).body(resMap);
+		} catch (IOException ex) {
+			ex.printStackTrace();
+			Map<String, Object> map = new HashMap<>();
+			map.put("message", "Something went wrong when processing request");
+			map.put("success", false);
+			Map<String, Object> resMap = new HashMap<>();
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+			// throw new RuntimeException("Could not store file " + fileName + ". Please try
+			// again!", ex);
+		}
 	}
-	
-	   private byte[] compressImage(byte[] imageData) throws IOException {
-	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-	        Thumbnails.of(new ByteArrayInputStream(imageData))
-	                .width(compressedImageWidth)
-	                .outputQuality(imageQuality)
-	                .toOutputStream(outputStream);
-	        return outputStream.toByteArray();
-	    }
 
-	public Object  findUsersCreatedBetweenStartAndEndDate( SdkSearchCustomers sdkSearchCustomer) {
-		        Date endDate = new Date(sdkSearchCustomer.getCreatedAtEnd()*1000);
-		        Date startDate = new Date(sdkSearchCustomer.getCreatedAtStart()*1000);
-				Map<Object, Object> message= new HashMap<>();
+	private byte[] compressImage(byte[] imageData) throws IOException {
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		Thumbnails.of(new ByteArrayInputStream(imageData)).width(compressedImageWidth).outputQuality(imageQuality)
+				.toOutputStream(outputStream);
+		return outputStream.toByteArray();
+	}
 
-           var pageable= PageRequest.of(sdkSearchCustomer.getPageNumber(),sdkSearchCustomer.getPageSize());
+	public Object findUsersCreatedBetweenStartAndEndDate(SdkSearchCustomers sdkSearchCustomer) {
+		Date endDate = new Date(sdkSearchCustomer.getCreatedAtEnd() * 1000);
+		Date startDate = new Date(sdkSearchCustomer.getCreatedAtStart() * 1000);
+		Map<Object, Object> message = new HashMap<>();
 
-		var results= this.userRepository.findByCreatedAtBetweenOrderByCreatedAtAsc(startDate,endDate,pageable);
-		
-		 
-			var data=results.stream().map(founduser->{
-				Map<Object, Object> m= new HashMap<>();
-				m.put("openId",founduser.getOpenId());
-				m.put("countryCode", founduser.getCountryCode());
-				m.put("firstName",founduser.getFirstName());
-				m.put("lastName",founduser.getLastName());
-				m.put("middleName",founduser.getMiddleName());
-				m.put("mobile",founduser.getMobile());
-				m.put("verified",founduser.getUserWallets().isEmpty()?false:true);
-				m.put("createdAt",founduser.getCreatedAt());
-				return m;
-			}).collect(Collectors.toList());		
-			message.put("payload", data);
-			var page= new HashMap<String,Object>();
-			page.put("hasNext", results.hasNext());
-			page.put("hasPrevious", results.hasPrevious());
-			page.put("nextPage", results.hasNext()?results.nextPageable().getPageNumber():null);
-			page.put("totalPages",results.getTotalPages());
-			page.put("itemsPage",results.getPageable().getPageSize());
-			page.put("currentPage", results.getNumber());
-			page.put("totalItems", results.getTotalElements());
-			page.put("previousPage", results.previousOrFirstPageable().getPageNumber());
-			page.put("fromDate", sdkSearchCustomer.getCreatedAtStart());
-			page.put("toDate", sdkSearchCustomer.getCreatedAtEnd());
-			message.put("page", page);
-			
-			
-		    return ResponseEntity.status(HttpStatus.OK).body(message);
-		
-	
+		var pageable = PageRequest.of(sdkSearchCustomer.getPageNumber(), sdkSearchCustomer.getPageSize());
+
+		var results = this.userRepository.findByCreatedAtBetweenOrderByCreatedAtAsc(startDate, endDate, pageable);
+
+		var data = results.stream().map(founduser -> {
+			Map<Object, Object> m = new HashMap<>();
+			m.put("openId", founduser.getOpenId());
+			m.put("countryCode", founduser.getCountryCode());
+			m.put("firstName", founduser.getFirstName());
+			m.put("lastName", founduser.getLastName());
+			m.put("middleName", founduser.getMiddleName());
+			m.put("mobile", founduser.getMobile());
+			m.put("verified", founduser.getUserWallets().isEmpty() ? false : true);
+			m.put("createdAt", founduser.getCreatedAt());
+			return m;
+		}).collect(Collectors.toList());
+		message.put("payload", data);
+		var page = new HashMap<String, Object>();
+		page.put("hasNext", results.hasNext());
+		page.put("hasPrevious", results.hasPrevious());
+		page.put("nextPage", results.hasNext() ? results.nextPageable().getPageNumber() : null);
+		page.put("totalPages", results.getTotalPages());
+		page.put("itemsPage", results.getPageable().getPageSize());
+		page.put("currentPage", results.getNumber());
+		page.put("totalItems", results.getTotalElements());
+		page.put("previousPage", results.previousOrFirstPageable().getPageNumber());
+		page.put("fromDate", sdkSearchCustomer.getCreatedAtStart());
+		page.put("toDate", sdkSearchCustomer.getCreatedAtEnd());
+		message.put("page", page);
+
+		return ResponseEntity.status(HttpStatus.OK).body(message);
+
 		// TODO Auto-generated method stub
-		
+
 	}
-	
-	
-	
+
 	public void notifyKompCallback(KompCallbackDto payLoad) {
-		Map<String,Object> map = new HashMap<>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("phoneNumber", payLoad.getMobileNumber());
 		map.put("verified", payLoad.getVerified());
-		map.put("description",payLoad.getDescription());
+		map.put("description", payLoad.getDescription());
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<Object> requestEntity = new HttpEntity<>(map,headers);
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<Object> requestEntity = new HttpEntity<>(map, headers);
 
-        
-        ResponseEntity<Object> responseEntity = restTemplate.exchange(
-        		this.kompCallBackUrl.toString(),
-                HttpMethod.POST,
-                requestEntity,
-                Object.class
-        );
-        
-        log.info(responseEntity.toString());
-        
+		ResponseEntity<Object> responseEntity = restTemplate.exchange(this.kompCallBackUrl.toString(), HttpMethod.POST,
+				requestEntity, Object.class);
+
+		log.info(responseEntity.toString());
+
 	}
-	
-	public Optional<User> findUserByOnboardingRequestId(String onbId){
+
+	public Optional<User> findUserByOnboardingRequestId(String onbId) {
 		return this.userRepository.findByOnboardingRequestId(onbId);
 	}
-	
-	
-
-	
 
 }
