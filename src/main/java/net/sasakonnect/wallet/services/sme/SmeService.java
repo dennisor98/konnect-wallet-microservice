@@ -127,7 +127,8 @@ public class SmeService {
 				var enterpriseResponse = new HashMap<String, Object>();
 				enterpriseResponse.put("name", enterprise.getName());
 				enterpriseResponse.put("id", enterprise.getId());
-
+				enterpriseResponse.put("updated",enterprise.getUpdatedAt());
+				enterpriseResponse.put("created", enterprise.getCreatedAt());
 				enterpriseResponse.put("industry", enterprise.getIndustry());
 				enterpriseResponse.put("ownership", enterprise.getOwnership());
 				enterpriseResponse.put("mission", enterprise.getMission());
