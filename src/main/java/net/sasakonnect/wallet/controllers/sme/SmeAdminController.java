@@ -25,11 +25,13 @@ import net.sasakonnect.wallet.RequestDto.sme.LlcSmeMemberDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmeAccountDocuments;
 import net.sasakonnect.wallet.RequestDto.sme.SmeBusinessAccountDto;
 import net.sasakonnect.wallet.RequestDto.sme.SubmitSmeAccount;
+import net.sasakonnect.wallet.ResponseDto.sme.SmeCorporateDto;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.IsCorporate;
 import net.sasakonnect.wallet.annotations.RequirePermission;
 import net.sasakonnect.wallet.constant.GlobalPermissionConstants;
 import net.sasakonnect.wallet.services.sme.SmeService;
+import net.sasakonnect.wallet.services.sme.SmeUserService;
 
 @RequestMapping("/enterprise")
 @Tag(name = "SME", description = "SME Back Office  routes")
@@ -39,6 +41,8 @@ import net.sasakonnect.wallet.services.sme.SmeService;
 public class SmeAdminController {
 	@Autowired
 	SmeService smeService;
+	@Autowired
+	SmeUserService smeUserService;
 
 	@PostMapping("/create")
 	@IsCorporate()
@@ -178,6 +182,14 @@ public class SmeAdminController {
 			pageSize = 100;
 		}
 		return this.smeService.getEnterprise(pageNumber,pageSize);
+	}
+	
+	@PostMapping("/corporate/user")
+	@IsCorporate()
+//	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanGetEnterprise.PERMISSION + "')")
+//	@RequirePermission(GlobalPermissionConstants.CanGetEnterprise.PERMISSION)
+	public ResponseEntity<Object> createCorporateUSer(@Valid @RequestBody() SmeCorporateDto corpdto) {
+		return this.smeUserService.createSmeUser(corpdto.getUserId());
 	}
 
 	

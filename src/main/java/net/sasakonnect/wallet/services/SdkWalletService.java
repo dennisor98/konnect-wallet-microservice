@@ -31,6 +31,7 @@ import net.sasakonnect.wallet.repository.RejectedAccountRepository;
 import net.sasakonnect.wallet.repository.UserJobRepository;
 import net.sasakonnect.wallet.repository.UserWalletRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
+import net.sasakonnect.wallet.repository.sme.SmeRepository;
 import net.sasakonnect.wallet.services.extensions.LarkUtilityService;
 import net.sasakonnect.wallet.tools.RequestSigner;
 import reactor.core.publisher.Mono;
@@ -71,6 +72,9 @@ public class SdkWalletService {
 	UserJobRepository userJobRepository;
 	@Autowired
 	LogsRepository logsRepository;
+	
+	@Autowired
+	SmeRepository smeRepository;
 	@Value("${KONNECT_BANK}")
 	private String konnectBank;
 
@@ -175,12 +179,22 @@ public class SdkWalletService {
 
 			break;
 		case WALLET:
-			var walletBilling = WalletBilling.builder();
+	var smeAccount=activeAccount.getSmeAccount();
+	if(smeAccount!=null) {
+		var walletBilling = WalletBilling.builder();
+		walletBilling.receiverAccount(smeAccount.getAccountNo()).receiverName(smeAccount.getSme().getAccountDetails().getBusinessName())
+				.remarks(smeAccount.getAccountName()).amount(String.valueOf(amount));
 
-			walletBilling.receiverAccount(activeAccount.getWalletAccountNo()).receiverName(clientApp.getAppName())
-					.remarks(clientApp.getAppName()).amount(String.valueOf(amount));
+		return this.applyFoWalletToWalletMerchant(walletBilling.build());
+	}else {
+		var walletBilling = WalletBilling.builder();
 
-			return this.applyFoWalletToWalletMerchant(walletBilling.build());
+		walletBilling.receiverAccount(activeAccount.getWalletAccountNo()).receiverName(clientApp.getAppName())
+				.remarks(clientApp.getAppName()).amount(String.valueOf(amount));
+
+		return this.applyFoWalletToWalletMerchant(walletBilling.build());
+	}
+			
 		default:
 			break;
 

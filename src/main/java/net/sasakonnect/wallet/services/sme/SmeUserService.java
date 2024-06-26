@@ -29,9 +29,11 @@ import net.sasakonnect.wallet.ResponseDto.sme.SmeUserResponseDto;
 import net.sasakonnect.wallet.domain.Otp;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.sme.Sme;
+import net.sasakonnect.wallet.domain.sme.SmeCorporate;
 import net.sasakonnect.wallet.domain.sme.SmeMember;
 import net.sasakonnect.wallet.domain.sme.SmePassword;
 import net.sasakonnect.wallet.repository.UserRepository;
+import net.sasakonnect.wallet.repository.sme.SmeCorporateRepository;
 import net.sasakonnect.wallet.repository.sme.SmeMemberRepository;
 import net.sasakonnect.wallet.repository.sme.SmePasswordRepository;
 import net.sasakonnect.wallet.repository.sme.SmeRepository;
@@ -59,6 +61,8 @@ public class SmeUserService {
 	OtpService otpService;
 	@Autowired
 	OtpSmsService otpSmsService;
+	@Autowired
+	SmeCorporateRepository smeCorporateRepository;
 
 	
   public ResponseEntity<ObjectNode> smeLogin(SmeUserLogin loginDto){
@@ -79,7 +83,7 @@ public class SmeUserService {
 	  }
 	  log.info(user.toString());
 	  
-	  Optional<SmeMember> smeMember = this.smeMemberRepository.findSmeMemberByUser(user.get());
+	  Optional<SmeCorporate> smeMember = this.smeCorporateRepository.findSmeCorporateByUser(user.get());
 	 if(smeMember.isEmpty()) {
 		 map.put("success", false);
 		 map.put("message","Account not found");
@@ -88,7 +92,7 @@ public class SmeUserService {
 	 
 	 var smeUser = smeMember.get();
 //	 map.put("sme", smeUser);
-	 Optional<SmePassword> smePassword = this.smePasswordRepository.findSmePasswordBySmeMemberId(smeUser);
+	 Optional<SmePassword> smePassword = this.smePasswordRepository.findSmePasswordBySmeCorporaterId(smeUser);
 	 if(smePassword.isEmpty()) {
 		 map.put("success", false);
 		 map.put("message","Password not set");
@@ -112,7 +116,7 @@ public class SmeUserService {
   
   
   public ResponseEntity<Object> createDefaultPassword(String memberId){
-	  Optional<SmeMember> smeMemberOptional =  this.smeMemberRepository.findById(memberId);
+	  Optional<SmeCorporate> smeMemberOptional =  this.smeCorporateRepository.findById(memberId);
 	  if(smeMemberOptional.isEmpty()) {
 		  Map<String,Object> map =  new HashMap<>();
 		  map.put("success",false);
@@ -124,7 +128,7 @@ public class SmeUserService {
 	  var password =  this.generateRandomString();
 	  var defaultPassword =  SmePassword.builder()
 	  .isDefault(true)
-	  .member_id(smeMember)
+	  .corporate_id(smeMember)
 	  .password(this.passwordEncoder.encode(password))
 	  .build();
 	  
@@ -144,6 +148,35 @@ public class SmeUserService {
 	  }
 	  
 	  
+  }
+  
+  public ResponseEntity<Object> createSmeUser(String userId){
+	  Optional<User> user = this.userRepository.findById(userId);
+	  if(user.isEmpty()) {
+		  Map<String,Object> map = new HashMap<>();
+		  map.put("success", false);
+		  map.put("message","User not found");
+		  return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+	  }
+	  
+	  var u = user.get();
+	  Optional<SmeCorporate> smeCorporporate = this.smeCorporateRepository.findSmeCorporateByUser(u);
+	  if(smeCorporporate.isPresent()) {
+		  Map<String,Object> map = new HashMap<>();
+		  map.put("success", false);
+		  map.put("message","User already have account");
+		  return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+	  }
+	var smeCorp =  SmeCorporate.builder()
+	  .user(u)
+	  .build();
+	var creteSmeCorp =  this.smeCorporateRepository.save(smeCorp);
+	  
+	  Map<String,Object> map = new HashMap<>();
+	  map.put("success", false);
+	  map.put("message","Sme corporate account created successfully");
+	  map.put("user",creteSmeCorp);
+	  return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
   }
   
 

@@ -173,10 +173,12 @@ public class SmeService {
 				var enterpriseResponse = new HashMap<String, Object>();
 				// enterpriseResponse.put("account", sme.getAccountNo());
 				// enterpriseResponse.put("email", sme.getEmail());
-				enterpriseResponse.put("name", sme.getSme().getAccountDetails().getBusinessName());
-				enterpriseResponse.put("createdOn", sme.getCreatedAt());
-				enterpriseResponse.put("id", sme.id);
-
+				enterpriseResponse.put("accountName",sme.getAccountName());
+				enterpriseResponse.put("business_name", sme.getSme().getAccountDetails().getBusinessName());
+				enterpriseResponse.put("created", sme.getCreatedAt());
+				enterpriseResponse.put("accountNumber",sme.getAccountNo());
+				enterpriseResponse.put("id",sme.id);
+                
 				return enterpriseResponse;
 			}).collect(Collectors.toList());
 

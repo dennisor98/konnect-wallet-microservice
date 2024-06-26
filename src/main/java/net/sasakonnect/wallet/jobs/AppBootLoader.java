@@ -18,6 +18,7 @@ import net.sasakonnect.wallet.domain.Currency;
 import net.sasakonnect.wallet.domain.Permission;
 import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.domain.sme.authorisation.SmeRole;
 import net.sasakonnect.wallet.enums.EmploymentStatus;
 import net.sasakonnect.wallet.enums.Gender;
 import net.sasakonnect.wallet.enums.IdType;
@@ -27,6 +28,7 @@ import net.sasakonnect.wallet.repository.CurrencyRepository;
 import net.sasakonnect.wallet.services.PermissionService;
 import net.sasakonnect.wallet.services.RoleService;
 import net.sasakonnect.wallet.services.UserService;
+import net.sasakonnect.wallet.services.sme.SmeUserService;
 
 @Component
 public class AppBootLoader implements ApplicationListener<ApplicationReadyEvent> {
@@ -272,7 +274,9 @@ public class AppBootLoader implements ApplicationListener<ApplicationReadyEvent>
 	UserService userService;
 	@Autowired
 	RoleService roleService;
-
+    @Autowired
+    SmeUserService smeUserService;
+	
 	@Override
 	@Transactional
 	public void onApplicationEvent(ApplicationReadyEvent event) {
@@ -307,6 +311,10 @@ public class AppBootLoader implements ApplicationListener<ApplicationReadyEvent>
 				.collect(Collectors.toList());
 		this.roleService.insertPermissionsNotAttachedToRole(savedRole, user.get(), allpermsions);
 		// Your custom logic here
+		
+		
 
 	}
+	
+	
 }

@@ -9,12 +9,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Builder;
+import lombok.Data;
 import net.sasakonnect.wallet.domain.BaseWalletDomain;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.sme.Sme;
 
 @Entity
-
+@Data
 @Builder
 public class SmeUserRole extends BaseWalletDomain implements Serializable {
 	private static final long serialVersionUID = 5208946861201323533L;
