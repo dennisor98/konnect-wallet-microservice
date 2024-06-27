@@ -13,11 +13,13 @@ import org.springframework.stereotype.Component;
 
 import jakarta.transaction.Transactional;
 import net.sasakonnect.wallet.constant.GlobalPermissionConstants;
+import net.sasakonnect.wallet.constant.sme.GlobalSmePermissionConstants;
 import net.sasakonnect.wallet.domain.Bank;
 import net.sasakonnect.wallet.domain.Currency;
 import net.sasakonnect.wallet.domain.Permission;
 import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.domain.sme.authorisation.SmePermissions;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeRole;
 import net.sasakonnect.wallet.enums.EmploymentStatus;
 import net.sasakonnect.wallet.enums.Gender;
@@ -28,6 +30,7 @@ import net.sasakonnect.wallet.repository.CurrencyRepository;
 import net.sasakonnect.wallet.services.PermissionService;
 import net.sasakonnect.wallet.services.RoleService;
 import net.sasakonnect.wallet.services.UserService;
+import net.sasakonnect.wallet.services.sme.SmePermissionService;
 import net.sasakonnect.wallet.services.sme.SmeUserService;
 
 @Component
@@ -276,17 +279,33 @@ public class AppBootLoader implements ApplicationListener<ApplicationReadyEvent>
 	RoleService roleService;
     @Autowired
     SmeUserService smeUserService;
+    @Autowired
+    SmePermissionService smePermissionService;
 	
 	@Override
 	@Transactional
 	public void onApplicationEvent(ApplicationReadyEvent event) {
 		long fortyYearsInMilliseconds = 40L * 365 * 24 * 60 * 60 * 1000;
 
+		
+		//create all wallet permissions
 		var permssions = GlobalPermissionConstants.scan();
 		permssions.forEach((permmsion, desc) -> {
 			var permission = Permission.builder().description(desc).name(permmsion).build();
 			this.permissionService.insertPermissionIfNotExistsOrUpdateDescription(permission);
 		});
+		
+		//create all sme permissions
+		var smePermissions = GlobalSmePermissionConstants.scan();
+		smePermissions.forEach(permissionData -> {
+			var permission = SmePermissions.builder()
+				.description(permissionData.get("description"))
+				.name(permissionData.get("permission"))
+				.category(permissionData.get("category"))
+				.build();
+			this.smePermissionService.insertPermissionIfNotExistsOrUpdateDescription(permission);
+		});
+		
 		Optional<User> user = this.userService.findUserByPhoneNumber("7999999999");
 		if (user.isEmpty()) {
 			var u = User.builder().firstName("AI").lastName("Billfold").middleName("Buddy").address("Zimmerman")

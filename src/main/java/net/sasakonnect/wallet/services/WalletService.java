@@ -88,6 +88,7 @@ import net.sasakonnect.wallet.repository.UserWalletRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.services.extensions.LarkUtilityService;
 import net.sasakonnect.wallet.services.sme.SmeService;
+import net.sasakonnect.wallet.services.sme.SmeUserService;
 import net.sasakonnect.wallet.tools.RequestSigner;
 import reactor.core.publisher.Mono;
 
@@ -142,7 +143,8 @@ public class WalletService {
 	UserJobRepository userJobRepository;
 	@Autowired
 	private ApplicationContext applicationContext;
-
+    @Autowired
+    private SmeUserService smeUserService;
 	@Autowired
 	LogsRepository logsRepository;
 	@Autowired
@@ -835,6 +837,7 @@ public class WalletService {
 						}.getType());
 				log.info("Sme account Opening", results);
 				this.smeAccountService.updateAccountinfo(results);
+			
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.UTILITY.getCode())) {
 

@@ -51,7 +51,6 @@ import net.sasakonnect.wallet.services.UserService;
 @EnableMethodSecurity
 @Slf4j
 @EnableAspectJAutoProxy
-
 public class WebSecurityConfig {
 
 	UserService userService;

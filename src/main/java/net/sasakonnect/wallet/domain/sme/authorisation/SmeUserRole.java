@@ -13,6 +13,7 @@ import lombok.Data;
 import net.sasakonnect.wallet.domain.BaseWalletDomain;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.sme.Sme;
+import net.sasakonnect.wallet.domain.sme.SmeCorporate;
 
 @Entity
 @Data
@@ -22,7 +23,7 @@ public class SmeUserRole extends BaseWalletDomain implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "user_id", referencedColumnName = "id")
 	@OnDelete(action = OnDeleteAction.CASCADE)
-	private User user;
+	private SmeCorporate user;
 
 	@ManyToOne
 	@JoinColumn(name = "sme_account_id", referencedColumnName = "id")

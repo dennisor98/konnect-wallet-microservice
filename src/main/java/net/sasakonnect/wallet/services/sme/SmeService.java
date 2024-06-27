@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.function.BodyInserters;
 
@@ -37,7 +38,10 @@ import net.sasakonnect.wallet.domain.sme.Enterprise;
 import net.sasakonnect.wallet.domain.sme.Sme;
 import net.sasakonnect.wallet.domain.sme.SmeAccount;
 import net.sasakonnect.wallet.domain.sme.SmeAccountDetails;
+import net.sasakonnect.wallet.domain.sme.SmeCorporate;
 import net.sasakonnect.wallet.domain.sme.SmeMember;
+import net.sasakonnect.wallet.domain.sme.authorisation.SmeRole;
+import net.sasakonnect.wallet.domain.sme.authorisation.SmeUserRole;
 import net.sasakonnect.wallet.notification.MultipleAccountOpeningResultNotification;
 import net.sasakonnect.wallet.enums.sme.BusinessIndustry;
 import net.sasakonnect.wallet.enums.sme.BusinessType;
@@ -50,9 +54,13 @@ import net.sasakonnect.wallet.repository.LogsRepository;
 import net.sasakonnect.wallet.repository.UserRepository;
 import net.sasakonnect.wallet.repository.sme.EnterpriseRepository;
 import net.sasakonnect.wallet.repository.sme.SmeAccountRepository;
+import net.sasakonnect.wallet.repository.sme.SmeCorporateRepository;
 import net.sasakonnect.wallet.repository.sme.SmeInformationRepository;
 import net.sasakonnect.wallet.repository.sme.SmeMemberRepository;
 import net.sasakonnect.wallet.repository.sme.SmeRepository;
+import net.sasakonnect.wallet.repository.sme.SmeRolePermissionRepository;
+import net.sasakonnect.wallet.repository.sme.SmeRoleRepository;
+import net.sasakonnect.wallet.repository.sme.SmeUserRoleRepository;
 import net.sasakonnect.wallet.services.ChoiceBankSmsService;
 import net.sasakonnect.wallet.tools.RequestSigner;
 import reactor.core.publisher.Mono;
@@ -82,6 +90,14 @@ public class SmeService {
 	UserRepository userRepository;
 	@Autowired
 	SmeMemberRepository smeMemberRepository;
+	@Autowired
+	SmeRoleRepository smeRoleRepository;
+	@Autowired
+    SmeUserRoleRepository smeUserRoleRepository;
+	@Autowired
+	SmeRolePermissionRepository smeRolePermissionRepository;
+	@Autowired
+	SmeCorporateRepository smeCorporateRepository;
 
 	public ResponseEntity<Object> createEnterprise(CreateEnterpriseDto ced) {
 		
@@ -459,6 +475,7 @@ public class SmeService {
 		return null;
 	}
 
+	@Transactional
 	public void updateAccountinfo(NotificationResult<SmeAccountOpeningResultNotification> results) {
 		var body = results.getParams();
 		if (body.getOnboardingRequestId() != null) {
@@ -468,7 +485,19 @@ public class SmeService {
 					
 					.sme(smedata).build();
 //			smedata.getSmeAccounts().add(smeAccount);
-			this.smeAccountRepository.save(smeAccount);
+		var savedsmeAccount =	this.smeAccountRepository.save(smeAccount);
+		Optional<SmeRole> existingRole =  this.smeRoleRepository.findByRoleNameAndEnterprise("SUPER_ADMIN",smedata.getEnterprise());
+		if(existingRole.isEmpty()) {
+			var smeRole =   SmeRole.builder().description("can perform any role in the enterprise").enterprise(smedata.getEnterprise()).roleName("SUPER_ADMIN").build();
+			var super_role = this.smeRoleRepository.save(smeRole); 
+			var smeCorp = SmeCorporate.builder().user(smedata.getSmeMembers().get(0).getUser()).build();
+			var super_user = this.smeCorporateRepository.save(smeCorp);
+			var sme_user_role = SmeUserRole.builder().sme_role(super_role).user(super_user).smeAccount(smedata).build();
+			this.smeUserRoleRepository.save(sme_user_role);
+		}else {
+			
+		}
+		 
 //           log.info(smeAccount+"");
 		} else {
 			// this.smeAccountRepository.save(null)
