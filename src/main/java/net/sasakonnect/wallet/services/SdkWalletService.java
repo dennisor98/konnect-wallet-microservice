@@ -79,51 +79,50 @@ public class SdkWalletService {
 	private String konnectBank;
 
 	public TransactionResponseDto applyForTransfer(@Valid ChoiceTransferDto choiceTransfer) {
-		return TransactionResponseDto.builder().build();
-//		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//
-//		var reqId = new HashMap<String, Object>();
-//
-//		var userWallets = this.walletRepository.findByUserWalletsUser(user);
-//		if (!userWallets.isEmpty()) {
-//			var userwallet = userWallets.get(0);
-//			reqId.put("payerAccountId", userwallet.getAccountId());
-//
-//		}
-//		var receivingUser = this.userService.findUserByAccountd(choiceTransfer.getReceiverAccount().trim());
-//		if (receivingUser.isPresent()) {
-//			reqId.put("payeeMobileForNotification", receivingUser.get().getMobile());
-//
-//		}
-//
-//		reqId.put("payeeBankCode", choiceTransfer.getBankCode().trim());
-//
-//		reqId.put("payeeAccountId", choiceTransfer.getReceiverAccount().trim());
-//		reqId.put("payeeAccountName", choiceTransfer.getReceiverName());
-//
-//		reqId.put("currency", choiceTransfer.getCurrencyCode());
-//		reqId.put("amount", choiceTransfer.getAmount());
-//		reqId.put("otpMobile", user.getMobile());
-//		reqId.put("otpType", choiceTransfer.getOtpType());
-//		reqId.put("remark", choiceTransfer.getRemarks());
-//
-//		var reqs = this.requestSigner.signRequest(reqId);
-//
-//		Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.WITHDRAW)
-//				.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
-//				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
-//
-//		String responseJson = responseMono.block();
-//		log.info(responseJson);
-//		if (responseJson != null) {
-//			var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
-//			choiceBankSmsService.invokeSms(resp.getData().txId);
-//			log.info(resp.getData().txId);
-//			return resp;
-//		}
-//
-//		// TODO Auto-generated method stub
-//		return null;
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		var reqId = new HashMap<String, Object>();
+
+		var userWallets = this.walletRepository.findByUserWalletsUser(user);
+		if (!userWallets.isEmpty()) {
+			var userwallet = userWallets.get(0);
+			reqId.put("payerAccountId", userwallet.getAccountId());
+
+		}
+		var receivingUser = this.userService.findUserByAccountd(choiceTransfer.getReceiverAccount().trim());
+		if (receivingUser.isPresent()) {
+			reqId.put("payeeMobileForNotification", receivingUser.get().getMobile());
+
+		}
+
+		reqId.put("payeeBankCode", choiceTransfer.getBankCode().trim());
+
+		reqId.put("payeeAccountId", choiceTransfer.getReceiverAccount().trim());
+		reqId.put("payeeAccountName", choiceTransfer.getReceiverName());
+
+		reqId.put("currency", choiceTransfer.getCurrencyCode());
+		reqId.put("amount", choiceTransfer.getAmount());
+		reqId.put("otpMobile", user.getMobile());
+		reqId.put("otpType", choiceTransfer.getOtpType());
+		reqId.put("remark", choiceTransfer.getRemarks());
+
+		var reqs = this.requestSigner.signRequest(reqId);
+
+		Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.WITHDRAW)
+				.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
+				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
+
+		String responseJson = responseMono.block();
+		log.info(responseJson);
+		if (responseJson != null) {
+			var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
+			choiceBankSmsService.invokeSms(resp.getData().txId);
+			log.info(resp.getData().txId);
+			return resp;
+		}
+
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	// overload
