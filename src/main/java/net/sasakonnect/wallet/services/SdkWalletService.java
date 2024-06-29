@@ -72,57 +72,58 @@ public class SdkWalletService {
 	UserJobRepository userJobRepository;
 	@Autowired
 	LogsRepository logsRepository;
-	
+
 	@Autowired
 	SmeRepository smeRepository;
 	@Value("${KONNECT_BANK}")
 	private String konnectBank;
 
 	public TransactionResponseDto applyForTransfer(@Valid ChoiceTransferDto choiceTransfer) {
-		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-		var reqId = new HashMap<String, Object>();
-
-		var userWallets = this.walletRepository.findByUserWalletsUser(user);
-		if (!userWallets.isEmpty()) {
-			var userwallet = userWallets.get(0);
-			reqId.put("payerAccountId", userwallet.getAccountId());
-
-		}
-		var receivingUser = this.userService.findUserByAccountd(choiceTransfer.getReceiverAccount().trim());
-		if (receivingUser.isPresent()) {
-			reqId.put("payeeMobileForNotification", receivingUser.get().getMobile());
-
-		}
-
-		reqId.put("payeeBankCode", choiceTransfer.getBankCode().trim());
-
-		reqId.put("payeeAccountId", choiceTransfer.getReceiverAccount().trim());
-		reqId.put("payeeAccountName", choiceTransfer.getReceiverName());
-
-		reqId.put("currency", choiceTransfer.getCurrencyCode());
-		reqId.put("amount", choiceTransfer.getAmount());
-		reqId.put("otpMobile", user.getMobile());
-		reqId.put("otpType", choiceTransfer.getOtpType());
-		reqId.put("remark", choiceTransfer.getRemarks());
-
-		var reqs = this.requestSigner.signRequest(reqId);
-
-		Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.WITHDRAW)
-				.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
-				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
-
-		String responseJson = responseMono.block();
-		log.info(responseJson);
-		if (responseJson != null) {
-			var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
-			choiceBankSmsService.invokeSms(resp.getData().txId);
-			log.info(resp.getData().txId);
-			return resp;
-		}
-
-		// TODO Auto-generated method stub
-		return null;
+		return TransactionResponseDto.builder().build();
+//		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//
+//		var reqId = new HashMap<String, Object>();
+//
+//		var userWallets = this.walletRepository.findByUserWalletsUser(user);
+//		if (!userWallets.isEmpty()) {
+//			var userwallet = userWallets.get(0);
+//			reqId.put("payerAccountId", userwallet.getAccountId());
+//
+//		}
+//		var receivingUser = this.userService.findUserByAccountd(choiceTransfer.getReceiverAccount().trim());
+//		if (receivingUser.isPresent()) {
+//			reqId.put("payeeMobileForNotification", receivingUser.get().getMobile());
+//
+//		}
+//
+//		reqId.put("payeeBankCode", choiceTransfer.getBankCode().trim());
+//
+//		reqId.put("payeeAccountId", choiceTransfer.getReceiverAccount().trim());
+//		reqId.put("payeeAccountName", choiceTransfer.getReceiverName());
+//
+//		reqId.put("currency", choiceTransfer.getCurrencyCode());
+//		reqId.put("amount", choiceTransfer.getAmount());
+//		reqId.put("otpMobile", user.getMobile());
+//		reqId.put("otpType", choiceTransfer.getOtpType());
+//		reqId.put("remark", choiceTransfer.getRemarks());
+//
+//		var reqs = this.requestSigner.signRequest(reqId);
+//
+//		Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.WITHDRAW)
+//				.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
+//				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
+//
+//		String responseJson = responseMono.block();
+//		log.info(responseJson);
+//		if (responseJson != null) {
+//			var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
+//			choiceBankSmsService.invokeSms(resp.getData().txId);
+//			log.info(resp.getData().txId);
+//			return resp;
+//		}
+//
+//		// TODO Auto-generated method stub
+//		return null;
 	}
 
 	// overload
@@ -132,7 +133,13 @@ public class SdkWalletService {
 				.collect(Collectors.toList());
 
 		if (!accounts.isEmpty()) {
-			var activeAccount = accounts.get(0);
+			WalletClientAccount activeAccount = null;
+			var acc = accounts.stream().filter(ac -> ac.getSmeAccount() != null).collect(Collectors.toList());
+			if (acc.isEmpty()) {
+				activeAccount = accounts.get(0);
+			} else {
+				activeAccount = acc.get(0);
+			}
 
 			return performBilling(activeAccount, Integer.parseInt(sdkpayDto.getAmount()), clientApp);
 
@@ -179,22 +186,23 @@ public class SdkWalletService {
 
 			break;
 		case WALLET:
-	var smeAccount=activeAccount.getSmeAccount();
-	if(smeAccount!=null) {
-		var walletBilling = WalletBilling.builder();
-		walletBilling.receiverAccount(smeAccount.getAccountNo()).receiverName(smeAccount.getSme().getAccountDetails().getBusinessName())
-				.remarks(smeAccount.getAccountName()).amount(String.valueOf(amount));
+			var smeAccount = activeAccount.getSmeAccount();
+			if (smeAccount != null) {
+				var walletBilling = WalletBilling.builder();
+				walletBilling.receiverAccount(smeAccount.getAccountNo())
+						.receiverName(smeAccount.getSme().getAccountDetails().getBusinessName())
+						.remarks(smeAccount.getAccountName()).amount(String.valueOf(amount));
 
-		return this.applyFoWalletToWalletMerchant(walletBilling.build());
-	}else {
-		var walletBilling = WalletBilling.builder();
+				return this.applyFoWalletToWalletMerchant(walletBilling.build());
+			} else {
+				var walletBilling = WalletBilling.builder();
 
-		walletBilling.receiverAccount(activeAccount.getWalletAccountNo()).receiverName(clientApp.getAppName())
-				.remarks(clientApp.getAppName()).amount(String.valueOf(amount));
+				walletBilling.receiverAccount(activeAccount.getWalletAccountNo()).receiverName(clientApp.getAppName())
+						.remarks(clientApp.getAppName()).amount(String.valueOf(amount));
 
-		return this.applyFoWalletToWalletMerchant(walletBilling.build());
-	}
-			
+				return this.applyFoWalletToWalletMerchant(walletBilling.build());
+			}
+
 		default:
 			break;
 

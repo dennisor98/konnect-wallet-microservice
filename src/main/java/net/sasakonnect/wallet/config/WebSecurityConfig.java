@@ -5,12 +5,14 @@ import java.util.Arrays;
 import org.springdoc.core.customizers.GlobalOpenApiCustomizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpMethod;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,6 +28,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.RequestContextFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -51,6 +54,8 @@ import net.sasakonnect.wallet.services.UserService;
 @EnableMethodSecurity
 @Slf4j
 @EnableAspectJAutoProxy
+@EnableAsync
+
 public class WebSecurityConfig {
 
 	UserService userService;
@@ -78,8 +83,8 @@ public class WebSecurityConfig {
 		CorsConfiguration configuration = new CorsConfiguration();
 
 		// Specify the allowed origins (replace "*" with your specific origin)
-		configuration.setAllowedOrigins(
-				Arrays.asList("https://gw.sasakonnect.net", "http://localhost:4200", "https://wallet.sasakonnect.net","https://b729-105-27-226-165.ngrok-free.app"));
+		configuration.setAllowedOrigins(Arrays.asList("https://gw.sasakonnect.net", "http://localhost:4200",
+				"https://wallet.sasakonnect.net", "https://b729-105-27-226-165.ngrok-free.app"));
 
 		// Specify the allowed HTTP methods (e.g., GET, POST, PUT, DELETE)
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
@@ -108,10 +113,10 @@ public class WebSecurityConfig {
 				"/swagger-resources/**", // Swagger resources like JS and CSS
 				"/webjars/**").permitAll()
 
-				.requestMatchers("/user/userLogin", "/user/confirmOtp","/user/admin/confirmOtp", "/konnect/callBack", "/user/refresh/token",
-						"/sme/login","/sme/verifyOtp","/lark/callback",
+				.requestMatchers("/user/userLogin", "/user/confirmOtp", "/user/admin/confirmOtp", "/konnect/callBack",
+						"/user/refresh/token", "/sme/login", "/sme/verifyOtp", "/lark/callback",
 						"/wallet/getOnboardingStatusById", "/sdk/transaction/{id}", "user/corporateLogin",
-						"/sdk/openId","/sdk/customer","/sdk/customers","/sdk/customer/stkpush")
+						"/sdk/openId", "/sdk/customer", "/sdk/customers", "/sdk/customer/stkpush")
 
 				.permitAll().requestMatchers("/wallet").permitAll().requestMatchers(HttpMethod.OPTIONS, "/**")
 				.permitAll() // Permit OPTIONS requests
@@ -243,6 +248,14 @@ public class WebSecurityConfig {
 		// Enable pretty-printing for JSON output
 		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 		return objectMapper;
+	}
+
+	@Bean
+	FilterRegistrationBean<RequestContextFilter> requestContextFilter() {
+		FilterRegistrationBean<RequestContextFilter> registrationBean = new FilterRegistrationBean<>();
+		registrationBean.setFilter(new RequestContextFilter());
+		registrationBean.addUrlPatterns("/*");
+		return registrationBean;
 	}
 
 }
