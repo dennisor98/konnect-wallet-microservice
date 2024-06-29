@@ -116,6 +116,7 @@ public class SdkWalletService {
 		log.info(responseJson);
 		if (responseJson != null) {
 			var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
+			System.out.print("send sms response payload" + resp);
 			choiceBankSmsService.invokeSms(resp.getData().txId);
 			log.info(resp.getData().txId);
 			return resp;
@@ -261,10 +262,13 @@ public class SdkWalletService {
 					.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 			String responseJson = responseMono.block();
 			log.info(responseJson);
+
 			if (responseJson != null) {
-
-				return new Gson().fromJson(responseJson, TransactionResponseDto.class);
-
+				var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
+				System.out.print("send sms response payload" + resp);
+				choiceBankSmsService.invokeSms(resp.getData().txId);
+				log.info(resp.getData().txId);
+				return resp;
 			}
 
 			// TODO Auto-generated method stub

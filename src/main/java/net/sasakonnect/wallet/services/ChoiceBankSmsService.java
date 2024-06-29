@@ -53,6 +53,60 @@ public class ChoiceBankSmsService {
 
 	}
 
+	public Object invokeResendSms(String businessId) {
+		executor.submit(() -> {
+
+			var reqId = new HashMap<String, Object>();
+			reqId.put("businessId", businessId);
+			reqId.put("otpType", "sms");
+			var reqs = requestSigner.signRequest(reqId);
+
+			Mono<String> responseMono = this.bankClientBean.webClient.post()
+					.uri(ChoiceEndpointsConstants.REQUEST_OTP_RESEND).contentType(MediaType.APPLICATION_JSON)
+					.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+					.bodyToMono(String.class);
+
+			String responseJson = responseMono.block();
+			log.info(responseJson);
+			if (responseJson != null) {
+				return new Gson().fromJson(responseJson, Object.class);
+
+			}
+			return null;
+
+		});
+
+		return null;
+
+	}
+
+	public Object invokeResendSms(String businessId, String smsType) {
+		executor.submit(() -> {
+
+			var reqId = new HashMap<String, Object>();
+			reqId.put("businessId", businessId);
+			reqId.put("otpType", smsType);
+			var reqs = requestSigner.signRequest(reqId);
+
+			Mono<String> responseMono = this.bankClientBean.webClient.post()
+					.uri(ChoiceEndpointsConstants.REQUEST_OTP_RESEND).contentType(MediaType.APPLICATION_JSON)
+					.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+					.bodyToMono(String.class);
+
+			String responseJson = responseMono.block();
+			log.info(responseJson);
+			if (responseJson != null) {
+				return new Gson().fromJson(responseJson, Object.class);
+
+			}
+			return null;
+
+		});
+
+		return null;
+
+	}
+
 	public Object invokeSms(String businessId, String smsType) {
 		executor.submit(() -> {
 

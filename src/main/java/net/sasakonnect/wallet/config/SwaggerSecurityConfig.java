@@ -65,9 +65,7 @@ public class SwaggerSecurityConfig {
 		var openApi = new OpenAPI();
 		openApi.addSecurityItem(new SecurityRequirement().addList("Bearer Authentication")).components(components
 
-		).components(new Components().addSecuritySchemes("basicScheme",
-				new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("basic")))
-				.addSecurityItem(new SecurityRequirement().addList("basicScheme"));
+		);
 
 		switch (profileActive) {
 		case "dev": {
