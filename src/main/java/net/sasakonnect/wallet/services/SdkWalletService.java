@@ -31,6 +31,7 @@ import net.sasakonnect.wallet.repository.RejectedAccountRepository;
 import net.sasakonnect.wallet.repository.UserJobRepository;
 import net.sasakonnect.wallet.repository.UserWalletRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
+import net.sasakonnect.wallet.repository.sme.SmeRepository;
 import net.sasakonnect.wallet.services.extensions.LarkUtilityService;
 import net.sasakonnect.wallet.tools.RequestSigner;
 import reactor.core.publisher.Mono;
@@ -71,6 +72,9 @@ public class SdkWalletService {
 	UserJobRepository userJobRepository;
 	@Autowired
 	LogsRepository logsRepository;
+
+	@Autowired
+	SmeRepository smeRepository;
 	@Value("${KONNECT_BANK}")
 	private String konnectBank;
 
@@ -112,6 +116,7 @@ public class SdkWalletService {
 		log.info(responseJson);
 		if (responseJson != null) {
 			var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
+			System.out.print("send sms response payload" + resp);
 			choiceBankSmsService.invokeSms(resp.getData().txId);
 			log.info(resp.getData().txId);
 			return resp;
@@ -128,7 +133,13 @@ public class SdkWalletService {
 				.collect(Collectors.toList());
 
 		if (!accounts.isEmpty()) {
-			var activeAccount = accounts.get(0);
+			WalletClientAccount activeAccount = null;
+			var acc = accounts.stream().filter(ac -> ac.getSmeAccount() != null).collect(Collectors.toList());
+			if (acc.isEmpty()) {
+				activeAccount = accounts.get(0);
+			} else {
+				activeAccount = acc.get(0);
+			}
 
 			return performBilling(activeAccount, Integer.parseInt(sdkpayDto.getAmount()), clientApp);
 
@@ -175,12 +186,23 @@ public class SdkWalletService {
 
 			break;
 		case WALLET:
-			var walletBilling = WalletBilling.builder();
+			var smeAccount = activeAccount.getSmeAccount();
+			if (smeAccount != null) {
+				var walletBilling = WalletBilling.builder();
+				walletBilling.receiverAccount(smeAccount.getAccountNo())
+						.receiverName(smeAccount.getSme().getAccountDetails().getBusinessName())
+						.remarks(smeAccount.getAccountName()).amount(String.valueOf(amount));
 
-			walletBilling.receiverAccount(activeAccount.getWalletAccountNo()).receiverName(clientApp.getAppName())
-					.remarks(clientApp.getAppName()).amount(String.valueOf(amount));
+				return this.applyFoWalletToWalletMerchant(walletBilling.build());
+			} else {
+				var walletBilling = WalletBilling.builder();
 
-			return this.applyFoWalletToWalletMerchant(walletBilling.build());
+				walletBilling.receiverAccount(activeAccount.getWalletAccountNo()).receiverName(clientApp.getAppName())
+						.remarks(clientApp.getAppName()).amount(String.valueOf(amount));
+
+				return this.applyFoWalletToWalletMerchant(walletBilling.build());
+			}
+
 		default:
 			break;
 
@@ -240,10 +262,13 @@ public class SdkWalletService {
 					.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 			String responseJson = responseMono.block();
 			log.info(responseJson);
+
 			if (responseJson != null) {
-
-				return new Gson().fromJson(responseJson, TransactionResponseDto.class);
-
+				var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
+				System.out.print("send sms response payload" + resp);
+				choiceBankSmsService.invokeSms(resp.getData().txId);
+				log.info(resp.getData().txId);
+				return resp;
 			}
 
 			// TODO Auto-generated method stub

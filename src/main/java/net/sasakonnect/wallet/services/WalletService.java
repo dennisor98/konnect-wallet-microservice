@@ -19,7 +19,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +45,7 @@ import net.sasakonnect.wallet.RequestDto.OnboardingStatus;
 import net.sasakonnect.wallet.RequestDto.OtpTransfer;
 import net.sasakonnect.wallet.RequestDto.PayUtility;
 import net.sasakonnect.wallet.RequestDto.PhoneCheckDto;
+import net.sasakonnect.wallet.RequestDto.ResendTxOtpDto;
 import net.sasakonnect.wallet.RequestDto.TransactionPeriod;
 import net.sasakonnect.wallet.RequestDto.TransferToMpesa;
 import net.sasakonnect.wallet.RequestDto.UpgradeWalletAccountDto;
@@ -88,6 +88,7 @@ import net.sasakonnect.wallet.repository.UserWalletRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.services.extensions.LarkUtilityService;
 import net.sasakonnect.wallet.services.sme.SmeService;
+import net.sasakonnect.wallet.services.sme.SmeUserService;
 import net.sasakonnect.wallet.tools.RequestSigner;
 import reactor.core.publisher.Mono;
 
@@ -142,7 +143,8 @@ public class WalletService {
 	UserJobRepository userJobRepository;
 	@Autowired
 	private ApplicationContext applicationContext;
-
+	@Autowired
+	private SmeUserService smeUserService;
 	@Autowired
 	LogsRepository logsRepository;
 	@Autowired
@@ -561,7 +563,6 @@ public class WalletService {
 
 	}
 
-	@Async("singleThreadExecutor")
 	@Transactional
 	private Object callBackContentResolver(JsonObject body) {
 		try {
@@ -1352,6 +1353,10 @@ public class WalletService {
 
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public ResponseEntity resendTransactionOtp(ResendTxOtpDto resendDto) {
+		return this.choiceBankSmsService.invokeResendSms(resendDto.getTransactionId());
 	}
 
 	public Object checkUserAccountStatus(@Valid CheckUserAccount checkUserAccount) {

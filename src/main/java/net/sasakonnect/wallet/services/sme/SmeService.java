@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -14,11 +13,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.function.BodyInserters;
-
 import com.google.gson.Gson;
-
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.sme.ConfirmSmeBusinessDto;
@@ -37,7 +35,10 @@ import net.sasakonnect.wallet.domain.sme.Enterprise;
 import net.sasakonnect.wallet.domain.sme.Sme;
 import net.sasakonnect.wallet.domain.sme.SmeAccount;
 import net.sasakonnect.wallet.domain.sme.SmeAccountDetails;
+import net.sasakonnect.wallet.domain.sme.SmeCorporate;
 import net.sasakonnect.wallet.domain.sme.SmeMember;
+import net.sasakonnect.wallet.domain.sme.authorisation.SmeRole;
+import net.sasakonnect.wallet.domain.sme.authorisation.SmeUserRole;
 import net.sasakonnect.wallet.notification.MultipleAccountOpeningResultNotification;
 import net.sasakonnect.wallet.enums.sme.BusinessIndustry;
 import net.sasakonnect.wallet.enums.sme.BusinessType;
@@ -50,9 +51,13 @@ import net.sasakonnect.wallet.repository.LogsRepository;
 import net.sasakonnect.wallet.repository.UserRepository;
 import net.sasakonnect.wallet.repository.sme.EnterpriseRepository;
 import net.sasakonnect.wallet.repository.sme.SmeAccountRepository;
+import net.sasakonnect.wallet.repository.sme.SmeCorporateRepository;
 import net.sasakonnect.wallet.repository.sme.SmeInformationRepository;
 import net.sasakonnect.wallet.repository.sme.SmeMemberRepository;
 import net.sasakonnect.wallet.repository.sme.SmeRepository;
+import net.sasakonnect.wallet.repository.sme.SmeRolePermissionRepository;
+import net.sasakonnect.wallet.repository.sme.SmeRoleRepository;
+import net.sasakonnect.wallet.repository.sme.SmeUserRoleRepository;
 import net.sasakonnect.wallet.services.ChoiceBankSmsService;
 import net.sasakonnect.wallet.tools.RequestSigner;
 import reactor.core.publisher.Mono;
@@ -82,6 +87,19 @@ public class SmeService {
 	UserRepository userRepository;
 	@Autowired
 	SmeMemberRepository smeMemberRepository;
+	@Autowired
+	SmeRoleRepository smeRoleRepository;
+	@Autowired
+    SmeUserRoleRepository smeUserRoleRepository;
+	@Autowired
+	SmeRolePermissionRepository smeRolePermissionRepository;
+	@Autowired
+	SmeCorporateRepository smeCorporateRepository;
+	@Autowired
+	SmePermissionService smePermissionService;
+	@Autowired
+	SmeRoleService smeRoleService;
+	
 
 	public ResponseEntity<Object> createEnterprise(CreateEnterpriseDto ced) {
 		
@@ -127,8 +145,8 @@ public class SmeService {
 				var enterpriseResponse = new HashMap<String, Object>();
 				enterpriseResponse.put("name", enterprise.getName());
 				enterpriseResponse.put("id", enterprise.getId());
-				enterpriseResponse.put("updated",enterprise.getUpdatedAt());
-				enterpriseResponse.put("created", enterprise.getCreatedAt());
+				enterpriseResponse.put("created",enterprise.getCreatedAt());
+				enterpriseResponse.put("updated", enterprise.getUpdatedAt());
 				enterpriseResponse.put("industry", enterprise.getIndustry());
 				enterpriseResponse.put("ownership", enterprise.getOwnership());
 				enterpriseResponse.put("mission", enterprise.getMission());
@@ -173,10 +191,12 @@ public class SmeService {
 				var enterpriseResponse = new HashMap<String, Object>();
 				// enterpriseResponse.put("account", sme.getAccountNo());
 				// enterpriseResponse.put("email", sme.getEmail());
-				enterpriseResponse.put("name", sme.getSme().getAccountDetails().getBusinessName());
-				enterpriseResponse.put("createdOn", sme.getCreatedAt());
-				enterpriseResponse.put("id", sme.id);
-
+				enterpriseResponse.put("accountName",sme.getAccountName());
+				enterpriseResponse.put("business_name", sme.getSme().getAccountDetails().getBusinessName());
+				enterpriseResponse.put("created", sme.getCreatedAt());
+				enterpriseResponse.put("accountNumber",sme.getAccountNo());
+				enterpriseResponse.put("id",sme.id);
+                
 				return enterpriseResponse;
 			}).collect(Collectors.toList());
 
@@ -457,6 +477,7 @@ public class SmeService {
 		return null;
 	}
 
+	@Transactional
 	public void updateAccountinfo(NotificationResult<SmeAccountOpeningResultNotification> results) {
 		var body = results.getParams();
 		if (body.getOnboardingRequestId() != null) {
@@ -466,7 +487,23 @@ public class SmeService {
 					
 					.sme(smedata).build();
 //			smedata.getSmeAccounts().add(smeAccount);
-			this.smeAccountRepository.save(smeAccount);
+		var savedsmeAccount =	this.smeAccountRepository.save(smeAccount);
+		Optional<SmeRole> existingRole =  this.smeRoleRepository.findByRoleNameAndEnterprise("SUPER_ADMIN",smedata.getEnterprise());
+		if(existingRole.isEmpty()) {
+			var smeRole =   SmeRole.builder().description("can perform any role in the enterprise").enterprise(smedata.getEnterprise()).roleName("SUPER_ADMIN").build();
+			var super_role = this.smeRoleRepository.save(smeRole); 
+			var smeCorp = SmeCorporate.builder().user(smedata.getSmeMembers().get(0).getUser()).build();
+			var super_user = this.smeCorporateRepository.save(smeCorp);
+			var sme_user_role = SmeUserRole.builder().sme_role(super_role).user(super_user).smeAccount(smedata).build();
+			this.smeUserRoleRepository.save(sme_user_role);
+
+			var allpermsions = this.smePermissionService.findAll().stream().map((data) -> data.getId())
+					.collect(Collectors.toList());
+			this.smeRoleService.insertPermissionsNotAttachedToRole(super_role,null,allpermsions);
+		}else {
+			
+		}
+		 
 //           log.info(smeAccount+"");
 		} else {
 			// this.smeAccountRepository.save(null)
@@ -614,4 +651,5 @@ public Object confirmSmeBusinesOpeningOtp(@Valid @RequestBody() ConfirmSmeBusine
 	}
 	return null;
 }
+
 }

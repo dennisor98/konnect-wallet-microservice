@@ -4,13 +4,17 @@ import java.util.Arrays;
 
 import org.springdoc.core.customizers.GlobalOpenApiCustomizer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpMethod;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,6 +30,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.RequestContextFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -33,24 +38,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import io.swagger.v3.oas.models.Components;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.headers.Header;
-import io.swagger.v3.oas.models.info.Contact;
-import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.info.License;
-import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
-import io.swagger.v3.oas.models.security.SecurityRequirement;
-import io.swagger.v3.oas.models.security.SecurityScheme;
-import io.swagger.v3.oas.models.servers.Server;
 import lombok.extern.slf4j.Slf4j;
+import net.sasakonnect.wallet.aspects.CustomPermissionEvaluator;
 import net.sasakonnect.wallet.services.UserService;
+import net.sasakonnect.wallet.services.sme.SmeUserService;
 
 @Configuration
 @EnableMethodSecurity
 @Slf4j
 @EnableAspectJAutoProxy
+@EnableAsync
 
 public class WebSecurityConfig {
 
@@ -79,8 +77,8 @@ public class WebSecurityConfig {
 		CorsConfiguration configuration = new CorsConfiguration();
 
 		// Specify the allowed origins (replace "*" with your specific origin)
-		configuration.setAllowedOrigins(
-				Arrays.asList("https://gw.sasakonnect.net", "http://localhost:4200", "https://wallet.sasakonnect.net","https://b729-105-27-226-165.ngrok-free.app"));
+		configuration.setAllowedOrigins(Arrays.asList("https://gw.sasakonnect.net", "http://localhost:4200",
+				"https://wallet.sasakonnect.net", "https://b729-105-27-226-165.ngrok-free.app"));
 
 		// Specify the allowed HTTP methods (e.g., GET, POST, PUT, DELETE)
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
@@ -109,10 +107,10 @@ public class WebSecurityConfig {
 				"/swagger-resources/**", // Swagger resources like JS and CSS
 				"/webjars/**").permitAll()
 
-				.requestMatchers("/user/userLogin", "/user/confirmOtp","/user/admin/confirmOtp", "/konnect/callBack", "/user/refresh/token",
-						"/sme/login","/sme/verifyOtp","/lark/callback",
+				.requestMatchers("/user/userLogin", "/user/confirmOtp", "/user/admin/confirmOtp", "/konnect/callBack",
+						"/user/refresh/token", "/sme/login", "/sme/verifyOtp", "/lark/callback",
 						"/wallet/getOnboardingStatusById", "/sdk/transaction/{id}", "user/corporateLogin",
-						"/sdk/openId","/sdk/customer","/sdk/customers","/sdk/customer/stkpush")
+						"/sdk/openId", "/sdk/customer", "/sdk/customers", "/sdk/customer/stkpush")
 
 				.permitAll().requestMatchers("/wallet").permitAll().requestMatchers(HttpMethod.OPTIONS, "/**")
 				.permitAll() // Permit OPTIONS requests
@@ -147,63 +145,30 @@ public class WebSecurityConfig {
 		return config.getAuthenticationManager();
 	}
 
-	@Bean
-	static MethodSecurityExpressionHandler expressionHandler(UserService userService) {
-		var expressionHandler = new DefaultMethodSecurityExpressionHandler();
-		expressionHandler.setPermissionEvaluator(new CustomPermissionEvaluator(userService));
-		return expressionHandler;
-	}
+//	@Bean
+//	static MethodSecurityExpressionHandler expressionHandler(UserService userService) {
+//		var expressionHandler = new DefaultMethodSecurityExpressionHandler();
+//		expressionHandler.setPermissionEvaluator(new CustomPermissionEvaluator(userService));
+//		return expressionHandler;
+//	}
 
-	@Bean
-	OpenAPI openApiInformation() throws Exception {
-		Server localServer = new Server().url("http://localhost:8081/konnect-wallet")
-				.description("Localhost Server URL");
-		Server gatewayServer = new Server().url("https://gw.sasakonnect.net/konnect-wallet")
-				.description("Gateway Server Server URL(Dev)");
-		Server nginxServer = new Server().url("https://wallet.sasakonnect.net/konnect-wallet")
-				.description("Production env");
+	
 
-		Server ngrokServer = new Server().url("https://328c-105-29-165-232.ngrok-free.app").description("Ngrok env");
+    @Bean
+    @Primary
+     MethodSecurityExpressionHandler expressionHandler1(UserService userService) {
+        var expressionHandler = new DefaultMethodSecurityExpressionHandler();
+        expressionHandler.setPermissionEvaluator(new CustomPermissionEvaluator(userService));
+        return expressionHandler;
+    }
 
-		Contact contact = new Contact().email("devops@gmail.com").name("DevOps");
-		Info info = new Info().contact(contact).description("Wallet Based implementation Through Choice Bank")
-				.summary("Easy way to Buy").title("Konnect Wallet").version("V1.0.0")
-				.license(new License().name("Apache 2.0").url("http://springdoc.org"));
-		// Define custom header here
-		Components components = new Components();
-		components.addHeaders("X-Custom-Header",
-				new Header().description("Description of custom header").schema(new StringSchema()));
-		components.addSecuritySchemes("Bearer Authentication", createAPIKeyScheme());
-
-		Object example_token = "xy......bearertoken";
-		var openApi = new OpenAPI();
-		openApi.addSecurityItem(new SecurityRequirement().addList("Bearer Authentication")).components(components
-
-		);
-
-		switch (profileActive) {
-		case "dev": {
-			openApi.info(info).addServersItem(gatewayServer).addServersItem(nginxServer).addServersItem(localServer)
-					.addServersItem(ngrokServer);
-			break;
-
-		}
-		default: {
-			openApi.info(info).addServersItem(nginxServer).addServersItem(gatewayServer).addServersItem(localServer)
-					.addServersItem(ngrokServer);
-			break;
-
-		}
-
-		}
-
-		return openApi;
-	}
-
-	private SecurityScheme createAPIKeyScheme() {
-		return new SecurityScheme().type(SecurityScheme.Type.HTTP).bearerFormat("JWT").scheme("bearer");
-	}
-
+    @Bean
+    @Qualifier("smeExpressionHandler")
+     MethodSecurityExpressionHandler smeExpressionHandler(SmeUserService smeUserService) {
+        var expressionHandler = new DefaultMethodSecurityExpressionHandler();
+        return expressionHandler;
+    }
+    
 	@Bean
 	public WebMvcConfigurer corsConfigurer() {
 		return new WebMvcConfigurer() {
@@ -244,6 +209,14 @@ public class WebSecurityConfig {
 		// Enable pretty-printing for JSON output
 		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 		return objectMapper;
+	}
+
+	@Bean
+	FilterRegistrationBean<RequestContextFilter> requestContextFilter() {
+		FilterRegistrationBean<RequestContextFilter> registrationBean = new FilterRegistrationBean<>();
+		registrationBean.setFilter(new RequestContextFilter());
+		registrationBean.addUrlPatterns("/*");
+		return registrationBean;
 	}
 
 }

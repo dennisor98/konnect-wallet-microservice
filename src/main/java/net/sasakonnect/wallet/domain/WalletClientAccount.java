@@ -13,6 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import net.sasakonnect.wallet.domain.sme.Sme;
+import net.sasakonnect.wallet.domain.sme.SmeAccount;
 
 @Data
 @Entity
@@ -49,6 +50,6 @@ public class WalletClientAccount extends BaseWalletDomain {
 
 	@OneToOne(optional = true)
 	@JoinColumn(name = "sme_account_id", unique = true, nullable = true, updatable = false)
-	Sme smeAccount;
+	SmeAccount smeAccount;
 
 }
