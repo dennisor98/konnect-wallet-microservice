@@ -156,7 +156,7 @@ public class WalletController {
 
 	@PostMapping("resendOtp")
 	public ResponseEntity resendOtp(@Valid @RequestBody() ResendTxOtpDto resendDto ) {
-		return ResponseEntity.ok(this.walletService.resendTransactionOtp());
+		return this.walletService.resendTransactionOtp(resendDto);
 	}
 
 //	@GetMapping("pin/reset/otp")

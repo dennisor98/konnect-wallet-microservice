@@ -54,7 +54,6 @@ import net.sasakonnect.wallet.repository.sme.SmeAccountRepository;
 import net.sasakonnect.wallet.repository.sme.SmeCorporateRepository;
 import net.sasakonnect.wallet.repository.sme.SmeInformationRepository;
 import net.sasakonnect.wallet.repository.sme.SmeMemberRepository;
-import net.sasakonnect.wallet.repository.sme.SmePermissionRepository;
 import net.sasakonnect.wallet.repository.sme.SmeRepository;
 import net.sasakonnect.wallet.repository.sme.SmeRolePermissionRepository;
 import net.sasakonnect.wallet.repository.sme.SmeRoleRepository;
