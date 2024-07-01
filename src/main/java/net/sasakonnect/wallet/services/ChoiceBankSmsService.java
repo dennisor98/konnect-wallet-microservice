@@ -6,6 +6,7 @@ import java.util.concurrent.Executors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 
@@ -53,7 +54,7 @@ public class ChoiceBankSmsService {
 
 	}
 
-	public Object invokeResendSms(String businessId) {
+	public ResponseEntity invokeResendSms(String businessId) {
 		executor.submit(() -> {
 
 			var reqId = new HashMap<String, Object>();

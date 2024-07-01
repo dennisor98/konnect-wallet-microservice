@@ -45,6 +45,7 @@ import net.sasakonnect.wallet.RequestDto.OnboardingStatus;
 import net.sasakonnect.wallet.RequestDto.OtpTransfer;
 import net.sasakonnect.wallet.RequestDto.PayUtility;
 import net.sasakonnect.wallet.RequestDto.PhoneCheckDto;
+import net.sasakonnect.wallet.RequestDto.ResendTxOtpDto;
 import net.sasakonnect.wallet.RequestDto.TransactionPeriod;
 import net.sasakonnect.wallet.RequestDto.TransferToMpesa;
 import net.sasakonnect.wallet.RequestDto.UpgradeWalletAccountDto;
@@ -1352,6 +1353,10 @@ public class WalletService {
 
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public ResponseEntity resendTransactionOtp(ResendTxOtpDto resendDto) {
+		return this.choiceBankSmsService.invokeResendSms(resendDto.getTransactionId());
 	}
 
 	public Object checkUserAccountStatus(@Valid CheckUserAccount checkUserAccount) {

@@ -29,6 +29,7 @@ import net.sasakonnect.wallet.RequestDto.OtpTransfer;
 import net.sasakonnect.wallet.RequestDto.PayUtility;
 import net.sasakonnect.wallet.RequestDto.PhoneCheckDto;
 import net.sasakonnect.wallet.RequestDto.PinDto;
+import net.sasakonnect.wallet.RequestDto.ResendTxOtpDto;
 import net.sasakonnect.wallet.RequestDto.TransactionPeriod;
 import net.sasakonnect.wallet.RequestDto.TransferToMpesa;
 import net.sasakonnect.wallet.RequestDto.UpgradeWalletAccountDto;
@@ -153,9 +154,9 @@ public class WalletController {
 		return this.walletService.confirmOtpTransfer(otpTransfer);
 	}
 
-	@GetMapping("resendOtp")
-	public ResponseEntity<Optional<User>> resendOtp() {
-		return ResponseEntity.ok(userService.getUserById("0"));
+	@PostMapping("resendOtp")
+	public ResponseEntity resendOtp(@Valid @RequestBody() ResendTxOtpDto resendDto ) {
+		return ResponseEntity.ok(this.walletService.resendTransactionOtp());
 	}
 
 //	@GetMapping("pin/reset/otp")
