@@ -9,10 +9,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Builder;
+import lombok.Data;
 import net.sasakonnect.wallet.domain.BaseWalletDomain;
+import net.sasakonnect.wallet.domain.User;
 
 @Entity
-
+@Data
 @Builder
 public class SmeRolePermission extends BaseWalletDomain implements Serializable {
 
@@ -20,10 +22,15 @@ public class SmeRolePermission extends BaseWalletDomain implements Serializable 
 	@ManyToOne
 	@JoinColumn(name = "sme_user_role", referencedColumnName = "id")
 	@OnDelete(action = OnDeleteAction.CASCADE)
-	private SmeUserRole smeUserRole;
+	private SmeRole smeRole;
+	
+	@ManyToOne
+	@JoinColumn(name = "creator_user_id", referencedColumnName = "id")
+	@OnDelete(action = OnDeleteAction.CASCADE)
+	private User creator;
 
 	@ManyToOne
 	@JoinColumn(name = "sme_permission_id", referencedColumnName = "id")
 	@OnDelete(action = OnDeleteAction.CASCADE)
-	private SmePermissions smePermissions;
+	private SmePermissions smePermission;
 }

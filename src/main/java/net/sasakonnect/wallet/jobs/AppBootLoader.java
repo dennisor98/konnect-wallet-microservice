@@ -31,6 +31,7 @@ import net.sasakonnect.wallet.services.PermissionService;
 import net.sasakonnect.wallet.services.RoleService;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.services.sme.SmePermissionService;
+import net.sasakonnect.wallet.services.sme.SmeRoleService;
 import net.sasakonnect.wallet.services.sme.SmeUserService;
 
 @Component
@@ -281,6 +282,8 @@ public class AppBootLoader implements ApplicationListener<ApplicationReadyEvent>
     SmeUserService smeUserService;
     @Autowired
     SmePermissionService smePermissionService;
+    @Autowired
+    SmeRoleService smeRoleService;
 	
 	@Override
 	@Transactional
@@ -330,6 +333,18 @@ public class AppBootLoader implements ApplicationListener<ApplicationReadyEvent>
 				.collect(Collectors.toList());
 		this.roleService.insertPermissionsNotAttachedToRole(savedRole, user.get(), allpermsions);
 		// Your custom logic here
+		
+		//assign all permissions to sme SUPER_ADMIN ROLE
+		List<SmeRole> smeRoles = this.smeRoleService.findRolesByName("SUPER_ADMIN");
+		var smepermsions = this.smePermissionService.findAll().stream().map((data) -> data.getId())
+				.collect(Collectors.toList());
+		if(!smeRoles.isEmpty()) {
+			smeRoles.stream().map(smr->{
+				this.smeRoleService.insertPermissionsNotAttachedToRole(smr,null, smepermsions);
+				return smr.id;
+			}).collect(Collectors.toList());
+		}
+		
 		
 		
 

@@ -8,8 +8,10 @@ import org.hibernate.annotations.OnDeleteAction;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import net.sasakonnect.wallet.domain.BaseWalletDomain;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.sme.Sme;
@@ -18,6 +20,8 @@ import net.sasakonnect.wallet.domain.sme.SmeCorporate;
 @Entity
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SmeUserRole extends BaseWalletDomain implements Serializable {
 	private static final long serialVersionUID = 5208946861201323533L;
 	@ManyToOne

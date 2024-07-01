@@ -1,13 +1,24 @@
 package net.sasakonnect.wallet.services.sme;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+import net.sasakonnect.wallet.domain.WalletClient;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmePermissions;
 import net.sasakonnect.wallet.repository.sme.SmePermissionRepository;
+import net.sasakonnect.wallet.tools.ResponsePagerClass;
 
 @Service
 public class SmePermissionService {
@@ -28,4 +39,73 @@ public class SmePermissionService {
 			return this.smePermissionRepository.save(permission);
 		}
 	}
+  
+  
+  public ResponseEntity<Object> getPermissions(Integer pageNumber,Integer pageSize){
+	  Page<SmePermissions> permissionsPage = this.smePermissionRepository.findAll(PageRequest.of(pageNumber, pageSize));
+	  if(permissionsPage.isEmpty()) {
+		  Map<String,Object> map = new HashMap<>();
+		  map.put("success",true);
+		  map.put("message","Request complete");
+		  map.put("permissions",new ArrayList<>());
+		  return ResponseEntity.status(HttpStatus.OK).body(map);
+	  }else {
+		  var permissions = permissionsPage.stream().map(permission->{
+			  Map<String,Object> pmap = new HashMap<>();
+			  pmap.put("id", permission.getId());
+			  pmap.put("name",permission.getName());
+			  pmap.put("description", permission.getDescription());
+			  pmap.put("category", permission.getCategory());
+			  return pmap;
+		  }).collect(Collectors.toList());
+		  Map<String,Object> map = new HashMap<>();
+		  map.put("success",true);
+		  map.put("message","Request complete");
+		  map.put("permissions", permissions);
+		  ResponsePagerClass<SmePermissions> page =  ResponsePagerClass.<SmePermissions>builder()
+	    		    .page(permissionsPage)
+	    		    .build();
+		 map.putAll(page.getPagingInfo());
+		  return ResponseEntity.status(HttpStatus.OK).body(map);
+	  }
+	  
+  }
+  
+  public ResponseEntity<Object> getPermissionsByCategoryName(String categoryName,Integer pageNumber,Integer pageSize){
+	  Page<SmePermissions> permissionsPage = this.smePermissionRepository.findByCategory(categoryName,PageRequest.of(pageNumber, pageSize));
+	  if(permissionsPage.isEmpty()) {
+		  Map<String,Object> map = new HashMap<>();
+		  map.put("success",true);
+		  map.put("message","Request complete");
+		  map.put("permissions",new ArrayList<>());
+		  return ResponseEntity.status(HttpStatus.OK).body(map);
+	  }else {
+		  var permissions = permissionsPage.stream().map(permission->{
+			  Map<String,Object> pmap = new HashMap<>();
+			  pmap.put("id", permission.getId());
+			  pmap.put("name",permission.getName());
+			  pmap.put("description", permission.getDescription());
+			  pmap.put("category", permission.getCategory());
+			  return pmap;
+		  }).collect(Collectors.toList());
+		  Map<String,Object> map = new HashMap<>();
+		  map.put("success",true);
+		  map.put("message","Request complete");
+		  map.put("permissions", permissions);
+		  ResponsePagerClass<SmePermissions> page =  ResponsePagerClass.<SmePermissions>builder()
+	    		    .page(permissionsPage)
+	    		    .build();
+		 map.putAll(page.getPagingInfo());
+		  return ResponseEntity.status(HttpStatus.OK).body(map);
+	  }
+  } 
+  
+  public ResponseEntity<Object> getPermissionCategories(String categoryName,Integer pageNumber,Integer pageSize){
+	  return null;
+  } 
+  
+  
+  public List<SmePermissions> findAll(){
+	 return this.smePermissionRepository.findAll(); 
+  }
 }

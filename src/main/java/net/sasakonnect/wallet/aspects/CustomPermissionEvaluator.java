@@ -1,4 +1,4 @@
-package net.sasakonnect.wallet.config;
+package net.sasakonnect.wallet.aspects;
 
 import java.io.Serializable;
 import java.util.Optional;
@@ -12,7 +12,7 @@ import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.services.UserService;
 
-@Component
+
 public class CustomPermissionEvaluator implements PermissionEvaluator {
 	@Autowired
 	private UserService userService;

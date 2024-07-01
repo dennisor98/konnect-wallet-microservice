@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import net.bytebuddy.asm.Advice.This;
 import net.sasakonnect.wallet.RequestDto.sme.ConfirmSmeBusinessDto;
 import net.sasakonnect.wallet.RequestDto.sme.ConfirmSmeDto;
 import net.sasakonnect.wallet.RequestDto.sme.CreateEnterpriseDto;
@@ -33,6 +34,7 @@ import net.sasakonnect.wallet.RequestDto.sme.SmeBusinessAccountDto;
 import net.sasakonnect.wallet.RequestDto.sme.SubmitSmeAccount;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
+import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.sme.Enterprise;
 import net.sasakonnect.wallet.domain.sme.Sme;
@@ -57,6 +59,7 @@ import net.sasakonnect.wallet.repository.sme.SmeAccountRepository;
 import net.sasakonnect.wallet.repository.sme.SmeCorporateRepository;
 import net.sasakonnect.wallet.repository.sme.SmeInformationRepository;
 import net.sasakonnect.wallet.repository.sme.SmeMemberRepository;
+import net.sasakonnect.wallet.repository.sme.SmePermissionRepository;
 import net.sasakonnect.wallet.repository.sme.SmeRepository;
 import net.sasakonnect.wallet.repository.sme.SmeRolePermissionRepository;
 import net.sasakonnect.wallet.repository.sme.SmeRoleRepository;
@@ -98,6 +101,11 @@ public class SmeService {
 	SmeRolePermissionRepository smeRolePermissionRepository;
 	@Autowired
 	SmeCorporateRepository smeCorporateRepository;
+	@Autowired
+	SmePermissionService smePermissionService;
+	@Autowired
+	SmeRoleService smeRoleService;
+	
 
 	public ResponseEntity<Object> createEnterprise(CreateEnterpriseDto ced) {
 		
@@ -494,6 +502,10 @@ public class SmeService {
 			var super_user = this.smeCorporateRepository.save(smeCorp);
 			var sme_user_role = SmeUserRole.builder().sme_role(super_role).user(super_user).smeAccount(smedata).build();
 			this.smeUserRoleRepository.save(sme_user_role);
+
+			var allpermsions = this.smePermissionService.findAll().stream().map((data) -> data.getId())
+					.collect(Collectors.toList());
+			this.smeRoleService.insertPermissionsNotAttachedToRole(super_role,null,allpermsions);
 		}else {
 			
 		}
@@ -645,4 +657,5 @@ public Object confirmSmeBusinesOpeningOtp(@Valid @RequestBody() ConfirmSmeBusine
 	}
 	return null;
 }
+
 }

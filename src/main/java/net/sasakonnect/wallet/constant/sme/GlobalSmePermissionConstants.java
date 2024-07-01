@@ -125,7 +125,7 @@ public class GlobalSmePermissionConstants {
 	public static class CanAssignAccountAccess extends SmePermissionEntry{
 		public static final String PERMISSION = "can.assign.user.acc.access";
 		public static final String DESCRIPTION = "can assign account access to sme user";
-		public static final String CATEGORY = "role";
+		public static final String CATEGORY = "account";
 
 		@Override
 		String getPERMISSION() {
@@ -148,6 +148,49 @@ public class GlobalSmePermissionConstants {
 		public static final String PERMISSION = "can.create.payslip";
 		public static final String DESCRIPTION = "can create a payslip";
 		public static final String CATEGORY = "payslip";
+
+		@Override
+		String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+
+		@Override
+		String getCATEGORY() {
+			return CATEGORY;
+		}
+
+	}
+	public static class CanGetRoles extends SmePermissionEntry{
+		public static final String PERMISSION = "can.get.roles.all";
+		public static final String DESCRIPTION = "can fetch all roles";
+		public static final String CATEGORY = "role";
+
+		@Override
+		String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+
+		@Override
+		String getCATEGORY() {
+			return CATEGORY;
+		}
+
+	}
+	
+	public static class CanGetPermissions extends SmePermissionEntry{
+		public static final String PERMISSION = "can.get.permissions.all";
+		public static final String DESCRIPTION = "can fetch all permissions";
+		public static final String CATEGORY = "permission";
 
 		@Override
 		String getPERMISSION() {

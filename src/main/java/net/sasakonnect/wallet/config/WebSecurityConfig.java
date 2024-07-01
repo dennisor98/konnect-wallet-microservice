@@ -4,10 +4,12 @@ import java.util.Arrays;
 
 import org.springdoc.core.customizers.GlobalOpenApiCustomizer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpMethod;
@@ -45,7 +47,9 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import lombok.extern.slf4j.Slf4j;
+import net.sasakonnect.wallet.aspects.CustomPermissionEvaluator;
 import net.sasakonnect.wallet.services.UserService;
+import net.sasakonnect.wallet.services.sme.SmeUserService;
 
 @Configuration
 @EnableMethodSecurity
@@ -146,13 +150,30 @@ public class WebSecurityConfig {
 		return config.getAuthenticationManager();
 	}
 
-	@Bean
-	static MethodSecurityExpressionHandler expressionHandler(UserService userService) {
-		var expressionHandler = new DefaultMethodSecurityExpressionHandler();
-		expressionHandler.setPermissionEvaluator(new CustomPermissionEvaluator(userService));
-		return expressionHandler;
-	}
+//	@Bean
+//	static MethodSecurityExpressionHandler expressionHandler(UserService userService) {
+//		var expressionHandler = new DefaultMethodSecurityExpressionHandler();
+//		expressionHandler.setPermissionEvaluator(new CustomPermissionEvaluator(userService));
+//		return expressionHandler;
+//	}
 
+	
+
+    @Bean
+    @Primary
+     MethodSecurityExpressionHandler expressionHandler1(UserService userService) {
+        var expressionHandler = new DefaultMethodSecurityExpressionHandler();
+        expressionHandler.setPermissionEvaluator(new CustomPermissionEvaluator(userService));
+        return expressionHandler;
+    }
+
+    @Bean
+    @Qualifier("smeExpressionHandler")
+     MethodSecurityExpressionHandler smeExpressionHandler(SmeUserService smeUserService) {
+        var expressionHandler = new DefaultMethodSecurityExpressionHandler();
+        return expressionHandler;
+    }
+    
 	@Bean
 	OpenAPI openApiInformation() throws Exception {
 		Server localServer = new Server().url("http://localhost:8081/konnect-wallet")
