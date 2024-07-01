@@ -2,7 +2,6 @@ package net.sasakonnect.wallet.workers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -35,7 +34,6 @@ public class MerchantWoker {
 
 	WebClient webClient = WebClient.builder().build();
 
-	@Async
 	@Transactional
 	public void notifyMerchant(Transaction transaction) {
 		if (transaction.getTxType().equalsIgnoreCase("TTID0005")) {
@@ -56,7 +54,8 @@ public class MerchantWoker {
 					.requestId(transaction.getRequestId()).build();
 //			var walletClient = this.walletClientAccountRepo.findWalletClientByTillNumberAndAccountType(
 //					transaction.getOppoAccountId(), FinancialInstituation.MPESA);
-			var walletClient = this.walletClientAccountRepo.findWalletClientByAccount(transaction.getOppoAccountId());
+			var walletClient = this.walletClientAccountRepo
+					.findWalletClientBySmeAccount(transaction.getOppoAccountId());
 			if (!walletClient.isEmpty()) {
 
 				newTransaction.id = this.userService.findUserByAccountd(transaction.getAccountId()).isPresent()
@@ -76,7 +75,6 @@ public class MerchantWoker {
 
 	}
 
-	@Async
 	@Transactional
 	public void notifyMerchantIncomingPayment(TransactionResponseDto data, SdkPayDto pay) {
 		try {

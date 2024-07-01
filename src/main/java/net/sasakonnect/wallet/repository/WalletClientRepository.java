@@ -17,14 +17,19 @@ public interface WalletClientRepository extends JpaRepository<WalletClient, Stri
 
 	@Query("SELECT wc FROM WalletClient wc JOIN FETCH wc.walletClientAccount WHERE wc.appKey = :key AND wc.enabled = true ORDER BY wc.createdAt DESC")
 	Optional<List<WalletClient>> findByAppKeyAnd(@Param("key") String client_app_key);
-	
+
 	@Query("SELECT wc FROM WalletClient wc WHERE  wc.appSecret = :secret AND wc.enabled = true ORDER BY wc.createdAt DESC")
 	Optional<List<WalletClient>> findByAppSecret(@Param("secret") String secret);
-	
+
 	@Query("SELECT wc FROM WalletClient wc JOIN wc.walletClientAccount wca WHERE wc.id = :id AND wca.id IN :accountId")
 	Optional<WalletClient> findByAppIdAndClientAccountId(@Param("id") String id, @Param("accountId") String accountId);
-	
-	
-	Page<WalletClient>findAllByOrderByUpdatedAtDesc(Pageable pageable);
-	
+
+	Page<WalletClient> findAllByOrderByUpdatedAtDesc(Pageable pageable);
+
+	@Query("SELECT wc FROM WalletClient wc " + "LEFT JOIN FETCH wc.walletClientAccount wca "
+			+ "LEFT JOIN FETCH wca.smeAccount sa " + "LEFT JOIN FETCH sa.sme s "
+			+ "LEFT JOIN FETCH s.accountDetails sad " + "WHERE wc.appKey = :key AND wc.enabled = true "
+			+ "ORDER BY wc.createdAt DESC")
+	Optional<List<WalletClient>> findWalletClientByAppKey(@Param("key") String client_app_key);
+
 }

@@ -19,7 +19,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -143,8 +142,8 @@ public class WalletService {
 	UserJobRepository userJobRepository;
 	@Autowired
 	private ApplicationContext applicationContext;
-    @Autowired
-    private SmeUserService smeUserService;
+	@Autowired
+	private SmeUserService smeUserService;
 	@Autowired
 	LogsRepository logsRepository;
 	@Autowired
@@ -563,7 +562,6 @@ public class WalletService {
 
 	}
 
-	@Async("singleThreadExecutor")
 	@Transactional
 	private Object callBackContentResolver(JsonObject body) {
 		try {
@@ -837,7 +835,6 @@ public class WalletService {
 						}.getType());
 				log.info("Sme account Opening", results);
 				this.smeAccountService.updateAccountinfo(results);
-			
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.UTILITY.getCode())) {
 
