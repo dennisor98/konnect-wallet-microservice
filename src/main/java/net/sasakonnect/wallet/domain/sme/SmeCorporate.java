@@ -1,7 +1,14 @@
 package net.sasakonnect.wallet.domain.sme;
 
+import java.util.List;
+import java.util.Set;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,11 +25,15 @@ import net.sasakonnect.wallet.domain.sme.authorisation.SmeRole;
 @Entity
 public class SmeCorporate extends BaseWalletDomain{
   @OneToOne()
-  @JoinColumn(name="user_id")
+  @JoinColumn(name="user_id",unique=false)
   User user;
   
   @OneToOne()
-  @JoinColumn(name="role_id")
+  @JoinColumn(name="role_id",unique=false)
   SmeRole role;
+  
+  @ManyToOne
+  @JoinColumn(name="sme_id")
+  private Sme smes;
   
 }

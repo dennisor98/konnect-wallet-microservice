@@ -3,23 +3,30 @@ package net.sasakonnect.wallet.config.sme;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import jakarta.servlet.http.HttpServletRequest;
 import net.sasakonnect.wallet.annotations.sme.HasSmePermission;
 import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.domain.sme.Sme;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeRole;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeUserRole;
+import net.sasakonnect.wallet.repository.sme.SmeRepository;
 import net.sasakonnect.wallet.services.sme.SmeRoleService;
 import net.sasakonnect.wallet.services.sme.SmeUserService;
+import net.sasakonnect.wallet.tools.JwtService;
 
 import java.util.Optional;
 
 @Aspect
 @Component
 public class SmePermissionEvaluatorAspect {
-
+    
     private final SmeUserService smeUserService;
     private final SmeRoleService smeRoleService;
 
@@ -38,7 +45,12 @@ public class SmePermissionEvaluatorAspect {
         }
 
         User user = (User) authentication.getPrincipal();
-        Optional<SmeUserRole> roleOptional = smeUserService.getSmeUserRoleByUser(user);
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+				.getRequest();
+	  
+	  String smeId =  this.smeUserService.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
+	  Optional<Sme> sme = this.smeUserService.findSmeById(smeId);
+        Optional<SmeUserRole> roleOptional = smeUserService.getSmeUserRoleByUser(user,sme.get());
         if (roleOptional.isEmpty()) {
             throw new IllegalStateException("User does not have a role assigned");
         }

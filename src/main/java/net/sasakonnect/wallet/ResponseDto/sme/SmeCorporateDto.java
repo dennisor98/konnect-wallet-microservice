@@ -1,12 +1,14 @@
 package net.sasakonnect.wallet.ResponseDto.sme;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SmeCorporateDto {
-  @NotBlank()
+  @NotBlank(message="userId cannot be empty")
   String userId;
 }

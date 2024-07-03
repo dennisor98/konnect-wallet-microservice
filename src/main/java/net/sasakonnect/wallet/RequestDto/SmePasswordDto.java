@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 public class SmePasswordDto {
   @NotBlank
-  String member_id;
+  String userId;
 }

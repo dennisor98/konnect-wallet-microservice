@@ -20,6 +20,7 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.domain.sme.Sme;
 import net.sasakonnect.wallet.enums.JwtType;
 
 @Slf4j
@@ -85,13 +86,13 @@ public class JwtService {
 		}
 		return null;
 	}
-
-	public String generateSmeMemberToken(User user) {
+	
+	public String generateSmeMemberToken(User user,Sme sme) {
 		try {
 			Map<String, Object> claims = new HashMap<>();
 			claims.put("id", user.getId());
 			claims.put("token_type", "sme_member_token");
-			log.info(jwtSecret);
+			claims.put("sme_id",sme.getId());
 			claims.put("firstName", user.getFirstName());
 			return Jwts.builder().setClaims(claims).setSubject(user.getId().toString()).setIssuedAt(new Date())
 					.setExpiration(new Date(System.currentTimeMillis() + jwtExpiryTime))// 10 days validity
@@ -265,5 +266,24 @@ public class JwtService {
 				.signWith(secretKey, SignatureAlgorithm.HS256).compact();
 
 	}
+	
+	public String extractUserSmeId(String token) throws MalformedJwtException, UnsupportedJwtException {
+		try {
+			if (Jwts.parserBuilder().setSigningKey(secretKey).build().isSigned(token)) {
+
+				Claims claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
+				return claims.get("sme_id").toString();
+
+			} else {
+				return null;
+			}
+
+		} catch (MalformedJwtException e) {
+			System.out.println("exception");
+			throw e;
+		}
+
+	}
+	
 
 }

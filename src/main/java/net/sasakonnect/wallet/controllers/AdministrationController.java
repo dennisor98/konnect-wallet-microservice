@@ -796,8 +796,13 @@ public class AdministrationController {
 	@IsCorporate()
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanGenerateSmePassword.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CanGenerateSmePassword.PERMISSION)
+<<<<<<< HEAD
 	public ResponseEntity<Object> generateSmememberPassword(@Valid @RequestBody() SmePasswordDto request) {
 		return this.smeUserService.createDefaultPassword(request.getMember_id());
+=======
+	public ResponseEntity<Object> generateSmememberPassword(@Valid @RequestBody() SmePasswordDto request){		
+		return this.smeUserService.createDefaultPassword(request.getUserId());
+>>>>>>> 2e8e4600f689ea8d3641a45eba68c7103760989b
 	}
 
 	@PostMapping("user/change/phonenumber")

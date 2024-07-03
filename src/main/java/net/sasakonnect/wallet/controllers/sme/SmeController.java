@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
 import net.sasakonnect.wallet.RequestDto.sme.SmeUserLogin;
+import net.sasakonnect.wallet.ResponseDto.sme.SmeCorporateDto;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.sme.HasSmePermission;
 import net.sasakonnect.wallet.annotations.sme.SmeCorporate;
@@ -64,6 +65,10 @@ public class SmeController {
 		return  category != null ? this.smePermissionService.getPermissionsByCategoryName(category,pageNumber, pageSize) : this.smePermissionService.getPermissions(pageNumber, pageSize);
 	}
 	
-//	@SmeCorporate
-//	@Post
+	@SmeCorporate
+	@PostMapping("user")
+	@HasSmePermission(GlobalSmePermissionConstants.CanAddSmeUser.PERMISSION)
+	public ResponseEntity<Object> createSmeUser(@Valid @RequestBody() SmeCorporateDto smeUserDto){
+		return this.smeUserService.createSmeUser(smeUserDto.getUserId());
+	}
 }
