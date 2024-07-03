@@ -23,7 +23,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.domain.User;
-import net.sasakonnect.wallet.enums.JwtType;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.tools.JwtService;
 
@@ -61,7 +60,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter implements Han
 			try {
 //				Optional<User> user = this.userService.findUserWallet(id);
 				User userDetails = (User) userService.loadUserByUsername(id);
-				if (userDetails != null && this.jwtService.validateToken(token, userDetails, JwtType.ACCESS_TOKEN)) {
+				if (userDetails != null && this.jwtService.validateToken(token, userDetails)) {
 
 					UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
 							null, null);
@@ -119,7 +118,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter implements Han
 			try {
 //				Optional<User> user = this.userService.findUserWallet(id);
 				User userDetails = (User) userService.loadUserByUsername(id);
-				if (userDetails != null && this.jwtService.validateToken(token, userDetails, JwtType.ACCESS_TOKEN)) {
+				if (userDetails != null && this.jwtService.validateToken(token, userDetails)) {
 					System.out.println("this is do internal");
 					attributes.put("principal", userDetails);
 					return true;
