@@ -726,10 +726,6 @@ public final class GlobalPermissionConstants {
 	public static class ConfirmChangeUserPhoneNumber extends PermissionEntry {
 		public static final String PERMISSION = "can.confirm.change.user.phonenumber";
 		public static final String DESCRIPTION = "can confirm change of user number operation";
-		static {
-			isAssignable = false;
-
-		}
 
 		@Override
 		public String getPERMISSION() {
@@ -739,6 +735,12 @@ public final class GlobalPermissionConstants {
 		@Override
 		public String getDESCRIPTION() {
 			return DESCRIPTION;
+
+		}
+
+		@Override
+		public boolean getIsAssignable() {
+			return false;
 		}
 
 	}

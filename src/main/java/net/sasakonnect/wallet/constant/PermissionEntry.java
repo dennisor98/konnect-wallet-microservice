@@ -5,7 +5,9 @@ public abstract class PermissionEntry {
 
 	abstract String getDESCRIPTION();
 
-	static boolean isAssignable = true;
+	public boolean getIsAssignable() {
+		return true;
+	}
 
 	public static String getUrl(String permission) {
 		return "hasPermission(#apartmentId, '" + permission + "')";
