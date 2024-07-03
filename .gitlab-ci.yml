@@ -13,7 +13,7 @@ build:
 
     - echo "Source code built on remote server"
   only:
-    - main
+    - dev
 
 move:
   stage: move
