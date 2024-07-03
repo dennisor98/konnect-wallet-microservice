@@ -181,6 +181,19 @@ public class JwtService {
 
 	}
 
+	public boolean validateToken(String token, User userDetails, JwtType jwt) {
+		try {
+			final String username = extractUsername(token, jwt);
+
+			User user = userDetails;
+			return (username.equals(user.getId()) && !isTokenExpired(token));
+		} catch (MalformedJwtException e) {
+			e.printStackTrace();
+		}
+		return false;
+
+	}
+
 	public boolean validateToken(String token, User userDetails) {
 		try {
 			final String username = extractUsername(token);
