@@ -22,6 +22,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -61,6 +62,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
 import net.sasakonnect.wallet.RequestDto.ChangePin;
+import net.sasakonnect.wallet.RequestDto.CloseUserAccount;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
 import net.sasakonnect.wallet.RequestDto.KompCallbackDto;
 import net.sasakonnect.wallet.RequestDto.OpenIdRequest;
@@ -87,6 +89,7 @@ import net.sasakonnect.wallet.domain.UserRole;
 import net.sasakonnect.wallet.domain.Wallet;
 import net.sasakonnect.wallet.domain.WalletAccountUpgrade;
 import net.sasakonnect.wallet.enums.LogTypes;
+import net.sasakonnect.wallet.notification.AccountClosureNotification;
 import net.sasakonnect.wallet.notification.WalletAccountUpgradeResultNotification;
 import net.sasakonnect.wallet.repository.CorporateDetailsRepository;
 import net.sasakonnect.wallet.repository.FirebaseTokenRepository;
@@ -1632,6 +1635,47 @@ public class UserService extends RestClientService implements UserDetailsService
 
 		// TODO Auto-generated method stub
 		return data;
+	}
+
+	public Object closeUserAccount(@Valid CloseUserAccount request) {
+		var results = this.userRepository.findUserByWalletAccountId(request.getAccountId());
+		if (results.isPresent()) {
+			var reqId = new HashMap<String, Object>();
+			reqId.put("accountId", results.get().getId());
+			reqId.put("otpType", "sms");
+			reqId.put("closureReason", Stream.of(request.getCloseReason()).map((data) -> data.getDescription())
+					.collect(Collectors.toList()));
+			var reqs = requestSigner.signRequest(reqId);
+
+			Mono<String> responseMono = this.bankClientBean.webClient.post()
+					.uri(ChoiceEndpointsConstants.CLOSE_USER_ACCOUNT).contentType(MediaType.APPLICATION_JSON)
+					.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+					.bodyToMono(String.class);
+
+			String responseJson = responseMono.block();
+			log.info(responseJson);
+			if (responseJson != null) {
+				var gsonData = new Gson().fromJson(responseJson, Object.class);
+				return gsonData;
+
+			}
+		} else {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("message", "user with account " + request.getAccountId() + "not found");
+
+			map.put("success", "false");
+
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(map);
+		}
+		// TODO Auto-generated method stub
+		return null;
+
+	}
+
+	public void updateUserAccountCloser(AccountClosureNotification params) {
+
+		// TODO Auto-generated method stub
+
 	}
 
 }

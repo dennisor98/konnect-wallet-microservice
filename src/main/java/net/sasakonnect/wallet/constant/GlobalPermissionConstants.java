@@ -691,6 +691,22 @@ public final class GlobalPermissionConstants {
 
 	}
 
+	public static class CanRequestUserAccountCloser extends PermissionEntry {
+		public static final String PERMISSION = "can.request.user.account.closure";
+		public static final String DESCRIPTION = "can request user account closure";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+
+	}
+
 	public static class ChangeUserPhoneNumber extends PermissionEntry {
 		public static final String PERMISSION = "can.change.user.phonenumber";
 		public static final String DESCRIPTION = "can change user phone number";

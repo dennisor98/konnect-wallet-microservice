@@ -56,6 +56,8 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 		}
 	}
 
+	@Column(nullable = true, length = 50)
+	private String kenyaIdVersion;
 	@Column
 	private String middleName;
 
