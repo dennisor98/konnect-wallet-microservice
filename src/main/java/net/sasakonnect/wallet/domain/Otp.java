@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import lombok.Data;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import net.sasakonnect.wallet.domain.sme.Sme;
 
 @Entity
 @Data
@@ -42,6 +43,10 @@ public class Otp extends BaseWalletDomain implements Serializable {
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private User user;
 
+	@ManyToOne
+	@JoinColumn(name = "sme_id", referencedColumnName = "id",nullable=true)
+	@OnDelete(action = OnDeleteAction.CASCADE)
+	private Sme sme;
 	// Constructors, getters, and setters
 
 	public Otp() {

@@ -848,7 +848,7 @@ public class AdministrationController {
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.CanGenerateSmePassword.PERMISSION)
 	public ResponseEntity<Object> generateSmememberPassword(@Valid @RequestBody() SmePasswordDto request){		
-		return this.smeUserService.createDefaultPassword(request.getMember_id());
+		return this.smeUserService.createDefaultPassword(request.getUserId());
 	}
 	
 	

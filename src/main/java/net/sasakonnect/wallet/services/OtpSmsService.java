@@ -22,6 +22,7 @@ import net.sasakonnect.wallet.RequestDto.UserLogin;
 import net.sasakonnect.wallet.RequestDto.sme.SmeUserLogin;
 import net.sasakonnect.wallet.domain.Otp;
 import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.domain.sme.Sme;
 import net.sasakonnect.wallet.provider.AfricasTalking;
 import net.sasakonnect.wallet.provider.Celcom;
 import net.sasakonnect.wallet.provider.SmsManager;
@@ -122,7 +123,7 @@ public class OtpSmsService {
 		}
 	}
 
-	public ResponseEntity<ObjectNode> sendSmeUserSms(SmeUserLogin userLogin, String template, Optional<User> user) {
+	public ResponseEntity<ObjectNode> sendSmeUserSms(SmeUserLogin userLogin,Sme sme,String template, Optional<User> user) {
 		StringBuilder stringbuilder = new StringBuilder();
 
 		if (template == null) {
@@ -152,6 +153,7 @@ public class OtpSmsService {
 
 			Otp otpEntity = new Otp();
 			otpEntity.setCode(String.valueOf(otp));
+			otpEntity.setSme(sme);
 			otpEntity.setPhoneNumber(userLogin.getFullPhone());
 			otpEntity.setUser(user.get());
 			otpEntity.setHashUseCount(0);
@@ -183,6 +185,8 @@ public class OtpSmsService {
 			return ResponseEntity.status(HttpStatus.OK).body(errorResponse);
 		}
 	}
+	
+	
 
 	public Optional<Otp> verifyOtp(@Valid ConfirmOtp confirmOtp) {
 		return this.otpService.getOtpWithByHashAndCode(confirmOtp.getHash(), confirmOtp.getOtp());

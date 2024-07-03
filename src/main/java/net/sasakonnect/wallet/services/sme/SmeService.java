@@ -3,6 +3,7 @@ package net.sasakonnect.wallet.services.sme;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -492,7 +493,7 @@ public class SmeService {
 		if(existingRole.isEmpty()) {
 			var smeRole =   SmeRole.builder().description("can perform any role in the enterprise").enterprise(smedata.getEnterprise()).roleName("SUPER_ADMIN").build();
 			var super_role = this.smeRoleRepository.save(smeRole); 
-			var smeCorp = SmeCorporate.builder().user(smedata.getSmeMembers().get(0).getUser()).build();
+			var smeCorp = SmeCorporate.builder().user(smedata.getSmeMembers().get(0).getUser()).role(super_role).smes(smedata).build();
 			var super_user = this.smeCorporateRepository.save(smeCorp);
 			var sme_user_role = SmeUserRole.builder().sme_role(super_role).user(super_user).smeAccount(smedata).build();
 			this.smeUserRoleRepository.save(sme_user_role);
