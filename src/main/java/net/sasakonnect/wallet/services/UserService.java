@@ -44,6 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.BodyInserters;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -53,6 +54,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -66,9 +69,12 @@ import net.sasakonnect.wallet.RequestDto.PinDto;
 import net.sasakonnect.wallet.RequestDto.SdkSearchCustomers;
 import net.sasakonnect.wallet.RequestDto.UserDeviceToken;
 import net.sasakonnect.wallet.RequestDto.UserLogin;
+import net.sasakonnect.wallet.RequestDto.sme.ChangeUserPhoneNumberDto;
+import net.sasakonnect.wallet.RequestDto.sme.ConfirmPhoneNumberChangeDto;
 import net.sasakonnect.wallet.ResponseDto.UserResponseDTO;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.beans.RedisBean;
+import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
 import net.sasakonnect.wallet.domain.FirebaseToken;
 import net.sasakonnect.wallet.domain.Logs;
 import net.sasakonnect.wallet.domain.Permission;
@@ -98,6 +104,7 @@ import net.sasakonnect.wallet.repository.WalletClientRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.tools.JwtService;
 import net.sasakonnect.wallet.tools.RequestSigner;
+import reactor.core.publisher.Mono;
 
 @Service
 @Slf4j
@@ -171,6 +178,9 @@ public class UserService extends RestClientService implements UserDetailsService
 
 	@Autowired
 	ProfileImageRepository profileImageRepository;
+
+	@Autowired
+	ChoiceBankSmsService choiceBankSmsService;
 
 //	public UserService() {
 //        try {
@@ -1559,6 +1569,69 @@ public class UserService extends RestClientService implements UserDetailsService
 
 	public Optional<User> findUserByOnboardingRequestId(String onbId) {
 		return this.userRepository.findByOnboardingRequestId(onbId);
+	}
+
+	public Object changeUserPhoneNumber(@Valid ChangeUserPhoneNumberDto request) {
+		// this.choiceBankSmsService.invokeResendSms(applicationId);
+
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		var userToChangePhone = this.findUserByAccountd(request.getUserAccount());
+		if (userToChangePhone.isPresent()) {
+
+			var reqId = new HashMap<String, Object>();
+
+			reqId.put("accountId", request.getUserAccount());
+			reqId.put("newMobileNumber", request.getNewPhoneNumber());
+			reqId.put("newMobileCountryCode", 254);
+
+			var reqs = requestSigner.signRequest(reqId);
+
+			Mono<String> responseMono = this.bankClientBean.webClient.post()
+					.uri(ChoiceEndpointsConstants.CHANGE_USER_PHONE_NUMBER).contentType(MediaType.APPLICATION_JSON)
+					.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+					.bodyToMono(String.class);
+
+			String responseJson = responseMono.block();
+			log.info(responseJson);
+			if (responseJson != null) {
+				var jsonObject = new Gson().fromJson(responseJson, JsonObject.class);
+				var applaictionObject = jsonObject.getAsJsonObject("data").get("applicationId");
+				if (applaictionObject == null) {
+					return jsonObject.toString();
+				}
+
+				var applicationId = applaictionObject.getAsString();
+
+				var log = Logs.builder().activity(LogTypes.UPDATE_MOBILE_NUMBER)
+						.description(user.getFirstName() + " " + user.getLastName() + " of id:" + user.getId()
+								+ " requested update for user account " + request.getUserAccount()
+								+ "under application id " + applicationId)
+						.build();
+				this.logsRepository.save(log);
+				this.choiceBankSmsService.invokeSms(applicationId);
+//				// ACCMD114552219057004544
+//
+				return responseJson;
+//
+			}
+//			return responseJson;	
+		}
+
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Object confirmPhoneChange(@Valid ConfirmPhoneNumberChangeDto request) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		var data = this.choiceBankSmsService.confirmOperation(request.getOperationId(), request.getOtp());
+		var log = Logs
+				.builder().activity(LogTypes.UPDATE_MOBILE_NUMBER).description(user.getFirstName() + " "
+						+ user.getLastName() + " of id:" + user.getId() + " confirmed otp request" + data.toString())
+				.build();
+		this.logsRepository.save(log);
+
+		// TODO Auto-generated method stub
+		return data;
 	}
 
 }

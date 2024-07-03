@@ -24,6 +24,8 @@ public class ChoiceEndpointsConstants {
 	public static final String ADD_OR_UPDATE_EMAIL = "/user/addOrUpdateEmail";
 	public static final String REQUEST_BANK_STATEMENT_CSV = "/statement/applyAccountStatement";
 	public static final String COMMON_SEND_OTP = "/common/sendOtp";
+	public static final String COMMON_V2_SEND_OTP = "/common/v2/sendOtp";
+
 	public static final String WITHDRAW = "/trans/v2/applyForTransfer";
 	public static final String BUY_AIRTIME = "/utilityPayment/v2/airtimePayment";
 	public static final String PAY_UTILITY = "/utilityPayment/v2/billPayment";
@@ -42,5 +44,6 @@ public class ChoiceEndpointsConstants {
 	public static final String UPLOAD_SME_MEMBER = "/onboarding/business/submitCompanyMember";
 	public static final String SUBMIT_SME_FOR_CONFIRMATION = "/onboarding/business/submitOrPullBackRequest";
 	public static final String UPDATE_USER_EMAIL = "/user/addOrUpdateEmail";
+	public static final String CHANGE_USER_PHONE_NUMBER = "/account/v2/mobileChange";
 
 }
