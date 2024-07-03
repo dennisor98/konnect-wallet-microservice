@@ -133,7 +133,6 @@ public class AdministrationController {
 	SmeUserService smeUserService;
 
 	@GetMapping("/upload/app")
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CreateSuperApp.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CreateSuperApp.PERMISSION)
 	public String upload() throws AccountNotFoundException {
@@ -144,7 +143,6 @@ public class AdministrationController {
 
 	@PostMapping("/create/app")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CreateWalletClient.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CreateWalletClient.PERMISSION)
 	public Object createApp(@Valid @RequestBody() WalletClientDTO walletClientDto) {
@@ -161,7 +159,6 @@ public class AdministrationController {
 
 	@PutMapping("/set/app/account/primary")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CreateWalletClient.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CreateWalletClient.PERMISSION)
 	public Object setPrimaryWallectClientAccount(
@@ -195,7 +192,6 @@ public class AdministrationController {
 
 	@PostMapping("/check/account/status")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION)
 	public Object checkUserAccountStatus(@Valid @RequestBody() CheckUserAccount checkUserAccount) {
@@ -204,7 +200,6 @@ public class AdministrationController {
 
 	@GetMapping("/users/getAll")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAllUsers.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.ViewAllUsers.PERMISSION)
 	public ResponseEntity<Object> getAllUsers(@RequestParam(name = "pageSize", defaultValue = "100") Integer pageSize,
@@ -217,7 +212,6 @@ public class AdministrationController {
 
 	@GetMapping("/user/corporate")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewCorporateUsers.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.ViewCorporateUsers.PERMISSION)
 	public Object getAllCorporateUser() {
@@ -226,7 +220,6 @@ public class AdministrationController {
 
 	@GetMapping("/user/search")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanSearchUsers.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CanSearchUsers.PERMISSION)
 	public Object searchUserbyPhone(@RequestParam(name = "queryString", required = true) String phone,
@@ -244,7 +237,6 @@ public class AdministrationController {
 
 	@PostMapping("/user/corporate/create")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CreateCorporateAccount.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CreateCorporateAccount.PERMISSION)
 	public Object createCorporateDetails(@Valid @RequestBody Corporate corporate) {
@@ -254,7 +246,6 @@ public class AdministrationController {
 
 	@PostMapping("/user/corporate/account/activate")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CheckUserAccountStatus.PERMISSION)
 	public Object activateCorporateAccount(@Valid @RequestBody VerifyCorporate request) {
@@ -263,7 +254,6 @@ public class AdministrationController {
 
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewCorporateUsers.PERMISSION + "')")
 	@IsCorporate()
-
 	@RequirePermission(GlobalPermissionConstants.ViewCorporateUsers.PERMISSION)
 	@GetMapping("/user/corporate/get")
 	public Object getCorporateEmails() {
@@ -271,7 +261,6 @@ public class AdministrationController {
 	}
 
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewLarkUsers.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.ViewLarkUsers.PERMISSION)
 	@GetMapping("/users/lark")
@@ -281,7 +270,6 @@ public class AdministrationController {
 	}
 
 	@IsCorporate()
-
 	@PostMapping("/role/create")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CreateUserRole.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CreateUserRole.PERMISSION)
@@ -295,7 +283,6 @@ public class AdministrationController {
 	}
 
 	@IsCorporate()
-
 	@PutMapping("/role/edit")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.EditRole.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.EditRole.PERMISSION)
@@ -306,7 +293,6 @@ public class AdministrationController {
 
 	@PostMapping("/user/attachRole")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.AssignUserRole.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.AssignUserRole.PERMISSION)
 	public Object attachUserToRole(@Valid @RequestBody UserRoleDTO userRole) {
@@ -434,7 +420,6 @@ public class AdministrationController {
 	}
 
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION)
@@ -444,7 +429,6 @@ public class AdministrationController {
 	}
 
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION)
@@ -455,7 +439,6 @@ public class AdministrationController {
 	}
 
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION)
@@ -467,7 +450,6 @@ public class AdministrationController {
 	}
 
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.ViewAccountAnalyticsSummary.PERMISSION)
@@ -497,7 +479,6 @@ public class AdministrationController {
 
 	@PostMapping("/user/wallet/pin/resetAttempts")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanResetPintattempts.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CanResetPintattempts.PERMISSION)
 	public Object resetWalletPinAttempts(@Valid @RequestBody PinReset req) {
@@ -506,7 +487,7 @@ public class AdministrationController {
 	}
 
 	@PostMapping("/user/wallet/pin/reset")
-
+	@IsCorporate()
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanResetUserPin.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CanResetUserPin.PERMISSION)
 	public Object resetWalletPin(@Valid @RequestBody PinReset req) {
@@ -525,7 +506,6 @@ public class AdministrationController {
 
 	@GetMapping("/wallet/pin/attempts")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION)
@@ -547,7 +527,6 @@ public class AdministrationController {
 
 	@GetMapping("/transaction/search")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.SearchTransaction.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.SearchTransaction.PERMISSION)
 	public ResponseEntity<Object> searchTransaction(
@@ -560,7 +539,6 @@ public class AdministrationController {
 
 	@PostMapping("account/statement")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanRequestAccountStatement.PERMISSION
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.CanRequestAccountStatement.PERMISSION)
@@ -573,7 +551,6 @@ public class AdministrationController {
 
 	@GetMapping("account/statement")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanRequestAccountStatement.PERMISSION
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.CanRequestAccountStatement.PERMISSION)
@@ -584,7 +561,6 @@ public class AdministrationController {
 
 	@GetMapping("analytics/onBoarding/trend")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAllAnalytics.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.ViewAllAnalytics.PERMISSION)
 	@Operation(summary = "Get user onboarding trend", description = "Get user onBoarding trend")
@@ -619,7 +595,6 @@ public class AdministrationController {
 
 	@GetMapping("analytics/spending")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAllAnalytics.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.ViewAllAnalytics.PERMISSION)
 	public ResponseEntity<Object> getTransactionBehaviour(@RequestParam(name = "year", required = false) Integer year,
@@ -642,7 +617,6 @@ public class AdministrationController {
 
 	@PostMapping("tarrif")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanCreateTarrif.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CanCreateTarrif.PERMISSION)
 	@Operation(summary = "Create a new tarrif", description = "Create tarrif that will show on client the ammount they are changed on transaction")
@@ -658,7 +632,6 @@ public class AdministrationController {
 
 	@GetMapping("tarrif")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanViewTariffs.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CanViewTariffs.PERMISSION)
 	public ResponseEntity<Object> getTariffs() {
@@ -667,7 +640,6 @@ public class AdministrationController {
 
 	@GetMapping("tarrif/filter")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanViewTariffs.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CanViewTariffs.PERMISSION)
 	public ResponseEntity<Object> filterTariffsByChannel(@Valid @RequestParam("channelType") ChannelType channelType) {
@@ -676,7 +648,6 @@ public class AdministrationController {
 
 	@PutMapping("tarrif")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanEditTariff.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CanEditTariff.PERMISSION)
 	public ResponseEntity<Object> editTarrif(@RequestParam("id") String id, @RequestBody() TariffDTO tariffDTO) {
@@ -685,7 +656,6 @@ public class AdministrationController {
 
 	@GetMapping("invoice/generate")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanGenerateInvoice.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CanGenerateInvoice.PERMISSION)
 	public ResponseEntity<Object> generateInvoice(
@@ -696,7 +666,6 @@ public class AdministrationController {
 
 	@GetMapping("invoice")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanViewInvoices.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CanViewInvoices.PERMISSION)
 	public ResponseEntity<Object> getInvoices(@RequestParam(name = "pageSize", defaultValue = "100") Integer pageSize,
@@ -706,7 +675,6 @@ public class AdministrationController {
 
 	@GetMapping("logs")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanViewLogs.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CanViewLogs.PERMISSION)
 	public ResponseEntity<Object> getLogs(
@@ -719,7 +687,6 @@ public class AdministrationController {
 
 	@GetMapping("logs/search")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanViewLogs.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CanViewLogs.PERMISSION)
 	public ResponseEntity<Object> searchLogs(@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
@@ -730,7 +697,6 @@ public class AdministrationController {
 
 	@GetMapping("account/check")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanSearchAccountInfo.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CanSearchAccountInfo.PERMISSION)
 	public ResponseEntity<Object> confirmAccount(@RequestParam(name = "idNumber") String idNumber) {
@@ -739,7 +705,6 @@ public class AdministrationController {
 
 	@GetMapping("lark/user/search")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.SearchLarkUsers.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.SearchLarkUsers.PERMISSION)
 	public ResponseEntity<Object> searchLarkUser(@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
@@ -750,7 +715,6 @@ public class AdministrationController {
 
 	@PostMapping("pin/reset/request")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanSearchAccountInfo.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CanSearchAccountInfo.PERMISSION)
 	public ResponseEntity<Object> requestPinReset(@Valid @RequestBody() PinResetDto request) {

@@ -45,7 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter implements Han
 			token = authHeader.substring(7);
 			if (token != null) {
 				try {
-					id = jwtService.extractUsername(token, JwtType.ACCESS_TOKEN);
+					id = jwtService.extractUsername(token);
 
 				} catch (UnsupportedJwtException e) {
 					throw e;

@@ -18,6 +18,7 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.sme.Sme;
@@ -86,13 +87,13 @@ public class JwtService {
 		}
 		return null;
 	}
-	
-	public String generateSmeMemberToken(User user,Sme sme) {
+
+	public String generateSmeMemberToken(User user, Sme sme) {
 		try {
 			Map<String, Object> claims = new HashMap<>();
 			claims.put("id", user.getId());
 			claims.put("token_type", "sme_member_token");
-			claims.put("sme_id",sme.getId());
+			claims.put("sme_id", sme.getId());
 			claims.put("firstName", user.getFirstName());
 			return Jwts.builder().setClaims(claims).setSubject(user.getId().toString()).setIssuedAt(new Date())
 					.setExpiration(new Date(System.currentTimeMillis() + jwtExpiryTime))// 10 days validity
@@ -231,6 +232,28 @@ public class JwtService {
 
 	}
 
+	public String extractUsername(String token, JwtType jwt, HttpServletRequest request)
+			throws MalformedJwtException, UnsupportedJwtException {
+		try {
+			if (Jwts.parserBuilder().setSigningKey(secretKey).build().isSigned(token)) {
+
+				Claims claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
+				if (!(claims.get("token_type").toString().equalsIgnoreCase(jwt.getToken()))) {
+					throw new UnsupportedJwtException("jwt supplied is not supported ");
+				}
+				return claims.getSubject();
+
+			} else {
+				return null;
+			}
+
+		} catch (MalformedJwtException e) {
+			System.out.println("exception");
+			throw e;
+		}
+
+	}
+
 	private Date extractExpiration(String token) {
 		Claims claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
 		return claims.getExpiration();
@@ -266,7 +289,7 @@ public class JwtService {
 				.signWith(secretKey, SignatureAlgorithm.HS256).compact();
 
 	}
-	
+
 	public String extractUserSmeId(String token) throws MalformedJwtException, UnsupportedJwtException {
 		try {
 			if (Jwts.parserBuilder().setSigningKey(secretKey).build().isSigned(token)) {
@@ -284,6 +307,5 @@ public class JwtService {
 		}
 
 	}
-	
 
 }
