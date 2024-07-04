@@ -50,6 +50,14 @@ public class SmeController {
 		return this.smeUserService.verifySmeUserOtp(SmeotpDto);
 	}
 	
+	
+	@SmeCorporate
+	@PostMapping("user")
+	@HasSmePermission(GlobalSmePermissionConstants.CanAddSmeUser.PERMISSION)
+	public ResponseEntity<Object> createSmeUser(@Valid @RequestBody() SmeCorporateDto smeUserDto){
+		return this.smeUserService.createSmeUser(smeUserDto.getUserId());
+	}
+	
 	@SmeCorporate
 	@GetMapping("roles")
 	@HasSmePermission(GlobalSmePermissionConstants.CanGetRoles.PERMISSION)
@@ -66,9 +74,12 @@ public class SmeController {
 	}
 	
 	@SmeCorporate
-	@PostMapping("user")
-	@HasSmePermission(GlobalSmePermissionConstants.CanAddSmeUser.PERMISSION)
-	public ResponseEntity<Object> createSmeUser(@Valid @RequestBody() SmeCorporateDto smeUserDto){
-		return this.smeUserService.createSmeUser(smeUserDto.getUserId());
+	@GetMapping("members")
+	@HasSmePermission(GlobalSmePermissionConstants.CanGetPermissions.PERMISSION)
+	public  ResponseEntity<Object> getSmeMembers(@RequestParam(name="pageNumber",required=true,defaultValue="0") Integer pageNumber, @RequestParam(name="pageSize",required=true,defaultValue="10") Integer pageSize ){
+		return  this.smeUserService.getSmeMembers(pageNumber, pageSize);
+				
 	}
+	
+	
 }

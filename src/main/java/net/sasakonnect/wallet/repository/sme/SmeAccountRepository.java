@@ -22,4 +22,6 @@ public interface SmeAccountRepository extends JpaRepository<SmeAccount, String> 
 
 	@Query("SELECT sa FROM SmeAccount sa  WHERE sa.appliactionId = :id")
 	Optional<SmeAccount> findSmeAccountByApplicationId(@Param("id") String id);
+	
+	Optional<SmeAccount> findByAccountNo(String accountNo);
 }

@@ -13,12 +13,14 @@ import org.springframework.stereotype.Component;
 
 import jakarta.transaction.Transactional;
 import net.sasakonnect.wallet.constant.GlobalPermissionConstants;
+import net.sasakonnect.wallet.constant.sme.GlobalSmeAccountPermissionConstants;
 import net.sasakonnect.wallet.constant.sme.GlobalSmePermissionConstants;
 import net.sasakonnect.wallet.domain.Bank;
 import net.sasakonnect.wallet.domain.Currency;
 import net.sasakonnect.wallet.domain.Permission;
 import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountPermissions;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmePermissions;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeRole;
 import net.sasakonnect.wallet.enums.EmploymentStatus;
@@ -307,6 +309,16 @@ public class AppBootLoader implements ApplicationListener<ApplicationReadyEvent>
 				.category(permissionData.get("category"))
 				.build();
 			this.smePermissionService.insertPermissionIfNotExistsOrUpdateDescription(permission);
+		});
+		
+		var smeaccPermissions = GlobalSmeAccountPermissionConstants.scan();
+		smeaccPermissions.forEach(permissionData -> {
+			var permission = SmeAccountPermissions.builder()
+				.description(permissionData.get("description"))
+				.name(permissionData.get("permission"))
+				.category(permissionData.get("category"))
+				.build();
+			this.smePermissionService.insertAccountPermissionIfNotExistsOrUpdateDescription(permission);
 		});
 		
 		Optional<User> user = this.userService.findUserByPhoneNumber("7999999999");
