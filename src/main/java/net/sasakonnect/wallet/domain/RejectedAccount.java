@@ -23,7 +23,7 @@ import net.sasakonnect.wallet.enums.MonthlyIncome;
 public class RejectedAccount extends BaseWalletDomain {
 	@Column
 	private String firstName;
-	
+
 	@Column
 	private String middleName;
 
@@ -49,10 +49,11 @@ public class RejectedAccount extends BaseWalletDomain {
 
 	@Column(nullable = false, unique = false, length = 50)
 	private String idNumber;
-   
+
 	@Column(length = 50, unique = false)
 	private String onboardingRequestId;
-
+	@Column(nullable = true, length = 50)
+	private String kenyaIdVersion;
 	@Column(nullable = false)
 	private Date birthday;
 
@@ -66,13 +67,13 @@ public class RejectedAccount extends BaseWalletDomain {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = true)
 	private MonthlyIncome monthlyIncome;
-	
+
 	@Column(nullable = true)
 	private String status;
-	
-	@Column(nullable=true)
+
+	@Column(nullable = true)
 	Date dateCreated;
-	
-	@Column(nullable=true)
+
+	@Column(nullable = true)
 	private String rejectionReason;
 }

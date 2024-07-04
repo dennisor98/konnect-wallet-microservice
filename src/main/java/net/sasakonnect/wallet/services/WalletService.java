@@ -76,6 +76,7 @@ import net.sasakonnect.wallet.enums.TransactionStatus;
 import net.sasakonnect.wallet.enums.WalletTransactionType;
 import net.sasakonnect.wallet.events.StatementGenerationEvent;
 import net.sasakonnect.wallet.events.TransactionEvent;
+import net.sasakonnect.wallet.notification.AccountClosureNotification;
 import net.sasakonnect.wallet.notification.AccountStatementReportNotification;
 import net.sasakonnect.wallet.notification.MultipleAccountOpeningResultNotification;
 import net.sasakonnect.wallet.notification.NotificationResult;
@@ -501,7 +502,7 @@ public class WalletService {
 					.mobile(easyOnboarding.getSerchablePhone()).idType(easyOnboarding.getIdTypeEnum())
 					.monthlyIncome(easyOnboarding.monthlyIncomeType()).kraPin(easyOnboarding.getKraPin())
 					.employmentStatus(easyOnboarding.getEmploymentStatusType()).idNumber(easyOnboarding.getIdNumber())
-					.build();
+					.kenyaIdVersion(easyOnboarding.getKenyaIdVersion()).build();
 
 			User su = this.userService.createUser(user);
 			var savedUser = this.userService.findUserAndWallets(su).get();
@@ -625,6 +626,7 @@ public class WalletService {
 					var rejected = RejectedAccount.builder().address(u.getAddress())
 							.employmentStatus(u.getEmploymentStatus()).countryCode(u.getCountryCode())
 							.birthday(u.getBirthday()).gender(u.getGender()).idNumber(u.getIdNumber())
+							.kenyaIdVersion(u.getKenyaIdVersion())
 							.rejectionReason(notificationBody.getRejectionReasonMsgs().stream().map(Object::toString)
 									.collect(Collectors.joining("\n")))
 							.idType(u.getIdType()).middleName(u.getMiddleName()).dateCreated(u.getCreatedAt())
@@ -895,6 +897,11 @@ public class WalletService {
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.BULK_UTILITY_PAYMENT.getCode())) {
 
+			} else if (notification_Type.equalsIgnoreCase(NotificationType.ACCOUNT_CLOSURE_NOTIFICATION.getCode())) {
+				NotificationResult<AccountClosureNotification> results = new Gson().fromJson(body.toString(),
+						new TypeToken<NotificationResult<AccountClosureNotification>>() {
+						}.getType());
+				this.userService.updateUserAccountCloser(results.getParams());
 			}
 		} catch (JsonSyntaxException e) {
 			// TODO Auto-generated catch block
@@ -1406,7 +1413,7 @@ public class WalletService {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	public ResponseEntity resendTransactionOtp(ResendTxOtpDto resendDto) {
 		return this.choiceBankSmsService.invokeResendSms(resendDto.getTransactionId());
 	}

@@ -22,6 +22,9 @@ public class Permission extends BaseWalletDomain implements Serializable {
 
 	@Column
 	private String description;
+	@Builder.Default
+	@Column(nullable = true, columnDefinition = "boolean default true")
+	private Boolean assignable = true;
 
 	// Constructors, getters, and setters go here
 

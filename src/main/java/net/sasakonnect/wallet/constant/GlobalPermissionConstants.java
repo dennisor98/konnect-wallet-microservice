@@ -658,7 +658,7 @@ public final class GlobalPermissionConstants {
 		}
 
 	}
-	
+
 	public static class CanGetEnterprise extends PermissionEntry {
 		public static final String PERMISSION = "can.get.enterprise";
 		public static final String DESCRIPTION = "can get enterprise information";
@@ -674,7 +674,7 @@ public final class GlobalPermissionConstants {
 		}
 
 	}
-	
+
 	public static class CanGenerateSmePassword extends PermissionEntry {
 		public static final String PERMISSION = "can.generate.sme.member.password";
 		public static final String DESCRIPTION = "can generate sme member password";
@@ -691,6 +691,59 @@ public final class GlobalPermissionConstants {
 
 	}
 
+	public static class CanRequestUserAccountCloser extends PermissionEntry {
+		public static final String PERMISSION = "can.request.user.account.closure";
+		public static final String DESCRIPTION = "can request user account closure";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+
+	}
+
+	public static class ChangeUserPhoneNumber extends PermissionEntry {
+		public static final String PERMISSION = "can.change.user.phonenumber";
+		public static final String DESCRIPTION = "can change user phone number";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+
+	}
+
+	public static class ConfirmChangeUserPhoneNumber extends PermissionEntry {
+		public static final String PERMISSION = "can.confirm.change.user.phonenumber";
+		public static final String DESCRIPTION = "can confirm change of user number operation";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+
+		}
+
+		@Override
+		public boolean getIsAssignable() {
+			return false;
+		}
+
+	}
 
 	public static Map<String, String> scan() {
 		Class<?>[] innerClasses = GlobalPermissionConstants.class.getDeclaredClasses();

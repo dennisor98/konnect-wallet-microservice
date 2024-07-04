@@ -54,6 +54,33 @@ public class ChoiceBankSmsService {
 
 	}
 
+	public Object invokeSmsV2(String businessId) {
+		executor.submit(() -> {
+
+			var reqId = new HashMap<String, Object>();
+			reqId.put("businessId", businessId);
+			reqId.put("otpType", "sms");
+			var reqs = requestSigner.signRequest(reqId);
+
+			Mono<String> responseMono = this.bankClientBean.webClient.post()
+					.uri(ChoiceEndpointsConstants.COMMON_V2_SEND_OTP).contentType(MediaType.APPLICATION_JSON)
+					.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+					.bodyToMono(String.class);
+
+			String responseJson = responseMono.block();
+			log.info(responseJson);
+			if (responseJson != null) {
+				return new Gson().fromJson(responseJson, Object.class);
+
+			}
+			return null;
+
+		});
+
+		return null;
+
+	}
+
 	public ResponseEntity invokeResendSms(String businessId) {
 		executor.submit(() -> {
 

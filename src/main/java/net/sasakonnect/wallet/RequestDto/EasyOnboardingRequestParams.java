@@ -25,7 +25,7 @@ import net.sasakonnect.wallet.enums.MonthlyIncome;
 @NoArgsConstructor
 public class EasyOnboardingRequestParams {
 	@NotBlank
-    @Pattern(regexp = "^[a-zA-Z]+$", message = "Only alphabetical characters are allowed")
+	@Pattern(regexp = "^[a-zA-Z]+$", message = "Only alphabetical characters are allowed")
 	String firstName;
 
 	String middleName;
@@ -53,6 +53,8 @@ public class EasyOnboardingRequestParams {
 
 	@NotBlank
 	String idNumber;
+
+	String kenyaIdVersion;
 	@Nullable()
 	String address;
 	@Nullable()
