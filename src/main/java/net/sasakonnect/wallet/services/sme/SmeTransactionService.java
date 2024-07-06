@@ -2,6 +2,7 @@ package net.sasakonnect.wallet.services.sme;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -22,6 +23,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.repository.WalletRepository;
+import net.sasakonnect.wallet.repository.sme.SmeAccountRolePermissionRepository;
+import net.sasakonnect.wallet.repository.sme.SmeAccountUserRoleRepository;
 import net.sasakonnect.wallet.repository.sme.SmeTransactionRepository;
 import net.sasakonnect.wallet.services.ChoiceBankSmsService;
 import net.sasakonnect.wallet.services.UserService;
@@ -30,16 +33,21 @@ import net.sasakonnect.wallet.tools.RequestSigner;
 import reactor.core.publisher.Mono;
 import net.sasakonnect.wallet.RequestDto.ChoiceTransferDto;
 import net.sasakonnect.wallet.RequestDto.WalletTransferDto;
+import net.sasakonnect.wallet.RequestDto.sme.ChoiceSmeTransferDto;
 import net.sasakonnect.wallet.ResponseDto.TransactionResponseDto;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
+import net.sasakonnect.wallet.constant.sme.GlobalSmeAccountPermissionConstants;
 import net.sasakonnect.wallet.domain.Logs;
 import net.sasakonnect.wallet.domain.Transaction;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.sme.Sme;
 import net.sasakonnect.wallet.domain.sme.SmeAccount;
+import net.sasakonnect.wallet.domain.sme.SmeAccountUserRole;
 import net.sasakonnect.wallet.domain.sme.SmeCorporate;
 import net.sasakonnect.wallet.domain.sme.SmeTransaction;
+import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountPermissions;
+import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountRolePermission;
 import net.sasakonnect.wallet.enums.LogTypes;
 import net.sasakonnect.wallet.notification.NotificationResult;
 import net.sasakonnect.wallet.notification.TransactionResultNotification;
@@ -67,6 +75,11 @@ public class SmeTransactionService {
    ChoiceBankSmsService choiceBankSmsService;
    @Autowired
    SmeAccountService smeAccountservice;
+   @Autowired
+   SmeAccountUserRoleRepository smeAccountUserRoleRepository;
+   @Autowired
+   SmeAccountRolePermissionRepository smeAccountRolePermissionsRepository;
+   
  
    
    public SmeTransaction saveTransaction(NotificationResult<TransactionResultNotification> results) {
@@ -110,7 +123,7 @@ public class SmeTransactionService {
 	   return this.smeTransactionRepository.findByTxId(txId);
    }
    
-   public Object applyForTransfer(@Valid ChoiceTransferDto choiceTransfer) {
+   public Object applyForTransfer(@Valid ChoiceSmeTransferDto choiceTransfer) {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 	   //verify that smeId in the authentication header is available
 	   HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
@@ -131,50 +144,67 @@ public class SmeTransactionService {
 		  }
 		  
 		  //check if user has transaction privileges in the provided payer account
-	  }
+		  if(this.userHasAccountPermission(smeAccount.get(), GlobalSmeAccountPermissionConstants.CanInvokeTransaction.PERMISSION)) {
+			  throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBIDDEN");
+		  }
+		  
+		  var reqId = new HashMap<String, Object>();
+			var receivingUser = this.userService.findUserByAccountd(choiceTransfer.getReceiverAccount().trim());
+			if (receivingUser.isPresent()) {
+				reqId.put("payeeMobileForNotification", receivingUser.get().getMobile());
+
+			}
+			reqId.put("payeeBankCode", choiceTransfer.getBankCode().trim());
+			reqId.put("payeeAccountId", choiceTransfer.getReceiverAccount().trim());
+			reqId.put("payeeAccountName", choiceTransfer.getReceiverName());
+			reqId.put("currency", choiceTransfer.getCurrencyCode());
+			reqId.put("amount", choiceTransfer.getAmount());
+			reqId.put("otpMobile", user.getMobile());
+			reqId.put("otpType", choiceTransfer.getOtpType());
+			reqId.put("remark", choiceTransfer.getRemarks());
+
+			var reqs = this.requestSigner.signRequest(reqId);
+
+			Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.WITHDRAW)
+					.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
+					.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
+
+			String responseJson = responseMono.block();
+			log.info(responseJson);
+			if (responseJson != null) {
+				var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
+				choiceBankSmsService.invokeSms(resp.getData().txId);
+				log.info(resp.getData().txId);
+				return resp;
+			}
+		}
        
-		var reqId = new HashMap<String, Object>();
-
-		var userWallets = this.walletRepository.findByUserWalletsUser(user);
 		
-		if (!userWallets.isEmpty()) {
-			var userwallet = userWallets.get(0);
-			reqId.put("payerAccountId", userwallet.getAccountId());
-          
-		}
-		var receivingUser = this.userService.findUserByAccountd(choiceTransfer.getReceiverAccount().trim());
-		if (receivingUser.isPresent()) {
-			reqId.put("payeeMobileForNotification", receivingUser.get().getMobile());
-
-		}
-
-		reqId.put("payeeBankCode", choiceTransfer.getBankCode().trim());
-
-		reqId.put("payeeAccountId", choiceTransfer.getReceiverAccount().trim());
-		reqId.put("payeeAccountName", choiceTransfer.getReceiverName());
-
-		reqId.put("currency", choiceTransfer.getCurrencyCode());
-		reqId.put("amount", choiceTransfer.getAmount());
-		reqId.put("otpMobile", user.getMobile());
-		reqId.put("otpType", choiceTransfer.getOtpType());
-		reqId.put("remark", choiceTransfer.getRemarks());
-
-		var reqs = this.requestSigner.signRequest(reqId);
-
-		Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.WITHDRAW)
-				.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
-				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
-
-		String responseJson = responseMono.block();
-		log.info(responseJson);
-		if (responseJson != null) {
-			var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
-			choiceBankSmsService.invokeSms(resp.getData().txId);
-			log.info(resp.getData().txId);
-			return resp;
-		}
 
 		// TODO Auto-generated method stub
 		return null;
 	}
+   
+   private boolean userHasAccountPermission(SmeAccount smeAccount,String permission) {
+	   User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	   HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+				.getRequest();
+	  String smeId =  this.smeUserService.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
+	  Optional<Sme> sme =  this.smeService.smeRepository.findById(smeId);
+	   Optional<SmeCorporate> smecorpOptional =  this.smeUserService.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
+	   if(smecorpOptional.isEmpty()) {
+		   return false;
+	   }
+	   Optional<SmeAccountUserRole> smeaccrole = this.smeAccountUserRoleRepository.findByCorporateAndSmeAccount(smecorpOptional.get(),smeAccount);
+	   if(smeaccrole.isEmpty()) {
+		   return false;
+	   }
+	   
+	   //check if user role has the required permission
+	   Optional<SmeAccountRolePermission> smeccpermissions = this.smeAccountRolePermissionsRepository.findRolePermissionByRoleAndPermission(smeaccrole.get().getRole(),permission);
+	   if(smeccpermissions.isEmpty()) {
+		   return false;
+	   }
+	   return true;
+   }
 }

@@ -12,34 +12,42 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import net.sasakonnect.wallet.RequestDto.sme.SmeAssignRoleDto;
+import net.sasakonnect.wallet.RequestDto.sme.SmeAssingRolePermissionDto;
 import net.sasakonnect.wallet.ResponseDto.sme.SmeAccRoleDto;
 import net.sasakonnect.wallet.ResponseDto.sme.SmeRoleDto;
-import net.sasakonnect.wallet.domain.Permission;
-import net.sasakonnect.wallet.domain.Role;
-import net.sasakonnect.wallet.domain.RolePermission;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.sme.Enterprise;
+import net.sasakonnect.wallet.domain.sme.Sme;
 import net.sasakonnect.wallet.domain.sme.SmeAccount;
+import net.sasakonnect.wallet.domain.sme.SmeAccountUserRole;
 import net.sasakonnect.wallet.domain.sme.SmeCorporate;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountRole;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmePermissions;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeRole;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeRolePermission;
+import net.sasakonnect.wallet.domain.sme.authorisation.SmeUserRole;
 import net.sasakonnect.wallet.repository.sme.EnterpriseRepository;
 import net.sasakonnect.wallet.repository.sme.SmeAccountRepository;
 import net.sasakonnect.wallet.repository.sme.SmeAccountRoleRepository;
+import net.sasakonnect.wallet.repository.sme.SmeAccountUserRoleRepository;
 import net.sasakonnect.wallet.repository.sme.SmePermissionRepository;
+import net.sasakonnect.wallet.repository.sme.SmeRepository;
 import net.sasakonnect.wallet.repository.sme.SmeRolePermissionRepository;
 import net.sasakonnect.wallet.repository.sme.SmeRoleRepository;
 import net.sasakonnect.wallet.repository.sme.SmeUserRoleRepository;
 import net.sasakonnect.wallet.tools.ResponsePagerClass;
 
+@Slf4j
 @Service
 public class SmeRoleService {
 	@Autowired
@@ -57,7 +65,15 @@ public class SmeRoleService {
 	@Autowired
 	SmeAccountRoleRepository smeAccountRoleRepository;
 	@Autowired
+	SmeAccountUserRoleRepository  smeAccountUserRoleRepository;
+	@Autowired
 	SmeUserService smeUserService;
+	@Autowired
+	SmeAccountService smeAccountService;
+	@Autowired
+	SmeRepository smeRepository;
+	
+	
 	public ResponseEntity<Object> createSmeRole(SmeRoleDto roleDto){
 		Optional<Enterprise> enteprise = this.enterpriseRepository.findById(roleDto.getEnterpriseId());
 		if(enteprise.isEmpty()) {
@@ -134,6 +150,162 @@ public class SmeRoleService {
 		}
 
 	}
+	
+	public ResponseEntity<Object> assignSmeUserRole(SmeAssignRoleDto roleDto) {
+		Optional<SmeCorporate> smeCorp =  this.smeUserService.smeCorporateRepository.findById(roleDto.getUser_id());
+		Optional<SmeRole> smeRole = this.smeRoleRepository.findById(roleDto.getRole_id());
+
+		if(smeCorp.isEmpty() && smeRole.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid information");
+		}
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+				.getRequest();
+		String smeId =  this.smeUserService.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
+		Optional<Sme> sme =  this.smeRepository.findById(smeId);
+		if(sme.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN,"FORBIDDEN");
+		}
+		var userRole =  SmeUserRole.builder().sme_role(smeRole.get()).smeAccount(sme.get()).user(smeCorp.get()).build();
+		try {
+			this.smeUserRoleRepository.save(userRole);
+			Map<String,Object> map =  new HashMap<>();
+			map.put("success",true);
+			map.put("message","Request completed.Role asssigned");
+			return ResponseEntity.status(HttpStatus.OK).body(map);
+		}catch(Exception ex) {
+			log.error(ex.getMessage());
+			Map<String,Object> map =  new HashMap<>();
+			map.put("success",false);
+			map.put("message","A server error encoutered");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+		}
+
+	}
+	
+	 @Transactional
+	    public ResponseEntity<Object> assignPermissionsToSmeRole(String[] permissionIds, String roleId) {
+	        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	        Optional<SmeRole> smerole = this.smeRoleRepository.findById(roleId);
+	        
+	        if (smerole.isPresent() && permissionIds.length > 0) {
+	            List<SmeRolePermission> rolePermissions = new ArrayList<>();
+	            
+	            for (String id : permissionIds) {
+	                Optional<SmePermissions> permission = this.smePermissionRepository.findById(id);
+	                
+	                if (permission.isPresent()) {
+	                    Optional<SmeRolePermission> rolePermission = this.smeRolePermissionRepository.findBySmeRoleAndSmePermission(smerole.get(), permission.get());
+	                    
+	                    if (rolePermission.isEmpty()) {
+	                        SmeRolePermission newRolePermission = SmeRolePermission.builder()
+	                                .smePermission(permission.get())
+	                                .smeRole(smerole.get())
+	                                .creator(user)
+	                                .build();
+	                        rolePermissions.add(newRolePermission);
+	                    }
+	                }
+	            }
+	            
+	            if (!rolePermissions.isEmpty()) {
+	                try {
+	                    this.smeRolePermissionRepository.saveAll(rolePermissions);
+	                    Map<String,Object> map  = new HashMap<>();
+	                    map.put("success",true);
+	                    map.put("message","A server error occured");
+	                    return ResponseEntity.status(HttpStatus.OK).body(map);
+	                } catch (Exception ex) {
+	                    log.error(ex.getMessage());
+	                    Map<String,Object> map  = new HashMap<>();
+	                    map.put("success",false);
+	                    map.put("message","A server error occured");
+	                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+	                }
+	            }
+	        }
+	        
+	        return null;
+	    }
+	 
+	 public ResponseEntity<Object> assignPermissionsToSmeAccountRole(SmeAssingRolePermissionDto roleDto){
+		  User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	        Optional<SmeRole> smerole = this.smeRoleRepository.findById(roleDto.getRole_id());
+	        
+	        if (smerole.isPresent() && roleDto.getPermissionIds().length > 0) {
+	        	List<SmeRolePermission> rolePermissions = new ArrayList<>();
+
+	        	for (String id : roleDto.getPermissionIds()) {
+	        		Optional<SmePermissions> permission = this.smePermissionRepository.findById(id);
+
+	        		if (permission.isPresent()) {
+	        			Optional<SmeRolePermission> rolePermission = this.smeRolePermissionRepository.findBySmeRoleAndSmePermission(smerole.get(), permission.get());
+
+	        			if (rolePermission.isEmpty()) {
+	        				SmeRolePermission newRolePermission = SmeRolePermission.builder()
+	        						.smePermission(permission.get())
+	        						.smeRole(smerole.get())
+	        						.creator(user)
+	        						.build();
+	        				rolePermissions.add(newRolePermission);
+	        			}
+	        		}
+	        	}
+	            
+	            if (!rolePermissions.isEmpty()) {
+	                try {
+	                    this.smeRolePermissionRepository.saveAll(rolePermissions);
+	                    Map<String,Object> map  = new HashMap<>();
+	                    map.put("success",true);
+	                    map.put("message","A server error occured");
+	                    return ResponseEntity.status(HttpStatus.OK).body(map);
+	                } catch (Exception ex) {
+	                    log.error(ex.getMessage());
+	                    Map<String,Object> map  = new HashMap<>();
+	                    map.put("success",false);
+	                    map.put("message","A server error occured");
+	                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+	                }
+	            }
+	        }
+	        
+	        return null;
+	 }
+	
+	public ResponseEntity<Object> assignSmeAccountRole(SmeAssignRoleDto roleDto) {
+		Optional<SmeCorporate> smeCorp =  this.smeUserService.smeCorporateRepository.findById(roleDto.getUser_id());
+		Optional<SmeAccountRole> smeRole = this.smeAccountRoleRepository.findById(roleDto.getRole_id());
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		if(smeCorp.isEmpty() && smeRole.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid information");
+		}
+		
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+				.getRequest();
+		String smeId =  this.smeUserService.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
+		Optional<Sme> sme =  this.smeRepository.findById(smeId);
+		if(sme.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN,"FORBIDDEN");
+		}
+		
+		if(smeCorp.get().getSmes().getId().equalsIgnoreCase(smeId)) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN,"FORBIDDEN");
+		}
+		var userRole =  SmeAccountUserRole.builder().role(smeRole.get()).smeCorporate(smeCorp.get()).user(user).build();
+		try {
+			this.smeAccountUserRoleRepository.save(userRole);
+			Map<String,Object> map =  new HashMap<>();
+			map.put("success",true);
+			map.put("message","Request completed.Role asssigned");
+			return ResponseEntity.status(HttpStatus.OK).body(map);
+		}catch(Exception ex) {
+			log.error(ex.getMessage());
+			Map<String,Object> map =  new HashMap<>();
+			map.put("success",false);
+			map.put("message","A server error encoutered");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+		}
+
+	} 
 	
   
   public ResponseEntity<Object> getRoles(Integer pageNumber,Integer pageSize){

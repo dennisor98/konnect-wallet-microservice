@@ -11,6 +11,7 @@ import net.sasakonnect.wallet.RequestDto.ChoiceTransferDto;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ChoiceSmeTransferDto {
+	String payerAccountNumber;
 	String bankCode;
 	String receiverName;
 	String receiverAccount;

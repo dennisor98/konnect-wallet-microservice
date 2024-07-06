@@ -144,6 +144,117 @@ public class GlobalSmePermissionConstants {
 
 	}
 	
+	public static class CanAssignSmeRole extends SmePermissionEntry{
+		public static final String PERMISSION = "can.assign.sme.role";
+		public static final String DESCRIPTION = "can assign sme role to a user";
+		public static final String CATEGORY = "role";
+
+		@Override
+		String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+
+		@Override
+		String getCATEGORY() {
+			return CATEGORY;
+		}
+
+	}
+	
+	public static class CanCreateSmeRole extends SmePermissionEntry{
+		public static final String PERMISSION = "can.create.sme.role";
+		public static final String DESCRIPTION = "can create sme role";
+		public static final String CATEGORY = "role";
+
+		@Override
+		String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+
+		@Override
+		String getCATEGORY() {
+			return CATEGORY;
+		}
+
+	}
+	
+	public static class CanCreateSmeAccountRole extends SmePermissionEntry{
+		public static final String PERMISSION = "can.create.sme..account.role";
+		public static final String DESCRIPTION = "can assign sme account role ";
+		public static final String CATEGORY = "role";
+
+		@Override
+		String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+
+		@Override
+		String getCATEGORY() {
+			return CATEGORY;
+		}
+
+	}
+	
+	public static class CanAssignAccountRole extends SmePermissionEntry{
+		public static final String PERMISSION = "can.assign.account.role";
+		public static final String DESCRIPTION = "can assign account role to a user";
+		public static final String CATEGORY = "role";
+
+		@Override
+		String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+
+		@Override
+		String getCATEGORY() {
+			return CATEGORY;
+		}
+
+	}
+	
+	public static class CanAssignRolePermissions extends SmePermissionEntry{
+		public static final String PERMISSION = "can.assign.permissions.role";
+		public static final String DESCRIPTION = "can assign permissions to a role";
+		public static final String CATEGORY = "role";
+
+		@Override
+		String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+
+		@Override
+		String getCATEGORY() {
+			return CATEGORY;
+		}
+
+	}
+	
+	
 	public static class CanCreatePaySlip extends SmePermissionEntry{
 		public static final String PERMISSION = "can.create.payslip";
 		public static final String DESCRIPTION = "can create a payslip";

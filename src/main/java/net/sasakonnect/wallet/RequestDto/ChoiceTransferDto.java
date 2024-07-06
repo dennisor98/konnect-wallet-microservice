@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 
 public class ChoiceTransferDto {
-	String payerAccountNumber;
 	String bankCode;
 	String receiverName;
 	String receiverAccount;
