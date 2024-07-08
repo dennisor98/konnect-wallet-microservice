@@ -65,6 +65,8 @@ import net.sasakonnect.wallet.domain.UserJob;
 import net.sasakonnect.wallet.domain.UserPin;
 import net.sasakonnect.wallet.domain.UserWallet;
 import net.sasakonnect.wallet.domain.Wallet;
+import net.sasakonnect.wallet.domain.sme.SmeAccount;
+import net.sasakonnect.wallet.domain.sme.SmeTransaction;
 import net.sasakonnect.wallet.enums.LogTypes;
 import net.sasakonnect.wallet.enums.NotificationBody;
 import net.sasakonnect.wallet.enums.NotificationTargetType;
@@ -88,7 +90,9 @@ import net.sasakonnect.wallet.repository.UserJobRepository;
 import net.sasakonnect.wallet.repository.UserWalletRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.services.extensions.LarkUtilityService;
+import net.sasakonnect.wallet.services.sme.SmeAccountService;
 import net.sasakonnect.wallet.services.sme.SmeService;
+import net.sasakonnect.wallet.services.sme.SmeTransactionService;
 import net.sasakonnect.wallet.services.sme.SmeUserService;
 import net.sasakonnect.wallet.tools.RequestSigner;
 import reactor.core.publisher.Mono;
@@ -114,7 +118,7 @@ public class WalletService {
 	@Autowired
 	LarkUtilityService larkUtilityService;
 	@Autowired
-	SmeService smeAccountService;
+	SmeService smeService;
 
 	@Autowired
 	WalletRepository walletRepository;
@@ -150,6 +154,11 @@ public class WalletService {
 	LogsRepository logsRepository;
 	@Autowired
 	TransactionEventService transactionEventService;
+	@Autowired
+	SmeTransactionService smeTransactionService;
+	
+	@Autowired
+	SmeAccountService smeAccountService;
 
 	@Value("${internetTillNumber}")
 	String internetTillNumber;
@@ -681,13 +690,13 @@ public class WalletService {
 
 				NotificationResult<TransactionResultNotification> results = new Gson().fromJson(body.toString(),
 						new TypeToken<NotificationResult<TransactionResultNotification>>() {
-						}.getType());
+				}.getType());
 				this.processTransaction(results);
 
 				var reqParams = results.getParams();
-//				if()
+				//				if()
 
-				if (reqParams.getTxStatus() == 8) {
+				if (reqParams.getTxStatus() == 8  && reqParams.getAccountId() !=null) {
 					var fContact = FinancialContact.builder().accountId(reqParams.getAccountId())
 							.oppoAccountId(reqParams.getOppoAccountId()).oppoSubAccountId(reqParams.getOppoSubAccount())
 							.txType(reqParams.getTxType()).oppoAccountName(reqParams.getExtInfo().getCounterpartyName())
@@ -696,98 +705,117 @@ public class WalletService {
 					this.financialContactService.saveTransactionContact(fContact);
 				}
 
-//				log.info("transacttion {}", results);
+				//				log.info("transacttion {}", results);
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.BALANCE.getCode())) {
 
 				NotificationResult<TransactionResultNotification> results = new Gson().fromJson(body.toString(),
 						new TypeToken<NotificationResult<TransactionResultNotification>>() {
-						}.getType());
-//				log.info("balance update {}", results);
+				}.getType());
+				//				log.info("balance update {}", results);
+				Optional<SmeAccount> smeAccountOptional = this.smeAccountService.findSmeAccountByAccountId(results.getParams().getAccountId());
+				if(smeAccountOptional.isPresent()) {
+					Optional<SmeTransaction> transactionOptional = this.smeTransactionService.findSmeTransactionByTxId(results.getParams().getTxId());
+					if(transactionOptional.isPresent()) {
+						var transaction = transactionOptional.get();
+						transaction.setTxStatus(results.getParams().getTxStatus());
+						transaction.setCounterpartyName(results.getParams().getExtInfo().getCounterpartyName());
+						transaction.setExternalTxId(results.getParams().getExtInfo().getExternalTxId());
+						transaction.setRemarks(results.getParams().getErrorMsg());
+						this.smeTransactionService.smeTransactionRepository.save(transaction);
+					}else{
+						var createdTransaction = this.smeTransactionService.saveTransaction(results);
+						if (createdTransaction != null) {
+							log.info("publish transaction to socket {}", createdTransaction);
 
-				var transaction = this.transactionService.getTransactionById(results.getParams().getTxId());
-
-				if (transaction.isPresent() && this.transactionService.isUpdatableTransaction(results)) {
-					var reqParams = results.getParams();
-					log.info("existing transaction" + results);
-					transaction.get().setTxStatus(8);
-					transaction.get().setBalance(new BigDecimal(results.getParams().getBalance()));
-					transaction.get().setRemarks(results.getParams().getErrorMsg());
-					if (results.getParams().getExtInfo().getCounterpartyName() == null) {
-						transaction.get().setCounterpartyName(transaction.get().getCounterpartyName());
+//							this.publisher.publishEvent(
+//									TransactionEvent.builder().userService(userService).transaction(createdTransaction).build());
+						}
 					}
+				}else {
+					var transaction = this.transactionService.getTransactionById(results.getParams().getTxId());
 
-					this.transactionService.transactionRepository.save(transaction.get());
-
-					this.publisher.publishEvent(
-							TransactionEvent.builder().userService(userService).transaction(transaction.get()).build());
-					if (reqParams.getTxStatus() == 8) {
-						var fContact = FinancialContact.builder().accountId(reqParams.getAccountId())
-								.oppoAccountId(reqParams.getOppoAccountId())
-								.oppoSubAccountId(reqParams.getOppoSubAccount()).txType(reqParams.getTxType())
-								.oppoAccountName(reqParams.getExtInfo().getCounterpartyName())
-								.oppoBankCode(reqParams.getOppoBankCode()).oppoChannelId(reqParams.getOppoChannelId())
-								.build();
-						this.financialContactService.saveTransactionContact(fContact);
-
-					} else {
-
-					}
-
-				} else {
-					var reqParams = results.getParams();
-					log.info("new transaction" + results);
-					if (results.getParams().getTxStatus() == 0) {
-						results.getParams().setTxStatus(8);
-
-					}
-					var createdTransaction = this.transactionService.saveTransaction(results);
-					if (createdTransaction != null) {
-//						log.info("publish transaction to socket {}", createdTransaction);
-						this.publisher.publishEvent(TransactionEvent.builder().userService(userService)
-								.transaction(createdTransaction).build());
-
-						if ((results.getParams().getTxType().equalsIgnoreCase(WalletTransactionType.TTID0001.getValue())
-								|| results.getParams().getTxType()
-										.equalsIgnoreCase(WalletTransactionType.TTID0002.getValue()))
-								&& results.getParams().getOppoAccountId().length() == 9
-								&& (results.getParams().getOppoBankCode().equalsIgnoreCase("M-PESA")
-										|| results.getParams().getOppoChannelId().equalsIgnoreCase("M-PESA"))) {
-							transactionEventService.notifyNewCustomer(results.getParams().getAccountId(),
-									results.getParams().getOppoAccountId());
-
+					if (transaction.isPresent() && this.transactionService.isUpdatableTransaction(results)) {
+						var reqParams = results.getParams();
+						log.info("existing transaction" + results);
+						transaction.get().setTxStatus(8);
+						transaction.get().setBalance(new BigDecimal(results.getParams().getBalance()));
+						transaction.get().setRemarks(results.getParams().getErrorMsg());
+						if (results.getParams().getExtInfo().getCounterpartyName() == null) {
+							transaction.get().setCounterpartyName(transaction.get().getCounterpartyName());
 						}
 
-						if (results.getParams().getTxType()
-								.equalsIgnoreCase(WalletTransactionType.TTID0011.getValue())) {
-							Optional<User> user = this.userService
-									.findUserByAccountd(results.getParams().getAccountId());
-							var ntf = Notifications.builder().title("REVERSAL ALERT")
-									.message("Dear " + user.get().getFirstName() + " " + user.get().getLastName()
-											+ ",your request for reversal of "
-											+ (new BigDecimal(results.getParams().getAmount()).abs())
-											+ "was successful. Transaction ID: " + results.getParams().getTxId())
-									.targetType(NotificationTargetType.INDIVIDUAL.getValue()).targetUser(user.get())
-									.build();
+						this.transactionService.transactionRepository.save(transaction.get());
 
-							this.notificationService.save(ntf);
-
-						}
-
+						this.publisher.publishEvent(
+								TransactionEvent.builder().userService(userService).transaction(transaction.get()).build());
 						if (reqParams.getTxStatus() == 8) {
 							var fContact = FinancialContact.builder().accountId(reqParams.getAccountId())
 									.oppoAccountId(reqParams.getOppoAccountId())
 									.oppoSubAccountId(reqParams.getOppoSubAccount()).txType(reqParams.getTxType())
 									.oppoAccountName(reqParams.getExtInfo().getCounterpartyName())
-									.oppoBankCode(reqParams.getOppoBankCode())
-									.oppoChannelId(reqParams.getOppoChannelId()).build();
+									.oppoBankCode(reqParams.getOppoBankCode()).oppoChannelId(reqParams.getOppoChannelId())
+									.build();
 							this.financialContactService.saveTransactionContact(fContact);
+
+						} else {
+
+						}
+
+					} else {
+						var reqParams = results.getParams();
+						log.info("new transaction" + results);
+						if (results.getParams().getTxStatus() == 0) {
+							results.getParams().setTxStatus(8);
+
+						}
+						var createdTransaction = this.transactionService.saveTransaction(results);
+						if (createdTransaction != null) {
+							//						log.info("publish transaction to socket {}", createdTransaction);
+							this.publisher.publishEvent(TransactionEvent.builder().userService(userService)
+									.transaction(createdTransaction).build());
+
+							if ((results.getParams().getTxType().equalsIgnoreCase(WalletTransactionType.TTID0001.getValue())
+									|| results.getParams().getTxType()
+									.equalsIgnoreCase(WalletTransactionType.TTID0002.getValue()))
+									&& results.getParams().getOppoAccountId().length() == 9
+									&& (results.getParams().getOppoBankCode().equalsIgnoreCase("M-PESA")
+											|| results.getParams().getOppoChannelId().equalsIgnoreCase("M-PESA"))) {
+								transactionEventService.notifyNewCustomer(results.getParams().getAccountId(),
+										results.getParams().getOppoAccountId());
+
+							}
+
+							if (results.getParams().getTxType()
+									.equalsIgnoreCase(WalletTransactionType.TTID0011.getValue())) {
+								Optional<User> user = this.userService
+										.findUserByAccountd(results.getParams().getAccountId());
+								var ntf = Notifications.builder().title("REVERSAL ALERT")
+										.message("Dear " + user.get().getFirstName() + " " + user.get().getLastName()
+												+ ",your request for reversal of "
+												+ (new BigDecimal(results.getParams().getAmount()).abs())
+												+ "was successful. Transaction ID: " + results.getParams().getTxId())
+										.targetType(NotificationTargetType.INDIVIDUAL.getValue()).targetUser(user.get())
+										.build();
+
+								this.notificationService.save(ntf);
+
+							}
+
+							if (reqParams.getTxStatus() == 8) {
+								var fContact = FinancialContact.builder().accountId(reqParams.getAccountId())
+										.oppoAccountId(reqParams.getOppoAccountId())
+										.oppoSubAccountId(reqParams.getOppoSubAccount()).txType(reqParams.getTxType())
+										.oppoAccountName(reqParams.getExtInfo().getCounterpartyName())
+										.oppoBankCode(reqParams.getOppoBankCode())
+										.oppoChannelId(reqParams.getOppoChannelId()).build();
+								this.financialContactService.saveTransactionContact(fContact);
+							}
+
 						}
 
 					}
-
 				}
-
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.INTERNAL_BATCH_TRANSACTION.getCode())) {
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.WALLET_ACCOUNT_UPGRADE.getCode())) {
@@ -837,7 +865,7 @@ public class WalletService {
 						new TypeToken<NotificationResult<SmeAccountOpeningResultNotification>>() {
 						}.getType());
 				log.info("Sme account Opening", results);
-				this.smeAccountService.updateAccountinfo(results);
+				this.smeService.updateAccountinfo(results);
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.UTILITY.getCode())) {
 
@@ -863,7 +891,7 @@ public class WalletService {
 						body.toString(), new TypeToken<NotificationResult<MultipleAccountOpeningResultNotification>>() {
 						}.getType());
 				log.info("Sme account Opening", results);
-				this.smeAccountService.updateMulitpleAccountinfo(results);
+				this.smeService.updateMulitpleAccountinfo(results);
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.FOREIGN_CURRENCY_EXCHANGE.getCode())) {
 
@@ -887,24 +915,48 @@ public class WalletService {
 
 	@Transactional
 	private void processTransaction(NotificationResult<TransactionResultNotification> results) {
-		Optional<Transaction> transaction = this.transactionService.getTransactionById(results.getParams().getTxId());
+		Optional<SmeAccount> smeAccountOptional = this.smeAccountService.findSmeAccountByAccountId(results.getParams().getAccountId());
+		var params = results.getParams();
+		if(smeAccountOptional.isPresent()) {
+			Optional<SmeTransaction> transactionOptional = this.smeTransactionService.findSmeTransactionByTxId(params.getTxId());
+			if(transactionOptional.isPresent()) {
+				var transaction = transactionOptional.get();
+				transaction.setTxStatus(results.getParams().getTxStatus());
+				transaction.setCounterpartyName(results.getParams().getExtInfo().getCounterpartyName());
+				transaction.setExternalTxId(results.getParams().getExtInfo().getExternalTxId());
+				transaction.setRemarks(results.getParams().getErrorMsg());
+				this.smeTransactionService.smeTransactionRepository.save(transaction);
+			}else{
+				var createdTransaction = this.transactionService.saveTransaction(results);
+				if (createdTransaction != null) {
+					log.info("publish transaction to socket {}", createdTransaction);
 
-		if (transaction.isPresent()) {
-			transaction.get().setTxStatus(results.getParams().getTxStatus());
-			transaction.get().setCounterpartyName(results.getParams().getExtInfo().getCounterpartyName());
-			transaction.get().setExternalTxId(results.getParams().getExtInfo().getExternalTxId());
-			transaction.get().setRemarks(results.getParams().getErrorMsg());
-			var createdTransaction = this.transactionService.transactionRepository.save(transaction.get());
+					this.publisher.publishEvent(
+							TransactionEvent.builder().userService(userService).transaction(createdTransaction).build());
+				}
+			}
 
-		} else {
-			var createdTransaction = this.transactionService.saveTransaction(results);
-			if (createdTransaction != null) {
-				log.info("publish transaction to socket {}", createdTransaction);
+		}else{
+			Optional<Transaction> transaction = this.transactionService.getTransactionById(params.getTxId());
 
-				this.publisher.publishEvent(
-						TransactionEvent.builder().userService(userService).transaction(createdTransaction).build());
+			if (transaction.isPresent()) {
+				transaction.get().setTxStatus(results.getParams().getTxStatus());
+				transaction.get().setCounterpartyName(results.getParams().getExtInfo().getCounterpartyName());
+				transaction.get().setExternalTxId(results.getParams().getExtInfo().getExternalTxId());
+				transaction.get().setRemarks(results.getParams().getErrorMsg());
+				var createdTransaction = this.transactionService.transactionRepository.save(transaction.get());
+
+			} else {
+				var createdTransaction = this.transactionService.saveTransaction(results);
+				if (createdTransaction != null) {
+					log.info("publish transaction to socket {}", createdTransaction);
+
+					this.publisher.publishEvent(
+							TransactionEvent.builder().userService(userService).transaction(createdTransaction).build());
+				}
 			}
 		}
+
 	}
 
 	public Object confirmOnboardingOtp(@Valid OnboardingOtp otp) {
@@ -1295,10 +1347,10 @@ public class WalletService {
 			map.put("success", "false");
 
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(map);
-		}
+	
+	}
 		// return null;
 	}
-
 	public Object confirmOtpTransfer(OtpTransfer otpTransfer) {
 
 		return this.choiceBankSmsService.confirmOperation(otpTransfer.getTxId(), otpTransfer.getOtp());

@@ -15,8 +15,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
+import net.sasakonnect.wallet.RequestDto.sme.SmeAssignRoleDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmeUserLogin;
+import net.sasakonnect.wallet.ResponseDto.sme.SmeAccRoleDto;
 import net.sasakonnect.wallet.ResponseDto.sme.SmeCorporateDto;
+import net.sasakonnect.wallet.ResponseDto.sme.SmeRoleDto;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.sme.HasSmePermission;
 import net.sasakonnect.wallet.annotations.sme.SmeCorporate;
@@ -50,10 +53,68 @@ public class SmeController {
 		return this.smeUserService.verifySmeUserOtp(SmeotpDto);
 	}
 	
+	
+	@SmeCorporate
+	@PostMapping("user")
+	@HasSmePermission(GlobalSmePermissionConstants.CanAddSmeUser.PERMISSION)
+	public ResponseEntity<Object> createSmeUser(@Valid @RequestBody() SmeCorporateDto smeUserDto){
+		return this.smeUserService.createSmeUser(smeUserDto.getUserId());
+	}
+	
+	@SmeCorporate
+	@HasSmePermission(GlobalSmePermissionConstants.CanCreateSmeRole.PERMISSION)
+	@PostMapping("role")
+	public ResponseEntity<Object> createSmeRole(@Valid @RequestBody() SmeRoleDto roleDto){
+		return this.createSmeRole(roleDto);
+	}
+	
+	@SmeCorporate
+	@HasSmePermission(GlobalSmePermissionConstants.CanCreateSmeAccountRole.PERMISSION)
+	@PostMapping("account/role")
+	public ResponseEntity<Object> createSmeAccountRole(@Valid @RequestBody() SmeAccRoleDto roleDto){
+		return this.smeRoleService.createSmeAccRole(roleDto);
+	}
+	
+	@SmeCorporate
+	@HasSmePermission(GlobalSmePermissionConstants.CanAssignSmeRole.PERMISSION)
+	@PostMapping("user/assignRole")
+	public ResponseEntity<Object> assignRole(@Valid @RequestBody() SmeAssignRoleDto roleDto){
+		return this.smeRoleService.assignSmeUserRole(roleDto);
+	}
+	
+	@SmeCorporate
+	@HasSmePermission(GlobalSmePermissionConstants.CanAssignAccountRole.PERMISSION)
+	@PostMapping("user/account/assignRole")
+	public ResponseEntity<Object> assignAccountRole(@Valid @RequestBody() SmeAssignRoleDto roleDto){
+		return this.smeRoleService.assignSmeAccountRole(roleDto);
+	}
+	
+	@SmeCorporate
+	@HasSmePermission(GlobalSmePermissionConstants.CanAssignRolePermissions.PERMISSION)
+	@PostMapping("role/assign/permissions")
+	public ResponseEntity<Object> assignSmeRolePermissions(@Valid @RequestBody() SmeAssignRoleDto roleDto){
+		return this.assignSmeRolePermissions(roleDto);
+	}
+	
+	@SmeCorporate
+	@HasSmePermission(GlobalSmePermissionConstants.CanAssignRolePermissions.PERMISSION)
+	@PostMapping("account/role/assign/permissions")
+	public ResponseEntity<Object> assignSmeAccountRolePermissions(@Valid @RequestBody()SmeAssignRoleDto roleDto){
+		return this.assignSmeAccountRolePermissions(roleDto);
+	}
+	
+	
 	@SmeCorporate
 	@GetMapping("roles")
 	@HasSmePermission(GlobalSmePermissionConstants.CanGetRoles.PERMISSION)
 	public  ResponseEntity<Object> getRoles(@RequestParam(name="pageNumber",required=true,defaultValue="0") Integer pageNumber, @RequestParam(name="pageSize",required=true,defaultValue="10") Integer pageSize){
+		return this.smeRoleService.getRoles(pageNumber, pageSize);
+	}
+	
+	@SmeCorporate
+	@GetMapping("account/roles")
+	@HasSmePermission(GlobalSmePermissionConstants.CanGetRoles.PERMISSION)
+	public  ResponseEntity<Object> getAccountRoles(@RequestParam(name="pageNumber",required=true,defaultValue="0") Integer pageNumber, @RequestParam(name="pageSize",required=true,defaultValue="10") Integer pageSize){
 		return this.smeRoleService.getRoles(pageNumber, pageSize);
 	}
 	
@@ -66,9 +127,14 @@ public class SmeController {
 	}
 	
 	@SmeCorporate
-	@PostMapping("user")
-	@HasSmePermission(GlobalSmePermissionConstants.CanAddSmeUser.PERMISSION)
-	public ResponseEntity<Object> createSmeUser(@Valid @RequestBody() SmeCorporateDto smeUserDto){
-		return this.smeUserService.createSmeUser(smeUserDto.getUserId());
+	@GetMapping("members")
+	@HasSmePermission(GlobalSmePermissionConstants.CanGetPermissions.PERMISSION)
+	public  ResponseEntity<Object> getSmeMembers(@RequestParam(name="pageNumber",required=true,defaultValue="0") Integer pageNumber, @RequestParam(name="pageSize",required=true,defaultValue="10") Integer pageSize ){
+		return  this.smeUserService.getSmeMembers(pageNumber, pageSize);
+				
 	}
+	
+	
+	
+	
 }

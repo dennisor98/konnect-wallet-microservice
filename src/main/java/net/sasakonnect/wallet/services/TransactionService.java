@@ -43,6 +43,7 @@ import net.sasakonnect.wallet.notification.TransactionResultNotification;
 import net.sasakonnect.wallet.repository.LogsRepository;
 import net.sasakonnect.wallet.repository.TransactionRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
+import net.sasakonnect.wallet.services.sme.SmeAccountService;
 import net.sasakonnect.wallet.tools.RequestSigner;
 import reactor.core.publisher.Mono;
 @Slf4j
@@ -62,7 +63,10 @@ public class TransactionService {
 	
 	@Autowired
 	UserService userService;
+    @Autowired
+    
 
+    SmeAccountService smeAccountService;
 	public Transaction saveTransaction(NotificationResult<TransactionResultNotification> results) {
 		var trans = results.getParams();
 		var existingTransaction = this.transactionRepository.findByTxId(trans.getTxId());
@@ -82,14 +86,19 @@ public class TransactionService {
 					.oppoAccountName(trans.getOppoAccountName()).thirdPartyTxType(trans.getThirdPartyTxType())
 					.counterpartyName(trans.getExtInfo().getCounterpartyName())
 					.currency(trans.getCurrency()).amount(new BigDecimal(trans.getAmount())).build();
-			User user = this.userService.findUserByAccountd(trans.getAccountId()).get();
-			var log = Logs.builder()
-					.description(user.getFirstName()+" "+user.getLastName()+"of acc No:"+trans.getAccountId()
-					+" invoked a transaction with id"+trans.getTxId()+"of amount"+trans.getAmount() +"to" +"acc No:"+trans.getOppoAccountId())
-					.activity(LogTypes.TRANSACTION)
-					.build();
-			this.logsRepository.save(log);
+			Optional<User> user = this.userService.findUserByAccountd(trans.getAccountId());
+			if(user.isPresent()) {
+				var u = user.get();
+				var log = Logs.builder()
+						.description(u.getFirstName()+" "+u.getLastName()+"of acc No:"+trans.getAccountId()
+						+" invoked a transaction with id"+trans.getTxId()+"of amount"+trans.getAmount() +"to" +"acc No:"+trans.getOppoAccountId())
+						.activity(LogTypes.TRANSACTION)
+						.build();
+				this.logsRepository.save(log);
+			}
 			return this.transactionRepository.save(transaction);
+
+			
 			
 		} else {
 //			var transaction = Transaction.builder().txId(trans.getTxId()).txType(trans.getTxType())
