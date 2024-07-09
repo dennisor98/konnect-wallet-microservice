@@ -46,6 +46,8 @@ import net.sasakonnect.wallet.RequestDto.WalletClientDTO;
 import net.sasakonnect.wallet.RequestDto.WalletClientUpdateDto;
 import net.sasakonnect.wallet.RequestDto.admin.CheckUserAccount;
 import net.sasakonnect.wallet.RequestDto.admin.PinReset;
+import net.sasakonnect.wallet.RequestDto.sme.ChangeUserPhoneNumberDto;
+import net.sasakonnect.wallet.RequestDto.sme.ConfirmPhoneNumberChangeDto;
 import net.sasakonnect.wallet.RequestDto.tarrif.TariffDTO;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.IsCorporate;
@@ -784,21 +786,21 @@ public class AdministrationController {
 		return this.transactionService.getAccountTransactionSummary(userId, period);
 	}
 
-//	@PostMapping("user/change/phonenumber")
-//	@IsCorporate()
-//	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ChangeUserPhoneNumber.PERMISSION + "')")
-//	@RequirePermission(GlobalPermissionConstants.ChangeUserPhoneNumber.PERMISSION)
-//	public Object changeUserPhoneNumber(@Valid @RequestBody() ChangeUserPhoneNumberDto request) {
-//		return this.userService.changeUserPhoneNumber(request);
-//	}
+	@PostMapping("user/change/phonenumber")
+	@IsCorporate()
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ChangeUserPhoneNumber.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.ChangeUserPhoneNumber.PERMISSION)
+	public Object changeUserPhoneNumber(@Valid @RequestBody() ChangeUserPhoneNumberDto request) {
+		return this.userService.changeUserPhoneNumber(request);
+	}
 
-//	@PostMapping("user/confirm/change/phonenumber")
-//	@IsCorporate()
-//	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ConfirmChangeUserPhoneNumber.PERMISSION
-//			+ "')")
-//	@RequirePermission(GlobalPermissionConstants.ConfirmChangeUserPhoneNumber.PERMISSION)
-//	public Object confirmPhoneChange(@Valid @RequestBody() ConfirmPhoneNumberChangeDto request) {
-//		return this.userService.confirmPhoneChange(request);
-//	}
+	@PostMapping("user/confirm/change/phonenumber")
+	@IsCorporate()
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ConfirmChangeUserPhoneNumber.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.ConfirmChangeUserPhoneNumber.PERMISSION)
+	public Object confirmPhoneChange(@Valid @RequestBody() ConfirmPhoneNumberChangeDto request) {
+		return this.userService.confirmPhoneChange(request);
+	}
 
 }

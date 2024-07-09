@@ -1,25 +1,17 @@
 package net.sasakonnect.wallet.enums;
 
 public enum ClosureReason {
-	NO_LONGER_USING_ACCOUNT("I'm no longer using the account"),
-	DISSATISFIED_BANK_SERVICE("Bank service - Dissatisfied with some aspects of choice's service"),
-	DISSATISFIED_PLATFORM(
-			"Platform - Dissatisfied with some aspects of the software platforms, i.e. User experience, system usability"),
-	DISSATISFIED_PRICING("Pricing - Dissatisfied with interest or charges on my account"),
-	DISSATISFIED_POLICY(
-			"Policy - Dissatisfied with the rules around the product, i.e. Onboarding, notice period, withdrawal policy"),
-	MOVING_AWAY("Moving away"), CIRCUMSTANCES_CHANGED("Account holder circumstances have changed"),
-	USING_FUNDS("Using funds"),
-	SIMILAR_ACCOUNT_HELD("Similar account already held or opening a similar account with choice"),
-	OPENED_IN_ERROR("Opened in error");
+	NO_LONGER_USING_ACCOUNT(1), DISSATISFIED_BANK_SERVICE(2), DISSATISFIED_PLATFORM(3), DISSATISFIED_PRICING(4),
+	DISSATISFIED_POLICY(5), MOVING_AWAY(6), CIRCUMSTANCES_CHANGED(7), USING_FUNDS(8), SIMILAR_ACCOUNT_HELD(9),
+	OPENED_IN_ERROR(10);
 
-	private final String description;
+	private final int description;
 
-	ClosureReason(String description) {
+	ClosureReason(int description) {
 		this.description = description;
 	}
 
-	public String getDescription() {
+	public int getDescription() {
 		return description;
 	}
 
