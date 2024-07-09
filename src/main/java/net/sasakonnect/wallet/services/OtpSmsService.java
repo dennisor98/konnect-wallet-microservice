@@ -186,6 +186,62 @@ public class OtpSmsService {
 		}
 	}
 	
+	public ResponseEntity<ObjectNode> sendSmeWindowSms(String phone,Sme sme,String template,User user) {
+		StringBuilder stringbuilder = new StringBuilder();
+
+		if (template == null) {
+			template = this.sme_template;
+		}
+		stringbuilder.append(template);
+       var fullphone = "254"+phone.substring(phone.length() -9);
+		// Check if SMS can be sent for the provided phone number
+		String data = otpService.canSendSms(fullphone);
+
+		if (data == null) {
+			// Generate a random OTP
+			int otp = new Random().nextInt(900000) + 100000;
+			/**
+			 * This is to allow Google to have a test account if you find a better way why
+			 * not change? so google play team will use 700000000 as phone number and 1234
+			 * as otp
+			 */
+			
+
+			Otp otpEntity = new Otp();
+			otpEntity.setCode(String.valueOf(otp));
+			otpEntity.setSme(sme);
+			otpEntity.setPhoneNumber(fullphone);
+			otpEntity.setUser(user);
+			otpEntity.setHashUseCount(0);
+			otpEntity.setTtl(otp_ttl);
+			Instant now = Instant.now();
+			long microsecondsSinceEpoch = Duration.between(Instant.EPOCH, now).toNanos() / 1_000;
+
+			otpEntity.setHash(RequestSigner.createHashFrom(user.getId() + otp + microsecondsSinceEpoch));
+			log.error("otp saved is " + otp);
+			Otp savedOtp = this.otpService.saveOtp(otpEntity);
+			stringbuilder.append(":" + savedOtp.getCode());
+
+			smsManager.sendMessage(stringbuilder.toString(),fullphone);
+			ObjectNode json = JsonNodeFactory.instance.objectNode();
+			json.put("hash", otpEntity.getHash());
+			json.put("message",
+					"otp message sent it will expire within the next " + savedOtp.getTtl() / 60 + " minutes");
+
+			json.put("success", true);
+			return ResponseEntity.status(HttpStatus.OK).body(json);
+
+		} else {
+			// Prepare error response for cases where SMS cannot be sent
+			ObjectMapper objectMapper = new ObjectMapper();
+			ObjectNode errorResponse = objectMapper.createObjectNode();
+			errorResponse.put("success", false);
+			errorResponse.put("message", data);
+
+			return ResponseEntity.status(HttpStatus.OK).body(errorResponse);
+		}
+	}
+	
 	
 
 	public Optional<Otp> verifyOtp(@Valid ConfirmOtp confirmOtp) {

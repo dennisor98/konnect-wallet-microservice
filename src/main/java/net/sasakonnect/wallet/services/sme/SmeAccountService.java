@@ -3,8 +3,10 @@ package net.sasakonnect.wallet.services.sme;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import net.sasakonnect.wallet.domain.sme.Sme;
 import net.sasakonnect.wallet.domain.sme.SmeAccount;
 import net.sasakonnect.wallet.repository.sme.SmeAccountRepository;
 
@@ -16,6 +18,8 @@ public class SmeAccountService {
    public Optional<SmeAccount> findSmeAccountByAccountId(String accountId){
 	   return this.smeAccountRepository.findByAccountNo(accountId);
    }
+   
+ 
    
    
 }

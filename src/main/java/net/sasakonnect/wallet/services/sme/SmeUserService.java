@@ -15,10 +15,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -30,6 +32,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
 import net.sasakonnect.wallet.RequestDto.sme.SmeUserLogin;
+import net.sasakonnect.wallet.RequestDto.sme.SmeWindowPinDto;
 import net.sasakonnect.wallet.ResponseDto.sme.SmeUserResponseDto;
 import net.sasakonnect.wallet.domain.Otp;
 import net.sasakonnect.wallet.domain.User;
@@ -76,7 +79,9 @@ public class SmeUserService {
 	SmeUserRoleRepository smeUserRoleRepository;
 	@Autowired
 	SmeRolePermissionRepository smeRolePermissionRepository;
-
+    @Autowired
+    PasswordEncoder passwordEncorder;
+    
 	public ResponseEntity<ObjectNode> smeLogin(SmeUserLogin loginDto) {
 
 		var mobileNumber = loginDto.getPhoneNumber().trim();
@@ -278,6 +283,38 @@ public class SmeUserService {
 		return null;
 
 	}
+	
+	
+	public ResponseEntity<Object> verifySmeWindowOtp(ConfirmOtp otpDto) {
+		Optional<Otp> otp = this.otpSmsService.verifyOtp(otpDto);
+		if (otp.isPresent()) {
+			if (!otp.get().isValid() || otp.get().getSme() == null) {
+				Map<String, Object> map = new HashMap<>();
+				map.put("success", false);
+				map.put("message", "OTP code invalid");
+
+				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
+			}
+
+			var user = otp.get().getUser();
+
+			if (user != null) {
+				var token = this.jwtService.generateTokenForWindow(user);
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("window", token);
+				map.put("success", true);
+//				this.userPinRepository.resetPinAttempts(user);
+				try {
+					return ResponseEntity.ok(map);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
+		}
+      return null;
+	}
 
 	public Optional<Sme> findSmeByPhone(String phone) {
 		return this.smeRepository.findSmeByMobile(phone);
@@ -328,6 +365,29 @@ public class SmeUserService {
 		resmap.put("message", "Request complete");
 		resmap.put("users", smeusers);
 		return ResponseEntity.status(HttpStatus.OK).body(resmap);
+	}
+	
+	public ResponseEntity<ObjectNode> setWindowPeriod(SmeWindowPinDto pinDto){
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+				.getRequest();
+		String smeId =  this.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
+		Optional<Sme> sme =  this.smeRepository.findById(smeId);
+		Optional<SmeCorporate> smecorpOptional =  this.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
+		if(smecorpOptional.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN,"FORBIDDEN");
+		}
+		Optional<SmePassword> smepassOptional = this.smePasswordRepository.findSmePasswordBySmeCorporaterId(smecorpOptional.get());
+		if(smepassOptional.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Password not set");
+		}
+		if(this.passwordEncoder.matches(pinDto.getPassword(),smepassOptional.get().getPassword())) {
+			return this.otpSmsService.sendSmeWindowSms(user.getMobile(),sme.get(),null, user);
+		}
+		   
+		   
+		return null;
+		
 	}
 
 }

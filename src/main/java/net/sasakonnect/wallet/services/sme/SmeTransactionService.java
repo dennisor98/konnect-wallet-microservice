@@ -189,8 +189,8 @@ public class SmeTransactionService {
 	   User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 	   HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
 				.getRequest();
-	  String smeId =  this.smeUserService.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
-	  Optional<Sme> sme =  this.smeService.smeRepository.findById(smeId);
+	   String smeId =  this.smeUserService.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
+	   Optional<Sme> sme =  this.smeService.smeRepository.findById(smeId);
 	   Optional<SmeCorporate> smecorpOptional =  this.smeUserService.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
 	   if(smecorpOptional.isEmpty()) {
 		   return false;
@@ -207,4 +207,6 @@ public class SmeTransactionService {
 	   }
 	   return true;
    }
+   
+   
 }
