@@ -1643,8 +1643,8 @@ public class UserService extends RestClientService implements UserDetailsService
 			var reqId = new HashMap<String, Object>();
 			reqId.put("accountId", request.getAccountId());
 			reqId.put("otpType", "sms");
-			reqId.put("closureReason", Stream.of(request.getCloseReason())
-					.map((data) -> String.valueOf(data.getDescription())).collect(Collectors.toList()));
+			reqId.put("closureReason", Stream.of(request.getCloseReason()).map((data) -> data.getDescription())
+					.collect(Collectors.toList()));
 			var reqs = requestSigner.signRequest(reqId);
 
 			Mono<String> responseMono = this.bankClientBean.webClient.post()
@@ -1677,9 +1677,9 @@ public class UserService extends RestClientService implements UserDetailsService
 		// TODO Auto-generated method stub
 
 	}
-	
-public Optional<User> findUserById(String id) {
-	return this.userRepository.findById(id);
-}
+
+	public Optional<User> findUserById(String id) {
+		return this.userRepository.findById(id);
+	}
 
 }
