@@ -39,10 +39,17 @@ import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.sme.Sme;
 import net.sasakonnect.wallet.domain.sme.SmeCorporate;
 import net.sasakonnect.wallet.domain.sme.SmePassword;
+import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountPermissions;
+import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountRole;
+import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountRolePermission;
+import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountUserRole;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmePermissions;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeRole;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeUserRole;
 import net.sasakonnect.wallet.repository.UserRepository;
+import net.sasakonnect.wallet.repository.sme.SmeAccountRolePermissionRepository;
+import net.sasakonnect.wallet.repository.sme.SmeAccountRoleRepository;
+import net.sasakonnect.wallet.repository.sme.SmeAccountUserRoleRepository;
 import net.sasakonnect.wallet.repository.sme.SmeCorporateRepository;
 import net.sasakonnect.wallet.repository.sme.SmeMemberRepository;
 import net.sasakonnect.wallet.repository.sme.SmePasswordRepository;
@@ -81,6 +88,12 @@ public class SmeUserService {
 	SmeRolePermissionRepository smeRolePermissionRepository;
     @Autowired
     PasswordEncoder passwordEncorder;
+    @Autowired
+    SmeAccountRoleRepository smeAccountRoleRepository;
+    @Autowired
+    SmeAccountUserRoleRepository smeAccountUserRoleRepository;
+    @Autowired
+    SmeAccountRolePermissionRepository  smeAccountRolePermissionRepository;
     
 	public ResponseEntity<ObjectNode> smeLogin(SmeUserLogin loginDto) {
 
@@ -332,9 +345,28 @@ public class SmeUserService {
 
 		return Optional.empty();
 	}
+	
+	public Optional<SmeAccountUserRole> getSmeAccUserRoleByUser(User user, Sme sme) {
+		Optional<SmeCorporate> smeCorpOptional = this.smeCorporateRepository.findSmeCorporateByUserAndSmes(user, sme);
+		if (smeCorpOptional.isPresent()) {
+			return this.smeAccountUserRoleRepository.findBySmeCorporate(smeCorpOptional.get());
+		}
+
+		return Optional.empty();
+	}
+	
 
 	public boolean findRolePermissionsByRole(SmeRole role, String permission) {
 		Optional<SmePermissions> permissions = this.smeRolePermissionRepository.findBySmeRoleAndSmePermissions(role,
+				permission);
+		if (permissions.isEmpty()) {
+			return false;
+		}
+		return true;
+	}
+	
+	public boolean findSmeAccRolePermissionsByRole(SmeAccountRole role, String permission) {
+		Optional<SmeAccountRolePermission> permissions = this.smeAccountRolePermissionRepository.findRolePermissionByRoleAndPermission(role,
 				permission);
 		if (permissions.isEmpty()) {
 			return false;

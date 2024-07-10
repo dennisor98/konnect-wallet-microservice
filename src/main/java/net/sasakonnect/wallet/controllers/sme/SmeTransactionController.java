@@ -26,6 +26,7 @@ import net.sasakonnect.wallet.RequestDto.sme.ChoiceSmeTransferDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmeWindowPinDto;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.TransactionMiddleware;
+import net.sasakonnect.wallet.annotations.sme.HasSmeAccountPermission;
 import net.sasakonnect.wallet.annotations.sme.HasSmePermission;
 import net.sasakonnect.wallet.annotations.sme.SmeCorporate;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
@@ -48,7 +49,7 @@ public class SmeTransactionController {
 	SmeUserService smeUserservice;;	
 	@SmeCorporate()
 	@PostMapping("transferToWallet")
-	@HasSmePermission(GlobalSmeAccountPermissionConstants.CanInvokeTransaction.PERMISSION)
+	@HasSmeAccountPermission(GlobalSmeAccountPermissionConstants.CanInvokeTransaction.PERMISSION)
 	@TransactionMiddleware()
 	public Object appplyWalletTransfer(@Valid @RequestBody() ChoiceSmeTransferDto choiceTransferdto) {
 		return this.smeTransactionService.applyForTransfer(choiceTransferdto);

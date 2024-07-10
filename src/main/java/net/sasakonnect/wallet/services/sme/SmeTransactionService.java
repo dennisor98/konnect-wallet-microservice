@@ -25,6 +25,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.repository.sme.SmeAccountRolePermissionRepository;
 import net.sasakonnect.wallet.repository.sme.SmeAccountUserRoleRepository;
+import net.sasakonnect.wallet.repository.sme.SmeCorporateRepository;
+import net.sasakonnect.wallet.repository.sme.SmeRepository;
 import net.sasakonnect.wallet.repository.sme.SmeTransactionRepository;
 import net.sasakonnect.wallet.services.ChoiceBankSmsService;
 import net.sasakonnect.wallet.services.UserService;
@@ -43,11 +45,11 @@ import net.sasakonnect.wallet.domain.Transaction;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.sme.Sme;
 import net.sasakonnect.wallet.domain.sme.SmeAccount;
-import net.sasakonnect.wallet.domain.sme.SmeAccountUserRole;
 import net.sasakonnect.wallet.domain.sme.SmeCorporate;
 import net.sasakonnect.wallet.domain.sme.SmeTransaction;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountPermissions;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountRolePermission;
+import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountUserRole;
 import net.sasakonnect.wallet.enums.LogTypes;
 import net.sasakonnect.wallet.notification.NotificationResult;
 import net.sasakonnect.wallet.notification.TransactionResultNotification;
@@ -79,7 +81,10 @@ public class SmeTransactionService {
    SmeAccountUserRoleRepository smeAccountUserRoleRepository;
    @Autowired
    SmeAccountRolePermissionRepository smeAccountRolePermissionsRepository;
-   
+   @Autowired
+   SmeRepository smeRepository;
+   @Autowired
+   SmeCorporateRepository smeCorporateRepository;
  
    
    public SmeTransaction saveTransaction(NotificationResult<TransactionResultNotification> results) {
@@ -129,11 +134,11 @@ public class SmeTransactionService {
 	   HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
 				.getRequest();
 	  String smeId =  this.smeUserService.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
-	  Optional<Sme> sme =  this.smeService.smeRepository.findById(smeId);
+	  Optional<Sme> sme =  this.smeRepository.findById(smeId);
 	  if(sme.isEmpty()) {
 	        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot process request.Consult your administrator");
 	  }else {
-		  Optional<SmeCorporate> smeCorporate =  this.smeService.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
+		  Optional<SmeCorporate> smeCorporate =  this.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
 		  if(smeCorporate.isEmpty()) {
 			  throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBIDDEN");
 		  }
@@ -190,7 +195,7 @@ public class SmeTransactionService {
 	   HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
 				.getRequest();
 	   String smeId =  this.smeUserService.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
-	   Optional<Sme> sme =  this.smeService.smeRepository.findById(smeId);
+	   Optional<Sme> sme =  this.smeRepository.findById(smeId);
 	   Optional<SmeCorporate> smecorpOptional =  this.smeUserService.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
 	   if(smecorpOptional.isEmpty()) {
 		   return false;

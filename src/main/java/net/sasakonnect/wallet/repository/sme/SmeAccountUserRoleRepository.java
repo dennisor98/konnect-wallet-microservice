@@ -7,9 +7,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import net.sasakonnect.wallet.domain.sme.SmeAccount;
-import net.sasakonnect.wallet.domain.sme.SmeAccountUserRole;
 import net.sasakonnect.wallet.domain.sme.SmeCorporate;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountRole;
+import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountUserRole;
 
 public interface SmeAccountUserRoleRepository extends JpaRepository<SmeAccountUserRole,String> {
 	

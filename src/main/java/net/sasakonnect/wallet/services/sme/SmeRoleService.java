@@ -29,11 +29,11 @@ import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.sme.Enterprise;
 import net.sasakonnect.wallet.domain.sme.Sme;
 import net.sasakonnect.wallet.domain.sme.SmeAccount;
-import net.sasakonnect.wallet.domain.sme.SmeAccountUserRole;
 import net.sasakonnect.wallet.domain.sme.SmeCorporate;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountPermissions;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountRole;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountRolePermission;
+import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountUserRole;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmePermissions;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeRole;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeRolePermission;
@@ -250,7 +250,7 @@ public class SmeRoleService {
 	        		Optional<SmeAccountPermissions> permission = this.smeAccountPermissionRepository.findById(id);
 
 	        		if (permission.isPresent()) {
-	        			Optional<SmeAccountRolePermission> rolePermission = this.smeAccountRolePermissionRepository.findRolePermissionByRoleAndPermission(smerole.get(), permission.get());
+	        			Optional<SmeAccountRolePermission> rolePermission = this.smeAccountRolePermissionRepository.findRolePermissionByRoleAndPermission(smerole.get(), permission.get().getName());
 
 	        			if (rolePermission.isEmpty()) {
 	        				SmeAccountRolePermission newRolePermission = SmeAccountRolePermission.builder()
@@ -429,6 +429,10 @@ public class SmeRoleService {
   
   public Optional<SmeRole> findRoleById(String roleId){
 	  return this.smeRoleRepository.findById(roleId);
+  }
+  
+  public Optional<SmeAccountRole> findSmeAccRoleById(String roleId){
+	  return this.smeAccountRoleRepository.findById(roleId);
   }
   
   public List<SmeRole> findRolesByName(String roleName){

@@ -1,4 +1,4 @@
-package net.sasakonnect.wallet.domain.sme;
+package net.sasakonnect.wallet.domain.sme.authorisation;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -9,7 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.sasakonnect.wallet.domain.BaseWalletDomain;
 import net.sasakonnect.wallet.domain.User;
-import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountRole;
+import net.sasakonnect.wallet.domain.sme.SmeCorporate;
 
 @Data
 @Builder
