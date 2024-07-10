@@ -21,8 +21,11 @@ import com.google.gson.Gson;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
+import net.sasakonnect.wallet.RequestDto.MpesaBilling;
 import net.sasakonnect.wallet.RequestDto.WalletTransferDto;
 import net.sasakonnect.wallet.RequestDto.sme.ChoiceSmeTransferDto;
+import net.sasakonnect.wallet.RequestDto.sme.SmeMpesaBilling;
+import net.sasakonnect.wallet.RequestDto.sme.SmeTransferToMpesa;
 import net.sasakonnect.wallet.RequestDto.sme.SmeWindowPinDto;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.TransactionMiddleware;
@@ -53,6 +56,20 @@ public class SmeTransactionController {
 	@TransactionMiddleware()
 	public Object appplyWalletTransfer(@Valid @RequestBody() ChoiceSmeTransferDto choiceTransferdto) {
 		return this.smeTransactionService.applyForTransfer(choiceTransferdto);
+	}
+	
+	@SmeCorporate()
+	@PostMapping("send/mpesa")
+	@HasSmeAccountPermission(GlobalSmeAccountPermissionConstants.CanInvokeTransaction.PERMISSION)
+	@TransactionMiddleware()
+	public Object sendToMpesa(@Valid @RequestBody() SmeTransferToMpesa choiceTransferdto) {
+		return this.smeTransactionService.withdrawToMpesa(choiceTransferdto);
+	}
+	
+	@PostMapping("mpesa/payments")
+	@TransactionMiddleware()
+	public Object mpesaPayments(@RequestBody() @Valid SmeMpesaBilling tillAndBuyGoods) {
+		return this.smeTransactionService.mpesaTillAndByGoods(tillAndBuyGoods);
 	}
 	
 	@SmeCorporate

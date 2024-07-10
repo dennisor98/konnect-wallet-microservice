@@ -35,7 +35,7 @@ public class SmeAccPermissionEvaluatorAspect {
     }
 
 
-	 @Before("@annotation(hasSmePermissionAnnotation)")
+	 @Before("@annotation(hasSmeAccountPermissionAnnotation)")
 	    public void beforeControllerMethodExecution(JoinPoint joinPoint, HasSmeAccountPermission hasSmePermissionAnnotation) {
 		 String permission = hasSmePermissionAnnotation.value();
 

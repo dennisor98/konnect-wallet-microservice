@@ -498,7 +498,6 @@ public class AdministrationController {
 
 	@GetMapping("/wallet/balance")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.CheckAlltransactionHistory.PERMISSION)
@@ -773,13 +772,14 @@ public class AdministrationController {
 	public Object closeUserAccount(@Valid @RequestBody() CloseUserAccount request) {
 		return this.userService.closeUserAccount(request);
 	}
-	
+
 	@GetMapping("user/transactions/trend")
 	@IsCorporate()
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanRequestUserAccountCloser.PERMISSION
 			+ "')")
 	@RequirePermission(GlobalPermissionConstants.CanRequestUserAccountCloser.PERMISSION)
-	public ResponseEntity<Object> getUserTransactionsTrend(@RequestParam("userId") String userId,@RequestParam("period") String period) {
+	public ResponseEntity<Object> getUserTransactionsTrend(@RequestParam("userId") String userId,
+			@RequestParam("period") String period) {
 //		if(Integer.valueOf(period) > 30) {
 //			period = String.valueOf(30);
 //		}

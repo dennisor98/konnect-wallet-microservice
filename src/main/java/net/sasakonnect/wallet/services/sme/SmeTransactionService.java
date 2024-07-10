@@ -34,8 +34,11 @@ import net.sasakonnect.wallet.tools.JwtService;
 import net.sasakonnect.wallet.tools.RequestSigner;
 import reactor.core.publisher.Mono;
 import net.sasakonnect.wallet.RequestDto.ChoiceTransferDto;
+import net.sasakonnect.wallet.RequestDto.MpesaBilling;
 import net.sasakonnect.wallet.RequestDto.WalletTransferDto;
 import net.sasakonnect.wallet.RequestDto.sme.ChoiceSmeTransferDto;
+import net.sasakonnect.wallet.RequestDto.sme.SmeMpesaBilling;
+import net.sasakonnect.wallet.RequestDto.sme.SmeTransferToMpesa;
 import net.sasakonnect.wallet.ResponseDto.TransactionResponseDto;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
@@ -149,9 +152,9 @@ public class SmeTransactionService {
 		  }
 		  
 		  //check if user has transaction privileges in the provided payer account
-		  if(this.userHasAccountPermission(smeAccount.get(), GlobalSmeAccountPermissionConstants.CanInvokeTransaction.PERMISSION)) {
-			  throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBIDDEN");
-		  }
+//		  if(this.userHasAccountPermission(smeAccount.get(), GlobalSmeAccountPermissionConstants.CanInvokeTransaction.PERMISSION)) {
+//			  throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBIDDEN");
+//		  }
 		  
 		  var reqId = new HashMap<String, Object>();
 			var receivingUser = this.userService.findUserByAccountd(choiceTransfer.getReceiverAccount().trim());
@@ -159,6 +162,7 @@ public class SmeTransactionService {
 				reqId.put("payeeMobileForNotification", receivingUser.get().getMobile());
 
 			}
+			reqId.put("payerAccountId", choiceTransfer.getPayerAccountNumber());
 			reqId.put("payeeBankCode", choiceTransfer.getBankCode().trim());
 			reqId.put("payeeAccountId", choiceTransfer.getReceiverAccount().trim());
 			reqId.put("payeeAccountName", choiceTransfer.getReceiverName());
@@ -185,6 +189,116 @@ public class SmeTransactionService {
 		}
        
 		
+
+		// TODO Auto-generated method stub
+		return null;
+	}
+   
+   public Object withdrawToMpesa(SmeTransferToMpesa mpesa) {
+	   User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	   //verify that smeId in the authentication header is available
+	   HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+			   .getRequest();
+	   String smeId =  this.smeUserService.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
+	   Optional<Sme> sme =  this.smeRepository.findById(smeId);
+	   if(sme.isEmpty()) {
+		   throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot process request.Consult your administrator");
+	   }
+	   Optional<SmeCorporate> smeCorporate =  this.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
+	   if(smeCorporate.isEmpty()) {
+		   throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBIDDEN");
+	   }
+	   //check if the provided payer account is available
+	   Optional<SmeAccount> smeAccount = this.smeAccountservice.findSmeAccountByAccountId(mpesa.getPayerAccountNumber());
+	   if(smeAccount.isEmpty()) {
+		   throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown account information provided");
+	   }
+
+	   var reqId = new HashMap<String, Object>();
+	   reqId.put("payerAccountId", mpesa.getPayerAccountNumber());
+	   reqId.put("amount", mpesa.getAmount());
+	   reqId.put("payeeBankCode", "M-PESA");
+	   reqId.put("payeeAccountId", mpesa.getReceiverMobileNumber());
+	   reqId.put("currency", mpesa.getCurrencyCode());
+	   reqId.put("remark", mpesa.getRemarks());
+	   reqId.put("otpType", "SMS");
+	   reqId.put("payeeMobileForNotification", mpesa.getReceiverMobileNumber());
+
+	   var reqs = this.requestSigner.signRequest(reqId);
+
+	   Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.WITHDRAW)
+			   .contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
+			   .accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
+
+	   String responseJson = responseMono.block();
+	   if (responseJson != null) {
+		   var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
+		   choiceBankSmsService.invokeSms(resp.getData().txId);
+		   log.info(resp.getData().txId);
+		   return resp;
+	   }
+
+	   return null;
+   }
+   
+   public Object mpesaTillAndByGoods(@Valid SmeMpesaBilling tillAndBuyGoods) {
+
+	   User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	   //verify that smeId in the authentication header is available
+	   HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+			   .getRequest();
+	   String smeId =  this.smeUserService.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
+	   Optional<Sme> sme =  this.smeRepository.findById(smeId);
+	   if(sme.isEmpty()) {
+		   throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot process request.Consult your administrator");
+	   }
+	   Optional<SmeCorporate> smeCorporate =  this.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
+	   if(smeCorporate.isEmpty()) {
+		   throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBIDDEN");
+	   }
+	   //check if the provided payer account is available
+	   Optional<SmeAccount> smeAccount = this.smeAccountservice.findSmeAccountByAccountId(tillAndBuyGoods.getPayerAccountNumber());
+	   if(smeAccount.isEmpty()) {
+		   throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown account information provided");
+	   }
+	   var reqId = new HashMap<String, Object>();
+	   reqId.put("payerAccountId", tillAndBuyGoods.getPayerAccountNumber());
+	   reqId.put("payType", tillAndBuyGoods.getBillType().getCode());
+
+	   switch (tillAndBuyGoods.billType) {
+	   case PAY_BILL:
+		   reqId.put("payeeReferenNumber", tillAndBuyGoods.getReceivingAccount().trim());
+
+		   break;
+	   case TILL:
+
+		   break;
+	   default:
+		   break;
+
+	   }
+		reqId.put("payeeShortCode", tillAndBuyGoods.getShortCode().trim());
+
+		reqId.put("amount", tillAndBuyGoods.getAmount());
+		reqId.put("description", tillAndBuyGoods.getShortNote());
+
+		reqId.put("otpType", tillAndBuyGoods.getOtpType());
+
+		var reqs = this.requestSigner.signRequest(reqId);
+
+		Mono<String> responseMono = this.bankClientBean.webClient.post()
+				.uri(ChoiceEndpointsConstants.MPESA_TILL_AND_PAYBILL).contentType(MediaType.APPLICATION_JSON)
+				.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+				.bodyToMono(String.class);
+		String responseJson = responseMono.block();
+		log.info(responseJson);
+		if (responseJson != null) {
+			var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
+			choiceBankSmsService.invokeSms(resp.getData().txId);
+			return resp;
+			// return new Gson().fromJson(responseJson, Object.class);
+
+		}
 
 		// TODO Auto-generated method stub
 		return null;

@@ -189,7 +189,7 @@ public class GlobalSmePermissionConstants {
 	}
 	
 	public static class CanCreateSmeAccountRole extends SmePermissionEntry{
-		public static final String PERMISSION = "can.create.sme..account.role";
+		public static final String PERMISSION = "can.create.sme.account.role";
 		public static final String DESCRIPTION = "can assign sme account role ";
 		public static final String CATEGORY = "role";
 

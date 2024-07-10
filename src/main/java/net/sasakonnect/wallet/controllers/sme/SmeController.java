@@ -28,6 +28,7 @@ import net.sasakonnect.wallet.annotations.sme.SmeCorporate;
 import net.sasakonnect.wallet.constant.sme.GlobalSmePermissionConstants;
 import net.sasakonnect.wallet.services.sme.SmePermissionService;
 import net.sasakonnect.wallet.services.sme.SmeRoleService;
+import net.sasakonnect.wallet.services.sme.SmeService;
 import net.sasakonnect.wallet.services.sme.SmeUserService;
 
 @RequestMapping("/sme")
@@ -42,7 +43,8 @@ public class SmeController {
 	SmeRoleService smeRoleService;
 	@Autowired
 	SmePermissionService smePermissionService;
-	
+	@Autowired
+	SmeService smeService;
 	@PostMapping("/login")
 	public ResponseEntity<ObjectNode> smeLogin(@Valid @RequestBody SmeUserLogin loginDto ){
 		return this.smeUserService.smeLogin(loginDto);
@@ -134,6 +136,13 @@ public class SmeController {
 	public  ResponseEntity<Object> getSmeMembers(@RequestParam(name="pageNumber",required=true,defaultValue="0") Integer pageNumber, @RequestParam(name="pageSize",required=true,defaultValue="10") Integer pageSize ){
 		return  this.smeUserService.getSmeMembers(pageNumber, pageSize);
 				
+	}
+	
+	@SmeCorporate
+	@GetMapping("account/balance")
+	@HasSmePermission(GlobalSmePermissionConstants.CanQueryAccountBalance.PERMISSION)
+	public Object getWalletBalance(@RequestParam(name = "accountNumber", required = true) String accountNumber) {
+		return this.smeService.getWalletAccountBalance(accountNumber);
 	}
 	
 

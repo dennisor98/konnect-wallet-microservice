@@ -653,4 +653,30 @@ public Object confirmSmeBusinesOpeningOtp(@Valid @RequestBody() ConfirmSmeBusine
 	return null;
 }
 
+public Object getWalletAccountBalance(String accountId) {
+//check if sme account exists
+	Optional<SmeAccount> smeacc =  this.smeAccountRepository.findByAccountNo(accountId.trim());
+	if (smeacc.isPresent()) {
+		//check if user has permission to access account balances
+			var reqId = new HashMap<String, Object>();
+			reqId.put("accountId", accountId.trim());
+			var reqs = requestSigner.signRequest(reqId);
+
+			Mono<String> responseMono = this.bankClientBean.webClient.post()
+					.uri(ChoiceEndpointsConstants.CHECK_BALANCE).contentType(MediaType.APPLICATION_JSON)
+					.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+					.bodyToMono(String.class);
+
+			String responseJson = responseMono.block();
+			log.info(responseJson);
+			if (responseJson != null) {
+				return (new Gson().fromJson(responseJson, Object.class));
+
+			}
+	
+	}
+
+	return null;
+}
+
 }
