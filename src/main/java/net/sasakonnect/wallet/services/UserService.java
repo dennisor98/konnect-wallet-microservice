@@ -1677,5 +1677,9 @@ public class UserService extends RestClientService implements UserDetailsService
 		// TODO Auto-generated method stub
 
 	}
+	
+public Optional<User> findUserById(String id) {
+	return this.userRepository.findById(id);
+}
 
 }

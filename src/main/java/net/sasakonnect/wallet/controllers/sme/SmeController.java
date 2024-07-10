@@ -15,7 +15,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
+import net.sasakonnect.wallet.RequestDto.SmeAssignPermissionsDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmeAssignRoleDto;
+import net.sasakonnect.wallet.RequestDto.sme.SmeAssingRolePermissionDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmeUserLogin;
 import net.sasakonnect.wallet.ResponseDto.sme.SmeAccRoleDto;
 import net.sasakonnect.wallet.ResponseDto.sme.SmeCorporateDto;
@@ -99,8 +101,8 @@ public class SmeController {
 	@SmeCorporate
 	@HasSmePermission(GlobalSmePermissionConstants.CanAssignRolePermissions.PERMISSION)
 	@PostMapping("account/role/assign/permissions")
-	public ResponseEntity<Object> assignSmeAccountRolePermissions(@Valid @RequestBody()SmeAssignRoleDto roleDto){
-		return this.assignSmeAccountRolePermissions(roleDto);
+	public ResponseEntity<Object> assignSmeAccountRolePermissions(@Valid @RequestBody()SmeAssingRolePermissionDto permissionDto){
+		return this.smeRoleService.assignPermissionsToSmeAccountRole(permissionDto);
 	}
 	
 	
@@ -115,7 +117,7 @@ public class SmeController {
 	@GetMapping("account/roles")
 	@HasSmePermission(GlobalSmePermissionConstants.CanGetRoles.PERMISSION)
 	public  ResponseEntity<Object> getAccountRoles(@RequestParam(name="pageNumber",required=true,defaultValue="0") Integer pageNumber, @RequestParam(name="pageSize",required=true,defaultValue="10") Integer pageSize){
-		return this.smeRoleService.getRoles(pageNumber, pageSize);
+		return this.smeRoleService.geSmeAccountRolesBySme(pageNumber, pageSize);
 	}
 	
 	
@@ -134,6 +136,7 @@ public class SmeController {
 				
 	}
 	
+
 	
 	
 	

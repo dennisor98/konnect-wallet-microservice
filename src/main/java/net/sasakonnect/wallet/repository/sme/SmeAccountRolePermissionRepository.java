@@ -11,7 +11,7 @@ import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountRole;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountRolePermission;
 
 public interface SmeAccountRolePermissionRepository extends JpaRepository<SmeAccountRolePermission,String>{
-	@Query("SELECT ap FROM SmeAccountRolePermission ap WHERE ap.permission.name =:permission  AND ap.role =:role")
-   Optional<SmeAccountRolePermission> findRolePermissionByRoleAndPermission(@Param("role")SmeAccountRole role,@Param("permission")String permission);
+	@Query("SELECT ap FROM SmeAccountRolePermission ap WHERE ap.permission =:permission  AND ap.role =:role")
+   Optional<SmeAccountRolePermission> findRolePermissionByRoleAndPermission(@Param("role")SmeAccountRole role,@Param("permission") SmeAccountPermissions permission);
    
 }

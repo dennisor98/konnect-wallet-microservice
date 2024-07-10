@@ -773,6 +773,18 @@ public class AdministrationController {
 	public Object closeUserAccount(@Valid @RequestBody() CloseUserAccount request) {
 		return this.userService.closeUserAccount(request);
 	}
+	
+	@GetMapping("user/transactions/trend")
+	@IsCorporate()
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanRequestUserAccountCloser.PERMISSION
+			+ "')")
+	@RequirePermission(GlobalPermissionConstants.CanRequestUserAccountCloser.PERMISSION)
+	public ResponseEntity<Object> getUserTransactionsTrend(@RequestParam("userId") String userId,@RequestParam("period") String period) {
+//		if(Integer.valueOf(period) > 30) {
+//			period = String.valueOf(30);
+//		}
+		return this.transactionService.getAccountTransactionSummary(userId, period);
+	}
 
 	@PostMapping("user/change/phonenumber")
 	@IsCorporate()
