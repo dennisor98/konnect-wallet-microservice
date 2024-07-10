@@ -22,6 +22,7 @@ import net.sasakonnect.wallet.RequestDto.WalletBilling;
 import net.sasakonnect.wallet.ResponseDto.TransactionResponseDto;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
+import net.sasakonnect.wallet.constant.TransactionVerificationMethod;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.WalletClient;
 import net.sasakonnect.wallet.domain.WalletClientAccount;
@@ -236,6 +237,96 @@ public class SdkWalletService {
 	}
 
 	public TransactionResponseDto applyFoWalletToWalletMerchant(ChoiceTransferDto walletTransfer) {
+		User userLoggedIn = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		var userop = this.userService
+				.findUserByPhoneNumber(userLoggedIn.getMobile().substring(userLoggedIn.getMobile().length() - 9));
+		if (userop.isPresent()) {
+			// var user = userop.get();
+			var reqId = new HashMap<String, Object>();
+
+			var userWallets = this.walletRepository.findByUserWalletsUser(userLoggedIn);
+			if (!userWallets.isEmpty()) {
+				var userwallet = userWallets.get(0);
+				reqId.put("payerAccountId", userwallet.getAccountId());
+			}
+			reqId.put("payeeAccountId", walletTransfer.getReceiverAccount());
+			reqId.put("payeeBankCode", konnectBank);
+			reqId.put("payeeAccountName", walletTransfer.getReceiverName());
+			reqId.put("currency", walletTransfer.getCurrencyCode());
+			reqId.put("amount", walletTransfer.getAmount());
+			reqId.put("otpMobile", userLoggedIn.getMobile());
+			reqId.put("otpType", walletTransfer.getOtpType());
+			var reqs = this.requestSigner.signRequest(reqId);
+			Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.WITHDRAW)
+					.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
+					.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
+			String responseJson = responseMono.block();
+			log.info(responseJson);
+
+			if (responseJson != null) {
+				var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
+				System.out.print("send sms response payload" + resp);
+				choiceBankSmsService.invokeSms(resp.getData().txId);
+				log.info(resp.getData().txId);
+				return resp;
+			}
+
+			// TODO Auto-generated method stub
+			return null;
+		} else {
+			return null;
+		}
+		// return null;
+	}
+
+	/**
+	 * 
+	 * This is api is for use by SME ,to avoid business from being affected by sms
+	 * issues This api is not recommended to be used for p2p transfer until a
+	 * cryptographic mechanism is appplied hence before this it should not be
+	 * exposed through controller
+	 * 
+	 * @param walletTransfer
+	 * @param transactionVerificationMethod
+	 * @return
+	 */
+	private TransactionResponseDto applyFoWalletToWalletMerchantInternalTransaction(ChoiceTransferDto walletTransfer) {
+		User userLoggedIn = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		var reqId = new HashMap<String, Object>();
+
+		var userWallets = this.walletRepository.findByUserWalletsUser(userLoggedIn);
+		if (!userWallets.isEmpty()) {
+			var userwallet = userWallets.get(0);
+			reqId.put("payerAccountId", userwallet.getAccountId());
+			reqId.put("payeeAccountId", walletTransfer.getReceiverAccount());
+			reqId.put("currency", walletTransfer.getCurrencyCode());
+			reqId.put("amount", walletTransfer.getAmount());
+
+			var reqs = this.requestSigner.signRequest(reqId);
+
+			Mono<String> responseMono = this.bankClientBean.webClient.post()
+					.uri(ChoiceEndpointsConstants.INTERNAL_TRANSFER).contentType(MediaType.APPLICATION_JSON)
+					.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+					.bodyToMono(String.class);
+			String responseJson = responseMono.block();
+			log.info(responseJson);
+
+			if (responseJson != null) {
+				var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
+				log.info(resp.getData().txId);
+				return resp;
+			}
+		} else {
+			return null;
+		}
+
+		return null;
+
+	}
+
+	public TransactionResponseDto applyFoWalletToWalletMerchant(ChoiceTransferDto walletTransfer,
+			TransactionVerificationMethod transactionVerificationMethod) {
 		User userLoggedIn = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
 		var userop = this.userService
