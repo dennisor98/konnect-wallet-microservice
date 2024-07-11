@@ -722,7 +722,7 @@ public class LarkService {
 	    		       	        "**\nStatus**: "+status;
 	    			}
 	    		}else {
-	    			status = "Unknown. Consult Systems Admin";
+	    			status = "Unknown.Kindly recheck in 5-10 minutes";
 	    			template += 
 	    	       	        "**\nStatus**: "+status;
 	    		}

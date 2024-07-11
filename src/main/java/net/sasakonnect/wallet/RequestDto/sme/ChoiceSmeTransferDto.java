@@ -1,5 +1,6 @@
 package net.sasakonnect.wallet.RequestDto.sme;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,6 +12,7 @@ import net.sasakonnect.wallet.RequestDto.ChoiceTransferDto;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ChoiceSmeTransferDto {
+	@NotNull
 	String payerAccountNumber;
 	String bankCode;
 	String receiverName;
@@ -21,6 +23,5 @@ public class ChoiceSmeTransferDto {
 	String remarks;
 	@Builder.Default
 	String otpType = "SMS";
-	String smeAccountId;
 	String payeeMobileForNotification;
 }
