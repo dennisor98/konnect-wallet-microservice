@@ -23,6 +23,4 @@ public class SmeUserResponseDto {
 	private Object profileImage;
 	private String mobile;
 	private int countryCode;
-
-
 }

@@ -1,5 +1,6 @@
 package net.sasakonnect.wallet.repository.sme;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -8,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import net.sasakonnect.wallet.domain.sme.Sme;
 import net.sasakonnect.wallet.domain.sme.SmeAccount;
 
 public interface SmeAccountRepository extends JpaRepository<SmeAccount, String> {
@@ -24,4 +26,7 @@ public interface SmeAccountRepository extends JpaRepository<SmeAccount, String> 
 	Optional<SmeAccount> findSmeAccountByApplicationId(@Param("id") String id);
 	
 	Optional<SmeAccount> findByAccountNo(String accountNo);
+	
+	List<SmeAccount> findBySme(Sme sme);
+
 }

@@ -37,6 +37,7 @@ import net.sasakonnect.wallet.ResponseDto.sme.SmeUserResponseDto;
 import net.sasakonnect.wallet.domain.Otp;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.sme.Sme;
+import net.sasakonnect.wallet.domain.sme.SmeAccount;
 import net.sasakonnect.wallet.domain.sme.SmeCorporate;
 import net.sasakonnect.wallet.domain.sme.SmePassword;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountPermissions;
@@ -47,6 +48,7 @@ import net.sasakonnect.wallet.domain.sme.authorisation.SmePermissions;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeRole;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeUserRole;
 import net.sasakonnect.wallet.repository.UserRepository;
+import net.sasakonnect.wallet.repository.sme.SmeAccountRepository;
 import net.sasakonnect.wallet.repository.sme.SmeAccountRolePermissionRepository;
 import net.sasakonnect.wallet.repository.sme.SmeAccountRoleRepository;
 import net.sasakonnect.wallet.repository.sme.SmeAccountUserRoleRepository;
@@ -94,6 +96,8 @@ public class SmeUserService {
     SmeAccountUserRoleRepository smeAccountUserRoleRepository;
     @Autowired
     SmeAccountRolePermissionRepository  smeAccountRolePermissionRepository;
+    @Autowired
+    SmeAccountRepository smeAccountRepository;
     
 	public ResponseEntity<ObjectNode> smeLogin(SmeUserLogin loginDto) {
 
@@ -420,6 +424,42 @@ public class SmeUserService {
 		   
 		return null;
 		
+	}
+	
+	public ResponseEntity<Object> getSmeUserAccounts(){
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+				.getRequest();
+		String smeId =  this.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
+		Optional<Sme> sme =  this.smeRepository.findById(smeId);
+		Optional<SmeCorporate> smecorpOptional =  this.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
+		if(smecorpOptional.isEmpty()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","Account not found");
+
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		List<SmeAccount> smeaccounts = this.smeAccountRepository.findBySme(sme.get());
+		if(smeaccounts.isEmpty()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",true);
+			map.put("message","Request completed");
+			map.put("accounts",new ArrayList<>());
+			return ResponseEntity.status(HttpStatus.OK).body(map);
+		}
+		Map<String,Object> map = new HashMap<>();
+		map.put("success",true);
+		map.put("message","Request completed");
+		var accounts = smeaccounts.stream().map(a->{
+			Map<String,Object> amap =  new HashMap<>();
+			amap.put("accountName",a.getAccountName());
+			amap.put("accountNo",a.getAccountNo());
+			return amap;
+		}).collect(Collectors.toList());
+		map.put("accounts",accounts);
+
+		return ResponseEntity.status(HttpStatus.OK).body(map);
 	}
 
 }

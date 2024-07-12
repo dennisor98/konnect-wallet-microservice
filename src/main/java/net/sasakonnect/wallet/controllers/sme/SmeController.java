@@ -145,6 +145,13 @@ public class SmeController {
 		return this.smeService.getWalletAccountBalance(accountNumber);
 	}
 	
+	@SmeCorporate
+	@GetMapping("accounts")
+	@HasSmePermission(GlobalSmePermissionConstants.CanGetPermissions.PERMISSION)
+	public ResponseEntity<Object> getSmeUserAccounts(){
+		return this.smeUserService.getSmeUserAccounts();
+	}
+	
 
 	
 	
