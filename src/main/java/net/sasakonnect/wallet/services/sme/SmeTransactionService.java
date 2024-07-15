@@ -1,12 +1,16 @@
 package net.sasakonnect.wallet.services.sme;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +36,7 @@ import net.sasakonnect.wallet.services.ChoiceBankSmsService;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.tools.JwtService;
 import net.sasakonnect.wallet.tools.RequestSigner;
+import net.sasakonnect.wallet.tools.ResponsePagerClass;
 import reactor.core.publisher.Mono;
 import net.sasakonnect.wallet.RequestDto.ChoiceTransferDto;
 import net.sasakonnect.wallet.RequestDto.MpesaBilling;
@@ -46,6 +51,7 @@ import net.sasakonnect.wallet.constant.sme.GlobalSmeAccountPermissionConstants;
 import net.sasakonnect.wallet.domain.Logs;
 import net.sasakonnect.wallet.domain.Transaction;
 import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.domain.WalletClient;
 import net.sasakonnect.wallet.domain.sme.Sme;
 import net.sasakonnect.wallet.domain.sme.SmeAccount;
 import net.sasakonnect.wallet.domain.sme.SmeCorporate;
@@ -325,6 +331,25 @@ public class SmeTransactionService {
 		   return false;
 	   }
 	   return true;
+   }
+   
+   public ResponseEntity<Object> getSmeTransactions(Integer pageNumber,Integer pageSize){
+	   Page<SmeTransaction> smeTransactionspage =  this.smeTransactionRepository.findAll(PageRequest.of(pageNumber,pageSize));
+	   if(smeTransactionspage.isEmpty()) {
+		   Map<String,Object> map = new HashMap<>();
+		   map.put("success",true);
+		   map.put("message","Request complete");	
+		   map.put("transactions",new ArrayList<>());
+		   return ResponseEntity.status(HttpStatus.OK).body(map);
+	   }
+	   Map<String,Object> map = new HashMap<>();
+	   map.put("success",true);
+	   map.put("message","Request complete");
+	   ResponsePagerClass<SmeTransaction> page = ResponsePagerClass.<SmeTransaction>builder().page(smeTransactionspage)
+				.build();
+	   map.putAll(page.getPagingInfo());
+	   map.put("transactions",smeTransactionspage.get().collect(Collectors.toList()));
+	   return ResponseEntity.status(HttpStatus.OK).body(map);
    }
    
    

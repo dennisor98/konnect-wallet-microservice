@@ -65,6 +65,7 @@ import net.sasakonnect.wallet.RequestDto.ChangePin;
 import net.sasakonnect.wallet.RequestDto.CloseUserAccount;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
 import net.sasakonnect.wallet.RequestDto.KompCallbackDto;
+import net.sasakonnect.wallet.RequestDto.LoginOtpResendDto;
 import net.sasakonnect.wallet.RequestDto.OpenIdRequest;
 import net.sasakonnect.wallet.RequestDto.PhoneCountryPair;
 import net.sasakonnect.wallet.RequestDto.PinDto;
@@ -404,6 +405,11 @@ public class UserService extends RestClientService implements UserDetailsService
 
 	}
 
+	
+	public ResponseEntity<Object> resendLoginOtp(LoginOtpResendDto otpDto){
+		return this.otpsmsService.resendLoginOtp(otpDto);
+	}
+	
 	public ResponseEntity<ObjectNode> corporateLogin(UserLogin userLogin) {
 		Optional<User> user = Optional.empty();
 		if (profileActive.equalsIgnoreCase("dev")) {
