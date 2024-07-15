@@ -19,7 +19,10 @@ public class SmeAccountService {
 	   return this.smeAccountRepository.findByAccountNo(accountId);
    }
    
- 
+ public ResponseEntity<Object> getAccountsByLoggedInSmeUsers(){
+	 return null;
+	 
+ }
    
    
 }
