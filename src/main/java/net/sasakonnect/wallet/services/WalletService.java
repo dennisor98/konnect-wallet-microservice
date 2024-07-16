@@ -38,6 +38,7 @@ import net.sasakonnect.wallet.RequestDto.BuyAirtime;
 import net.sasakonnect.wallet.RequestDto.ChoiceTransferDto;
 import net.sasakonnect.wallet.RequestDto.EasyOnboardingRequestParams;
 import net.sasakonnect.wallet.RequestDto.KompCallbackDto;
+import net.sasakonnect.wallet.RequestDto.MobileVerifyDto;
 import net.sasakonnect.wallet.RequestDto.Mpesa;
 import net.sasakonnect.wallet.RequestDto.MpesaBilling;
 import net.sasakonnect.wallet.RequestDto.OnboardingOtp;
@@ -1896,5 +1897,33 @@ public class WalletService {
 		}
 
 	}
+	
+	public ResponseEntity<Object> verifyTransactionContact(MobileVerifyDto verifyDto){
+		var reqId = new HashMap<String, Object>();
+		reqId.put("countryCode",verifyDto.getCountryCode());
+		reqId.put("mobile",verifyDto.getMobileNumber());
+
+		var reqs = requestSigner.signRequest(reqId);
+
+		Mono<String> responseMono = this.bankClientBean.webClient.post()
+				.uri(ChoiceEndpointsConstants.TRANS_MOBILE_NUMBER_VERIFY)
+				.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
+				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
+
+		String responseJson = responseMono.block();
+		if(responseJson != null) {
+			var jsonObject = new Gson().fromJson(responseJson, JsonObject.class);
+			System.out.println(responseJson);
+			var verifyName = jsonObject.getAsJsonObject("data").get("verifyName");
+            Map<String,Object> map  = new HashMap<>();
+            map.put("success",true);
+            map.put("message","Request complete");
+            map.put("contactName",verifyName);
+            
+            return ResponseEntity.status(HttpStatus.OK).body(map);
+		}
+		return null;
+	}
 
 }
+ 

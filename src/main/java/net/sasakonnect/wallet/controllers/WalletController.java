@@ -21,6 +21,7 @@ import net.sasakonnect.wallet.RequestDto.BuyAirtime;
 import net.sasakonnect.wallet.RequestDto.ChangePin;
 import net.sasakonnect.wallet.RequestDto.ChoiceTransferDto;
 import net.sasakonnect.wallet.RequestDto.EasyOnboardingRequestParams;
+import net.sasakonnect.wallet.RequestDto.MobileVerifyDto;
 import net.sasakonnect.wallet.RequestDto.Mpesa;
 import net.sasakonnect.wallet.RequestDto.MpesaBilling;
 import net.sasakonnect.wallet.RequestDto.OnBoardingStatusById;
@@ -318,6 +319,11 @@ public class WalletController {
 			return this.notificationService.setAsRead(notificationId);
 		}
 
+	}
+	
+	@GetMapping("/transaction/mobile/verify")
+	public ResponseEntity<Object> verifyMobileNumber(MobileVerifyDto verifyDto){
+		return this.walletService.verifyTransactionContact(verifyDto);
 	}
 
 }
