@@ -146,23 +146,35 @@ public class OtpSmsService {
 			map.put("message","Otp already used");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 		}
+		String data = otpService.canSendSms(otp.getPhoneNumber());
+		if(data == null) {
+			otp.setTtl(otp_ttl);
+			otp.setCreatedAt(new Date());
+
+			Otp savedOtp = this.otpService.saveOtp(otp);
+			StringBuilder stringbuilder = new StringBuilder();
+			stringbuilder.append(template);
+			stringbuilder.append(":" + otp.getCode());
+
+			smsManager.sendMessage(stringbuilder.toString(), otp.getPhoneNumber());
+			ObjectNode json = JsonNodeFactory.instance.objectNode();
+			json.put("hash", otp.getHash());
+			json.put("message",
+					"otp message sent it will expire within the next " + savedOtp.getTtl() / 60 + " minutes");
+
+			json.put("success", true);
+			return ResponseEntity.status(HttpStatus.OK).body(json);
 			
-		otp.setTtl(otp_ttl);
-		otp.setCreatedAt(new Date());
+		}else {
+			ObjectMapper objectMapper = new ObjectMapper();
+			ObjectNode errorResponse = objectMapper.createObjectNode();
+			errorResponse.put("success", false);
+			errorResponse.put("message", data);
 
-		Otp savedOtp = this.otpService.saveOtp(otp);
-		StringBuilder stringbuilder = new StringBuilder();
-		stringbuilder.append(template);
-		stringbuilder.append(":" + otp.getCode());
-
-		smsManager.sendMessage(stringbuilder.toString(), otp.getPhoneNumber());
-		ObjectNode json = JsonNodeFactory.instance.objectNode();
-		json.put("hash", otp.getHash());
-		json.put("message",
-				"otp message sent it will expire within the next " + savedOtp.getTtl() / 60 + " minutes");
-
-		json.put("success", true);
-		return ResponseEntity.status(HttpStatus.OK).body(json);
+			return ResponseEntity.status(HttpStatus.OK).body(errorResponse);
+		}
+			
+		
 	}
 
 	public ResponseEntity<ObjectNode> sendSmeUserSms(SmeUserLogin userLogin,Sme sme,String template, Optional<User> user) {
