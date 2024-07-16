@@ -39,6 +39,7 @@ import net.sasakonnect.wallet.tools.RequestSigner;
 import net.sasakonnect.wallet.tools.ResponsePagerClass;
 import reactor.core.publisher.Mono;
 import net.sasakonnect.wallet.RequestDto.ChoiceTransferDto;
+import net.sasakonnect.wallet.RequestDto.Mpesa;
 import net.sasakonnect.wallet.RequestDto.MpesaBilling;
 import net.sasakonnect.wallet.RequestDto.WalletTransferDto;
 import net.sasakonnect.wallet.RequestDto.sme.ChoiceSmeTransferDto;
@@ -212,6 +213,7 @@ public class SmeTransactionService {
 	   }
 	   Optional<SmeCorporate> smeCorporate =  this.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
 	   if(smeCorporate.isEmpty()) {
+		   
 		   throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBIDDEN");
 	   }
 	   //check if the provided payer account is available
@@ -256,16 +258,25 @@ public class SmeTransactionService {
 	   String smeId =  this.smeUserService.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
 	   Optional<Sme> sme =  this.smeRepository.findById(smeId);
 	   if(sme.isEmpty()) {
-		   throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot process request.Consult your administrator");
+		   Map<String,Object> map  = new HashMap<>();
+		   map.put("success",false);
+		   map.put("message","Cannot process request.Consult your administrator");
+		   return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
 	   }
 	   Optional<SmeCorporate> smeCorporate =  this.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
 	   if(smeCorporate.isEmpty()) {
-		   throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBIDDEN");
+		   Map<String,Object> map  = new HashMap<>();
+		   map.put("success",false);
+		   map.put("message","Cannot process request.Consult your administrator");
+		   return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
 	   }
 	   //check if the provided payer account is available
 	   Optional<SmeAccount> smeAccount = this.smeAccountservice.findSmeAccountByAccountId(tillAndBuyGoods.getPayerAccountNumber());
 	   if(smeAccount.isEmpty()) {
-		   throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown account information provided");
+		   Map<String,Object> map  = new HashMap<>();
+		   map.put("success",false);
+		   map.put("message","Unknown account information provided");
+		   return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 	   }
 	   var reqId = new HashMap<String, Object>();
 	   reqId.put("payerAccountId", tillAndBuyGoods.getPayerAccountNumber());
@@ -306,6 +317,37 @@ public class SmeTransactionService {
 
 		}
 
+		// TODO Auto-generated method stub
+		return null;
+	}
+   
+   public Object loadWalletFromMpesa(Mpesa mpesa) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		var userWallets = this.walletRepository.findByUserWalletsUser(user);
+		if (!userWallets.isEmpty()) {
+			var userwallet = userWallets.get(0);
+
+			var reqId = new HashMap<String, Object>();
+			reqId.put("accountId", userwallet.getAccountId());
+			reqId.put("amount", mpesa.getAmount());
+
+			reqId.put("mobile", mpesa.getMpesaNumber());
+
+			var reqs = this.requestSigner.signRequest(reqId);
+
+			Mono<String> responseMono = this.bankClientBean.webClient.post()
+					.uri(ChoiceEndpointsConstants.DEPOSIT_FROM_MPESA).contentType(MediaType.APPLICATION_JSON)
+					.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+					.bodyToMono(String.class);
+
+			String responseJson = responseMono.block();
+			log.info(responseJson);
+			if (responseJson != null) {
+				return new Gson().fromJson(responseJson, Object.class);
+
+			}
+		}
 		// TODO Auto-generated method stub
 		return null;
 	}

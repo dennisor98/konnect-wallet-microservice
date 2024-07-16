@@ -47,5 +47,6 @@ public class ChoiceEndpointsConstants {
 	public static final String SUBMIT_SME_FOR_CONFIRMATION = "/onboarding/business/submitOrPullBackRequest";
 	public static final String UPDATE_USER_EMAIL = "/user/addOrUpdateEmail";
 	public static final String CHANGE_USER_PHONE_NUMBER = "/account/v2/mobileChange";
+	public static final String TRANS_MOBILE_NUMBER_VERIFY = "/trans/mobileNumberVerify";
 
 }

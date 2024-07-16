@@ -68,6 +68,7 @@ public class SmeTransactionController {
 	}
 	
 	@PostMapping("mpesa/payments")
+	@HasSmeAccountPermission(GlobalSmeAccountPermissionConstants.CanInvokeTransaction.PERMISSION)
 	@TransactionMiddleware()
 	public Object mpesaPayments(@RequestBody() @Valid SmeMpesaBilling tillAndBuyGoods) {
 		return this.smeTransactionService.mpesaTillAndByGoods(tillAndBuyGoods);
