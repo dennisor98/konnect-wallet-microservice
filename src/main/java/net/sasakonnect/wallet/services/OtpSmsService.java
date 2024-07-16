@@ -2,6 +2,11 @@ package net.sasakonnect.wallet.services;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
@@ -18,6 +23,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
+import net.sasakonnect.wallet.RequestDto.LoginOtpResendDto;
 import net.sasakonnect.wallet.RequestDto.UserLogin;
 import net.sasakonnect.wallet.RequestDto.sme.SmeUserLogin;
 import net.sasakonnect.wallet.domain.Otp;
@@ -122,6 +128,42 @@ public class OtpSmsService {
 			return ResponseEntity.status(HttpStatus.OK).body(errorResponse);
 		}
 	}
+	
+	public ResponseEntity<Object> resendLoginOtp(LoginOtpResendDto otpDto){
+		Optional<Otp> otpOptional = this.otpService.getOtpWithByHash(otpDto.getHash());
+		if(otpOptional.isEmpty()) {
+			Map<String,Object> map  = new HashMap<>();
+			map.put("success", false);
+			map.put("message","Malformed hash");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		
+		
+		var otp =  otpOptional.get();
+		if(otp.getDeletedAt() !=null && !otp.isValid()) {
+			Map<String,Object> map  = new HashMap<>();
+			map.put("success", false);
+			map.put("message","Otp already used");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+			
+		otp.setTtl(otp_ttl);
+		otp.setCreatedAt(new Date());
+
+		Otp savedOtp = this.otpService.saveOtp(otp);
+		StringBuilder stringbuilder = new StringBuilder();
+		stringbuilder.append(template);
+		stringbuilder.append(":" + otp.getCode());
+
+		smsManager.sendMessage(stringbuilder.toString(), otp.getPhoneNumber());
+		ObjectNode json = JsonNodeFactory.instance.objectNode();
+		json.put("hash", otp.getHash());
+		json.put("message",
+				"otp message sent it will expire within the next " + savedOtp.getTtl() / 60 + " minutes");
+
+		json.put("success", true);
+		return ResponseEntity.status(HttpStatus.OK).body(json);
+	}
 
 	public ResponseEntity<ObjectNode> sendSmeUserSms(SmeUserLogin userLogin,Sme sme,String template, Optional<User> user) {
 		StringBuilder stringbuilder = new StringBuilder();
@@ -200,13 +242,6 @@ public class OtpSmsService {
 		if (data == null) {
 			// Generate a random OTP
 			int otp = new Random().nextInt(900000) + 100000;
-			/**
-			 * This is to allow Google to have a test account if you find a better way why
-			 * not change? so google play team will use 700000000 as phone number and 1234
-			 * as otp
-			 */
-			
-
 			Otp otpEntity = new Otp();
 			otpEntity.setCode(String.valueOf(otp));
 			otpEntity.setSme(sme);

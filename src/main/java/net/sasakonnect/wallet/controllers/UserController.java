@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
+import net.sasakonnect.wallet.RequestDto.LoginOtpResendDto;
 import net.sasakonnect.wallet.RequestDto.OpenIdRequest;
 import net.sasakonnect.wallet.RequestDto.UserDeviceToken;
 import net.sasakonnect.wallet.RequestDto.UserLogin;
@@ -49,15 +50,14 @@ public class UserController {
 
 	@PostMapping("userLogin")
 	public ResponseEntity<ObjectNode> getAll(@Valid @RequestBody UserLogin loginDto) {
-//		test firebase
-		// Queueable<List<FirebaseMessage>> myBean = new Firebase(firebaseWrapper);
-//		myBean.params = new ArrayList<FirebaseMessage>();
-//		myBean.params.add(FirebaseMessage.builder().message("hello this").token("yes").build());
-//
-//		this.jobProducer.enqueueJob("firebase", myBean);
-
 		return userService.userLogin(loginDto);
 	}
+	
+	@PostMapping("login/resendOtp")
+	public ResponseEntity<Object> rendLoginOtp(@Valid @RequestBody LoginOtpResendDto otpDto) {
+		return userService.resendLoginOtp(otpDto);
+	}
+	
 
 	@PostMapping("corporateLogin")
 	public ResponseEntity<ObjectNode> corporateSignin(@Valid @RequestBody UserLogin loginDTO) {
