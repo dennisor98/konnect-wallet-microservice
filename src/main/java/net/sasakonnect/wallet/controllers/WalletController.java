@@ -1,4 +1,4 @@
- package net.sasakonnect.wallet.controllers;
+package net.sasakonnect.wallet.controllers;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -69,8 +70,10 @@ public class WalletController {
 	}
 
 	@PostMapping("")
-	public Object onBoarding(@Valid @RequestBody EasyOnboardingRequestParams easyOnboarding) {
-		return this.walletService.createNewOnBoardingUser(easyOnboarding);
+	public Object onBoarding(@Valid @RequestBody EasyOnboardingRequestParams easyOnboarding,
+			@RequestHeader("app-version-number") String konnectHeader) {
+
+		return this.walletService.createNewOnBoardingUser(easyOnboarding, konnectHeader);
 	}
 
 	@GetMapping("pin/set")
@@ -155,7 +158,7 @@ public class WalletController {
 	}
 
 	@PostMapping("resendOtp")
-	public ResponseEntity resendOtp(@Valid @RequestBody() ResendTxOtpDto resendDto ) {
+	public ResponseEntity resendOtp(@Valid @RequestBody() ResendTxOtpDto resendDto) {
 		return this.walletService.resendTransactionOtp(resendDto);
 	}
 
