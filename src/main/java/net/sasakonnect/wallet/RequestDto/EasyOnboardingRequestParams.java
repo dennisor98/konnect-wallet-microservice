@@ -53,8 +53,14 @@ public class EasyOnboardingRequestParams {
 
 	@NotBlank
 	String idNumber;
-
+	@Nullable()
 	String kenyaIdVersion;
+
+	@Nullable()
+	String selfiePhoto;
+
+	@Nullable()
+	String idPhoto;
 	@Nullable()
 	String address;
 	@Nullable()
