@@ -322,8 +322,8 @@ public class WalletController {
 	}
 	
 	@GetMapping("/transaction/mobile/verify")
-	public ResponseEntity<Object> verifyMobileNumber(MobileVerifyDto verifyDto){
-		return this.walletService.verifyTransactionContact(verifyDto);
+	public ResponseEntity<Object> verifyMobileNumber(@RequestParam(name="countryCode",defaultValue="254") String countryCode,@RequestParam("mobileNumber") String mobileNumber){
+		return this.walletService.verifyTransactionContact(countryCode,mobileNumber);
 	}
 
 }

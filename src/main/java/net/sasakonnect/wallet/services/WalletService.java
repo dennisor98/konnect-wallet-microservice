@@ -1898,10 +1898,10 @@ public class WalletService {
 
 	}
 	
-	public ResponseEntity<Object> verifyTransactionContact(MobileVerifyDto verifyDto){
+	public ResponseEntity<Object> verifyTransactionContact(String countryCode,String mobileNumber){
 		var reqId = new HashMap<String, Object>();
-		reqId.put("countryCode",verifyDto.getCountryCode());
-		reqId.put("mobile",verifyDto.getMobileNumber());
+		reqId.put("countryCode",countryCode);
+		reqId.put("mobile",mobileNumber.substring(mobileNumber.length() -9));
 
 		var reqs = requestSigner.signRequest(reqId);
 
@@ -1914,7 +1914,7 @@ public class WalletService {
 		if(responseJson != null) {
 			var jsonObject = new Gson().fromJson(responseJson, JsonObject.class);
 			System.out.println(responseJson);
-			var verifyName = jsonObject.getAsJsonObject("data").get("verifyName");
+			var verifyName = jsonObject.getAsJsonObject("data").get("verifyName").getAsString();
             Map<String,Object> map  = new HashMap<>();
             map.put("success",true);
             map.put("message","Request complete");
