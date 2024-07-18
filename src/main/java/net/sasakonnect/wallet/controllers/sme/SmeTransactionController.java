@@ -25,6 +25,7 @@ import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
 import net.sasakonnect.wallet.RequestDto.MpesaBilling;
 import net.sasakonnect.wallet.RequestDto.WalletTransferDto;
 import net.sasakonnect.wallet.RequestDto.sme.ChoiceSmeTransferDto;
+import net.sasakonnect.wallet.RequestDto.sme.SmeMpesa;
 import net.sasakonnect.wallet.RequestDto.sme.SmeMpesaBilling;
 import net.sasakonnect.wallet.RequestDto.sme.SmeTransferToMpesa;
 import net.sasakonnect.wallet.RequestDto.sme.SmeWindowPinDto;
@@ -72,6 +73,14 @@ public class SmeTransactionController {
 	@TransactionMiddleware()
 	public Object mpesaPayments(@RequestBody() @Valid SmeMpesaBilling tillAndBuyGoods) {
 		return this.smeTransactionService.mpesaTillAndByGoods(tillAndBuyGoods);
+	}
+	
+	
+	@PostMapping("mpesa/deposit")
+	@HasSmeAccountPermission(GlobalSmeAccountPermissionConstants.CanInvokeTransaction.PERMISSION)
+	@TransactionMiddleware()
+	public Object mpesaPayments(@RequestBody() @Valid SmeMpesa mpesa) {
+		return this.smeTransactionService.loadWalletFromMpesa(mpesa);
 	}
 	
 	@SmeCorporate

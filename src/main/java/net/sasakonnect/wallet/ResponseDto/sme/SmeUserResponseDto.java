@@ -22,5 +22,6 @@ public class SmeUserResponseDto {
 	private String open_id;
 	private Object profileImage;
 	private String mobile;
+	private String sme;
 	private int countryCode;
 }

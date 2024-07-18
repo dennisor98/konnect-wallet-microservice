@@ -1,5 +1,6 @@
 package net.sasakonnect.wallet.services.sme;
 
+import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -9,6 +10,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import javax.print.DocFlavor.STRING;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -31,6 +34,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
+import net.sasakonnect.wallet.RequestDto.sme.SmePasswordDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmeUserLogin;
 import net.sasakonnect.wallet.RequestDto.sme.SmeWindowPinDto;
 import net.sasakonnect.wallet.ResponseDto.sme.SmeUserResponseDto;
@@ -40,6 +44,7 @@ import net.sasakonnect.wallet.domain.sme.Sme;
 import net.sasakonnect.wallet.domain.sme.SmeAccount;
 import net.sasakonnect.wallet.domain.sme.SmeCorporate;
 import net.sasakonnect.wallet.domain.sme.SmePassword;
+import net.sasakonnect.wallet.domain.sme.SmeTransaction;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountPermissions;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountRole;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountRolePermission;
@@ -57,6 +62,7 @@ import net.sasakonnect.wallet.repository.sme.SmeMemberRepository;
 import net.sasakonnect.wallet.repository.sme.SmePasswordRepository;
 import net.sasakonnect.wallet.repository.sme.SmeRepository;
 import net.sasakonnect.wallet.repository.sme.SmeRolePermissionRepository;
+import net.sasakonnect.wallet.repository.sme.SmeTransactionRepository;
 import net.sasakonnect.wallet.repository.sme.SmeUserRoleRepository;
 import net.sasakonnect.wallet.services.OtpService;
 import net.sasakonnect.wallet.services.OtpSmsService;
@@ -98,6 +104,8 @@ public class SmeUserService {
     SmeAccountRolePermissionRepository  smeAccountRolePermissionRepository;
     @Autowired
     SmeAccountRepository smeAccountRepository;
+    @Autowired
+    SmeTransactionRepository smeTransactionRepository;
     
 	public ResponseEntity<ObjectNode> smeLogin(SmeUserLogin loginDto) {
 
@@ -275,7 +283,7 @@ public class SmeUserService {
 
 			if (user != null) {
 				var response = SmeUserResponseDto.builder()
-						.token(jwtService.generateSmeMemberToken(user, otp.get().getSme()))
+						.token(jwtService.generateSmeMemberToken(user, otp.get().getSme())).sme(otp.get().getSme().getAccountDetails().getBusinessName())
 						.refreshToken(jwtService.generateRefreshToken(user)).middleName(user.getMiddleName())
 						.open_id(user.getOpenId()).updatedAt(user.getUpdatedAt()).profileImage(user.getProfileImage())
 						.createdAt(user.getCreatedAt()).id(user.getId()).firstName(user.getFirstName())
@@ -461,5 +469,121 @@ public class SmeUserService {
 
 		return ResponseEntity.status(HttpStatus.OK).body(map);
 	}
+	
+	public ResponseEntity<Object> getSmeUserAccountsInfo(){
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+				.getRequest();
+		String smeId =  this.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
+		Optional<Sme> sme =  this.smeRepository.findById(smeId);
+		Optional<SmeCorporate> smecorpOptional =  this.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
+		if(smecorpOptional.isEmpty()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","Account not found");
 
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		List<SmeAccount> smeaccounts = this.smeAccountRepository.findBySme(sme.get());
+		if(smeaccounts.isEmpty()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",true);
+			map.put("message","Request completed");
+			map.put("accounts",new ArrayList<>());
+			return ResponseEntity.status(HttpStatus.OK).body(map);
+		}
+		Map<String,Object> map = new HashMap<>();
+		map.put("success",true);
+		map.put("message","Request completed");
+		var accounts = smeaccounts.stream().map(a->{
+			Map<String,Object> amap =  new HashMap<>();
+			amap.put("createdat", a.getCreatedAt());	
+			amap.put("accountName",a.getAccountName());
+			amap.put("accountNo",a.getAccountNo());
+			List<SmeTransaction> smeTransOut =  this.getTransactionsOutByAccountId(a.getAccountNo());
+			BigDecimal totalTransacted = smeTransOut.stream()
+	                .map(t -> t.getAmount().abs())
+	                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+	        amap.put("transacted", totalTransacted);
+	        
+	        List<SmeTransaction> totalReceivedtrans  = this.getTransactionsInByAccountId(a.getAccountNo());       
+			BigDecimal totalreceived = totalReceivedtrans.stream()
+	                .map(t -> t.getAmount().abs())
+	                .reduce(BigDecimal.ZERO, BigDecimal::add);
+            amap.put("transactions",totalReceivedtrans.size()+smeTransOut.size());
+	        amap.put("received",totalreceived);
+	        amap.put("total_transacted",(totalreceived.add(totalTransacted)));
+	        List<SmeTransaction> smeTransaction = this.smeTransactionRepository.findAllByAccountIdOrderByCreatedAtDesc(a.getAccountNo());
+	        amap.put("balance",smeTransaction.isEmpty()  ? 0: smeTransaction.get(0).getBalance());
+			return amap;
+		}).collect(Collectors.toList());
+		map.put("accounts",accounts);
+
+		return ResponseEntity.status(HttpStatus.OK).body(map);
+	}
+
+	private List<SmeTransaction> getTransactionsInByAccountId(String accountId){
+		return this.smeTransactionRepository.findAllInByAccountId(accountId);
+	}
+	   
+	   
+	private List<SmeTransaction> getTransactionsOutByAccountId(String accountId){
+		return this.smeTransactionRepository.findAlloutByAccountId(accountId);
+	}
+	   
+	public ResponseEntity<Object> updateSmePassword(SmePasswordDto passwordDto){
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+				.getRequest();
+		String smeId =  this.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
+		Optional<Sme> sme =  this.smeRepository.findById(smeId);
+		Optional<SmeCorporate> smecorpOptional =  this.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
+		if(smecorpOptional.isEmpty()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","Account not found");
+
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		Optional<SmePassword> smePassopt = this.smePasswordRepository.findSmePasswordBySmeCorporaterId(smecorpOptional.get());
+		if(smePassopt.isEmpty()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","No password set yet");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		
+		var smePass =  smePassopt.get();
+		if (!this.validatePassword(passwordDto.getOldPassword(),smePass.getPassword())) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","Old password does not match");
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
+		}
+		
+		if(this.validatePassword(passwordDto.getPassword(),smePass.getPassword())) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","Use a password not used previously");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		
+		smePass.setPassword(passwordEncoder.encode(passwordDto.getPassword()));
+
+			try {
+				this.smePasswordRepository.save(smePass);
+				Map<String,Object> map  = new HashMap<>();
+				map.put("success",true);
+				map.put("message","Request complete.Password updated");
+				return ResponseEntity.status(HttpStatus.OK).body(map);
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				Map<String, Object> cmap = new HashMap<>();
+				cmap.put("success", false);
+				cmap.put("message", "Something went wrong");
+				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(cmap);
+			}
+				
+	}
 }
