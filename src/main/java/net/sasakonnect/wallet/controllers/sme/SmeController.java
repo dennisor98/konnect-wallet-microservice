@@ -152,6 +152,13 @@ public class SmeController {
 		return this.smeUserService.getSmeUserAccounts();
 	}
 	
+	@SmeCorporate
+	@GetMapping("accounts/info")
+	public ResponseEntity<Object> getSmeAccountsInfoBySme(){
+		return  this.smeUserService.getSmeUserAccountsInfo();
+	}
+	
+	
 
 	
 	

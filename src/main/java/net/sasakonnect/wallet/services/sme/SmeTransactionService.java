@@ -43,6 +43,7 @@ import net.sasakonnect.wallet.RequestDto.Mpesa;
 import net.sasakonnect.wallet.RequestDto.MpesaBilling;
 import net.sasakonnect.wallet.RequestDto.WalletTransferDto;
 import net.sasakonnect.wallet.RequestDto.sme.ChoiceSmeTransferDto;
+import net.sasakonnect.wallet.RequestDto.sme.SmeMpesa;
 import net.sasakonnect.wallet.RequestDto.sme.SmeMpesaBilling;
 import net.sasakonnect.wallet.RequestDto.sme.SmeTransferToMpesa;
 import net.sasakonnect.wallet.ResponseDto.TransactionResponseDto;
@@ -321,19 +322,38 @@ public class SmeTransactionService {
 		return null;
 	}
    
-   public Object loadWalletFromMpesa(Mpesa mpesa) {
-		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-		var userWallets = this.walletRepository.findByUserWalletsUser(user);
-		if (!userWallets.isEmpty()) {
-			var userwallet = userWallets.get(0);
-
+   public Object loadWalletFromMpesa(SmeMpesa mpesa) {
+	   User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	   //verify that smeId in the authentication header is available
+	   HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+			   .getRequest();
+	   String smeId =  this.smeUserService.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
+	   Optional<Sme> sme =  this.smeRepository.findById(smeId);
+	   if(sme.isEmpty()) {
+		   Map<String,Object> map  = new HashMap<>();
+		   map.put("success",false);
+		   map.put("message","Cannot process request.Consult your administrator");
+		   return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
+	   }
+	   Optional<SmeCorporate> smeCorporate =  this.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
+	   if(smeCorporate.isEmpty()) {
+		   Map<String,Object> map  = new HashMap<>();
+		   map.put("success",false);
+		   map.put("message","Cannot process request.Consult your administrator");
+		   return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
+	   }
+	   //check if the provided payer account is available
+	   Optional<SmeAccount> smeAccount = this.smeAccountservice.findSmeAccountByAccountId(mpesa.getAccountNumber());
+	   if(smeAccount.isEmpty()) {
+		   Map<String,Object> map  = new HashMap<>();
+		   map.put("success",false);
+		   map.put("message","Unknown account information provided");
+		   return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+	   }
 			var reqId = new HashMap<String, Object>();
-			reqId.put("accountId", userwallet.getAccountId());
+			reqId.put("accountId", mpesa.getAccountNumber());
 			reqId.put("amount", mpesa.getAmount());
-
 			reqId.put("mobile", mpesa.getMpesaNumber());
-
 			var reqs = this.requestSigner.signRequest(reqId);
 
 			Mono<String> responseMono = this.bankClientBean.webClient.post()
@@ -347,7 +367,7 @@ public class SmeTransactionService {
 				return new Gson().fromJson(responseJson, Object.class);
 
 			}
-		}
+		
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -376,7 +396,7 @@ public class SmeTransactionService {
    }
    
    public ResponseEntity<Object> getSmeTransactions(Integer pageNumber,Integer pageSize){
-	   Page<SmeTransaction> smeTransactionspage =  this.smeTransactionRepository.findAll(PageRequest.of(pageNumber,pageSize));
+	   Page<SmeTransaction> smeTransactionspage =  this.smeTransactionRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(pageNumber,pageSize));
 	   if(smeTransactionspage.isEmpty()) {
 		   Map<String,Object> map = new HashMap<>();
 		   map.put("success",true);
@@ -393,6 +413,8 @@ public class SmeTransactionService {
 	   map.put("transactions",smeTransactionspage.get().collect(Collectors.toList()));
 	   return ResponseEntity.status(HttpStatus.OK).body(map);
    }
+   
+  
    
    
 }

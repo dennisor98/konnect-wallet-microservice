@@ -1,5 +1,6 @@
 package net.sasakonnect.wallet.services.sme;
 
+import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -40,6 +41,7 @@ import net.sasakonnect.wallet.domain.sme.Sme;
 import net.sasakonnect.wallet.domain.sme.SmeAccount;
 import net.sasakonnect.wallet.domain.sme.SmeCorporate;
 import net.sasakonnect.wallet.domain.sme.SmePassword;
+import net.sasakonnect.wallet.domain.sme.SmeTransaction;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountPermissions;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountRole;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountRolePermission;
@@ -57,6 +59,7 @@ import net.sasakonnect.wallet.repository.sme.SmeMemberRepository;
 import net.sasakonnect.wallet.repository.sme.SmePasswordRepository;
 import net.sasakonnect.wallet.repository.sme.SmeRepository;
 import net.sasakonnect.wallet.repository.sme.SmeRolePermissionRepository;
+import net.sasakonnect.wallet.repository.sme.SmeTransactionRepository;
 import net.sasakonnect.wallet.repository.sme.SmeUserRoleRepository;
 import net.sasakonnect.wallet.services.OtpService;
 import net.sasakonnect.wallet.services.OtpSmsService;
@@ -98,6 +101,8 @@ public class SmeUserService {
     SmeAccountRolePermissionRepository  smeAccountRolePermissionRepository;
     @Autowired
     SmeAccountRepository smeAccountRepository;
+    @Autowired
+    SmeTransactionRepository smeTransactionRepository;
     
 	public ResponseEntity<ObjectNode> smeLogin(SmeUserLogin loginDto) {
 
@@ -461,5 +466,65 @@ public class SmeUserService {
 
 		return ResponseEntity.status(HttpStatus.OK).body(map);
 	}
+	
+	public ResponseEntity<Object> getSmeUserAccountsInfo(){
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+				.getRequest();
+		String smeId =  this.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
+		Optional<Sme> sme =  this.smeRepository.findById(smeId);
+		Optional<SmeCorporate> smecorpOptional =  this.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
+		if(smecorpOptional.isEmpty()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","Account not found");
 
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		List<SmeAccount> smeaccounts = this.smeAccountRepository.findBySme(sme.get());
+		if(smeaccounts.isEmpty()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",true);
+			map.put("message","Request completed");
+			map.put("accounts",new ArrayList<>());
+			return ResponseEntity.status(HttpStatus.OK).body(map);
+		}
+		Map<String,Object> map = new HashMap<>();
+		map.put("success",true);
+		map.put("message","Request completed");
+		var accounts = smeaccounts.stream().map(a->{
+			Map<String,Object> amap =  new HashMap<>();
+			amap.put("accountName",a.getAccountName());
+			amap.put("accountNo",a.getAccountNo());
+			List<SmeTransaction> smeTransOut =  this.getTransactionsOutByAccountId(a.getAccountNo());
+			BigDecimal totalTransacted = smeTransOut.stream()
+	                .map(t -> t.getAmount().abs())
+	                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+	        amap.put("transacted", totalTransacted);
+	        
+	        List<SmeTransaction> totalReceivedtrans  = this.getTransactionsInByAccountId(a.getAccountNo());       
+			BigDecimal totalreceived = totalReceivedtrans.stream()
+	                .map(t -> t.getAmount().abs())
+	                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+	        amap.put("received",totalreceived);
+	        List<SmeTransaction> smeTransaction = this.smeTransactionRepository.findAllByAccountIdOrderByCreatedAtDesc(a.getAccountNo());
+	        amap.put("balance",smeTransaction.isEmpty()  ? 0: smeTransaction.get(0).getBalance());
+			return amap;
+		}).collect(Collectors.toList());
+		map.put("accounts",accounts);
+
+		return ResponseEntity.status(HttpStatus.OK).body(map);
+	}
+
+	private List<SmeTransaction> getTransactionsInByAccountId(String accountId){
+		return this.smeTransactionRepository.findAllInByAccountId(accountId);
+	}
+	   
+	   
+	private List<SmeTransaction> getTransactionsOutByAccountId(String accountId){
+		return this.smeTransactionRepository.findAlloutByAccountId(accountId);
+	}
+	   
 }
