@@ -37,7 +37,7 @@ import net.sasakonnect.wallet.RequestDto.PermissionsToRoleDTO;
 import net.sasakonnect.wallet.RequestDto.PinResetDto;
 import net.sasakonnect.wallet.RequestDto.ReversalDto;
 import net.sasakonnect.wallet.RequestDto.RoleDTO;
-import net.sasakonnect.wallet.RequestDto.SmePasswordDto;
+import net.sasakonnect.wallet.RequestDto.SmeDefaultPasswordDto;
 import net.sasakonnect.wallet.RequestDto.UserRoleDTO;
 import net.sasakonnect.wallet.RequestDto.VerifyCorporate;
 import net.sasakonnect.wallet.RequestDto.WalletClientAccountDto;
@@ -760,7 +760,7 @@ public class AdministrationController {
 	@IsCorporate()
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanGenerateSmePassword.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CanGenerateSmePassword.PERMISSION)
-	public ResponseEntity<Object> generateSmememberPassword(@Valid @RequestBody() SmePasswordDto request) {
+	public ResponseEntity<Object> generateSmememberPassword(@Valid @RequestBody() SmeDefaultPasswordDto request) {
 		return this.smeUserService.createDefaultPassword(request.getUserId());
 	}
 

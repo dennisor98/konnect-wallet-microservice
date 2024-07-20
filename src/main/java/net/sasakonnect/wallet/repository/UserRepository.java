@@ -54,7 +54,8 @@ public interface UserRepository extends JpaRepository<User, String> {
 	Page<User> findAllusers(Pageable page);
 
 	@Query("SELECT u FROM User u JOIN u.userWallets uw WHERE uw.wallet.accountId = :accountId")
-	Optional<User> findUserByWalletAccountId(@Param("accountId") String accountId);;
+	Optional<User> findUserByWalletAccountId(@Param("accountId") String accountId);
+	
 
 	@Transactional
 	@Modifying

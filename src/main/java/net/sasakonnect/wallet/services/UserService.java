@@ -996,6 +996,35 @@ public class UserService extends RestClientService implements UserDetailsService
 		// TODO Auto-generated method stub
 
 	}
+	
+	public ResponseEntity<Object> findUserByMobile(String phoneNumber){
+		if(phoneNumber.length() < 9 ) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","Wrong phone number length");
+
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+
+		}
+
+		var validPhone = phoneNumber.trim().substring(phoneNumber.length() -9);
+		Optional<User> userOptional =  this.findUserByPhoneNumber(validPhone);
+		if(userOptional.isEmpty()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","User not found");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		var user = userOptional.get();
+		Map<String,Object> map = new HashMap<>();
+		map.put("success",true);
+		map.put("message","Request complete");
+		var usermap = new HashMap<>();
+		usermap.put("id",user.getId());
+		usermap.put("name",user.getFirstName() + " "+user.getMiddleName() + " " + user.getLastName());
+		map.put("user", usermap);
+		return ResponseEntity.status(HttpStatus.OK).body(map);
+	}
 
 	public Optional<User> findUserByPhoneNumberLoadUserWallet(String phoneNumber, String countrycode) {
 		// log.error(phoneNumber);
@@ -1677,6 +1706,24 @@ public class UserService extends RestClientService implements UserDetailsService
 
 	public Optional<User> findUserById(String id) {
 		return this.userRepository.findById(id);
+	}
+	
+	public ResponseEntity<Object> confirmAccountByIdNumber(String idNumber){
+		Optional<User> userOptional = this.userRepository.findByIdNumber(idNumber);
+		if(userOptional.isEmpty()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",true);
+			map.put("message","Id Number does not have account");
+			map.put("accountExits",false);	
+			
+			return ResponseEntity.status(HttpStatus.OK).body(map);
+		}
+		
+		Map<String,Object> map = new HashMap<>();
+		map.put("success",true);
+		map.put("message","Id Number already has an account registered");
+		map.put("accountExits",true);
+		return ResponseEntity.status(HttpStatus.OK).body(map);
 	}
 
 }

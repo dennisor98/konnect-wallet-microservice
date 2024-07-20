@@ -117,5 +117,13 @@ public class UserController {
 			){
 		return this.userService.uploadProfileImage(file);
 	}
+	
+	@GetMapping("idNumber/confirm")
+	public ResponseEntity<Object> confirmAccountExists(@RequestParam("idNumber") String idNumber){
+		return this.userService.confirmAccountByIdNumber(idNumber);
+	}
+	
+	
+	
 
 }
