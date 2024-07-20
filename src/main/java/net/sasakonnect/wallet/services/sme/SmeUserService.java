@@ -570,6 +570,7 @@ public class SmeUserService {
 		}
 		
 		smePass.setPassword(passwordEncoder.encode(passwordDto.getPassword()));
+		smePass.setIsDefault(false);
 
 			try {
 				this.smePasswordRepository.save(smePass);
@@ -585,5 +586,41 @@ public class SmeUserService {
 				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(cmap);
 			}
 				
+	}
+	
+	
+	public ResponseEntity<Object> getSmestaff() {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+				.getRequest();
+		String smeId =  this.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
+		Optional<Sme> sme =  this.smeRepository.findById(smeId);
+		List<SmeCorporate> smeCorps =  this.smeCorporateRepository.findSmeCorporateBySmes(sme.get());
+		if(smeCorps.isEmpty()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",true);
+			map.put("message","Request completed");
+			map.put("staff",new ArrayList<>());
+		
+			return ResponseEntity.status(HttpStatus.OK).body(map);
+		}
+		
+		Map<String,Object> map = new HashMap<>();
+		map.put("success",true);
+		map.put("message","Request completed");
+		var staff =  smeCorps.stream()
+				.map(s->{
+					Map<String,Object> smap = new HashMap<>();
+					smap.put("id",s.getId());
+					smap.put("createdAt",s.getCreatedAt());
+					smap.put("firstname",s.getUser().getFirstName());
+					smap.put("middlename",s.getUser().getMiddleName());
+					smap.put("lastname",s.getUser().getLastName());
+					smap.put("mobile",s.getUser().getMobile());
+					smap.put("image",s.getUser().getProfileImage() != null ? s.getUser().getProfileImage().getFilePath() : null);
+					return smap;
+				}).collect(Collectors.toList());
+		map.put("staff",staff);
+		return ResponseEntity.status(HttpStatus.OK).body(map);
 	}
 }

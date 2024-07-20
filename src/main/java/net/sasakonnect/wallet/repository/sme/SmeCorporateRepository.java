@@ -16,4 +16,5 @@ public interface SmeCorporateRepository extends JpaRepository<SmeCorporate,Strin
   List<SmeCorporate> findSmeCorporateByUser(User user);
   @Query("SELECT c.smes FROM SmeCorporate c WHERE c.user =:user")
   List<Sme> findSmesByUser(@Param("user") User user);
+  List<SmeCorporate> findSmeCorporateBySmes(Sme sme);
 }
