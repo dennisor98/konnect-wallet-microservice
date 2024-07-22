@@ -20,5 +20,7 @@ public interface SmeRolePermissionRepository extends JpaRepository<SmeRolePermis
 			+ "WHERE rp.smeRole = :role AND rp.smePermission.name = :permissionName")
  Optional<SmePermissions> findBySmeRoleAndSmePermissions(@Param("role") SmeRole role,@Param("permissionName") String permissionName);
  Optional<SmeRolePermission> findBySmeRoleAndSmePermission(SmeRole  role,SmePermissions permission);
+ @Query("SELECT rp.smePermission FROM SmeRolePermission rp")
+ List<SmeRolePermission> findAllBySmeRole(SmeRole smeUserRole);
 
 }

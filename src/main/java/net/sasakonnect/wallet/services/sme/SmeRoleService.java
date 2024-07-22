@@ -400,7 +400,39 @@ public class SmeRoleService {
   }
   
   public ResponseEntity<Object> getRolePermissions(String roleId){
-	  return null;
+	  Optional<SmeRole> smeRoleOptional =  this.smeRoleRepository.findById(roleId);
+	  
+	  if(smeRoleOptional.isEmpty()) {
+		  Map<String,Object> map = new HashMap<>();
+		  map.put("success",false);
+		  map.put("message","Unknown role");
+		  
+		  return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+	  }
+	  var smerole = smeRoleOptional.get();
+	  List<SmeRolePermission> smePermission =  this.smeRolePermissionRepository.findAllBySmeRole(smerole);
+	  if(smePermission.isEmpty()) {
+		  Map<String,Object> map = new HashMap<>();
+		  map.put("success",false);
+		  map.put("message","Request completed");
+		  map.put("permissions",new ArrayList<>());
+		  return ResponseEntity.status(HttpStatus.OK).body(map);
+	  }
+	  Map<String,Object> map = new HashMap<>();
+	  map.put("success",false);
+	  map.put("message","Request completed");
+	  var smePermissions = smePermission.stream()
+			  .map(p->{
+				  Map<String,Object> pmap = new HashMap<>();
+				  pmap.put("id",p.getSmePermission().getId());
+				  pmap.put("name",p.getSmePermission().getName());
+				  pmap.put("description",p.getSmePermission().getDescription());
+				  return pmap;
+			  }).collect(Collectors.toList());
+	  map.put("permissions",smePermissions);
+	  map.put("totalItems",smePermission.size());
+	  
+	  return ResponseEntity.status(HttpStatus.OK).body(map);
   }
   
   public ResponseEntity<Object> getSmeUserRole(SmeCorporate user){

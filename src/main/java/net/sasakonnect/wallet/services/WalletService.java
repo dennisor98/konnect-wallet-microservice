@@ -535,6 +535,7 @@ public class WalletService {
 
 						try {
 							JsonNode jsonNode = objectMapper.readTree(response);
+							log.warn("{{response}}"+jsonNode);
 							return jsonNode;
 						} catch (Exception e) {
 							// Handle any potential exception here
@@ -544,9 +545,12 @@ public class WalletService {
 						}
 					});
 			var jsonNode = responseMono.block();
-			log.info(jsonNode.toPrettyString());
+			log.error(jsonNode.toPrettyString());
+			var data = jsonNode.path("data").isEmpty();
+			log.error(data+"{}}");
 			var onboardingRequestId = jsonNode.path("data").path("onboardingRequestId");
-			if (onboardingRequestId.isNull()) {
+			log.error(onboardingRequestId+"{}");
+			if (data ||onboardingRequestId == null || onboardingRequestId.isNull()) {
 				this.userService.deleteUserById(savedUser.getId());
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("payload", jsonNode);
@@ -563,7 +567,7 @@ public class WalletService {
 		} catch (DataIntegrityViolationException e) {
 			e.printStackTrace();
 			Map<String, Object> map = new HashMap<String, Object>();
-			map.put("message", "Account already exist");
+			map.put("message","Account already exists");
 			map.put("success", false);
 			return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
 		} catch (Exception e) {

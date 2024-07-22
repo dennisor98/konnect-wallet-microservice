@@ -241,7 +241,7 @@ public class SmeUserService {
 		Map<String, Object> map = new HashMap<>();
 		map.put("success", false);
 		map.put("message", "Sme corporate account created successfully");
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		return ResponseEntity.status(HttpStatus.OK).body(map);
 	}
 
 	private String generateRandomString() {

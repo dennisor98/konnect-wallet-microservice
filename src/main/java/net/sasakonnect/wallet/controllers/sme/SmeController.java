@@ -121,6 +121,13 @@ public class SmeController {
 	}
 	
 	@SmeCorporate
+	@GetMapping("roles/permissions")
+	@HasSmePermission(GlobalSmePermissionConstants.CanGetRoles.PERMISSION)
+	public  ResponseEntity<Object> getRolePermissions(@RequestParam(name="roleId",required=true) String roleId){
+		return this.smeRoleService.getRolePermissions(roleId);
+	}
+	
+	@SmeCorporate
 	@GetMapping("account/roles")
 	@HasSmePermission(GlobalSmePermissionConstants.CanGetRoles.PERMISSION)
 	public  ResponseEntity<Object> getAccountRoles(@RequestParam(name="pageNumber",required=true,defaultValue="0") Integer pageNumber, @RequestParam(name="pageSize",required=true,defaultValue="10") Integer pageSize){
