@@ -138,8 +138,8 @@ public class SmeController {
 	@SmeCorporate
 	@GetMapping("permissions")
 	@HasSmePermission(GlobalSmePermissionConstants.CanGetPermissions.PERMISSION)
-	public  ResponseEntity<Object> getPermissionByCategory(@RequestParam(name="categoryName",required=false) String category,@RequestParam(name="pageNumber",required=true,defaultValue="0") Integer pageNumber, @RequestParam(name="pageSize",required=true,defaultValue="10") Integer pageSize ){
-		return  category != null ? this.smePermissionService.getPermissionsByCategoryName(category,pageNumber, pageSize) : this.smePermissionService.getPermissions(pageNumber, pageSize);
+	public  ResponseEntity<Object> getPermissionByCategory(@RequestParam(name="categoryName",required=false) String category){
+		return  category != null ? this.smePermissionService.getPermissionsByCategoryName(category) : this.smePermissionService.getPermissions();
 	}
 	
 	@SmeCorporate

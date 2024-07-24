@@ -496,7 +496,7 @@ public class WalletService {
 
 		}
 		if (easyOnboarding.getIdPhoto() != null && easyOnboarding.getSelfiePhoto() != null) {
-			userMap.put("idPhoto", easyOnboarding.getIdPhoto());
+			userMap.put("frontSidePhoto", easyOnboarding.getIdPhoto());
 			userMap.put("selfiePhoto", easyOnboarding.getSelfiePhoto());
 			onboardingUrl = ChoiceEndpointsConstants.OPEN_WALLET_ACCOUNT_V3;
 		}

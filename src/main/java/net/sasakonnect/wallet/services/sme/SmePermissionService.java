@@ -59,8 +59,8 @@ public class SmePermissionService {
 	}
   
   
-  public ResponseEntity<Object> getPermissions(Integer pageNumber,Integer pageSize){
-	  Page<SmePermissions> permissionsPage = this.smePermissionRepository.findAll(PageRequest.of(pageNumber, pageSize));
+  public ResponseEntity<Object> getPermissions(Integer pageNumber){
+	  List<SmePermissions> permissionsPage = this.smePermissionRepository.findAll();
 	  if(permissionsPage.isEmpty()) {
 		  Map<String,Object> map = new HashMap<>();
 		  map.put("success",true);
@@ -80,17 +80,13 @@ public class SmePermissionService {
 		  map.put("success",true);
 		  map.put("message","Request complete");
 		  map.put("permissions", permissions);
-		  ResponsePagerClass<SmePermissions> page =  ResponsePagerClass.<SmePermissions>builder()
-	    		    .page(permissionsPage)
-	    		    .build();
-		 map.putAll(page.getPagingInfo());
 		  return ResponseEntity.status(HttpStatus.OK).body(map);
 	  }
 	  
   }
   
-  public ResponseEntity<Object> getPermissionsByCategoryName(String categoryName,Integer pageNumber,Integer pageSize){
-	  Page<SmePermissions> permissionsPage = this.smePermissionRepository.findByCategory(categoryName,PageRequest.of(pageNumber, pageSize));
+  public ResponseEntity<Object> getPermissionsByCategoryName(String categoryName){
+	  List<SmePermissions> permissionsPage = this.smePermissionRepository.findByCategory(categoryName);
 	  if(permissionsPage.isEmpty()) {
 		  Map<String,Object> map = new HashMap<>();
 		  map.put("success",true);
@@ -110,10 +106,6 @@ public class SmePermissionService {
 		  map.put("success",true);
 		  map.put("message","Request complete");
 		  map.put("permissions", permissions);
-		  ResponsePagerClass<SmePermissions> page =  ResponsePagerClass.<SmePermissions>builder()
-	    		    .page(permissionsPage)
-	    		    .build();
-		 map.putAll(page.getPagingInfo());
 		  return ResponseEntity.status(HttpStatus.OK).body(map);
 	  }
   } 
