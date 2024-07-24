@@ -25,6 +25,7 @@ import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.services.WalletService;
+import net.sasakonnect.wallet.services.sme.FirebaseService;
 
 @CustomController()
 @Tag(name = "Choice-Bank", description = "Bank Routes routes")
@@ -37,7 +38,7 @@ public class ChoiceBankController {
 	private String allowedIps;
 	@Autowired
 	private ApplicationEventPublisher eventPublisher;
-
+ 
 	public ChoiceBankController(UserService userService, WalletService walletService) {
 		this.userService = userService;
 		this.walletService = walletService;

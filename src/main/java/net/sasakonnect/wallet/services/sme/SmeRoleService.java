@@ -410,7 +410,7 @@ public class SmeRoleService {
 		  return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 	  }
 	  var smerole = smeRoleOptional.get();
-	  List<SmeRolePermission> smePermission =  this.smeRolePermissionRepository.findAllBySmeRole(smerole);
+	  List<SmePermissions> smePermission =  this.smeRolePermissionRepository.findAllBySmeRole(smerole);
 	  if(smePermission.isEmpty()) {
 		  Map<String,Object> map = new HashMap<>();
 		  map.put("success",false);
@@ -424,9 +424,9 @@ public class SmeRoleService {
 	  var smePermissions = smePermission.stream()
 			  .map(p->{
 				  Map<String,Object> pmap = new HashMap<>();
-				  pmap.put("id",p.getSmePermission().getId());
-				  pmap.put("name",p.getSmePermission().getName());
-				  pmap.put("description",p.getSmePermission().getDescription());
+				  pmap.put("id",p.getId());
+				  pmap.put("name",p.getName());
+				  pmap.put("description",p.getDescription());
 				  return pmap;
 			  }).collect(Collectors.toList());
 	  map.put("permissions",smePermissions);
@@ -445,14 +445,19 @@ public class SmeRoleService {
 		// role
 
 		for (String permissionId : permissionIds) {
-			SmePermissions permission = this.smePermissionRepository.findById(permissionId).orElse(null);
+			Optional<SmePermissions> permission = this.smePermissionRepository.findById(permissionId);
 
-			if (permission != null) {
-				var rolePermission = SmeRolePermission.builder().smePermission(permission).smeRole(role).creator(user).build();
+			if (permission.isPresent()) {
+				Optional<SmeRolePermission> smeRolePermission  = this.smeRolePermissionRepository.findBySmeRoleAndSmePermission(role, permission.get());
+				if(smeRolePermission.isEmpty()) {
+					var rolePermission = SmeRolePermission.builder().smePermission(permission.get()).smeRole(role).creator(user).build();
+					this.smeRolePermissionRepository.save(rolePermission);
+
+				}
+				
 				
 //				this.rolePermissionRepository
 
-				this.smeRolePermissionRepository.save(rolePermission);
 			}
 			// Handle the case where the permission with the provided ID does not exist.
 		}

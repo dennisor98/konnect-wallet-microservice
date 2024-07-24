@@ -722,6 +722,22 @@ public final class GlobalPermissionConstants {
 		}
 
 	}
+	
+	public static class CanSendNotification extends PermissionEntry {
+		public static final String PERMISSION = "can.send.notification";
+		public static final String DESCRIPTION = "can send induvidual and broadcast notifications";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+
+		}
+	}
 
 	public static class ConfirmChangeUserPhoneNumber extends PermissionEntry {
 		public static final String PERMISSION = "can.confirm.change.user.phonenumber";

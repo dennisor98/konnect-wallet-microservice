@@ -91,6 +91,7 @@ import net.sasakonnect.wallet.repository.UserJobRepository;
 import net.sasakonnect.wallet.repository.UserWalletRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.services.extensions.LarkUtilityService;
+import net.sasakonnect.wallet.services.sme.FirebaseService;
 import net.sasakonnect.wallet.services.sme.SmeAccountService;
 import net.sasakonnect.wallet.services.sme.SmeService;
 import net.sasakonnect.wallet.services.sme.SmeTransactionService;
@@ -160,6 +161,8 @@ public class WalletService {
 
 	@Autowired
 	SmeAccountService smeAccountService;
+	@Autowired
+	private FirebaseService firebaseService;
 
 	@Value("${internetTillNumber}")
 	String internetTillNumber;
@@ -555,7 +558,7 @@ public class WalletService {
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("payload", jsonNode);
 				map.put("success", false);
-				return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 			} else {
 				savedUser.setOnboardingRequestId(onboardingRequestId.asText());
 				var updateduser = this.userService.updateUser(savedUser);
@@ -812,7 +815,7 @@ public class WalletService {
 												+ "was successful. Transaction ID: " + results.getParams().getTxId())
 										.targetType(NotificationTargetType.INDIVIDUAL.getValue()).targetUser(user.get())
 										.build();
-
+                                this.firebaseService.sendMessage(ntf);
 								this.notificationService.save(ntf);
 
 							}
@@ -872,8 +875,9 @@ public class WalletService {
 				}
 				var ntf = Notifications.builder().title("ACCOUNT UPGARDE BRIEFING").message(message)
 						.targetType(NotificationTargetType.INDIVIDUAL.getValue()).targetUser(user.get()).build();
-
+               
 				this.notificationService.save(ntf);
+				this.firebaseService.sendMessage(ntf);
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.SME_ACCOUNT_OPEN.getCode())) {
 				NotificationResult<SmeAccountOpeningResultNotification> results = new Gson().fromJson(body.toString(),

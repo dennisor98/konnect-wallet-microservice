@@ -24,22 +24,24 @@ public class Firebase extends PushProvider<List<FirebaseMessage>> {
 
 	@Override
 	public void executeJob() {
-		try {
-			var messages = this.params.stream().map(element -> Message.builder().setNotification(Notification.builder()
-
-					.setTitle("hello").setBody("body").build()).setToken("kkk").build()).collect(Collectors.toList());
-			if (this.params.size() == 1) {
-
-				FirebaseMessaging.getInstance(firebaseProvider.getFirebaseApp()).send(messages.get(0));
-
-			} else {
-				FirebaseMessaging.getInstance(firebaseProvider.getFirebaseApp()).sendAll(messages);
-
-			}
-		} catch (FirebaseMessagingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			var messages = this.params.stream().map(element -> Message.builder().setNotification(Notification.builder()
+//
+//					.setTitle("hello").setBody("body").build()).setToken("kkk").build()).collect(Collectors.toList());
+//			if (this.params.size() == 1) {
+//
+//				FirebaseMessaging.getInstance(firebaseProvider.getFirebaseApp()).send(messages.get(0));
+//
+//			} else {
+//				FirebaseMessaging.getInstance(firebaseProvider.getFirebaseApp()).sendAll(messages);
+//
+//			}
+//		} catch (FirebaseMessagingException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
+	
+	
 
 }
