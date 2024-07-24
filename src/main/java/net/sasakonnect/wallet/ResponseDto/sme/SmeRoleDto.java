@@ -10,7 +10,5 @@ public class SmeRoleDto {
   
   @NotBlank(message="description cannot be empty")
   String description;
-  
-  @NotBlank(message="enterpriseId cannot be empty")
-  String enterpriseId;
+
 }

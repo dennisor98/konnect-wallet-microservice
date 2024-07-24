@@ -118,4 +118,6 @@ public class SmePermissionService {
   public List<SmePermissions> findAll(){
 	 return this.smePermissionRepository.findAll(); 
   }
+  
+  
 }

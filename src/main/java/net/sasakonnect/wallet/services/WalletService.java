@@ -1420,8 +1420,27 @@ public class WalletService {
 		String responseJson = responseMono.block();
 		log.info(responseJson);
 		if (tillAndBuyGoods.getBillType().toString().equalsIgnoreCase("TILL")
-				&& tillAndBuyGoods.getShortCode().trim().equalsIgnoreCase(internetTillNumber)) {
+				&& tillAndBuyGoods.getShortCode().trim().equalsIgnoreCase(internetTillNumber) ) {
 			return null;
+		}
+		
+		if (tillAndBuyGoods.getBillType().toString().equalsIgnoreCase("PAY_BILL")) {
+		    String[] blacklistedShortCodes = {
+		    		"804040", 
+		    		"556688", 
+		    		"290290"
+		    		};
+
+		    boolean isBlacklisted = Arrays.stream(blacklistedShortCodes)
+		                                  .anyMatch(code -> code.equalsIgnoreCase(tillAndBuyGoods.getShortCode()));
+
+		    if (isBlacklisted) {
+		        Map<String, Object> map = new HashMap<>();
+		        map.put("success", false);
+		        map.put("message", "Merchant does not accept payment from Konnect Wallet");
+
+		        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		    }
 		}
 
 		if (responseJson != null) {

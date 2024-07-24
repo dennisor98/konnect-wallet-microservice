@@ -101,8 +101,8 @@ public class SmeController {
 	@SmeCorporate
 	@HasSmePermission(GlobalSmePermissionConstants.CanAssignRolePermissions.PERMISSION)
 	@PostMapping("role/assign/permissions")
-	public ResponseEntity<Object> assignSmeRolePermissions(@Valid @RequestBody() SmeAssignRoleDto roleDto){
-		return this.assignSmeRolePermissions(roleDto);
+	public ResponseEntity<Object> assignSmeRolePermissions(@Valid @RequestBody() SmeAssingRolePermissionDto roleDto){
+		return this.smeRoleService.assignPermissionsToSmeRole(roleDto.getPermissionIds(),roleDto.getRole_id());
 	}
 	
 	@SmeCorporate

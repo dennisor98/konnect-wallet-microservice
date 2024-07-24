@@ -82,38 +82,41 @@ public class SmeRoleService {
 	SmeAccountRolePermissionRepository smeAccountRolePermissionRepository;
 	
 	public ResponseEntity<Object> createSmeRole(SmeRoleDto roleDto){
-		Optional<Enterprise> enteprise = this.enterpriseRepository.findById(roleDto.getEnterpriseId());
-		if(enteprise.isEmpty()) {
-			Map<String,Object> map = new HashMap<>();
-			map.put("success",false);
-			map.put("message","Uknown enterprise supplied");
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		   //verify that smeId in the authentication header is available
+		   HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+				   .getRequest();
+		   String smeId =  this.smeUserService.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
+		   Optional<Sme> sme =  this.smeRepository.findById(smeId);
+		 if(sme.isPresent()){
+			 var enterprise = sme.get().getEnterprise();
+				Optional<SmeRole> smeRoleExists = this.smeRoleRepository.findByRoleNameAndEnterprise(roleDto.getName(),enterprise);
+				if(smeRoleExists.isPresent()) {
+					Map<String,Object> map = new HashMap<>();
+					map.put("success",false);
+					map.put("message","Role already exists");
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+				}
 
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
-		}
-
-		Optional<SmeRole> smeRoleExists = this.smeRoleRepository.findByRoleNameAndEnterprise(roleDto.getName(),enteprise.get());
-		if(smeRoleExists.isPresent()) {
-			Map<String,Object> map = new HashMap<>();
-			map.put("success",false);
-			map.put("message","Role already exists");
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
-		}
-
-		var smeRole = SmeRole.builder().roleName(roleDto.getName()).description(roleDto.getDescription()).enterprise(enteprise.get()).build();
-		try {
-			var savedRole = this.smeRoleRepository.save(smeRole);
-			Map<String,Object> map = new HashMap<>();
-			map.put("success",true);
-			map.put("message","Role created successfully");
-			map.put("role", savedRole);
-			return ResponseEntity.status(HttpStatus.OK).body(map);
-		}catch(Exception ex) {
-			ex.printStackTrace();
-			Map<String,Object> map = new HashMap<>();
-			map.put("success",false);
-			map.put("message","Something went wrong");
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
-		}
+				var smeRole = SmeRole.builder().roleName(roleDto.getName()).description(roleDto.getDescription()).enterprise(enterprise).build();
+				try {
+					var savedRole = this.smeRoleRepository.save(smeRole);
+					Map<String,Object> map = new HashMap<>();
+					map.put("success",true);
+					map.put("message","Role created successfully");
+					return ResponseEntity.status(HttpStatus.OK).body(map);
+				}catch(Exception ex) {
+					ex.printStackTrace();
+					Map<String,Object> map = new HashMap<>();
+					map.put("success",false);
+					map.put("message","Something went wrong");
+					return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+				}
+				
+				
+		 }
+		
+		 return null;
 
 	}
 	
@@ -347,6 +350,7 @@ public class SmeRoleService {
 	  if(!rolesPage.isEmpty()) {
 		  var roles = rolesPage.stream().map(role->{
 			  Map<String,Object> map = new HashMap<>();
+			  map.put("createdAt",role.getCreatedAt());
 			  map.put("name",role.getRoleName());
 			  map.put("description", role.getDescription());
 			  map.put("id",role.getId());
