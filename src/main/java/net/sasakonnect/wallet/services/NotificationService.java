@@ -145,7 +145,7 @@ public class NotificationService {
 			   map.put("message","Request completed successfully");
 			   
 			   String firebaseToken =   user.get().getFirebaseTokens().get(0).getToken();
-			   this.firebaseService.sendMessage(ntf,firebaseToken);
+			   this.firebaseService.sendMessage(ntf);
 			   return ResponseEntity.status(HttpStatus.OK).body(map);
 		   }
 		   Map<String,Object> map = new HashMap<>();
