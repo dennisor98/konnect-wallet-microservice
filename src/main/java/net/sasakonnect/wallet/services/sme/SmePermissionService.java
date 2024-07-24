@@ -59,7 +59,7 @@ public class SmePermissionService {
 	}
   
   
-  public ResponseEntity<Object> getPermissions(Integer pageNumber){
+  public ResponseEntity<Object> getPermissions(){
 	  List<SmePermissions> permissionsPage = this.smePermissionRepository.findAll();
 	  if(permissionsPage.isEmpty()) {
 		  Map<String,Object> map = new HashMap<>();
