@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -39,6 +40,7 @@ import net.sasakonnect.wallet.repository.TransactionRepository;
 import net.sasakonnect.wallet.services.TransactionService;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.services.WalletClientService;
+import net.sasakonnect.wallet.services.WalletService;
 import net.sasakonnect.wallet.tools.RequestSigner;
 import net.sasakonnect.wallet.workers.MerchantWoker;
 
@@ -61,6 +63,8 @@ public class SdkController {
 	MerchantWoker merchantWorker;
 	@Autowired
 	UserService userService;
+	@Autowired
+	WalletService walletService;
 
 	ClientAppsBean clientDataService;
 
@@ -173,6 +177,16 @@ public class SdkController {
 		message.put("message", "could not validate key");
 
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(message);
+
+	}
+	
+	@GetMapping("mobile/confirm")
+	@ServiceInteractionMiddleware()
+	public Object confirmMobileNumber(
+			@Parameter(example = "d388a3ababb6c3a2851f1ad112d8037c1350b32fe93623edda82", name = "secret-key", description = "Provide app key of the app you created on dashboard", in = ParameterIn.HEADER, required = true) @RequestHeader("secret-key") String appSecret,
+
+			@RequestParam(name="mobileNumber",required=true) String mobileNumber,@RequestParam(name="countryCode",defaultValue="254",required=false) String countryCode) {
+		return this.walletService.verifyTransactionContact(countryCode, mobileNumber);
 
 	}
 
