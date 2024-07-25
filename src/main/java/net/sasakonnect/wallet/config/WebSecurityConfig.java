@@ -108,7 +108,7 @@ public class WebSecurityConfig {
 				"/webjars/**").permitAll()
 
 				.requestMatchers("/user/userLogin", "/user/confirmOtp", "/user/admin/confirmOtp", "/konnect/callBack","/user/idNumber/confirm",
-						"/user/refresh/token", "/sme/login", "/sme/verifyOtp", "/lark/callback","/user/login/resendOtp",
+						"/user/refresh/token", "/sme/login", "/sme/verifyOtp", "/lark/callback","/user/login/resendOtp","/sdk/mobile/confirm",
 						"/wallet/getOnboardingStatusById", "/sdk/transaction/{id}", "user/corporateLogin",
 						"/sdk/openId", "/sdk/customer", "/sdk/customers", "/sdk/customer/stkpush")
 

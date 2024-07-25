@@ -1938,6 +1938,13 @@ public class WalletService {
 	}
 	
 	public ResponseEntity<Object> verifyTransactionContact(String countryCode,String mobileNumber){
+		if(mobileNumber.length() < 9) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","Please check the length of mobileNumber parameter");	
+			
+			 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
 		var reqId = new HashMap<String, Object>();
 		reqId.put("countryCode",countryCode);
 		reqId.put("mobile",mobileNumber.substring(mobileNumber.length() -9));
@@ -1953,13 +1960,21 @@ public class WalletService {
 		if(responseJson != null) {
 			var jsonObject = new Gson().fromJson(responseJson, JsonObject.class);
 			System.out.println(responseJson);
-			var verifyName = jsonObject.getAsJsonObject("data").get("verifyName").getAsString();
-            Map<String,Object> map  = new HashMap<>();
-            map.put("success",true);
-            map.put("message","Request complete");
-            map.put("contactName",verifyName);
-            
-            return ResponseEntity.status(HttpStatus.OK).body(map);
+			if(jsonObject.get("code").getAsString().equalsIgnoreCase("00000")) {
+				var verifyName = jsonObject.getAsJsonObject("data").get("verifyName").getAsString();
+				Map<String,Object> map  = new HashMap<>();
+				map.put("success",true);
+				map.put("message","Request complete");
+				map.put("contactName",verifyName);
+
+				return ResponseEntity.status(HttpStatus.OK).body(map);
+			}
+			
+			Map<String,Object> map  = new HashMap<>();
+			map.put("success",true);
+			map.put("message",jsonObject.get("msg").getAsString());
+			
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 		}
 		return null;
 	}
