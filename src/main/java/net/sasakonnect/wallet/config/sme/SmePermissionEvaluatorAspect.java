@@ -56,7 +56,7 @@ public class SmePermissionEvaluatorAspect {
         }
 
         SmeUserRole smeUserRole = roleOptional.get();
-        Optional<SmeRole> smeRoleOptional = smeRoleService.findRoleById(smeUserRole.getSme_role().getId());
+        Optional<SmeRole> smeRoleOptional = smeRoleService.findRoleById(smeUserRole.getSmeRole().getId());
         if (smeRoleOptional.isEmpty()) {
             throw new IllegalStateException("Role not found");
         }

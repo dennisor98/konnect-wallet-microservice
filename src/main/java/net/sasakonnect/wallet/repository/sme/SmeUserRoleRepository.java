@@ -1,5 +1,6 @@
 package net.sasakonnect.wallet.repository.sme;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,4 +12,6 @@ import net.sasakonnect.wallet.domain.sme.authorisation.SmeUserRole;
 
 public interface SmeUserRoleRepository extends JpaRepository<SmeUserRole,String>{
   Optional<SmeUserRole> findByUser(SmeCorporate smeCorporate);
+  
+  List<SmeUserRole> findBySmeRole(SmeRole smeRole); 
 }

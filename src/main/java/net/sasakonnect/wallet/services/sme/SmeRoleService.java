@@ -180,7 +180,7 @@ public class SmeRoleService {
 		if(sme.isEmpty()) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN,"FORBIDDEN");
 		}
-		var userRole =  SmeUserRole.builder().sme_role(smeRole.get()).smeAccount(sme.get()).user(smeCorp.get()).build();
+		var userRole =  SmeUserRole.builder().smeRole(smeRole.get()).smeAccount(sme.get()).user(smeCorp.get()).build();
 		try {
 			this.smeUserRoleRepository.save(userRole);
 			Map<String,Object> map =  new HashMap<>();
@@ -227,7 +227,7 @@ public class SmeRoleService {
 	                    this.smeRolePermissionRepository.saveAll(rolePermissions);
 	                    Map<String,Object> map  = new HashMap<>();
 	                    map.put("success",true);
-	                    map.put("message","A server error occured");
+	                    map.put("message","Request completed.Permissions updated");
 	                    return ResponseEntity.status(HttpStatus.OK).body(map);
 	                } catch (Exception ex) {
 	                    log.error(ex.getMessage());
@@ -478,5 +478,42 @@ public class SmeRoleService {
   
   public List<SmeRole> findRolesByName(String roleName){
 	  return this.smeRoleRepository.findAllByRoleName(roleName);
+  }
+  
+  public ResponseEntity<Object> getRoleUsers(String roleId){
+	  Optional<SmeRole> smeRole = this.findRoleById(roleId);
+	  if(smeRole.isEmpty()) {
+		  Map<String,Object> map = new HashMap<>();
+		  map.put("success",false);
+		  map.put("message","Role not found");
+		  
+		  return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+	  }
+	  var role = smeRole.get();
+	  List<SmeUserRole> smeUserRoles = this.smeUserRoleRepository.findBySmeRole(role);
+	  if(smeUserRoles.isEmpty()) {
+		  Map<String,Object> map = new HashMap<>();
+		  map.put("success",true);
+		  map.put("message","Request completed");
+		  map.put("users",new ArrayList<>());
+		  return  ResponseEntity.status(HttpStatus.OK).body(map);
+	  }
+	  
+	  var users = smeUserRoles.stream()
+			  .map(rp->{
+				  Map<String,Object> umap = new HashMap<>();
+				  umap.put("id",rp.getUser().getId());
+				  umap.put("user_role_id",rp.getId());
+				  umap.put("firstname",rp.getUser().getUser().getFirstName());
+				  umap.put("middlename",rp.getUser().getUser().getMiddleName());
+				  umap.put("lastname",rp.getUser().getUser().getLastName());
+				  umap.put("mobile",rp.getUser().getUser().getMobile());
+				 return umap; 
+			  }).collect(Collectors.toList());
+	  Map<String,Object> map = new HashMap<>();
+	  map.put("success",true);
+	  map.put("message","Request completed");
+	  map.put("users",users);
+	return ResponseEntity.status(HttpStatus.OK).body(map);
   }
 }

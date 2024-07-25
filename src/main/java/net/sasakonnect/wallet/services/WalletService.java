@@ -1438,7 +1438,6 @@ public class WalletService {
 		        Map<String, Object> map = new HashMap<>();
 		        map.put("success", false);
 		        map.put("message", "Merchant does not accept payment from Konnect Wallet");
-
 		        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 		    }
 		}

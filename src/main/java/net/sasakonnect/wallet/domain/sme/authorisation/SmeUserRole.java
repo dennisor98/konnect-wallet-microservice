@@ -37,6 +37,6 @@ public class SmeUserRole extends BaseWalletDomain implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "sme_role_id", referencedColumnName = "id")
 	@OnDelete(action = OnDeleteAction.CASCADE)
-	private SmeRole sme_role;
+	private SmeRole smeRole;
 
 }
