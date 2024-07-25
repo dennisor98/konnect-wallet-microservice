@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -39,6 +40,7 @@ import net.sasakonnect.wallet.repository.TransactionRepository;
 import net.sasakonnect.wallet.services.TransactionService;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.services.WalletClientService;
+import net.sasakonnect.wallet.services.WalletService;
 import net.sasakonnect.wallet.tools.RequestSigner;
 import net.sasakonnect.wallet.workers.MerchantWoker;
 
@@ -61,6 +63,8 @@ public class SdkController {
 	MerchantWoker merchantWorker;
 	@Autowired
 	UserService userService;
+	@Autowired
+	WalletService walletService;
 
 	ClientAppsBean clientDataService;
 
@@ -79,7 +83,7 @@ public class SdkController {
 	@TransactionMiddleware()
 	@SdkMiddleware()
 	public Object payUtility(
-			@Parameter(example = "37c8043a43adca4368607e5742a10d501c0cb990a26906603818f18ad8d15882", name = "app-key", description = "Provide app key of the app you created on dashboard", in = ParameterIn.HEADER, required = true) @RequestHeader("app-key") String appKey,
+			@Parameter(example = "xxxx", name = "app-key", description = "Provide app key of the app you created on dashboard", in = ParameterIn.HEADER, required = true) @RequestHeader("app-key") String appKey,
 			@RequestBody() @Valid SdkPayDto sdkpayDto) {
 		var walletClientService = this.walletClientService.payThroughSdk(sdkpayDto);
 		if (walletClientService.getCode().equalsIgnoreCase("00000")) {
@@ -101,7 +105,7 @@ public class SdkController {
 	@ServiceInteractionMiddleware()
 	@RateLimit(3)
 	public Object checkCustomer(
-			@Parameter(example = "d388a3ababb6c3a2851f1ad112d8037c1350b32fe93623edda82", name = "secret-key", description = "Provide app key of the app you created on dashboard", in = ParameterIn.HEADER, required = true) @RequestHeader("secret-key") String appSecret,
+			@Parameter(example = "xxxx", name = "secret-key", description = "Provide app key of the app you created on dashboard", in = ParameterIn.HEADER, required = true) @RequestHeader("secret-key") String appSecret,
 
 			@RequestBody() @Valid SdkSearchCustomer sdkSearchCustomer) {
 		// ignored country code just for brevity
@@ -148,7 +152,7 @@ public class SdkController {
 	@PostMapping("customer/stkpush")
 	@ServiceInteractionMiddleware()
 	public Object invokeStkPush(
-			@Parameter(example = "d388a3ababb6c3a2851f1ad112d8037c1350b32fe93623edda82", name = "secret-key", description = "Provide app key of the app you created on dashboard", in = ParameterIn.HEADER, required = true) @RequestHeader("secret-key") String appSecret,
+			@Parameter(example = "xxx", name = "secret-key", description = "Provide app key of the app you created on dashboard", in = ParameterIn.HEADER, required = true) @RequestHeader("secret-key") String appSecret,
 
 			@RequestBody() @Valid MerchantStkPush merchantStkPush) {
 		// ignored country code just for brevity
@@ -175,6 +179,16 @@ public class SdkController {
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(message);
 
 	}
+	
+	@GetMapping("mobile/confirm")
+	@ServiceInteractionMiddleware()
+	public Object confirmMobileNumber(
+			@Parameter(example = "xxx", name = "secret-key", description = "Provide app key of the app you created on dashboard", in = ParameterIn.HEADER, required = true) @RequestHeader("secret-key") String appSecret,
+
+			@RequestParam(name="mobileNumber",required=true) String mobileNumber,@RequestParam(name="countryCode",defaultValue="254",required=false) String countryCode) {
+		return this.walletService.verifyTransactionContact(countryCode, mobileNumber);
+
+	}
 
 	/**
 	 * 
@@ -186,7 +200,7 @@ public class SdkController {
 	@ServiceInteractionMiddleware()
 	@RateLimit(30)
 	public Object checkCustomers(
-			@Parameter(example = "d6t8a3auabb6c3a2851f1ad117d0037c13y0b32fe93623edda82", name = "secret-key", description = "Provide app key of the app you created on dashboard", in = ParameterIn.HEADER, required = true) @RequestHeader("secret-key") String appSecret,
+			@Parameter(example = "xxx", name = "secret-key", description = "Provide app key of the app you created on dashboard", in = ParameterIn.HEADER, required = true) @RequestHeader("secret-key") String appSecret,
 
 			@RequestBody() @Valid() SdkSearchCustomers sdkSearchCustomer) {
 		// ignored country code just for brevity
@@ -226,7 +240,7 @@ public class SdkController {
 	@GetMapping("transaction/{id}")
 	@SdkMiddleware()
 	public Object getOneTransaction(
-			@Parameter(example = "37c8043a43adca4368607e5742a10d501c0cb990a26906603818f18ad8d15882", name = "app-key", description = "Provide app key of the app you created on dashboard", in = ParameterIn.HEADER, required = true) @RequestHeader("app-key") String appKey,
+			@Parameter(example = "xx", name = "app-key", description = "Provide app key of the app you created on dashboard", in = ParameterIn.HEADER, required = true) @RequestHeader("app-key") String appKey,
 			@PathVariable String id) {
 		if (id == null) {
 			return ResponseEntity.notFound();
@@ -241,7 +255,7 @@ public class SdkController {
 	 */
 	@PostMapping("openId")
 	@ServiceInteractionMiddleware
-	@Parameter(example = "37c8043a43adca4368607e5742a10d501c0cb990a26906603818f18ad8d15882", name = "secret-key", description = "Provide app secret of the app you created on dashboard", in = ParameterIn.HEADER, required = true)
+	@Parameter(example = "xx", name = "secret-key", description = "Provide app secret of the app you created on dashboard", in = ParameterIn.HEADER, required = true)
 	public Object createOpenIdForUser(@Valid @RequestBody() SdkRequestOpenId sdkOpenRequest) {
 		var clientData = clientDataService.getWalletClient();
 		if (clientData.getEnabled() && clientData.getDeletedAt() == null) {
