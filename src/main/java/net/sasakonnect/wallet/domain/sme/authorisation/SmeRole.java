@@ -38,7 +38,7 @@ public class SmeRole extends BaseWalletDomain implements Serializable {
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private User user;
 
-	@OneToMany(mappedBy = "sme_role", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "smeRole", cascade = CascadeType.ALL)
 	private List<SmeUserRole> smeUserRoles;
 
 	@Column(name = "role_name", unique = true)

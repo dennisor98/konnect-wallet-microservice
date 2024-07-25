@@ -495,7 +495,7 @@ public class SmeService {
 			var super_role = this.smeRoleRepository.save(smeRole); 
 			var smeCorp = SmeCorporate.builder().user(smedata.getSmeMembers().get(0).getUser()).role(super_role).smes(smedata).build();
 			var super_user = this.smeCorporateRepository.save(smeCorp);
-			var sme_user_role = SmeUserRole.builder().sme_role(super_role).user(super_user).smeAccount(smedata).build();
+			var sme_user_role = SmeUserRole.builder().smeRole(super_role).user(super_user).smeAccount(smedata).build();
 			this.smeUserRoleRepository.save(sme_user_role);
 
 			var allpermsions = this.smePermissionService.findAll().stream().map((data) -> data.getId())

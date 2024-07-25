@@ -91,6 +91,7 @@ import net.sasakonnect.wallet.repository.UserJobRepository;
 import net.sasakonnect.wallet.repository.UserWalletRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.services.extensions.LarkUtilityService;
+import net.sasakonnect.wallet.services.sme.FirebaseService;
 import net.sasakonnect.wallet.services.sme.SmeAccountService;
 import net.sasakonnect.wallet.services.sme.SmeService;
 import net.sasakonnect.wallet.services.sme.SmeTransactionService;
@@ -160,6 +161,8 @@ public class WalletService {
 
 	@Autowired
 	SmeAccountService smeAccountService;
+	@Autowired
+	private FirebaseService firebaseService;
 
 	@Value("${internetTillNumber}")
 	String internetTillNumber;
@@ -493,7 +496,7 @@ public class WalletService {
 
 		}
 		if (easyOnboarding.getIdPhoto() != null && easyOnboarding.getSelfiePhoto() != null) {
-			userMap.put("idPhoto", easyOnboarding.getIdPhoto());
+			userMap.put("frontSidePhoto", easyOnboarding.getIdPhoto());
 			userMap.put("selfiePhoto", easyOnboarding.getSelfiePhoto());
 			onboardingUrl = ChoiceEndpointsConstants.OPEN_WALLET_ACCOUNT_V3;
 		}
@@ -535,6 +538,7 @@ public class WalletService {
 
 						try {
 							JsonNode jsonNode = objectMapper.readTree(response);
+							log.warn("{{response}}"+jsonNode);
 							return jsonNode;
 						} catch (Exception e) {
 							// Handle any potential exception here
@@ -544,14 +548,17 @@ public class WalletService {
 						}
 					});
 			var jsonNode = responseMono.block();
-			log.info(jsonNode.toPrettyString());
+			log.error(jsonNode.toPrettyString());
+			var data = jsonNode.path("data").isEmpty();
+			log.error(data+"{}}");
 			var onboardingRequestId = jsonNode.path("data").path("onboardingRequestId");
-			if (onboardingRequestId.isNull()) {
+			log.error(onboardingRequestId+"{}");
+			if (data ||onboardingRequestId == null || onboardingRequestId.isNull()) {
 				this.userService.deleteUserById(savedUser.getId());
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("payload", jsonNode);
 				map.put("success", false);
-				return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 			} else {
 				savedUser.setOnboardingRequestId(onboardingRequestId.asText());
 				var updateduser = this.userService.updateUser(savedUser);
@@ -563,7 +570,7 @@ public class WalletService {
 		} catch (DataIntegrityViolationException e) {
 			e.printStackTrace();
 			Map<String, Object> map = new HashMap<String, Object>();
-			map.put("message", "Account already exist");
+			map.put("message","Account already exists");
 			map.put("success", false);
 			return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
 		} catch (Exception e) {
@@ -808,7 +815,7 @@ public class WalletService {
 												+ "was successful. Transaction ID: " + results.getParams().getTxId())
 										.targetType(NotificationTargetType.INDIVIDUAL.getValue()).targetUser(user.get())
 										.build();
-
+                                this.firebaseService.sendMessage(ntf);
 								this.notificationService.save(ntf);
 
 							}
@@ -868,8 +875,9 @@ public class WalletService {
 				}
 				var ntf = Notifications.builder().title("ACCOUNT UPGARDE BRIEFING").message(message)
 						.targetType(NotificationTargetType.INDIVIDUAL.getValue()).targetUser(user.get()).build();
-
+               
 				this.notificationService.save(ntf);
+				this.firebaseService.sendMessage(ntf);
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.SME_ACCOUNT_OPEN.getCode())) {
 				NotificationResult<SmeAccountOpeningResultNotification> results = new Gson().fromJson(body.toString(),
@@ -1412,8 +1420,26 @@ public class WalletService {
 		String responseJson = responseMono.block();
 		log.info(responseJson);
 		if (tillAndBuyGoods.getBillType().toString().equalsIgnoreCase("TILL")
-				&& tillAndBuyGoods.getShortCode().trim().equalsIgnoreCase(internetTillNumber)) {
+				&& tillAndBuyGoods.getShortCode().trim().equalsIgnoreCase(internetTillNumber) ) {
 			return null;
+		}
+		
+		if (tillAndBuyGoods.getBillType().toString().equalsIgnoreCase("PAY_BILL")) {
+		    String[] blacklistedShortCodes = {
+		    		"804040", 
+		    		"556688", 
+		    		"290290"
+		    		};
+
+		    boolean isBlacklisted = Arrays.stream(blacklistedShortCodes)
+		                                  .anyMatch(code -> code.equalsIgnoreCase(tillAndBuyGoods.getShortCode()));
+
+		    if (isBlacklisted) {
+		        Map<String, Object> map = new HashMap<>();
+		        map.put("success", false);
+		        map.put("message", "Merchant does not accept payment from Konnect Wallet");
+		        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		    }
 		}
 
 		if (responseJson != null) {

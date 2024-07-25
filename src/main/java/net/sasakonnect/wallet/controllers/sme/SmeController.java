@@ -28,6 +28,7 @@ import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.sme.HasSmePermission;
 import net.sasakonnect.wallet.annotations.sme.SmeCorporate;
 import net.sasakonnect.wallet.constant.sme.GlobalSmePermissionConstants;
+import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.services.sme.SmePermissionService;
 import net.sasakonnect.wallet.services.sme.SmeRoleService;
 import net.sasakonnect.wallet.services.sme.SmeService;
@@ -47,6 +48,8 @@ public class SmeController {
 	SmePermissionService smePermissionService;
 	@Autowired
 	SmeService smeService;
+	@Autowired
+	UserService userService;
 	@PostMapping("/login")
 	public ResponseEntity<ObjectNode> smeLogin(@Valid @RequestBody SmeUserLogin loginDto ){
 		return this.smeUserService.smeLogin(loginDto);
@@ -71,7 +74,7 @@ public class SmeController {
 	@HasSmePermission(GlobalSmePermissionConstants.CanCreateSmeRole.PERMISSION)
 	@PostMapping("role")
 	public ResponseEntity<Object> createSmeRole(@Valid @RequestBody() SmeRoleDto roleDto){
-		return this.createSmeRole(roleDto);
+		return this.smeRoleService.createSmeRole(roleDto);
 	}
 	
 	@SmeCorporate
@@ -98,8 +101,8 @@ public class SmeController {
 	@SmeCorporate
 	@HasSmePermission(GlobalSmePermissionConstants.CanAssignRolePermissions.PERMISSION)
 	@PostMapping("role/assign/permissions")
-	public ResponseEntity<Object> assignSmeRolePermissions(@Valid @RequestBody() SmeAssignRoleDto roleDto){
-		return this.assignSmeRolePermissions(roleDto);
+	public ResponseEntity<Object> assignSmeRolePermissions(@Valid @RequestBody() SmeAssingRolePermissionDto roleDto){
+		return this.smeRoleService.assignPermissionsToSmeRole(roleDto.getPermissionIds(),roleDto.getRole_id());
 	}
 	
 	@SmeCorporate
@@ -118,6 +121,20 @@ public class SmeController {
 	}
 	
 	@SmeCorporate
+	@GetMapping("roles/users")
+	@HasSmePermission(GlobalSmePermissionConstants.CanGetRoles.PERMISSION)
+	public  ResponseEntity<Object> getRoles(@RequestParam(name="roleId",required=true) String roleId){
+		return this.smeRoleService.getRoleUsers(roleId);
+	}
+	
+	@SmeCorporate
+	@GetMapping("roles/permissions")
+	@HasSmePermission(GlobalSmePermissionConstants.CanGetRoles.PERMISSION)
+	public  ResponseEntity<Object> getRolePermissions(@RequestParam(name="roleId",required=true) String roleId){
+		return this.smeRoleService.getRolePermissions(roleId);
+	}
+	
+	@SmeCorporate
 	@GetMapping("account/roles")
 	@HasSmePermission(GlobalSmePermissionConstants.CanGetRoles.PERMISSION)
 	public  ResponseEntity<Object> getAccountRoles(@RequestParam(name="pageNumber",required=true,defaultValue="0") Integer pageNumber, @RequestParam(name="pageSize",required=true,defaultValue="10") Integer pageSize){
@@ -128,8 +145,8 @@ public class SmeController {
 	@SmeCorporate
 	@GetMapping("permissions")
 	@HasSmePermission(GlobalSmePermissionConstants.CanGetPermissions.PERMISSION)
-	public  ResponseEntity<Object> getPermissionByCategory(@RequestParam(name="categoryName",required=false) String category,@RequestParam(name="pageNumber",required=true,defaultValue="0") Integer pageNumber, @RequestParam(name="pageSize",required=true,defaultValue="10") Integer pageSize ){
-		return  category != null ? this.smePermissionService.getPermissionsByCategoryName(category,pageNumber, pageSize) : this.smePermissionService.getPermissions(pageNumber, pageSize);
+	public  ResponseEntity<Object> getPermissionByCategory(@RequestParam(name="categoryName",required=false) String category){
+		return  category != null ? this.smePermissionService.getPermissionsByCategoryName(category) : this.smePermissionService.getPermissions();
 	}
 	
 	@SmeCorporate
@@ -156,6 +173,7 @@ public class SmeController {
 	
 	@SmeCorporate
 	@GetMapping("accounts/info")
+	@HasSmePermission(GlobalSmePermissionConstants.CanGetAccountsInfo.PERMISSION)
 	public ResponseEntity<Object> getSmeAccountsInfoBySme(){
 		return  this.smeUserService.getSmeUserAccountsInfo();
 	}
@@ -166,11 +184,18 @@ public class SmeController {
 		return  this.smeUserService.updateSmePassword(passwordDto);
 	}
 	
+	@SmeCorporate
+	@GetMapping("staff")
+	@HasSmePermission(GlobalSmePermissionConstants.CanGetStaffInfo.PERMISSION)
+	public ResponseEntity<Object> getSmeStaff(@RequestParam(name="pageNumber",defaultValue="0") Integer pageNumber,@RequestParam(name="pageSize",defaultValue="10") Integer pageSize){
+		return  this.smeUserService.getSmestaff();
+	}
 	
-	
-	
-
-	
-	
+	@SmeCorporate
+	@GetMapping("wallet/user/search")
+	@HasSmePermission(GlobalSmePermissionConstants.CanAddSmeUser.PERMISSION)
+	public ResponseEntity<Object> searchWalletUser(@RequestParam("mobileNumber") String mobile){
+		return this.userService.findUserByMobile(mobile);
+	}
 	
 }

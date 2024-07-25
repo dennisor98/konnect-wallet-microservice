@@ -25,18 +25,19 @@ import net.sasakonnect.wallet.enums.NotificationTargetType;
 import net.sasakonnect.wallet.repository.NotificationsReadRepository;
 import net.sasakonnect.wallet.repository.NotificationsRepository;
 import net.sasakonnect.wallet.repository.UserRepository;
+import net.sasakonnect.wallet.services.sme.FirebaseService;
 import net.sasakonnect.wallet.tools.ResponsePagerClass;
 
 @Service
 public class NotificationService {
 	@Autowired
 	NotificationsRepository  notificationsRepository;
-	
 	@Autowired
 	UserRepository userRepository;
-	
 	@Autowired
 	NotificationsReadRepository notificationsReadRepository;
+	@Autowired
+	FirebaseService firebaseService;
 	
    public void save(Notifications notification) {
 	   this.notificationsRepository.save(notification);
@@ -127,6 +128,8 @@ public class NotificationService {
    }
    
    public ResponseEntity<Object> createNotification(NotificationDto notification) {
+	   
+	   //send notification to an individual
 	   if(notification.getTargetType().getValue().equalsIgnoreCase(NotificationTargetType.INDIVIDUAL.getValue())) {
 		   Optional<User> user = this.userRepository.findById(notification.getUserId());
 		   if(user.isPresent()) {
@@ -141,6 +144,8 @@ public class NotificationService {
 			   map.put("success",true);
 			   map.put("message","Request completed successfully");
 			   
+			   String firebaseToken =   user.get().getFirebaseTokens().get(0).getToken();
+			   this.firebaseService.sendMessage(ntf);
 			   return ResponseEntity.status(HttpStatus.OK).body(map);
 		   }
 		   Map<String,Object> map = new HashMap<>();
@@ -149,6 +154,8 @@ public class NotificationService {
 		   return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 	   }
 	   
+	   //else send notification as a broadcast
+	   
 	   var ntf = Notifications.builder()
 			   .title(notification.getTitle())
 			   .message(notification.getMessage())
@@ -156,7 +163,7 @@ public class NotificationService {
 			   .targetType(notification.getTargetType().getValue())
 			   .build();
 	   this.notificationsRepository.save(ntf);
-	   
+	   this.firebaseService.sendBroadCastMessage(ntf);
 	   Map<String,Object> map = new HashMap<>();
 	   map.put("success",false);
 	   map.put("message","Request completed successfully");

@@ -320,6 +320,50 @@ public class GlobalSmePermissionConstants {
 
 	}
 	
+	public static class CanGetAccountsInfo extends SmePermissionEntry{
+		public static final String PERMISSION = "can.get.accounts.info";
+		public static final String DESCRIPTION = "can fetch all accounts information from the given sme";
+		public static final String CATEGORY = "account";
+
+		@Override
+		String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+
+		@Override
+		String getCATEGORY() {
+			return CATEGORY;
+		}
+
+	}
+	
+	public static class CanGetStaffInfo extends SmePermissionEntry{
+		public static final String PERMISSION = "can.get.sme.staff.info";
+		public static final String DESCRIPTION = "can fetch all staff information from the given sme";
+		public static final String CATEGORY = "staff";
+
+		@Override
+		String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+
+		@Override
+		String getCATEGORY() {
+			return CATEGORY;
+		}
+
+	}
+	
 	public static class CanPrintPaySlip extends SmePermissionEntry{
 		public static final String PERMISSION = "can.print.payslip";
 		public static final String DESCRIPTION = "can print a payslip record";

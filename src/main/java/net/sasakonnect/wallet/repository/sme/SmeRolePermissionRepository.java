@@ -16,9 +16,12 @@ import net.sasakonnect.wallet.domain.sme.authorisation.SmeUserRole;
 
 public interface SmeRolePermissionRepository extends JpaRepository<SmeRolePermission,String>{
  Page<SmeRolePermission> findAllBySmeRole(SmeRole smeUserRole,Pageable pageable);
+ List<SmeRolePermission> findBySmeRole(SmeRole smeUserRole);
  @Query("SELECT rp.smePermission FROM SmeRolePermission rp "
 			+ "WHERE rp.smeRole = :role AND rp.smePermission.name = :permissionName")
  Optional<SmePermissions> findBySmeRoleAndSmePermissions(@Param("role") SmeRole role,@Param("permissionName") String permissionName);
  Optional<SmeRolePermission> findBySmeRoleAndSmePermission(SmeRole  role,SmePermissions permission);
+ @Query("SELECT rp.smePermission FROM SmeRolePermission rp WHERE rp.smeRole =:role")
+ List<SmePermissions> findAllBySmeRole(@Param("role") SmeRole smeUserRole);
 
 }
