@@ -1,5 +1,6 @@
 package net.sasakonnect.wallet.domain;
 
+import java.util.Date;
 import java.util.List;
 
 import jakarta.persistence.Column;
@@ -36,5 +37,8 @@ public class Notifications extends BaseWalletDomain {
 	
 	@OneToMany(mappedBy="message")
 	List<NotificationsRead> messageRead;
+	
+	@Column()
+	Date expiryDate;
    
 }

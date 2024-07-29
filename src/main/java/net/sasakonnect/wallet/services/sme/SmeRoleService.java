@@ -49,6 +49,7 @@ import net.sasakonnect.wallet.repository.sme.SmeRepository;
 import net.sasakonnect.wallet.repository.sme.SmeRolePermissionRepository;
 import net.sasakonnect.wallet.repository.sme.SmeRoleRepository;
 import net.sasakonnect.wallet.repository.sme.SmeUserRoleRepository;
+import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.tools.ResponsePagerClass;
 
 @Slf4j
@@ -80,6 +81,8 @@ public class SmeRoleService {
 	SmeAccountPermissionRepository smeAccountPermissionRepository;
 	@Autowired
 	SmeAccountRolePermissionRepository smeAccountRolePermissionRepository;
+	@Autowired
+	UserService userService;
 	
 	public ResponseEntity<Object> createSmeRole(SmeRoleDto roleDto){
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -167,18 +170,55 @@ public class SmeRoleService {
 	}
 	
 	public ResponseEntity<Object> assignSmeUserRole(SmeAssignRoleDto roleDto) {
-		Optional<SmeCorporate> smeCorp =  this.smeUserService.smeCorporateRepository.findById(roleDto.getUser_id());
-		Optional<SmeRole> smeRole = this.smeRoleRepository.findById(roleDto.getRole_id());
-
-		if(smeCorp.isEmpty() && smeRole.isEmpty()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid information");
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		if(user.getId().equalsIgnoreCase(roleDto.getUser_id())) {
+			Map<String,Object> map =  new HashMap<>();
+			map.put("success",false);
+			map.put("message","Operation forbidden");
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
 		}
+		Optional<User> OptionalUser =  this.userService.findUserById(roleDto.getUser_id());
+		if(OptionalUser.isEmpty()) {
+			Map<String,Object> map =  new HashMap<>();
+			map.put("success",false);
+			map.put("message","Invalid user_id");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		
 		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
 				.getRequest();
 		String smeId =  this.smeUserService.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
 		Optional<Sme> sme =  this.smeRepository.findById(smeId);
 		if(sme.isEmpty()) {
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN,"FORBIDDEN");
+			Map<String,Object> map =  new HashMap<>();
+			map.put("success",false);
+			map.put("message","Data cannot be processed");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		} 
+		Optional<SmeCorporate> smeCorp =  this.smeUserService.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
+		Optional<SmeRole> smeRole = this.smeRoleRepository.findById(roleDto.getRole_id());
+
+		if(smeCorp.isEmpty()) {
+			Map<String,Object> map =  new HashMap<>();
+			map.put("success",false);
+			map.put("message","Account not found");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		
+		if(smeRole.isEmpty()) {
+			Map<String,Object> map =  new HashMap<>();
+			map.put("success",false);
+			map.put("message","Invalid role_id");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+	
+		
+		Optional<SmeUserRole> userRoleExists = this.smeUserRoleRepository.findBySmeRoleAndUser(smeCorp.get(),smeRole.get());
+		if(userRoleExists.isPresent()) {
+			Map<String,Object> map =  new HashMap<>();
+			map.put("success",false);
+			map.put("message","Role already assigned");
+			return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
 		}
 		var userRole =  SmeUserRole.builder().smeRole(smeRole.get()).smeAccount(sme.get()).user(smeCorp.get()).build();
 		try {
@@ -504,6 +544,7 @@ public class SmeRoleService {
 				  Map<String,Object> umap = new HashMap<>();
 				  umap.put("id",rp.getUser().getId());
 				  umap.put("user_role_id",rp.getId());
+				  umap.put("date_added",rp.getCreatedAt());
 				  umap.put("firstname",rp.getUser().getUser().getFirstName());
 				  umap.put("middlename",rp.getUser().getUser().getMiddleName());
 				  umap.put("lastname",rp.getUser().getUser().getLastName());

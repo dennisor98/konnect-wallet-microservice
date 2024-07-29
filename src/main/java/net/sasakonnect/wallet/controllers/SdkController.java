@@ -181,6 +181,7 @@ public class SdkController {
 	}
 	
 	@GetMapping("mobile/confirm")
+	@RateLimit(3)
 	@ServiceInteractionMiddleware()
 	public Object confirmMobileNumber(
 			@Parameter(example = "xxx", name = "secret-key", description = "Provide app key of the app you created on dashboard", in = ParameterIn.HEADER, required = true) @RequestHeader("secret-key") String appSecret,

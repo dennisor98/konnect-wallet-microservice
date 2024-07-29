@@ -1,10 +1,13 @@
 package net.sasakonnect.wallet.services;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -618,6 +621,17 @@ public class WalletService {
 						this.userWalletRepository.save(userWallet);
 						this.userService.deleteSuccessfulFromRejected(user.get().getIdNumber());
 						this.larkService.sendOnBoardingMessage("SUCCESSFUL ONBOARDING", "orange", notificationBody);
+						
+						var u = user.get();
+						
+						
+						//send message to user
+						var message  = "Dear "+u.getFirstName()+",your account has been approved.Continue enjoying our services"+"\n"+"Regards,\nKonnect Wallet";
+						Instant expiryInstant = Instant.now().plus(5, ChronoUnit.MINUTES);
+						Date expiryDate = Date.from(expiryInstant);
+						var ntf = Notifications.builder().targetType("INDIVIDUAL").message(message).targetUser(u).title("ACCOUNT STATUS UPDATE").expiryDate(expiryDate).build();
+						this.firebaseService.sendMessage(ntf);
+						this.notificationService.save(ntf);
 						// write logs to database
 						var log = Logs.builder().activity(LogTypes.ONBOARDING)
 								.description(user.get().getFirstName() + " " + user.get().getLastName() + "of acc No: "
@@ -638,6 +652,15 @@ public class WalletService {
 					var onboardingRequestId = params.get("onboardingRequestId").getAsString();
 					// insert into rejected accounts
 					var u = user.get();
+					
+					//send notifification message to the user
+					var message  = "Dear "+u.getFirstName()+",your account has been rejected due to: "+notificationBody.getRejectionReasonMsgs().stream().map(Object::toString)
+							.collect(Collectors.joining("\n"))+"\nRegards,\nKonnect Wallet";
+					Instant expiryInstant = Instant.now().plus(5, ChronoUnit.MINUTES);
+					Date expiryDate = Date.from(expiryInstant);
+					var ntf = Notifications.builder().targetType("INDIVIDUAL").message(message).targetUser(u).title("ACCOUNT STATUS UPDATE").expiryDate(expiryDate).build();
+					this.firebaseService.sendMessage(ntf);
+					this.notificationService.save(ntf);
 					var rejected = RejectedAccount.builder().address(u.getAddress())
 							.employmentStatus(u.getEmploymentStatus()).countryCode(u.getCountryCode())
 							.birthday(u.getBirthday()).gender(u.getGender()).idNumber(u.getIdNumber())
@@ -670,21 +693,32 @@ public class WalletService {
 				} else if (notificationBody.getStatus() == 8 && user.isPresent()) {
 					// log failed account opening
 					var onboardingRequestId = params.get("onboardingRequestId").getAsString();
-					System.out.println(onboardingRequestId);
 					// delete user from the system
 					this.userService.deletUserByOnboardingRequestId(onboardingRequestId);
 					this.larkService.sendOnBoardingMessage("ACCOUNT OPENING FAILED", "red", notificationBody);
 
 				} else if (notificationBody.getStatus() == 9 && user.isPresent()) {
+					var u = user.get();
 					// account under manual review
 					// save logs to the database
+					
 					var log = Logs.builder().activity(LogTypes.ONBOARDING)
 							.description(user.get().getFirstName() + " " + user.get().getLastName()
 									+ " of onboarding ID: " + notificationBody.getOnboardingRequestId()
 									+ " failed to onboard.Account under mnaual review.")
 							.build();
 					this.logsRepository.save(log);
+					
+					//send notification to user
+					var message  = "Dear "+u.getFirstName()+",your account is under manual review.We will notify you once approved."+"\n"+"Regards,\nKonnect Wallet";
+					Instant expiryInstant = Instant.now().plus(5, ChronoUnit.MINUTES);
+					Date expiryDate = Date.from(expiryInstant);
+					var ntf = Notifications.builder().targetType("INDIVIDUAL").message(message).targetUser(u).title("ACCOUNT STATUS UPDATE").expiryDate(expiryDate).build();
+					this.firebaseService.sendMessage(ntf);
+					this.notificationService.save(ntf);
+					//send lark notification
 					this.larkService.sendOnBoardingMessage("ACCOUNT UNDER MANUAL REVIEW", "green", notificationBody);
+					
 
 				} else {
 
@@ -856,7 +890,7 @@ public class WalletService {
 				Optional<User> user = this.userService.findUserByAccountd(results.getParams().getAccountId());
 
 				var message = "";
-				if (results.getParams().getStatus() == OnboardingStatusType.FAILED_TO_OPEN_ACCOUNT.getCode()) {
+				if (results.getParams().getStatus() == OnboardingStatusType.REJECTED.getCode()) {
 					message = "Dear " + user.get().getFirstName() + " " + user.get().getLastName()
 							+ ",your account upgrade request failed.Kindly resubmit valid documents and details.\nThanks"
 							+ "Regards," + "\n" + "Konnect Wallet";

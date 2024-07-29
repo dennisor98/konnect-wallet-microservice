@@ -142,9 +142,7 @@ public class NotificationService {
 			   this.notificationsRepository.save(ntf);
 			   Map<String,Object> map =  new HashMap<>();
 			   map.put("success",true);
-			   map.put("message","Request completed successfully");
-			   
-			   String firebaseToken =   user.get().getFirebaseTokens().get(0).getToken();
+			   map.put("message","Request completed successfully");  
 			   this.firebaseService.sendMessage(ntf);
 			   return ResponseEntity.status(HttpStatus.OK).body(map);
 		   }
