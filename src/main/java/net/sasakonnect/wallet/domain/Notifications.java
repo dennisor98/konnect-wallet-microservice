@@ -29,7 +29,7 @@ public class Notifications extends BaseWalletDomain {
 	String message;
 	
 	@ManyToOne()
-	@JoinColumn(name = "user_id")
+	@JoinColumn(name = "user_id",nullable=true)
 	User targetUser;
 	
 	@Column()

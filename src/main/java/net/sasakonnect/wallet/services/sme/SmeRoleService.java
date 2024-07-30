@@ -195,7 +195,7 @@ public class SmeRoleService {
 			map.put("message","Data cannot be processed");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 		} 
-		Optional<SmeCorporate> smeCorp =  this.smeUserService.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
+		Optional<SmeCorporate> smeCorp =  this.smeUserService.smeCorporateRepository.findSmeCorporateByUserAndSmes(OptionalUser.get(),sme.get());
 		Optional<SmeRole> smeRole = this.smeRoleRepository.findById(roleDto.getRole_id());
 
 		if(smeCorp.isEmpty()) {
@@ -213,15 +213,20 @@ public class SmeRoleService {
 		}
 	
 		
-		Optional<SmeUserRole> userRoleExists = this.smeUserRoleRepository.findBySmeRoleAndUser(smeCorp.get(),smeRole.get());
+		Optional<SmeUserRole> userRoleExists = this.smeUserRoleRepository.findBySmeRoleAndUser(smeRole.get(),smeCorp.get());
 		if(userRoleExists.isPresent()) {
 			Map<String,Object> map =  new HashMap<>();
 			map.put("success",false);
 			map.put("message","Role already assigned");
 			return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
 		}
+		
+		var userHasRole = this.smeUserRoleRepository.findByUser(smeCorp.get());
 		var userRole =  SmeUserRole.builder().smeRole(smeRole.get()).smeAccount(sme.get()).user(smeCorp.get()).build();
 		try {
+			if(userHasRole.isPresent()) {
+				this.smeUserRoleRepository.delete(userHasRole.get());
+			}
 			this.smeUserRoleRepository.save(userRole);
 			Map<String,Object> map =  new HashMap<>();
 			map.put("success",true);
@@ -235,6 +240,71 @@ public class SmeRoleService {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
 		}
 
+	}
+	
+	
+	public ResponseEntity<Object> removeUserFromRole(SmeAssignRoleDto roleDto){
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		if(user.getId().equalsIgnoreCase(roleDto.getUser_id())) {
+			Map<String,Object> map =  new HashMap<>();
+			map.put("success",false);
+			map.put("message","Operation forbidden");
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
+		}
+		Optional<User> OptionalUser =  this.userService.findUserById(roleDto.getUser_id());
+		if(OptionalUser.isEmpty()) {
+			Map<String,Object> map =  new HashMap<>();
+			map.put("success",false);
+			map.put("message","Invalid user_id");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+				.getRequest();
+		String smeId =  this.smeUserService.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
+		Optional<Sme> sme =  this.smeRepository.findById(smeId);
+		if(sme.isEmpty()) {
+			Map<String,Object> map =  new HashMap<>();
+			map.put("success",false);
+			map.put("message","Data cannot be processed");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		} 
+		Optional<SmeCorporate> smeCorp =  this.smeUserService.smeCorporateRepository.findSmeCorporateByUserAndSmes(OptionalUser.get(),sme.get());
+		Optional<SmeRole> smeRole = this.smeRoleRepository.findById(roleDto.getRole_id());
+
+		if(smeCorp.isEmpty()) {
+			Map<String,Object> map =  new HashMap<>();
+			map.put("success",false);
+			map.put("message","Account not found");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+
+		if(smeRole.isEmpty()) {
+			Map<String,Object> map =  new HashMap<>();
+			map.put("success",false);
+			map.put("message","Invalid role_id");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		Optional<SmeUserRole> userRoleExists = this.smeUserRoleRepository.findBySmeRoleAndUser(smeRole.get(),smeCorp.get());
+		if(userRoleExists.isEmpty()){
+			Map<String,Object> map =  new HashMap<>();
+			map.put("success",false);
+			map.put("message","Role mapping unavailable");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+
+		try {
+			this.smeUserRoleRepository.delete(userRoleExists.get());
+			Map<String,Object> map =  new HashMap<>();
+			map.put("success",false);
+			map.put("message","Role mapping unavailable");
+			return ResponseEntity.status(HttpStatus.OK).body(map);
+		}catch(Exception ex) {	
+			ex.printStackTrace();
+			Map<String,Object> map =  new HashMap<>();
+			map.put("success",false);
+			map.put("message","A server error occured");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+		}
 	}
 	
 	 @Transactional
@@ -542,7 +612,7 @@ public class SmeRoleService {
 	  var users = smeUserRoles.stream()
 			  .map(rp->{
 				  Map<String,Object> umap = new HashMap<>();
-				  umap.put("id",rp.getUser().getId());
+				  umap.put("id",rp.getUser().getUser().getId());
 				  umap.put("user_role_id",rp.getId());
 				  umap.put("date_added",rp.getCreatedAt());
 				  umap.put("firstname",rp.getUser().getUser().getFirstName());

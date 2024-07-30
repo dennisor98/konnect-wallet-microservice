@@ -126,8 +126,8 @@ public class User extends BaseWalletDomain implements Serializable, UserDetails 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<FirebaseToken> firebaseTokens;
 
-	@ManyToMany(mappedBy = "user_notified")
-	private List<Notification> notifications;
+	@ManyToMany(mappedBy = "targetUser")
+	private List<Notifications> notifications;
 
 	@OneToOne(mappedBy = "user")
 	private UserRole userRole;

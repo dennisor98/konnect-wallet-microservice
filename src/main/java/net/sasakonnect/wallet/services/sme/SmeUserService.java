@@ -623,4 +623,54 @@ public class SmeUserService {
 		map.put("staff",staff);
 		return ResponseEntity.status(HttpStatus.OK).body(map);
 	}
+	
+	public ResponseEntity<Object> getUserPermissions() {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+				.getRequest();
+		String smeId =  this.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
+		Optional<Sme> sme =  this.smeRepository.findById(smeId);
+		
+		Optional<SmeCorporate> smeCorp = this.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
+		if(smeCorp.isEmpty()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","Account unavailable");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		Optional<SmeUserRole> userRole =  this.smeUserRoleRepository.findByUser(smeCorp.get());
+		if(userRole.isEmpty()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","Request completed");
+			map.put("permissions", new ArrayList<>());
+			return ResponseEntity.status(HttpStatus.OK).body(map);
+		}
+		
+		
+		List<SmePermissions> permissionsList =  this.smeRolePermissionRepository.findAllBySmeRole(userRole.get().getSmeRole());
+		if(permissionsList.isEmpty()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","Request completed");
+			map.put("permissions", new ArrayList<>());
+			return ResponseEntity.status(HttpStatus.OK).body(map);
+		}
+		
+		Map<String,Object> map = new HashMap<>();
+		map.put("success",false);
+		map.put("message","Request completed");
+		
+		var permissions = permissionsList.stream()
+				.map(p->{
+					Map<String,Object> mp = new HashMap<>();
+					mp.put("id",p.getId());
+					mp.put("name",p.getName());
+
+					return mp;
+				}).collect(Collectors.toList());
+		map.put("permissions", permissions);
+		return ResponseEntity.status(HttpStatus.OK).body(map);
+				
+	}
 }

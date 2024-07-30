@@ -88,9 +88,11 @@ import net.sasakonnect.wallet.notification.SmeAccountOpeningResultNotification;
 import net.sasakonnect.wallet.notification.TransactionResultNotification;
 import net.sasakonnect.wallet.notification.WalletAccountUpgradeResultNotification;
 import net.sasakonnect.wallet.repository.CurrencyRepository;
+import net.sasakonnect.wallet.repository.FirebaseTokenRepository;
 import net.sasakonnect.wallet.repository.LogsRepository;
 import net.sasakonnect.wallet.repository.RejectedAccountRepository;
 import net.sasakonnect.wallet.repository.UserJobRepository;
+import net.sasakonnect.wallet.repository.UserPinRepository;
 import net.sasakonnect.wallet.repository.UserWalletRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.services.extensions.LarkUtilityService;
@@ -135,7 +137,7 @@ public class WalletService {
 
 	@Autowired
 	RejectedAccountRepository rejectedAccountRepository;
-
+	
 	@Autowired
 	private TransactionService transactionService;
 
@@ -166,9 +168,14 @@ public class WalletService {
 	SmeAccountService smeAccountService;
 	@Autowired
 	private FirebaseService firebaseService;
+	
+	@Autowired
+	UserPinRepository userPinRepository;
 
 	@Value("${internetTillNumber}")
 	String internetTillNumber;
+	
+	
 
 	@Value("${KONNECT_BANK}")
 	private String konnectBank;
@@ -602,6 +609,7 @@ public class WalletService {
 
 			if (notification_Type.equalsIgnoreCase(NotificationType.ONBOARD.getCode())) {
 				var user = this.userService.getUserById(params.get("userId").getAsString());
+			
 				if (user.isPresent()) {
 					var u = user.get();
 					u.setStatus(String.valueOf(notificationBody.getStatus()));
@@ -629,7 +637,7 @@ public class WalletService {
 						var message  = "Dear "+u.getFirstName()+",your account has been approved.Continue enjoying our services"+"\n"+"Regards,\nKonnect Wallet";
 						Instant expiryInstant = Instant.now().plus(5, ChronoUnit.MINUTES);
 						Date expiryDate = Date.from(expiryInstant);
-						var ntf = Notifications.builder().targetType("INDIVIDUAL").message(message).targetUser(u).title("ACCOUNT STATUS UPDATE").expiryDate(expiryDate).build();
+						var ntf = Notifications.builder().targetType("INDIVIDUAL").message(message).targetUser(u).title("ACCOUNT APPROVED").expiryDate(expiryDate).build();
 						this.firebaseService.sendMessage(ntf);
 						this.notificationService.save(ntf);
 						// write logs to database
@@ -658,9 +666,14 @@ public class WalletService {
 							.collect(Collectors.joining("\n"))+"\nRegards,\nKonnect Wallet";
 					Instant expiryInstant = Instant.now().plus(5, ChronoUnit.MINUTES);
 					Date expiryDate = Date.from(expiryInstant);
-					var ntf = Notifications.builder().targetType("INDIVIDUAL").message(message).targetUser(u).title("ACCOUNT STATUS UPDATE").expiryDate(expiryDate).build();
-					this.firebaseService.sendMessage(ntf);
-					this.notificationService.save(ntf);
+					var ntf = Notifications.builder().targetType("INDIVIDUAL").message(message).targetUser(u).title("ACCOUNT REJECTED").expiryDate(expiryDate).build();
+					
+
+					if(u.getFirebaseTokens() !=null && !u.getFirebaseTokens().isEmpty()) {
+						this.firebaseService.deleteTokensByUser(u);;
+						this.firebaseService.sendMessage(ntf);
+					}
+					
 					var rejected = RejectedAccount.builder().address(u.getAddress())
 							.employmentStatus(u.getEmploymentStatus()).countryCode(u.getCountryCode())
 							.birthday(u.getBirthday()).gender(u.getGender()).idNumber(u.getIdNumber())
@@ -671,6 +684,11 @@ public class WalletService {
 							.onboardingRequestId(u.getOnboardingRequestId()).mobile(u.getMobile())
 							.firstName(u.getFirstName()).lastName(u.getLastName()).build();
 					this.userService.createRejectedAccount(rejected);
+					if(u.getNotifications() !=null) {
+						List<Notifications> untf = u.getNotifications();
+						this.notificationService.deleteAll(untf);
+					}
+					
 					this.userService.deletUserByOnboardingRequestId(onboardingRequestId);
 					var log = Logs.builder().activity(LogTypes.ONBOARDING).description(user.get().getFirstName() + " "
 							+ user.get().getLastName() + " of onboarding ID: "
@@ -713,7 +731,7 @@ public class WalletService {
 					var message  = "Dear "+u.getFirstName()+",your account is under manual review.We will notify you once approved."+"\n"+"Regards,\nKonnect Wallet";
 					Instant expiryInstant = Instant.now().plus(5, ChronoUnit.MINUTES);
 					Date expiryDate = Date.from(expiryInstant);
-					var ntf = Notifications.builder().targetType("INDIVIDUAL").message(message).targetUser(u).title("ACCOUNT STATUS UPDATE").expiryDate(expiryDate).build();
+					var ntf = Notifications.builder().targetType("INDIVIDUAL").message(message).targetUser(u).title("ACCOUNT ON MANUAL REVIEW").expiryDate(expiryDate).build();
 					this.firebaseService.sendMessage(ntf);
 					this.notificationService.save(ntf);
 					//send lark notification
@@ -1566,8 +1584,8 @@ public class WalletService {
 		Map<String, Object> map = new HashMap<>();
 		Map<String, Object> resMap = new HashMap<>();
 		if (user.isPresent()) {
-			var pins = user.get().getPins();
-			if (pins != null && !pins.isEmpty()) {
+			var pin = this.userPinRepository.getUserPinThatIsNotArchived(user.get());
+			if (pin != null && !pin.isEmpty()) {
 				UserPin userPin = user.get().getPins().get(0);
 				Integer attempts = userPin.getPinAttempts();
 				map.put("attempts", attempts);

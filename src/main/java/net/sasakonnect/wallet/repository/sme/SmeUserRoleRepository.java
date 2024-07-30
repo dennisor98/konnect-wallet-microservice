@@ -11,6 +11,6 @@ import net.sasakonnect.wallet.domain.sme.authorisation.SmeUserRole;
 
 public interface SmeUserRoleRepository extends JpaRepository<SmeUserRole,String>{
   Optional<SmeUserRole> findByUser(SmeCorporate smeCorporate);
-  Optional<SmeUserRole> findBySmeRoleAndUser(SmeCorporate smeCorporate,SmeRole smeRole);
+  Optional<SmeUserRole> findBySmeRoleAndUser(SmeRole smeRole,SmeCorporate smeCorporate);
   List<SmeUserRole> findBySmeRole(SmeRole smeRole); 
 }

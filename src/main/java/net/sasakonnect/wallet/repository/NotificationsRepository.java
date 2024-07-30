@@ -23,6 +23,9 @@ public interface NotificationsRepository extends JpaRepository<Notifications,Str
 	
 	@Query("SELECT n FROM Notifications n JOIN NotificationsRead nr ON nr.message = n WHERE nr.user = :user ORDER BY n.createdAt DESC")
 	Page<Notifications> findReadNotifications(@Param("user") User user, Pageable pageable);
+	
+	@Query("SELECT n FROM Notifications n WHERE n.expiryDate < CURRENT_TIMESTAMP")
+    List<Notifications> findExpiredNotifications();
 
 
 }

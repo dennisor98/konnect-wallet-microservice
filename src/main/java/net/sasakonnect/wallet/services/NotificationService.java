@@ -254,6 +254,10 @@ public class NotificationService {
 		   ex.printStackTrace();
 		   return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
 	   }
-	
+	   
+   }
+   
+   public void deleteAll(List<Notifications> notifications) {
+	   this.notificationsRepository.deleteAll(notifications);
    }
 }
