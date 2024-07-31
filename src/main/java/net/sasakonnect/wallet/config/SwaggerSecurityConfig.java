@@ -32,12 +32,12 @@ public class SwaggerSecurityConfig {
 		this.passwordEncoder = passwordEncoder;
 	}
 
-	@Bean
-	UserDetailsService userDetailsService() {
-		UserDetails user = User.builder().username("user").password(passwordEncoder.encode("password")).roles("USER")
-				.build();
-		return new InMemoryUserDetailsManager(user);
-	}
+//	@Bean
+//	UserDetailsService userDetailsService() {
+//		UserDetails user = User.builder().username("user").password(passwordEncoder.encode("password")).roles("USER")
+//				.build();
+//		return new InMemoryUserDetailsManager(user);
+//	}
 
 	@Bean
 	OpenAPI openApiInformation() throws Exception {
