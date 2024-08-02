@@ -241,7 +241,7 @@ public class WalletService {
                     	  boolean canSkip = specificDateMillis >= currentDateMillis;
                     	  datamap.put("canSkip", canSkip);
                     	  datamap.put("title","Account Upgrade Required");    
-                    	  datamap.put("accounType","C002");
+                    	  datamap.put("accountType","C002");
                     	  
                     	  map.put("data", datamap);                	
                     	  
@@ -268,7 +268,7 @@ public class WalletService {
 			  datamap.put("message","Please update your app to enjoy more features and seamless transaction exprience");		
 			  datamap.put("canSkip",true);
 			  datamap.put("title","New App Version available");    
-			  datamap.put("accounType",accountType);
+			  datamap.put("accountType",accountType);
 			  
 			  map.put("data",datamap);        	
 			  return map;
