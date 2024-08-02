@@ -199,9 +199,18 @@ public class WalletService {
 
 		if (responseJson != null) {
 		  var json = new  Gson().fromJson(responseJson, Map.class);
+		  log.info("{}",json);
+
 		  Map<String,Object> data = (Map<String,Object>)json.get("data");
 		  if(data !=null) {
-			  String accountType =  data.get("accountType").toString();
+			  log.info("{}",data);
+			  var accType = data.get("accountType");
+
+			  if(accType == null) {
+				  return null;
+			  }
+			  String accountType =  accType.toString();
+			  
 			  if(accountType.equalsIgnoreCase("C002")) {
 				  try {
 					  long timestamp = ((Number) json.get("timestamp")).longValue();
@@ -250,7 +259,7 @@ public class WalletService {
 		  Integer userAppVersion = Integer.valueOf(user.getCurrentAppVersion().replace(".", ""));
 		  Integer latestVesrion = Integer.valueOf(latestAppVesrion.replace(".", ""));
 		  if(latestVesrion > userAppVersion) {
-			  String accountType =  data.get("accountType").toString();
+//			  String accountType =  data.get("accountType").toString();
 			  Map<String,Object> map = new HashMap<>();
 			  Map<String,Object> datamap = new HashMap<>();
 			  map.put("success",true);
@@ -259,7 +268,7 @@ public class WalletService {
 			  datamap.put("message","Please update your app to enjoy more features and seamless transaction exprience");		
 			  datamap.put("canSkip",true);
 			  datamap.put("title","New App Version available");    
-			  datamap.put("accounType",accountType);
+//			  datamap.put("accounType",accountType);
 			  
 			  map.put("data",datamap);        	
 			  return map;
