@@ -203,7 +203,6 @@ public class WalletService {
 		  if(data !=null) {
 			  String accountType =  data.get("accountType").toString();
 			  if(accountType.equalsIgnoreCase("C002")) {
-				 
 				  try {
 					  long timestamp = ((Number) json.get("timestamp")).longValue();
                       Date jsonDate = new Date(timestamp);
@@ -224,13 +223,19 @@ public class WalletService {
                       
                       if (userCreatedAtMillis < specificDateMillis)  {
                     	  Map<String,Object> map = new HashMap<>();
-                    	  map.put("action","upgrade");
-                    	  map.put("message","You are required to upgrade your account to continue enjoying higher transaction limits");		
-                    	  map.put("kycType","v1");
+                    	  Map<String,Object> datamap = new HashMap<>();
+                    	  map.put("success",true);
+                    	  map.put("message","Request complete");
+                    	  datamap.put("action","upgrade");
+                    	  datamap.put("message","You are required to upgrade your account to continue enjoying higher transaction limits");		
+                    	  datamap.put("kycType","v1");
                     	  boolean canSkip = specificDateMillis >= currentDateMillis;
-                    	  map.put("canSkip", canSkip);
-                    	  map.put("title","Account Upgrade Required");    
-                    	  map.put("accounType","C002");
+                    	  datamap.put("canSkip", canSkip);
+                    	  datamap.put("title","Account Upgrade Required");    
+                    	  datamap.put("accounType","C002");
+                    	  
+                    	  map.put("data", datamap);                	
+                    	  
                     	  return map;
                       }
 
@@ -243,15 +248,21 @@ public class WalletService {
 		  }
 		  
 		  Integer userAppVersion = Integer.valueOf(user.getCurrentAppVersion().replace(".", ""));
-		  Integer latestVesrion = Integer.valueOf(latestAppVesrion);
+		  Integer latestVesrion = Integer.valueOf(latestAppVesrion.replace(".", ""));
 		  if(latestVesrion > userAppVersion) {
+			  String accountType =  data.get("accountType").toString();
 			  Map<String,Object> map = new HashMap<>();
-			  map.put("action","update");
-        	  map.put("message","Please update your app to enjoy more features and seamless transaction exprience");		
-        	  map.put("canSkip",true);
-        	  map.put("title","New App Version available");    
-        	  map.put("accounType","C002");
-        	  return map;
+			  Map<String,Object> datamap = new HashMap<>();
+			  map.put("success",true);
+			  map.put("message","Request complete");
+			  datamap.put("action","update");
+			  datamap.put("message","Please update your app to enjoy more features and seamless transaction exprience");		
+			  datamap.put("canSkip",true);
+			  datamap.put("title","New App Version available");    
+			  datamap.put("accounType",accountType);
+			  
+			  map.put("data",datamap);        	
+			  return map;
 			  
 		  }
 //		  log.error(data+"{}");
