@@ -1,6 +1,8 @@
 package net.sasakonnect.wallet.services;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -179,7 +181,7 @@ public class WalletService {
 
 	@Value("${KONNECT_BANK}")
 	private String konnectBank;
-
+	 private static final String DATE_FORMAT = "yyyy-MM-dd";
 	public Object getWalletInfo() {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		var reqId = new HashMap<String, Object>();
@@ -191,11 +193,53 @@ public class WalletService {
 				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 
 		String responseJson = responseMono.block();
-		log.info(responseJson);
 
 		if (responseJson != null) {
-			return new Gson().fromJson(responseJson, Object.class);
+		  var json = new  Gson().fromJson(responseJson, Map.class);
+		  log.info("{}"+json);
+		  Map<String,Object> data = (Map<String,Object>)json.get("data");
+		  if(data !=null) {
+			  String accountType =  data.get("accountType").toString();
+			  if(accountType.equalsIgnoreCase("C002")) {
+				 
+				  try {
+					  long timestamp = ((Number) json.get("timestamp")).longValue();
+                      Date jsonDate = new Date(timestamp);
 
+                      // Parse specific date
+                      SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+                      sdf.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+                      Date specificDate = sdf.parse("2024-07-15");
+
+                      // Retrieve user creation date
+                      Date userCreatedAt = user.getCreatedAt();
+
+                      // Convert dates to epoch time for comparison
+                      long jsonDateMillis = jsonDate.getTime();
+                      long specificDateMillis = specificDate.getTime();
+                      long userCreatedAtMillis = userCreatedAt.getTime();
+                      long currentDateMillis = System.currentTimeMillis();
+                      
+                      if (userCreatedAtMillis < specificDateMillis)  {
+                    	  Map<String,Object> map = new HashMap<>();
+                    	  map.put("action","upgrade");
+                    	  map.put("message","You are required to upgrade your account to continue enjoying higher transaction limits");		
+                    	  map.put("kycType","v1");
+                    	  boolean canSkip = specificDateMillis >= currentDateMillis;
+                    	  map.put("canSkip", canSkip);
+                    	  map.put("accounType","C002");
+                    	  return map;
+                      }
+
+                  } catch (ParseException e){
+                      log.error("Date parsing error", e);
+                  }
+			  }
+			  
+			  log.error("{}"+accountType);
+		  }
+//		  log.error(data+"{}");
+			return new Gson().fromJson(responseJson, Object.class);
 		}
 
 		return null;

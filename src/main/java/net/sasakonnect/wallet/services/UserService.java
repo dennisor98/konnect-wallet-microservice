@@ -170,6 +170,9 @@ public class UserService extends RestClientService implements UserDetailsService
 
 	@Value("${WALLET_BASE_URL}")
 	String wallet_base_url;
+	
+	@Value("${latestAppVesrion}")
+	String latestApVersion;
 
 	@Value("${kompCallBackUrl}")
 	String kompCallBackUrl;
@@ -1744,6 +1747,13 @@ public class UserService extends RestClientService implements UserDetailsService
 		map.put("accountExits",true);
 		map.put("errors",errors);
 		return ResponseEntity.status(HttpStatus.OK).body(map);
+	}
+	
+	public ResponseEntity<Object> confirmUserAction(){
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+	
+		return null;
 	}
 
 }

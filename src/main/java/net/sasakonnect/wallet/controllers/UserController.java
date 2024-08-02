@@ -123,6 +123,14 @@ public class UserController {
 		return this.userService.confirmAccountByIdNumber(idNumber,mobile);
 	}
 	
+	@GetMapping("account/confirm/action")
+	public ResponseEntity<Object> confirmAccountAction(@RequestParam(name="actionType",required=true) String actionType){
+		
+		return null;
+	}
+	
+	
+	
 	
 	
 
