@@ -177,6 +177,9 @@ public class WalletService {
 	@Value("${internetTillNumber}")
 	String internetTillNumber;
 	
+	@Value("${latestAppVesrion}")
+	String latestAppVesrion;
+	
 	
 
 	@Value("${KONNECT_BANK}")
@@ -196,7 +199,6 @@ public class WalletService {
 
 		if (responseJson != null) {
 		  var json = new  Gson().fromJson(responseJson, Map.class);
-		  log.info("{}"+json);
 		  Map<String,Object> data = (Map<String,Object>)json.get("data");
 		  if(data !=null) {
 			  String accountType =  data.get("accountType").toString();
@@ -227,6 +229,7 @@ public class WalletService {
                     	  map.put("kycType","v1");
                     	  boolean canSkip = specificDateMillis >= currentDateMillis;
                     	  map.put("canSkip", canSkip);
+                    	  map.put("title","Account Upgrade Required");    
                     	  map.put("accounType","C002");
                     	  return map;
                       }
@@ -237,6 +240,19 @@ public class WalletService {
 			  }
 			  
 			  log.error("{}"+accountType);
+		  }
+		  
+		  Integer userAppVersion = Integer.valueOf(user.getCurrentAppVersion().replace(".", ""));
+		  Integer latestVesrion = Integer.valueOf(latestAppVesrion);
+		  if(latestVesrion > userAppVersion) {
+			  Map<String,Object> map = new HashMap<>();
+			  map.put("action","update");
+        	  map.put("message","Please update your app to enjoy more features and seamless transaction exprience");		
+        	  map.put("canSkip",true);
+        	  map.put("title","New App Version available");    
+        	  map.put("accounType","C002");
+        	  return map;
+			  
 		  }
 //		  log.error(data+"{}");
 			return new Gson().fromJson(responseJson, Object.class);
