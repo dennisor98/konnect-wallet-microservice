@@ -717,7 +717,7 @@ public class WalletService {
 						var message  = "Dear "+u.getFirstName()+",your account has been approved.Continue enjoying our services"+"\n"+"Regards,\nKonnect Wallet";
 						Instant expiryInstant = Instant.now().plus(5, ChronoUnit.MINUTES);
 						Date expiryDate = Date.from(expiryInstant);
-						var ntf = Notifications.builder().targetType("INDIVIDUAL").message(message).targetUser(u).title("ACCOUNT APPROVED").expiryDate(expiryDate).build();
+						var ntf = Notifications.builder().targetType("INDIVIDUAL").message(message).targetUser(u).title("ACCOUNT APPROVED").expiryDate(expiryDate).contentType("text").caption("Your account has been approved...") .build();
 						this.firebaseService.sendMessage(ntf);
 						this.notificationService.save(ntf);
 						// write logs to database
@@ -746,7 +746,7 @@ public class WalletService {
 							.collect(Collectors.joining("\n"))+"\nRegards,\nKonnect Wallet";
 					Instant expiryInstant = Instant.now().plus(5, ChronoUnit.MINUTES);
 					Date expiryDate = Date.from(expiryInstant);
-					var ntf = Notifications.builder().targetType("INDIVIDUAL").message(message).targetUser(u).title("ACCOUNT REJECTED").expiryDate(expiryDate).build();
+					var ntf = Notifications.builder().targetType("INDIVIDUAL").message(message).targetUser(u).title("ACCOUNT REJECTED").expiryDate(expiryDate).contentType("text").caption("Your account has been rejected...").build();
 					
 
 					if(u.getFirebaseTokens() !=null && !u.getFirebaseTokens().isEmpty()) {
@@ -811,7 +811,7 @@ public class WalletService {
 					var message  = "Dear "+u.getFirstName()+",your account is under manual review.We will notify you once approved."+"\n"+"Regards,\nKonnect Wallet";
 					Instant expiryInstant = Instant.now().plus(5, ChronoUnit.MINUTES);
 					Date expiryDate = Date.from(expiryInstant);
-					var ntf = Notifications.builder().targetType("INDIVIDUAL").message(message).targetUser(u).title("ACCOUNT ON MANUAL REVIEW").expiryDate(expiryDate).build();
+					var ntf = Notifications.builder().targetType("INDIVIDUAL").message(message).targetUser(u).title("ACCOUNT ON MANUAL REVIEW").expiryDate(expiryDate).contentType("text").caption("Your account is on manual review...") .build();
 					this.firebaseService.sendMessage(ntf);
 					this.notificationService.save(ntf);
 					//send lark notification
@@ -946,6 +946,8 @@ public class WalletService {
 												+ (new BigDecimal(results.getParams().getAmount()).abs())
 												+ "was successful. Transaction ID: " + results.getParams().getTxId())
 										.targetType(NotificationTargetType.INDIVIDUAL.getValue()).targetUser(user.get())
+										.contentType("text")
+										.caption("Your reversal request was successful")
 										.build();
                                 this.firebaseService.sendMessage(ntf);
 								this.notificationService.save(ntf);
@@ -987,26 +989,31 @@ public class WalletService {
 
 				Optional<User> user = this.userService.findUserByAccountd(results.getParams().getAccountId());
 
-				var message = "";
+				var message = ""; 
+				var caption = "";
 				if (results.getParams().getStatus() == OnboardingStatusType.REJECTED.getCode()) {
 					message = "Dear " + user.get().getFirstName() + " " + user.get().getLastName()
 							+ ",your account upgrade request failed.Kindly resubmit valid documents and details.\nThanks"
 							+ "Regards," + "\n" + "Konnect Wallet";
+					
+					caption = "Account upgrade failed";
 				}
 
 				if (results.getParams().getStatus() == OnboardingStatusType.MANUAL_REVIEWING.getCode()) {
 					message = "Dear " + user.get().getFirstName() + " " + user.get().getLastName()
 							+ ",account upgrade is on manual review.We will let you know the status.Thanks." + "\n"
 							+ "Regards," + "\n" + "Konnect Wallet";
+					caption = "Account upgrade request is on manual review";
 				}
 
 				if (results.getParams().getStatus() == OnboardingStatusType.ACCOUNT_OPENED.getCode()) {
 					message = "Dear " + user.get().getFirstName() + " " + user.get().getLastName()
 							+ ",account has been upgraded succesfully. You can now enjoy higher transaction limits"
 							+ "\n" + "Cheers." + "\n" + "Konnect Wallet";
+					caption =  "Account upgrade successful";
 				}
 				var ntf = Notifications.builder().title("ACCOUNT UPGARDE BRIEFING").message(message)
-						.targetType(NotificationTargetType.INDIVIDUAL.getValue()).targetUser(user.get()).build();
+						.targetType(NotificationTargetType.INDIVIDUAL.getValue()).targetUser(user.get()).contentType("text").caption(caption).build();
                
 				this.notificationService.save(ntf);
 				this.firebaseService.sendMessage(ntf);

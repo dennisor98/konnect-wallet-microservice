@@ -24,6 +24,7 @@ FirebaseTokenRepository firebaseTokenRepository;
 	 Message message = Message.builder()
 	     .putData("title",notification.getTitle())
 	     .putData("message",notification.getMessage())
+	     .putData("caption",notification.getCaption())
 	     .setTopic(notification.getTargetUser().getId())
 	     .build();
 
@@ -43,6 +44,7 @@ FirebaseTokenRepository firebaseTokenRepository;
 	 Message message = Message.builder()
 		     .putData("title",notification.getTitle())
 		     .putData("message",notification.getMessage())
+		     .putData("caption",notification.getCaption())
 		     .setTopic("konnect-broadcast")
 		     .build();
 
