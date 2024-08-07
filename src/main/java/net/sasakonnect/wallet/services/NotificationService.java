@@ -136,15 +136,15 @@ public class NotificationService {
 			   var ntf = Notifications.builder()
 					   .title(notification.getTitle())
 					   .message(notification.getMessage())
+					   .contentType(notification.getContentType())
 					   .targetUser(user.get())
+					   .caption(notification.getCaption())
 					   .targetType(notification.getTargetType().getValue())
 					   .build();
 			   this.notificationsRepository.save(ntf);
 			   Map<String,Object> map =  new HashMap<>();
 			   map.put("success",true);
-			   map.put("message","Request completed successfully");
-			   
-			   String firebaseToken =   user.get().getFirebaseTokens().get(0).getToken();
+			   map.put("message","Request completed successfully");  
 			   this.firebaseService.sendMessage(ntf);
 			   return ResponseEntity.status(HttpStatus.OK).body(map);
 		   }
@@ -159,6 +159,8 @@ public class NotificationService {
 	   var ntf = Notifications.builder()
 			   .title(notification.getTitle())
 			   .message(notification.getMessage())
+			   .contentType(notification.getContentType())
+			   .caption(notification.getCaption())
 			   .targetUser(null)
 			   .targetType(notification.getTargetType().getValue())
 			   .build();
@@ -195,6 +197,8 @@ public class NotificationService {
 	            nMap.put("createdAt", n.getCreatedAt());
 	            nMap.put("updatedAt", n.getUpdatedAt());
 	            nMap.put("title", n.getTitle());
+	            nMap.put("caption",n.getCaption());
+				nMap.put("contentType",n.getContentType());
 	            nMap.put("message", n.getMessage());
 	            nMap.put("targetType", n.getTargetType());
 	            boolean isRead = notificationsReadRepository.existsByMessageAndUser(n, user);
@@ -238,6 +242,8 @@ public class NotificationService {
 					  nMap.put("updatedAt",n.getUpdatedAt());
 					  nMap.put("title",n.getTitle());
 					  nMap.put("message",n.getMessage());
+					  nMap.put("caption",n.getCaption());
+					  nMap.put("contentType",n.getContentType());
 					  nMap.put("target",n.getTargetType());
 					  boolean isRead = notificationsReadRepository.existsByMessageAndUser(n, user);
 			            nMap.put("isRead", isRead);
@@ -256,6 +262,10 @@ public class NotificationService {
 		   ex.printStackTrace();
 		   return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
 	   }
-	
+	   
+   }
+   
+   public void deleteAll(List<Notifications> notifications) {
+	   this.notificationsRepository.deleteAll(notifications);
    }
 }

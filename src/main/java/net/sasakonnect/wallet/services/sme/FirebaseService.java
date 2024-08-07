@@ -1,23 +1,31 @@
 package net.sasakonnect.wallet.services.sme;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 
 import net.sasakonnect.wallet.domain.Notifications;
+import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.repository.FirebaseTokenRepository;
 
 @Service
 public class FirebaseService {
-
+@Autowired
+FirebaseTokenRepository firebaseTokenRepository;
 	
  public void sendMessage(Notifications notification) {
+	 
+	 
 	 String token = notification.getTargetUser().getFirebaseTokens().get(0).getToken();
 	 Message message = Message.builder()
 	     .putData("title",notification.getTitle())
 	     .putData("message",notification.getMessage())
-	     .setToken(token)
+	     .putData("caption",notification.getCaption())
+	     .setTopic(notification.getTargetUser().getId())
 	     .build();
 
 	 // Send a message to the device corresponding to the provided
@@ -36,6 +44,7 @@ public class FirebaseService {
 	 Message message = Message.builder()
 		     .putData("title",notification.getTitle())
 		     .putData("message",notification.getMessage())
+		     .putData("caption",notification.getCaption())
 		     .setTopic("konnect-broadcast")
 		     .build();
 
@@ -49,6 +58,11 @@ public class FirebaseService {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+ }
+ 
+ @Transactional
+ public void deleteTokensByUser(User user) {
+	 this.firebaseTokenRepository.deleteByUser(user);
  }
  
  

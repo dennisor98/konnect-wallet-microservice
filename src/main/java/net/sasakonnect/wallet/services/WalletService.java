@@ -1,10 +1,15 @@
 package net.sasakonnect.wallet.services;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,9 +90,11 @@ import net.sasakonnect.wallet.notification.SmeAccountOpeningResultNotification;
 import net.sasakonnect.wallet.notification.TransactionResultNotification;
 import net.sasakonnect.wallet.notification.WalletAccountUpgradeResultNotification;
 import net.sasakonnect.wallet.repository.CurrencyRepository;
+import net.sasakonnect.wallet.repository.FirebaseTokenRepository;
 import net.sasakonnect.wallet.repository.LogsRepository;
 import net.sasakonnect.wallet.repository.RejectedAccountRepository;
 import net.sasakonnect.wallet.repository.UserJobRepository;
+import net.sasakonnect.wallet.repository.UserPinRepository;
 import net.sasakonnect.wallet.repository.UserWalletRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.services.extensions.LarkUtilityService;
@@ -132,7 +139,7 @@ public class WalletService {
 
 	@Autowired
 	RejectedAccountRepository rejectedAccountRepository;
-
+	
 	@Autowired
 	private TransactionService transactionService;
 
@@ -163,13 +170,21 @@ public class WalletService {
 	SmeAccountService smeAccountService;
 	@Autowired
 	private FirebaseService firebaseService;
+	
+	@Autowired
+	UserPinRepository userPinRepository;
 
 	@Value("${internetTillNumber}")
 	String internetTillNumber;
+	
+	@Value("${latestAppVesrion}")
+	String latestAppVesrion;
+	
+	
 
 	@Value("${KONNECT_BANK}")
 	private String konnectBank;
-
+	 private static final String DATE_FORMAT = "yyyy-MM-dd";
 	public Object getWalletInfo() {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		var reqId = new HashMap<String, Object>();
@@ -181,11 +196,86 @@ public class WalletService {
 				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 
 		String responseJson = responseMono.block();
-		log.info(responseJson);
 
 		if (responseJson != null) {
-			return new Gson().fromJson(responseJson, Object.class);
+		  var json = new  Gson().fromJson(responseJson, Map.class);
+		  log.info("{}",json);
 
+		  Map<String,Object> data = (Map<String,Object>)json.get("data");
+		  if(data !=null) {
+			  log.info("{}",data);
+			  var accType = data.get("accountType");
+
+			  if(accType == null) {
+				  return null;
+			  }
+			  String accountType =  accType.toString();
+			  
+			  if(accountType.equalsIgnoreCase("C002")) {
+				  try {
+					  long timestamp = ((Number) json.get("timestamp")).longValue();
+                      Date jsonDate = new Date(timestamp);
+
+                      // Parse specific date
+                      SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+                      sdf.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+                      Date specificDate = sdf.parse("2024-08-07");
+
+                      // Retrieve user creation date
+                      Date userCreatedAt = user.getCreatedAt();
+
+                      // Convert dates to epoch time for comparison
+                      long jsonDateMillis = jsonDate.getTime();
+                      long specificDateMillis = specificDate.getTime();
+                      long userCreatedAtMillis = userCreatedAt.getTime();
+                      long currentDateMillis = System.currentTimeMillis();
+                      
+                      if (userCreatedAtMillis < specificDateMillis)  {
+                    	  Map<String,Object> map = new HashMap<>();
+                    	  Map<String,Object> datamap = new HashMap<>();
+                    	  map.put("success",true);
+                    	  map.put("message","Request complete");
+                    	  datamap.put("action","upgrade");
+                    	  datamap.put("message","You are required to upgrade your account to continue enjoying higher transaction limits");		
+                    	  datamap.put("kycType","v1");
+                    	  boolean canSkip = specificDateMillis >= currentDateMillis;
+                    	  datamap.put("canSkip", canSkip);
+                    	  datamap.put("title","Account Upgrade Required");    
+                    	  datamap.put("accountType","C002");
+                    	  
+                    	  map.put("data", datamap);                	
+                    	  
+                    	  return map;
+                      }
+
+                  } catch (ParseException e){
+                      log.error("Date parsing error", e);
+                  }
+			  }
+			  
+			  log.error("{}"+accountType);
+		  }
+		  
+		  Integer userAppVersion = Integer.valueOf(user.getCurrentAppVersion().replace(".", ""));
+		  Integer latestVesrion = Integer.valueOf(latestAppVesrion.replace(".", ""));
+		  if(latestVesrion > userAppVersion) {
+			  String accountType =  data.get("accountType").toString();
+			  Map<String,Object> map = new HashMap<>();
+			  Map<String,Object> datamap = new HashMap<>();
+			  map.put("success",true);
+			  map.put("message","Request complete");
+			  datamap.put("action","update");
+			  datamap.put("message","Please update your app to enjoy more features and seamless transaction exprience");		
+			  datamap.put("canSkip",true);
+			  datamap.put("title","New App Version available");    
+			  datamap.put("accountType",accountType);
+			  
+			  map.put("data",datamap);        	
+			  return map;
+			  
+		  }
+//		  log.error(data+"{}");
+			return new Gson().fromJson(responseJson, Object.class);
 		}
 
 		return null;
@@ -599,6 +689,7 @@ public class WalletService {
 
 			if (notification_Type.equalsIgnoreCase(NotificationType.ONBOARD.getCode())) {
 				var user = this.userService.getUserById(params.get("userId").getAsString());
+			
 				if (user.isPresent()) {
 					var u = user.get();
 					u.setStatus(String.valueOf(notificationBody.getStatus()));
@@ -618,6 +709,17 @@ public class WalletService {
 						this.userWalletRepository.save(userWallet);
 						this.userService.deleteSuccessfulFromRejected(user.get().getIdNumber());
 						this.larkService.sendOnBoardingMessage("SUCCESSFUL ONBOARDING", "orange", notificationBody);
+						
+						var u = user.get();
+						
+						
+						//send message to user
+						var message  = "Dear "+u.getFirstName()+",your account has been approved.Continue enjoying our services"+"\n"+"Regards,\nKonnect Wallet";
+						Instant expiryInstant = Instant.now().plus(5, ChronoUnit.MINUTES);
+						Date expiryDate = Date.from(expiryInstant);
+						var ntf = Notifications.builder().targetType("INDIVIDUAL").message(message).targetUser(u).title("ACCOUNT APPROVED").expiryDate(expiryDate).contentType("text").caption("Your account has been approved...") .build();
+						this.firebaseService.sendMessage(ntf);
+						this.notificationService.save(ntf);
 						// write logs to database
 						var log = Logs.builder().activity(LogTypes.ONBOARDING)
 								.description(user.get().getFirstName() + " " + user.get().getLastName() + "of acc No: "
@@ -638,6 +740,20 @@ public class WalletService {
 					var onboardingRequestId = params.get("onboardingRequestId").getAsString();
 					// insert into rejected accounts
 					var u = user.get();
+					
+					//send notifification message to the user
+					var message  = "Dear "+u.getFirstName()+",your account has been rejected due to: "+notificationBody.getRejectionReasonMsgs().stream().map(Object::toString)
+							.collect(Collectors.joining("\n"))+"\nRegards,\nKonnect Wallet";
+					Instant expiryInstant = Instant.now().plus(5, ChronoUnit.MINUTES);
+					Date expiryDate = Date.from(expiryInstant);
+					var ntf = Notifications.builder().targetType("INDIVIDUAL").message(message).targetUser(u).title("ACCOUNT REJECTED").expiryDate(expiryDate).contentType("text").caption("Your account has been rejected...").build();
+					
+
+					if(u.getFirebaseTokens() !=null && !u.getFirebaseTokens().isEmpty()) {
+						this.firebaseService.deleteTokensByUser(u);;
+						this.firebaseService.sendMessage(ntf);
+					}
+					
 					var rejected = RejectedAccount.builder().address(u.getAddress())
 							.employmentStatus(u.getEmploymentStatus()).countryCode(u.getCountryCode())
 							.birthday(u.getBirthday()).gender(u.getGender()).idNumber(u.getIdNumber())
@@ -648,6 +764,11 @@ public class WalletService {
 							.onboardingRequestId(u.getOnboardingRequestId()).mobile(u.getMobile())
 							.firstName(u.getFirstName()).lastName(u.getLastName()).build();
 					this.userService.createRejectedAccount(rejected);
+					if(u.getNotifications() !=null) {
+						List<Notifications> untf = u.getNotifications();
+						this.notificationService.deleteAll(untf);
+					}
+					
 					this.userService.deletUserByOnboardingRequestId(onboardingRequestId);
 					var log = Logs.builder().activity(LogTypes.ONBOARDING).description(user.get().getFirstName() + " "
 							+ user.get().getLastName() + " of onboarding ID: "
@@ -670,21 +791,32 @@ public class WalletService {
 				} else if (notificationBody.getStatus() == 8 && user.isPresent()) {
 					// log failed account opening
 					var onboardingRequestId = params.get("onboardingRequestId").getAsString();
-					System.out.println(onboardingRequestId);
 					// delete user from the system
 					this.userService.deletUserByOnboardingRequestId(onboardingRequestId);
 					this.larkService.sendOnBoardingMessage("ACCOUNT OPENING FAILED", "red", notificationBody);
 
 				} else if (notificationBody.getStatus() == 9 && user.isPresent()) {
+					var u = user.get();
 					// account under manual review
 					// save logs to the database
+					
 					var log = Logs.builder().activity(LogTypes.ONBOARDING)
 							.description(user.get().getFirstName() + " " + user.get().getLastName()
 									+ " of onboarding ID: " + notificationBody.getOnboardingRequestId()
 									+ " failed to onboard.Account under mnaual review.")
 							.build();
 					this.logsRepository.save(log);
+					
+					//send notification to user
+					var message  = "Dear "+u.getFirstName()+",your account is under manual review.We will notify you once approved."+"\n"+"Regards,\nKonnect Wallet";
+					Instant expiryInstant = Instant.now().plus(5, ChronoUnit.MINUTES);
+					Date expiryDate = Date.from(expiryInstant);
+					var ntf = Notifications.builder().targetType("INDIVIDUAL").message(message).targetUser(u).title("ACCOUNT ON MANUAL REVIEW").expiryDate(expiryDate).contentType("text").caption("Your account is on manual review...") .build();
+					this.firebaseService.sendMessage(ntf);
+					this.notificationService.save(ntf);
+					//send lark notification
 					this.larkService.sendOnBoardingMessage("ACCOUNT UNDER MANUAL REVIEW", "green", notificationBody);
+					
 
 				} else {
 
@@ -814,6 +946,8 @@ public class WalletService {
 												+ (new BigDecimal(results.getParams().getAmount()).abs())
 												+ "was successful. Transaction ID: " + results.getParams().getTxId())
 										.targetType(NotificationTargetType.INDIVIDUAL.getValue()).targetUser(user.get())
+										.contentType("text")
+										.caption("Your reversal request was successful")
 										.build();
                                 this.firebaseService.sendMessage(ntf);
 								this.notificationService.save(ntf);
@@ -855,26 +989,31 @@ public class WalletService {
 
 				Optional<User> user = this.userService.findUserByAccountd(results.getParams().getAccountId());
 
-				var message = "";
-				if (results.getParams().getStatus() == OnboardingStatusType.FAILED_TO_OPEN_ACCOUNT.getCode()) {
+				var message = ""; 
+				var caption = "";
+				if (results.getParams().getStatus() == OnboardingStatusType.REJECTED.getCode()) {
 					message = "Dear " + user.get().getFirstName() + " " + user.get().getLastName()
 							+ ",your account upgrade request failed.Kindly resubmit valid documents and details.\nThanks"
 							+ "Regards," + "\n" + "Konnect Wallet";
+					
+					caption = "Account upgrade failed";
 				}
 
 				if (results.getParams().getStatus() == OnboardingStatusType.MANUAL_REVIEWING.getCode()) {
 					message = "Dear " + user.get().getFirstName() + " " + user.get().getLastName()
 							+ ",account upgrade is on manual review.We will let you know the status.Thanks." + "\n"
 							+ "Regards," + "\n" + "Konnect Wallet";
+					caption = "Account upgrade request is on manual review";
 				}
 
 				if (results.getParams().getStatus() == OnboardingStatusType.ACCOUNT_OPENED.getCode()) {
 					message = "Dear " + user.get().getFirstName() + " " + user.get().getLastName()
 							+ ",account has been upgraded succesfully. You can now enjoy higher transaction limits"
 							+ "\n" + "Cheers." + "\n" + "Konnect Wallet";
+					caption =  "Account upgrade successful";
 				}
 				var ntf = Notifications.builder().title("ACCOUNT UPGARDE BRIEFING").message(message)
-						.targetType(NotificationTargetType.INDIVIDUAL.getValue()).targetUser(user.get()).build();
+						.targetType(NotificationTargetType.INDIVIDUAL.getValue()).targetUser(user.get()).contentType("text").caption(caption).build();
                
 				this.notificationService.save(ntf);
 				this.firebaseService.sendMessage(ntf);
@@ -884,6 +1023,7 @@ public class WalletService {
 						new TypeToken<NotificationResult<SmeAccountOpeningResultNotification>>() {
 						}.getType());
 				log.info("Sme account Opening", results);
+				
 				this.smeService.updateAccountinfo(results);
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.UTILITY.getCode())) {
@@ -1428,7 +1568,8 @@ public class WalletService {
 		    String[] blacklistedShortCodes = {
 		    		"804040", 
 		    		"556688", 
-		    		"290290"
+		    		"290290",
+		    		"290680"
 		    		};
 
 		    boolean isBlacklisted = Arrays.stream(blacklistedShortCodes)
@@ -1532,8 +1673,8 @@ public class WalletService {
 		Map<String, Object> map = new HashMap<>();
 		Map<String, Object> resMap = new HashMap<>();
 		if (user.isPresent()) {
-			var pins = user.get().getPins();
-			if (pins != null && !pins.isEmpty()) {
+			var pin = this.userPinRepository.getUserPinThatIsNotArchived(user.get());
+			if (pin != null && !pin.isEmpty()) {
 				UserPin userPin = user.get().getPins().get(0);
 				Integer attempts = userPin.getPinAttempts();
 				map.put("attempts", attempts);

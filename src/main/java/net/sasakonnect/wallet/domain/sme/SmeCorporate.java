@@ -1,5 +1,6 @@
 package net.sasakonnect.wallet.domain.sme;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
@@ -23,7 +24,8 @@ import net.sasakonnect.wallet.domain.sme.authorisation.SmeRole;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class SmeCorporate extends BaseWalletDomain{
+public class SmeCorporate extends BaseWalletDomain implements Serializable{
+	private static final long serialVersionUID = -4463864574321745687L;
   @OneToOne()
   @JoinColumn(name="user_id",unique=false)
   User user;

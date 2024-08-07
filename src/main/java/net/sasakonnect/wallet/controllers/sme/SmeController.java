@@ -2,6 +2,7 @@ package net.sasakonnect.wallet.controllers.sme;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -17,6 +18,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
 import net.sasakonnect.wallet.RequestDto.SmeAssignPermissionsDto;
+import net.sasakonnect.wallet.RequestDto.sme.SmeAccountManagerDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmeAssignRoleDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmeAssingRolePermissionDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmePasswordDto;
@@ -71,6 +73,14 @@ public class SmeController {
 	}
 	
 	@SmeCorporate
+	@GetMapping("user/permissions")
+//	@HasSmePermission(GlobalSmePermissionConstants.CanAddSmeUser.PERMISSION)
+	public ResponseEntity<Object> getUserPermissions(){
+		return this.smeUserService.getUserPermissions();
+//		return this.smeUserService.createSmeUser(smeUserDto.getUserId());
+	}
+	
+	@SmeCorporate
 	@HasSmePermission(GlobalSmePermissionConstants.CanCreateSmeRole.PERMISSION)
 	@PostMapping("role")
 	public ResponseEntity<Object> createSmeRole(@Valid @RequestBody() SmeRoleDto roleDto){
@@ -92,9 +102,18 @@ public class SmeController {
 	}
 	
 	@SmeCorporate
+	@HasSmePermission(GlobalSmePermissionConstants.CanAssignSmeRole.PERMISSION)
+	@DeleteMapping("user/delete/role")
+	public ResponseEntity<Object> deleteUserFromRole(@RequestParam("roleId") String roleId,@RequestParam("userId") String userId){
+		var roleDto = SmeAssignRoleDto.builder().role_id(roleId).user_id(userId).build();
+		return this.smeRoleService.removeUserFromRole(roleDto);
+	}
+	
+	@SmeCorporate
 	@HasSmePermission(GlobalSmePermissionConstants.CanAssignAccountRole.PERMISSION)
 	@PostMapping("user/account/assignRole")
-	public ResponseEntity<Object> assignAccountRole(@Valid @RequestBody() SmeAssignRoleDto roleDto){
+	public ResponseEntity<Object> assignAccountRole(SmeAssignRoleDto roleDto){
+		 
 		return this.smeRoleService.assignSmeAccountRole(roleDto);
 	}
 	
@@ -193,9 +212,24 @@ public class SmeController {
 	
 	@SmeCorporate
 	@GetMapping("wallet/user/search")
-	@HasSmePermission(GlobalSmePermissionConstants.CanAddSmeUser.PERMISSION)
+	@HasSmePermission(GlobalSmePermissionConstants.CanSearchSmeUser.PERMISSION)
 	public ResponseEntity<Object> searchWalletUser(@RequestParam("mobileNumber") String mobile){
 		return this.userService.findUserByMobile(mobile);
 	}
+	
+	@SmeCorporate
+	@PostMapping("account/manager")
+	@HasSmePermission(GlobalSmePermissionConstants.CanAddAccountMaanager.PERMISSION)
+	public Object addAccountManager(@Valid @RequestBody() SmeAccountManagerDto managerDto) {
+		return this.smeService.AddSmeAccountManager(managerDto);
+	}
+	
+	@SmeCorporate
+	@PostMapping("account/manager/verify")
+	@HasSmePermission(GlobalSmePermissionConstants.CanAddAccountMaanager.PERMISSION)
+	public Object verifyAccountManager(@Valid @RequestBody() SmeAccountManagerDto managerDto) {
+		return this.smeService.AddSmeAccountManager(managerDto);
+	}
+	
 	
 }

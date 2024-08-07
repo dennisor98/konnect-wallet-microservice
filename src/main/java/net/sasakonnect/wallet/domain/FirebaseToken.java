@@ -2,6 +2,9 @@ package net.sasakonnect.wallet.domain;
 
 import java.io.Serializable;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -22,7 +25,8 @@ public class FirebaseToken extends BaseWalletDomain implements Serializable {
 	private String token;
 
 	@ManyToOne
-	@JoinColumn(name = "user_id")
+	@JoinColumn(name = "user_id", nullable = true)
+	@OnDelete(action = OnDeleteAction.SET_NULL) // Configure to set the user field to null on user deletion
 	private User user;
 
 	// Constructors, getters, and setters go here

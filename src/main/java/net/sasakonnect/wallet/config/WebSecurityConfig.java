@@ -107,7 +107,7 @@ public class WebSecurityConfig {
 				"/swagger-resources/**", // Swagger resources like JS and CSS
 				"/webjars/**").permitAll()
 
-				.requestMatchers("/user/userLogin", "/user/confirmOtp", "/user/admin/confirmOtp", "/konnect/callBack","/user/idNumber/confirm",
+				.requestMatchers("/user/userLogin", "/user/confirmOtp", "/user/admin/confirmOtp", "/konnect/callBack","/user/account/confirm",
 						"/user/refresh/token", "/sme/login", "/sme/verifyOtp", "/lark/callback","/user/login/resendOtp","/sdk/mobile/confirm",
 						"/wallet/getOnboardingStatusById", "/sdk/transaction/{id}", "user/corporateLogin",
 						"/sdk/openId", "/sdk/customer", "/sdk/customers", "/sdk/customer/stkpush")

@@ -12,14 +12,19 @@ import net.sasakonnect.wallet.enums.NotificationTargetType;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NotificationDto {
-   @NotNull()
+   @NotNull(message="title is required")
    String title;
    
-   @NotNull()
+   @NotNull(message="message is required")
    String message;
    
-   @NotNull()
+   @NotNull(message="contentType is required")
+   String contentType;
+   
+   @NotNull(message="targetType is required")
    NotificationTargetType targetType;
+   
+   String caption;
    
    String userId;
    

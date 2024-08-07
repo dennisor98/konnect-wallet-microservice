@@ -170,6 +170,9 @@ public class UserService extends RestClientService implements UserDetailsService
 
 	@Value("${WALLET_BASE_URL}")
 	String wallet_base_url;
+	
+	@Value("${latestAppVesrion}")
+	String latestApVersion;
 
 	@Value("${kompCallBackUrl}")
 	String kompCallBackUrl;
@@ -1708,22 +1711,49 @@ public class UserService extends RestClientService implements UserDetailsService
 		return this.userRepository.findById(id);
 	}
 	
-	public ResponseEntity<Object> confirmAccountByIdNumber(String idNumber){
-		Optional<User> userOptional = this.userRepository.findByIdNumber(idNumber);
-		if(userOptional.isEmpty()) {
+	public ResponseEntity<Object> confirmAccountByIdNumber(String idNumber,String mobile){
+		if(mobile.length() < 9) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","Mobile number should be at least 9 digits");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		var mobileSubstr =  mobile.substring(mobile.length() - 9);
+		Optional<User> idNumberExists = this.userRepository.findByIdNumber(idNumber);
+		Optional<User> mobileExists = this.userRepository.findByMobile(mobileSubstr);
+		ArrayList<String> errors =  new ArrayList<String>();
+
+		if(idNumberExists.isEmpty() && mobileExists.isEmpty()) {
 			Map<String,Object> map = new HashMap<>();
 			map.put("success",true);
-			map.put("message","Id Number does not have account");
+			map.put("message","Account does not exist");
 			map.put("accountExits",false);	
-			
+			map.put("errors",errors);
 			return ResponseEntity.status(HttpStatus.OK).body(map);
 		}
 		
+		if(idNumberExists.isPresent()) {
+			errors.add("ID Number already has an account");
+		}
+		
+		if(mobileExists.isPresent()) {
+			errors.add("Mobile number is already used");
+		}
+		
+		
 		Map<String,Object> map = new HashMap<>();
 		map.put("success",true);
-		map.put("message","Id Number already has an account registered");
+		map.put("message","Account exists");
 		map.put("accountExits",true);
+		map.put("errors",errors);
 		return ResponseEntity.status(HttpStatus.OK).body(map);
+	}
+	
+	public ResponseEntity<Object> confirmUserAction(){
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+	
+		return null;
 	}
 
 }

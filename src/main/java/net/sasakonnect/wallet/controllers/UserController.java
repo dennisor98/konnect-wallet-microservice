@@ -118,10 +118,18 @@ public class UserController {
 		return this.userService.uploadProfileImage(file);
 	}
 	
-	@GetMapping("idNumber/confirm")
-	public ResponseEntity<Object> confirmAccountExists(@RequestParam("idNumber") String idNumber){
-		return this.userService.confirmAccountByIdNumber(idNumber);
+	@GetMapping("account/confirm")
+	public ResponseEntity<Object> confirmAccountExists(@RequestParam(name="idNumber",required=true) String idNumber,@RequestParam(name="mobileNumber",required=true) String mobile){
+		return this.userService.confirmAccountByIdNumber(idNumber,mobile);
 	}
+	
+	@GetMapping("account/confirm/action")
+	public ResponseEntity<Object> confirmAccountAction(@RequestParam(name="actionType",required=true) String actionType){
+		
+		return null;
+	}
+	
+	
 	
 	
 	

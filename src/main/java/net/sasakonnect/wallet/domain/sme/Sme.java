@@ -22,13 +22,12 @@ import net.sasakonnect.wallet.domain.BaseWalletDomain;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Sme extends BaseWalletDomain implements Serializable {
-
+	private static final long serialVersionUID = -4463864574321745687L;
 	@ManyToOne
 	@JoinColumn(name = "enterprise_id")
 	private Enterprise enterprise;
 	@OneToMany(mappedBy = "sme_account")
 	private List<SmeMember> smeMembers;
-	private static final long serialVersionUID = -2020925333315146974L;
 	@Column(name = "country_code", nullable = false)
 	private String countryCode;
 
