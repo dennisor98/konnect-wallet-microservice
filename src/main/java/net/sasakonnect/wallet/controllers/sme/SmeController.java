@@ -18,6 +18,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
 import net.sasakonnect.wallet.RequestDto.SmeAssignPermissionsDto;
+import net.sasakonnect.wallet.RequestDto.sme.SmeAccountManagerDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmeAssignRoleDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmeAssingRolePermissionDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmePasswordDto;
@@ -211,9 +212,24 @@ public class SmeController {
 	
 	@SmeCorporate
 	@GetMapping("wallet/user/search")
-	@HasSmePermission(GlobalSmePermissionConstants.CanAddSmeUser.PERMISSION)
+	@HasSmePermission(GlobalSmePermissionConstants.CanSearchSmeUser.PERMISSION)
 	public ResponseEntity<Object> searchWalletUser(@RequestParam("mobileNumber") String mobile){
 		return this.userService.findUserByMobile(mobile);
 	}
+	
+	@SmeCorporate
+	@PostMapping("account/manager")
+	@HasSmePermission(GlobalSmePermissionConstants.CanAddAccountMaanager.PERMISSION)
+	public Object addAccountManager(@Valid @RequestBody() SmeAccountManagerDto managerDto) {
+		return this.smeService.AddSmeAccountManager(managerDto);
+	}
+	
+	@SmeCorporate
+	@PostMapping("account/manager/verify")
+	@HasSmePermission(GlobalSmePermissionConstants.CanAddAccountMaanager.PERMISSION)
+	public Object verifyAccountManager(@Valid @RequestBody() SmeAccountManagerDto managerDto) {
+		return this.smeService.AddSmeAccountManager(managerDto);
+	}
+	
 	
 }

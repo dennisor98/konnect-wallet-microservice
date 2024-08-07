@@ -53,6 +53,7 @@ import net.sasakonnect.wallet.domain.sme.authorisation.SmePermissions;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeRole;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeUserRole;
 import net.sasakonnect.wallet.repository.UserRepository;
+import net.sasakonnect.wallet.repository.sme.SmeAccountManagerRepository;
 import net.sasakonnect.wallet.repository.sme.SmeAccountRepository;
 import net.sasakonnect.wallet.repository.sme.SmeAccountRolePermissionRepository;
 import net.sasakonnect.wallet.repository.sme.SmeAccountRoleRepository;
@@ -106,6 +107,8 @@ public class SmeUserService {
     SmeAccountRepository smeAccountRepository;
     @Autowired
     SmeTransactionRepository smeTransactionRepository;
+    @Autowired
+    SmeAccountManagerRepository smeAccountManagerRepository;
     
 	public ResponseEntity<ObjectNode> smeLogin(SmeUserLogin loginDto) {
 
@@ -413,10 +416,7 @@ public class SmeUserService {
 	
 	public ResponseEntity<ObjectNode> setWindowPeriod(SmeWindowPinDto pinDto){
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-				.getRequest();
-		String smeId =  this.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
-		Optional<Sme> sme =  this.smeRepository.findById(smeId);
+		Optional<Sme> sme =  this.getLoggedInSmeOptional();
 		Optional<SmeCorporate> smecorpOptional =  this.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
 		if(smecorpOptional.isEmpty()) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN,"FORBIDDEN");
@@ -436,10 +436,7 @@ public class SmeUserService {
 	
 	public ResponseEntity<Object> getSmeUserAccounts(){
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-				.getRequest();
-		String smeId =  this.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
-		Optional<Sme> sme =  this.smeRepository.findById(smeId);
+		Optional<Sme> sme =  this.getLoggedInSmeOptional();
 		Optional<SmeCorporate> smecorpOptional =  this.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
 		if(smecorpOptional.isEmpty()) {
 			Map<String,Object> map = new HashMap<>();
@@ -472,19 +469,9 @@ public class SmeUserService {
 	
 	public ResponseEntity<Object> getSmeUserAccountsInfo(){
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-				.getRequest();
-		String smeId =  this.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
-		Optional<Sme> sme =  this.smeRepository.findById(smeId);
-		Optional<SmeCorporate> smecorpOptional =  this.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
-		if(smecorpOptional.isEmpty()) {
-			Map<String,Object> map = new HashMap<>();
-			map.put("success",false);
-			map.put("message","Account not found");
-
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
-		}
-		List<SmeAccount> smeaccounts = this.smeAccountRepository.findBySme(sme.get());
+		
+		List<SmeAccount> smeaccounts = this.smeAccountManagerRepository.findSmeAccountByUser(user);
+		
 		if(smeaccounts.isEmpty()) {
 			Map<String,Object> map = new HashMap<>();
 			map.put("success",true);
@@ -534,10 +521,7 @@ public class SmeUserService {
 	   
 	public ResponseEntity<Object> updateSmePassword(SmePasswordDto passwordDto){
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-				.getRequest();
-		String smeId =  this.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
-		Optional<Sme> sme =  this.smeRepository.findById(smeId);
+		Optional<Sme> sme =  this.getLoggedInSmeOptional();
 		Optional<SmeCorporate> smecorpOptional =  this.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
 		if(smecorpOptional.isEmpty()) {
 			Map<String,Object> map = new HashMap<>();
@@ -591,10 +575,7 @@ public class SmeUserService {
 	
 	public ResponseEntity<Object> getSmestaff() {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-				.getRequest();
-		String smeId =  this.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
-		Optional<Sme> sme =  this.smeRepository.findById(smeId);
+		Optional<Sme> sme =  this.getLoggedInSmeOptional();
 		List<SmeCorporate> smeCorps =  this.smeCorporateRepository.findSmeCorporateBySmes(sme.get());
 		if(smeCorps.isEmpty()) {
 			Map<String,Object> map = new HashMap<>();
@@ -626,10 +607,8 @@ public class SmeUserService {
 	
 	public ResponseEntity<Object> getUserPermissions() {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-				.getRequest();
-		String smeId =  this.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
-		Optional<Sme> sme =  this.smeRepository.findById(smeId);
+		
+		Optional<Sme> sme =  this.getLoggedInSmeOptional();
 		
 		Optional<SmeCorporate> smeCorp = this.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
 		if(smeCorp.isEmpty()) {
@@ -666,11 +645,18 @@ public class SmeUserService {
 					Map<String,Object> mp = new HashMap<>();
 					mp.put("id",p.getId());
 					mp.put("name",p.getName());
-
 					return mp;
 				}).collect(Collectors.toList());
 		map.put("permissions", permissions);
 		return ResponseEntity.status(HttpStatus.OK).body(map);
 				
+	}
+	
+	public Optional<Sme> getLoggedInSmeOptional() {
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+				.getRequest();
+
+		String smeId = this.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
+		return this.smeRepository.findById(smeId);
 	}
 }

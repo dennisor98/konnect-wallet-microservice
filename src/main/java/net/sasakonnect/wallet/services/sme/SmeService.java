@@ -27,8 +27,10 @@ import net.sasakonnect.wallet.RequestDto.sme.CreateSmeDto;
 import net.sasakonnect.wallet.RequestDto.sme.LLCInformationDto;
 import net.sasakonnect.wallet.RequestDto.sme.LlcSmeMemberDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmeAccountDocuments;
+import net.sasakonnect.wallet.RequestDto.sme.SmeAccountManagerDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmeBusinessAccountDto;
 import net.sasakonnect.wallet.RequestDto.sme.SubmitSmeAccount;
+import net.sasakonnect.wallet.ResponseDto.TransactionResponseDto;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
 import net.sasakonnect.wallet.domain.User;
@@ -36,6 +38,7 @@ import net.sasakonnect.wallet.domain.sme.Enterprise;
 import net.sasakonnect.wallet.domain.sme.Sme;
 import net.sasakonnect.wallet.domain.sme.SmeAccount;
 import net.sasakonnect.wallet.domain.sme.SmeAccountDetails;
+import net.sasakonnect.wallet.domain.sme.SmeAccountManager;
 import net.sasakonnect.wallet.domain.sme.SmeCorporate;
 import net.sasakonnect.wallet.domain.sme.SmeMember;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeRole;
@@ -51,6 +54,7 @@ import net.sasakonnect.wallet.notification.SmeAccountOpeningResultNotification;
 import net.sasakonnect.wallet.repository.LogsRepository;
 import net.sasakonnect.wallet.repository.UserRepository;
 import net.sasakonnect.wallet.repository.sme.EnterpriseRepository;
+import net.sasakonnect.wallet.repository.sme.SmeAccountManagerRepository;
 import net.sasakonnect.wallet.repository.sme.SmeAccountRepository;
 import net.sasakonnect.wallet.repository.sme.SmeCorporateRepository;
 import net.sasakonnect.wallet.repository.sme.SmeInformationRepository;
@@ -62,6 +66,7 @@ import net.sasakonnect.wallet.repository.sme.SmeUserRoleRepository;
 import net.sasakonnect.wallet.services.ChoiceBankSmsService;
 import net.sasakonnect.wallet.tools.RequestSigner;
 import reactor.core.publisher.Mono;
+import net.sasakonnect.wallet.ResponseDto.sme.SmeAccountManagerAddResponseDto;
 @Slf4j
 @Service
 public class SmeService {
@@ -100,6 +105,8 @@ public class SmeService {
 	SmePermissionService smePermissionService;
 	@Autowired
 	SmeRoleService smeRoleService;
+	@Autowired
+	SmeAccountManagerRepository smeAccountManagerRepository;
 	
 
 	public ResponseEntity<Object> createEnterprise(CreateEnterpriseDto ced) {
@@ -313,59 +320,7 @@ public class SmeService {
 		return null;
 	}
 
-//	public Object verifyOtpForSms(CreateSmeDto createSmeSto) {
-//		var enterprise = this.enterpriseRepository.findById(createSmeSto.getEnterprise_id());
-//		if (enterprise.isPresent()) {
-//			var smeAccountBuild = Sme.builder().mobile(createSmeSto.getMobile())
-//					.businessType(String.valueOf(createSmeSto.getBusinessType().getCode()))
-//					.countryCode(createSmeSto.getCountryCode()).otpType(createSmeSto.getOtpType())
-//					.enterprise(enterprise.get()).email(createSmeSto.getEmail()).build();
-//			Map<String, Object> paginationInfo = new HashMap<>();
-//			Sme smeAccount = this.smeRepository.save(smeAccountBuild);
-//
-//			paginationInfo.put("countryCode", smeAccount.getCountryCode());
-//			paginationInfo.put("status", smeAccount.getStatus());
-//			paginationInfo.put("completeTime", smeAccount.getCompleteTime());
-//			paginationInfo.put("businessType", smeAccount.getBusinessType());
-//			paginationInfo.put("mobile", smeAccount.getMobile());
-//			paginationInfo.put("email", smeAccount.getEmail());
-//			paginationInfo.put("otpType", smeAccount.getOtpType());
-//			paginationInfo.put("onboardingRequestId", smeAccount.getOnboardingRequestId());
-//
-//			var reqId = new HashMap<String, Object>();
-//			reqId.put("userId", smeAccount.getId());
-//			reqId.put("countryCode", smeAccount.getCountryCode());
-//			reqId.put("businessType", smeAccount.getBusinessType());
-//			reqId.put("mobile", smeAccount.getMobile());
-//			reqId.put("email", smeAccount.getEmail());
-//			reqId.put("otpType", smeAccount.getOtpType());
-//
-//			var reqs = requestSigner.signRequest(reqId);
-//
-//			Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.APPLY_FOR_SME)
-//					.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
-//					.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
-//
-//			String responseJson = responseMono.block();
-//
-//			if (responseJson != null) {
-//				var gson = new Gson().fromJson(responseJson, HashMap.class);
-//				if (!((String) gson.get("code")).equalsIgnoreCase("00000")) {
-//					this.smeAccountRepository.delete(smeAccount);
-//				} else {
-//					smeAccount.setOnboardingRequestId(
-//							((Map<?, ?>) gson.get("data")).get("onboardingRequestId").toString());
-//					this.smeAccountRepository.save(smeAccount);
-//				}
-//				return gson;
-//
-//			}
-//			return paginationInfo;
-//		}
-//
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
+
 
 	public Object registerLLcMember(LlcSmeMemberDto lccSmemeberDto) {
 		var sme = this.smeRepository.findSmeByOnboardingId(lccSmemeberDto.getOnboardingRequestId());
@@ -489,6 +444,8 @@ public class SmeService {
 					.sme(smedata).build();
 //			smedata.getSmeAccounts().add(smeAccount);
 		var savedsmeAccount =	this.smeAccountRepository.save(smeAccount);
+		var smeAccManagerBuild = SmeAccountManager.builder().smeAccount(List.of(savedsmeAccount)).user(smedata.getSmeMembers().get(0).getUser()).build();
+		this.smeAccountManagerRepository.save(smeAccManagerBuild);
 		Optional<SmeRole> existingRole =  this.smeRoleRepository.findByRoleNameAndEnterprise("SUPER_ADMIN",smedata.getEnterprise());
 		if(existingRole.isEmpty()) {
 			var smeRole =   SmeRole.builder().description("can perform any role in the enterprise").enterprise(smedata.getEnterprise()).roleName("SUPER_ADMIN").build();
@@ -501,13 +458,10 @@ public class SmeService {
 			var allpermsions = this.smePermissionService.findAll().stream().map((data) -> data.getId())
 					.collect(Collectors.toList());
 			this.smeRoleService.insertPermissionsNotAttachedToRole(super_role,null,allpermsions);
-		}else {
-			
 		}
-		 
-//           log.info(smeAccount+"");
-		} else {
-			// this.smeAccountRepository.save(null)
+			
+	
+       
 		}
 
 	}
@@ -678,5 +632,76 @@ public Object getWalletAccountBalance(String accountId) {
 
 	return null;
 }
+
+public Object AddSmeAccountManager(SmeAccountManagerDto managerDto) {
+	Optional<User> userOpt =  this.userRepository.findById(managerDto.getUserId());
+	
+	if(userOpt.isEmpty()) {
+		Map<String,Object> map = new HashMap<>();
+		map.put("success",false);
+		map.put("message","Wrong userId field");
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+	}
+	
+	Optional<SmeAccount> smeAccOpt = this.smeAccountRepository.findByAccountNo(managerDto.getAccountId());
+	if(smeAccOpt.isEmpty()) {
+		Map<String,Object> map = new HashMap<>();
+		map.put("success",false);
+		map.put("message","Wrong accountId field");
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+	}
+	var user = userOpt.get();	
+	var smeAcc =  smeAccOpt.get();
+	var accManager =  SmeAccountManager.builder().smeAccount(List.of(smeAcc) ).user(user).build();
+	
+	Optional<SmeAccountManager> smeAccManagerOpt =  this.smeAccountManagerRepository.findBySmeAccountAndUser(smeAcc,user);
+	//check if user is already a manager in the account
+	if(smeAccManagerOpt.isPresent()) {
+		Map<String,Object> map = new HashMap<>();
+		map.put("success",false);
+		map.put("message","User is already the account admin");
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(map);
+	}
+	try {
+		//save entity to local database
+		this.smeAccountManagerRepository.save(accManager);
+		var reqId = new HashMap<String, Object>();
+		reqId.put("accountId", managerDto.getAccountId().trim());
+		reqId.put("idNumber",user.getIdNumber());
+		reqId.put("idType", user.getIdType());
+		reqId.put("fullName",user.getFirstName()+" "+user.getMiddleName() !=null ? user.getMiddleName():""+" "+user.getLastName());
+		reqId.put("countryCode",user.getCountryCode());
+		reqId.put("mobile",user.getMobile());
+		reqId.put("email",user.getEmail());
+		var reqs = requestSigner.signRequest(reqId);
+
+		Mono<String> responseMono = this.bankClientBean.webClient.post()
+				.uri(ChoiceEndpointsConstants.ADD_SME_ACCOUNT_ADMINISTRATOR).contentType(MediaType.APPLICATION_JSON)
+				.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+				.bodyToMono(String.class);
+
+		String responseJson = responseMono.block();
+		
+		if (responseJson != null) {
+			var resp = new Gson().fromJson(responseJson, SmeAccountManagerAddResponseDto.class);
+			choiceBankSmsService.invokeSms(resp.getData().applicationId);
+         return resp;
+		}
+		
+		return null;
+	}catch(Exception ex) {
+		Map<String,Object> map = new HashMap<>();
+		map.put("success",false);
+		map.put("message","Something went wrong");
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+	}
+}
+
+public Object verifyAccManager() {
+	User userLoggedIn = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+	return null;
+}
+
 
 }

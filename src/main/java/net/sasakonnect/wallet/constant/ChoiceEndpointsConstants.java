@@ -49,5 +49,9 @@ public class ChoiceEndpointsConstants {
 	public static final String CHANGE_USER_PHONE_NUMBER = "/account/v2/mobileChange";
 	public static final String TRANS_MOBILE_NUMBER_VERIFY = "/trans/mobileNumberVerify";
 	public static final String OPEN_WALLET_ACCOUNT_V3 = "/onboarding/v3/submitEasyOnboardingRequest";
+	public static final String ADD_SME_ACCOUNT_ADMINISTRATOR = "/account/v2/addAccountAdministrator";
+	public static final String VERIFY_SME_ACCOUNT_ADMINISTRATOR_MOBILE = "/account/v2/addAccountAdministrator";
 
+
+//	/account/verifyAccountAdministrator
 }

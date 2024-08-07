@@ -54,6 +54,31 @@ public class GlobalSmePermissionConstants {
 
 	}
 	
+	
+	public static class CanAddAccountMaanager extends SmePermissionEntry{
+		public static final String PERMISSION = "can.add.account.manager";
+		public static final String DESCRIPTION = "can add account manager(use with caution)";
+		public static final String CATEGORY = "account";
+
+		@Override
+		String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+
+		@Override
+		String getCATEGORY() {
+			return CATEGORY;
+		}
+
+	}
+	
+	
+	
 	public static class CanSearchSmeUser extends SmePermissionEntry{
 		public static final String PERMISSION = "can.search.sme.user";
 		public static final String DESCRIPTION = "can search sme user details";

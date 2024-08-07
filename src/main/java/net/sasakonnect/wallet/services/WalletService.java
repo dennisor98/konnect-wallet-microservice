@@ -219,7 +219,7 @@ public class WalletService {
                       // Parse specific date
                       SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
                       sdf.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
-                      Date specificDate = sdf.parse("2024-07-15");
+                      Date specificDate = sdf.parse("2024-08-07");
 
                       // Retrieve user creation date
                       Date userCreatedAt = user.getCreatedAt();
@@ -1023,6 +1023,7 @@ public class WalletService {
 						new TypeToken<NotificationResult<SmeAccountOpeningResultNotification>>() {
 						}.getType());
 				log.info("Sme account Opening", results);
+				
 				this.smeService.updateAccountinfo(results);
 
 			} else if (notification_Type.equalsIgnoreCase(NotificationType.UTILITY.getCode())) {
@@ -1567,7 +1568,8 @@ public class WalletService {
 		    String[] blacklistedShortCodes = {
 		    		"804040", 
 		    		"556688", 
-		    		"290290"
+		    		"290290",
+		    		"290680"
 		    		};
 
 		    boolean isBlacklisted = Arrays.stream(blacklistedShortCodes)

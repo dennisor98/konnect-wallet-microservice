@@ -27,6 +27,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.repository.WalletRepository;
+import net.sasakonnect.wallet.repository.sme.SmeAccountManagerRepository;
 import net.sasakonnect.wallet.repository.sme.SmeAccountRolePermissionRepository;
 import net.sasakonnect.wallet.repository.sme.SmeAccountUserRoleRepository;
 import net.sasakonnect.wallet.repository.sme.SmeCorporateRepository;
@@ -56,6 +57,7 @@ import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.WalletClient;
 import net.sasakonnect.wallet.domain.sme.Sme;
 import net.sasakonnect.wallet.domain.sme.SmeAccount;
+import net.sasakonnect.wallet.domain.sme.SmeAccountManager;
 import net.sasakonnect.wallet.domain.sme.SmeCorporate;
 import net.sasakonnect.wallet.domain.sme.SmeTransaction;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountPermissions;
@@ -96,6 +98,8 @@ public class SmeTransactionService {
    SmeRepository smeRepository;
    @Autowired
    SmeCorporateRepository smeCorporateRepository;
+   @Autowired
+   SmeAccountManagerRepository smeAccountManagerRepository;
  
    
    public SmeTransaction saveTransaction(NotificationResult<TransactionResultNotification> results) {
@@ -139,31 +143,31 @@ public class SmeTransactionService {
 	   return this.smeTransactionRepository.findByTxId(txId);
    }
    
+   
+   
+   
    public Object applyForTransfer(@Valid ChoiceSmeTransferDto choiceTransfer) {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-	   //verify that smeId in the authentication header is available
-	   HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-				.getRequest();
-	  String smeId =  this.smeUserService.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
-	  Optional<Sme> sme =  this.smeRepository.findById(smeId);
-	  if(sme.isEmpty()) {
-	        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot process request.Consult your administrator");
-	  }else {
-		  Optional<SmeCorporate> smeCorporate =  this.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
-		  if(smeCorporate.isEmpty()) {
-			  throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBIDDEN");
-		  }
-		  //check if the provided payer account is available
+         
+		 //check if the provided payer account is available
 		  Optional<SmeAccount> smeAccount = this.smeAccountservice.findSmeAccountByAccountId(choiceTransfer.getPayerAccountNumber());
 		  if(smeAccount.isEmpty()) {
-			  throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown account information provided");
+			 Map<String,Object> map = new HashMap<>();
+			 map.put("success",false);
+			 map.put("message","Account Number not found");
+			 
+			 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 		  }
 		  
 		  //check if user has transaction privileges in the provided payer account
-//		  if(this.userHasAccountPermission(smeAccount.get(), GlobalSmeAccountPermissionConstants.CanInvokeTransaction.PERMISSION)) {
-//			  throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBIDDEN");
-//		  }
-		  
+        Optional<SmeAccountManager> smeAccMngrOpt = this.smeAccountManagerRepository.findBySmeAccountAndUser(smeAccount.get(),user);
+        if(smeAccMngrOpt.isEmpty()) {
+      	  Map<String,Object> map = new HashMap<>();
+      	  map.put("success",false);
+      	  map.put("message","No access to account");
+
+      	  return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
+        }
 		  var reqId = new HashMap<String, Object>();
 			var receivingUser = this.userService.findUserByAccountd(choiceTransfer.getReceiverAccount().trim());
 			if (receivingUser.isPresent()) {
@@ -194,7 +198,7 @@ public class SmeTransactionService {
 				log.info(resp.getData().txId);
 				return resp;
 			}
-		}
+		
        
 		
 
@@ -204,25 +208,27 @@ public class SmeTransactionService {
    
    public Object withdrawToMpesa(SmeTransferToMpesa mpesa) {
 	   User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-	   //verify that smeId in the authentication header is available
-	   HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-			   .getRequest();
-	   String smeId =  this.smeUserService.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
-	   Optional<Sme> sme =  this.smeRepository.findById(smeId);
-	   if(sme.isEmpty()) {
-		   throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot process request.Consult your administrator");
-	   }
-	   Optional<SmeCorporate> smeCorporate =  this.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
-	   if(smeCorporate.isEmpty()) {
-		   
-		   throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBIDDEN");
-	   }
-	   //check if the provided payer account is available
-	   Optional<SmeAccount> smeAccount = this.smeAccountservice.findSmeAccountByAccountId(mpesa.getPayerAccountNumber());
-	   if(smeAccount.isEmpty()) {
-		   throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown account information provided");
-	   }
+		 //check if the provided payer account is available
+		  Optional<SmeAccount> smeAccount = this.smeAccountservice.findSmeAccountByAccountId(mpesa.getPayerAccountNumber());
+		  if(smeAccount.isEmpty()) {
+			 Map<String,Object> map = new HashMap<>();
+			 map.put("success",false);
+			 map.put("message","Account Number not found");
+			 
+			 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		  }
+		  
+		  //check if user has transaction privileges in the provided payer account
+     Optional<SmeAccountManager> smeAccMngrOpt = this.smeAccountManagerRepository.findBySmeAccountAndUser(smeAccount.get(),user);
+     if(smeAccMngrOpt.isEmpty()) {
+   	  Map<String,Object> map = new HashMap<>();
+   	  map.put("success",false);
+   	  map.put("message","No access to account");
 
+   	  return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
+     }
+  
+	   
 	   var reqId = new HashMap<String, Object>();
 	   reqId.put("payerAccountId", mpesa.getPayerAccountNumber());
 	   reqId.put("amount", mpesa.getAmount());
@@ -254,31 +260,25 @@ public class SmeTransactionService {
 
 	   User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 	   //verify that smeId in the authentication header is available
-	   HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-			   .getRequest();
-	   String smeId =  this.smeUserService.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
-	   Optional<Sme> sme =  this.smeRepository.findById(smeId);
-	   if(sme.isEmpty()) {
-		   Map<String,Object> map  = new HashMap<>();
-		   map.put("success",false);
-		   map.put("message","Cannot process request.Consult your administrator");
-		   return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
-	   }
-	   Optional<SmeCorporate> smeCorporate =  this.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
-	   if(smeCorporate.isEmpty()) {
-		   Map<String,Object> map  = new HashMap<>();
-		   map.put("success",false);
-		   map.put("message","Cannot process request.Consult your administrator");
-		   return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
-	   }
-	   //check if the provided payer account is available
-	   Optional<SmeAccount> smeAccount = this.smeAccountservice.findSmeAccountByAccountId(tillAndBuyGoods.getPayerAccountNumber());
-	   if(smeAccount.isEmpty()) {
-		   Map<String,Object> map  = new HashMap<>();
-		   map.put("success",false);
-		   map.put("message","Unknown account information provided");
-		   return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
-	   }
+		 //check if the provided payer account is available
+		  Optional<SmeAccount> smeAccount = this.smeAccountservice.findSmeAccountByAccountId(tillAndBuyGoods.getPayerAccountNumber());
+		  if(smeAccount.isEmpty()) {
+			 Map<String,Object> map = new HashMap<>();
+			 map.put("success",false);
+			 map.put("message","Account Number not found");
+			 
+			 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		  }
+		  
+		  //check if user has transaction privileges in the provided payer account
+     Optional<SmeAccountManager> smeAccMngrOpt = this.smeAccountManagerRepository.findBySmeAccountAndUser(smeAccount.get(),user);
+     if(smeAccMngrOpt.isEmpty()) {
+   	  Map<String,Object> map = new HashMap<>();
+   	  map.put("success",false);
+   	  map.put("message","No access to account");
+
+   	  return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
+     }
 	   var reqId = new HashMap<String, Object>();
 	   reqId.put("payerAccountId", tillAndBuyGoods.getPayerAccountNumber());
 	   reqId.put("payType", tillAndBuyGoods.getBillType().getCode());
@@ -324,32 +324,25 @@ public class SmeTransactionService {
    
    public Object loadWalletFromMpesa(SmeMpesa mpesa) {
 	   User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-	   //verify that smeId in the authentication header is available
-	   HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-			   .getRequest();
-	   String smeId =  this.smeUserService.jwtService.extractUserSmeId(request.getHeader("Authorization").split("Bearer ")[1]);
-	   Optional<Sme> sme =  this.smeRepository.findById(smeId);
-	   if(sme.isEmpty()) {
-		   Map<String,Object> map  = new HashMap<>();
-		   map.put("success",false);
-		   map.put("message","Cannot process request.Consult your administrator");
-		   return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
-	   }
-	   Optional<SmeCorporate> smeCorporate =  this.smeCorporateRepository.findSmeCorporateByUserAndSmes(user,sme.get());
-	   if(smeCorporate.isEmpty()) {
-		   Map<String,Object> map  = new HashMap<>();
-		   map.put("success",false);
-		   map.put("message","Cannot process request.Consult your administrator");
-		   return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
-	   }
-	   //check if the provided payer account is available
-	   Optional<SmeAccount> smeAccount = this.smeAccountservice.findSmeAccountByAccountId(mpesa.getAccountNumber());
-	   if(smeAccount.isEmpty()) {
-		   Map<String,Object> map  = new HashMap<>();
-		   map.put("success",false);
-		   map.put("message","Unknown account information provided");
-		   return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
-	   }
+		 //check if the provided payer account is available
+		  Optional<SmeAccount> smeAccount = this.smeAccountservice.findSmeAccountByAccountId(mpesa.getAccountNumber());
+		  if(smeAccount.isEmpty()) {
+			 Map<String,Object> map = new HashMap<>();
+			 map.put("success",false);
+			 map.put("message","Account Number not found");
+			 
+			 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		  }
+		  
+		  //check if user has transaction privileges in the provided payer account
+     Optional<SmeAccountManager> smeAccMngrOpt = this.smeAccountManagerRepository.findBySmeAccountAndUser(smeAccount.get(),user);
+     if(smeAccMngrOpt.isEmpty()) {
+   	  Map<String,Object> map = new HashMap<>();
+   	  map.put("success",false);
+   	  map.put("message","No access to account");
+
+   	  return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
+     }
 			var reqId = new HashMap<String, Object>();
 			reqId.put("accountId", mpesa.getAccountNumber());
 			reqId.put("amount", mpesa.getAmount());
