@@ -201,7 +201,7 @@ public class WalletService {
 	@Value("${KONNECT_BANK}")
 	private String konnectBank;
 	 private static final String DATE_FORMAT = "yyyy-MM-dd";
-	 public Object getWalletInfo() {
+	 public Object getWalletInfo() throws ParseException {
 		    User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		    var reqId = new HashMap<String, Object>();
 		    reqId.put("userId", user.getId());
@@ -265,7 +265,8 @@ public class WalletService {
 
 		            List<KycVersions> kycVersions = this.kycVersionsRepository.findAll();
 		            Optional<KycVersions> maxKycVersion = this.kycVersionsRepository.findMaximumVersion();
-
+		            SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+                    sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 		            if (kycVersions.isEmpty()) {
 		                return gson.fromJson(responseJson, Object.class);
 		            } else {
@@ -274,6 +275,30 @@ public class WalletService {
                         if(userMaxKycOpt.isEmpty() && accountType.equalsIgnoreCase("C001")) {
                         	var userKyc = KycUpgrade.builder().user(user).version(2).build();
                         	this.kycUpgradeRepository.save(userKyc);
+                        }
+                        if(userMaxKycOpt.isEmpty() && accountType.equalsIgnoreCase("C002") && maxKycVersion.isPresent()) {
+                        	 Map<String, Object> map = new HashMap<>();
+                             Map<String, Object> dataMap = new HashMap<>();
+                             map.put("success", true);
+                             map.put("message", "Request complete");
+                             Boolean canSkip = false;
+	                         KycVersions upgradeVersion = maxKycVersion.get();
+                             if(upgradeVersion.getDateLine() !=null) {
+                             	Date specificDate = sdf.parse(upgradeVersion.getDateLine().toString());
+                             	long specificDateMillis = specificDate.getTime();
+	                                long currentDateMillis = System.currentTimeMillis();
+	                                
+	                                canSkip = specificDateMillis >= currentDateMillis;
+                             }
+                             dataMap.put("action", "upgrade");
+                             dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits");
+                             dataMap.put("kycType", "v2");
+                             dataMap.put("canSkip",canSkip);
+                             dataMap.put("title", "Account Upgrade Required");
+                             dataMap.put("accountType", "C002");
+                             map.put("data", dataMap);
+                             
+                             return map;
                         }
 		                if (userMaxKycOpt.isPresent() && maxKycVersion.isPresent()) {
 		                    KycUpgrade userKyc = userMaxKycOpt.get();
@@ -289,8 +314,7 @@ public class WalletService {
 
 		                            if (requiredUpgrade.isPresent()) {
 		                                KycVersions upgradeVersion = requiredUpgrade.get();
-		                                SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
-		                                sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+		                                
 		                                Date specificDate;
 		                                
 		                                Boolean canSkip = false;
