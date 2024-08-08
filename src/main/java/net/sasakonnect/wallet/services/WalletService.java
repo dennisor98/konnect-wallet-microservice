@@ -216,7 +216,7 @@ public class WalletService {
 		            .bodyToMono(String.class);
 
 		    String responseJson = responseMono.block();
-
+            
 		    if (responseJson != null) {
 		        var gson = new Gson();
 		        Map<String, Object> json = gson.fromJson(responseJson, Map.class);
@@ -230,6 +230,38 @@ public class WalletService {
 		            if (accountType == null) {
 		                return null;
 		            }
+		            Integer userAppVersion = Integer.valueOf(user.getCurrentAppVersion().replace(".", ""));
+	                Optional<AppVersions> latestAppVersion = this.appVersionsRepository.findMaxVersion();
+
+	                if (latestAppVersion.isPresent()) {
+	                    Integer latestVersion = Integer.valueOf(latestAppVersion.get().getVersion().replace(".", ""));
+
+	                    if (latestVersion > userAppVersion) {
+//	                        String accountType = (String) data.get("accountType");
+	                        Date dateline = latestAppVersion.get().getUpdateDateline();
+	                        Date currentTime = new Date();
+	                        boolean canSkip;
+	                        if(dateline == null) {
+	                        	canSkip = true;
+	                        }else {
+	                        	canSkip =  currentTime.after(dateline);
+	                        }
+	                      
+
+	                        Map<String, Object> map = new HashMap<>();
+	                        Map<String, Object> dataMap = new HashMap<>();
+	                        map.put("success", true);
+	                        map.put("message", "Request complete");
+	                        dataMap.put("action", "update");
+	                        dataMap.put("message", "Please update your app to enjoy more features and seamless transaction experience");
+	                        dataMap.put("canSkip", canSkip);
+	                        dataMap.put("title", "New App Version available");
+	                        dataMap.put("accountType", accountType);
+
+	                        map.put("data", dataMap);
+	                        return map;
+	                    }
+	                }
 
 		            List<KycVersions> kycVersions = this.kycVersionsRepository.findAll();
 		            Optional<KycVersions> maxKycVersion = this.kycVersionsRepository.findMaximumVersion();
@@ -327,38 +359,7 @@ public class WalletService {
 //		                    }
 		                }
 
-		                Integer userAppVersion = Integer.valueOf(user.getCurrentAppVersion().replace(".", ""));
-		                Optional<AppVersions> latestAppVersion = this.appVersionsRepository.findMaxVersion();
-
-		                if (latestAppVersion.isPresent()) {
-		                    Integer latestVersion = Integer.valueOf(latestAppVersion.get().getVersion().replace(".", ""));
-
-		                    if (latestVersion > userAppVersion) {
-//		                        String accountType = (String) data.get("accountType");
-		                        Date dateline = latestAppVersion.get().getUpdateDateline();
-		                        Date currentTime = new Date();
-		                        boolean canSkip;
-		                        if(dateline == null) {
-		                        	canSkip = true;
-		                        }else {
-		                        	canSkip =  currentTime.after(dateline);
-		                        }
-		                      
-
-		                        Map<String, Object> map = new HashMap<>();
-		                        Map<String, Object> dataMap = new HashMap<>();
-		                        map.put("success", true);
-		                        map.put("message", "Request complete");
-		                        dataMap.put("action", "update");
-		                        dataMap.put("message", "Please update your app to enjoy more features and seamless transaction experience");
-		                        dataMap.put("canSkip", canSkip);
-		                        dataMap.put("title", "New App Version available");
-		                        dataMap.put("accountType", accountType);
-
-		                        map.put("data", dataMap);
-		                        return map;
-		                    }
-		                }
+		                
 
 		                return gson.fromJson(responseJson, Object.class);
 		            }
