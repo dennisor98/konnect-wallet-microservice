@@ -281,7 +281,7 @@ public class WalletService {
                              Map<String, Object> dataMap = new HashMap<>();
                              map.put("success", true);
                              map.put("message", "Request complete");
-                             Boolean canSkip = false;
+                             boolean canSkip;
 	                         KycVersions upgradeVersion = maxKycVersion.get();
                              if(upgradeVersion.getDateLine() !=null) {
                              	Date specificDate = sdf.parse(upgradeVersion.getDateLine().toString());
@@ -289,6 +289,8 @@ public class WalletService {
 	                                long currentDateMillis = System.currentTimeMillis();
 	                                
 	                                canSkip = specificDateMillis >= currentDateMillis;
+                             }else {
+                            	 canSkip = true;
                              }
                              dataMap.put("action", "upgrade");
                              dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits");
