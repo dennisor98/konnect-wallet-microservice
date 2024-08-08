@@ -238,12 +238,19 @@ public class WalletService {
 		                return gson.fromJson(responseJson, Object.class);
 		            } else {
 		                Optional<KycUpgrade> userMaxKycOpt = this.kycUpgradeRepository.findMaxVersionByUser(user);
-
+                        log.info(userMaxKycOpt+"");
+                        if(userMaxKycOpt.isEmpty() && accountType.equalsIgnoreCase("C001")) {
+                        	var userKyc = KycUpgrade.builder().user(user).version(2).build();
+                        	this.kycUpgradeRepository.save(userKyc);
+                        }
 		                if (userMaxKycOpt.isPresent() && maxKycVersion.isPresent()) {
 		                    KycUpgrade userKyc = userMaxKycOpt.get();
 		                    KycVersions maxVersion = maxKycVersion.get();
+		                    log.error(userKyc.getVersion()+"{}");
+		                    log.error(maxVersion.getVersion()+"{}");
+		                    log.info((maxVersion.getVersion() > userKyc.getVersion())+"{}");
 
-		                    if (userKyc.getVersion() < maxVersion.getVersion()) {
+		                    if ( maxVersion.getVersion() > userKyc.getVersion() ) {
 		                        try {
 		                            Integer nextVersion = userKyc.getVersion() + 1;
 		                            Optional<KycVersions> requiredUpgrade = this.kycVersionsRepository.findByVersion(nextVersion);
@@ -252,10 +259,19 @@ public class WalletService {
 		                                KycVersions upgradeVersion = requiredUpgrade.get();
 		                                SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
 		                                sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-		                                Date specificDate = sdf.parse(upgradeVersion.getDateLine().toString());
+		                                Date specificDate;
+		                                
+		                                Boolean canSkip = false;
+		                                if(upgradeVersion.getDateLine() !=null) {
+		                                	specificDate = sdf.parse(upgradeVersion.getDateLine().toString());
+		                                	long specificDateMillis = specificDate.getTime();
+			                                long currentDateMillis = System.currentTimeMillis();
+			                                
+			                                canSkip = specificDateMillis >= currentDateMillis;
+		                                }
+		                               
 
-		                                long specificDateMillis = specificDate.getTime();
-		                                long currentDateMillis = System.currentTimeMillis();
+		                                
 
 		                                Map<String, Object> map = new HashMap<>();
 		                                Map<String, Object> dataMap = new HashMap<>();
@@ -264,7 +280,7 @@ public class WalletService {
 		                                dataMap.put("action", "upgrade");
 		                                dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits");
 		                                dataMap.put("kycType", "v" + nextVersion);
-		                                dataMap.put("canSkip", specificDateMillis >= currentDateMillis);
+		                                dataMap.put("canSkip",canSkip);
 		                                dataMap.put("title", "Account Upgrade Required");
 		                                dataMap.put("accountType", "C002");
 
@@ -274,39 +290,41 @@ public class WalletService {
 		                        } catch (ParseException e) {
 		                            log.error("Date parsing error", e);
 		                        }
-		                    } else {
-		                        try {
-		                            long timestamp = ((Number) json.get("timestamp")).longValue();
-		                            Date jsonDate = new Date(timestamp);
-
-		                            SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
-		                            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-		                            Date specificDate = sdf.parse("2024-08-07");
-
-		                            Date userCreatedAt = user.getCreatedAt();
-
-		                            long specificDateMillis = specificDate.getTime();
-		                            long userCreatedAtMillis = userCreatedAt.getTime();
-
-		                            if (userCreatedAtMillis < specificDateMillis) {
-		                                Map<String, Object> map = new HashMap<>();
-		                                Map<String, Object> dataMap = new HashMap<>();
-		                                map.put("success", true);
-		                                map.put("message", "Request complete");
-		                                dataMap.put("action", "upgrade");
-		                                dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits");
-		                                dataMap.put("kycType", "v2");
-		                                dataMap.put("canSkip", specificDateMillis >= userCreatedAtMillis);
-		                                dataMap.put("title", "Account Upgrade Required");
-		                                dataMap.put("accountType", "C002");
-
-		                                map.put("data", dataMap);
-		                                return map;
-		                            }
-		                        } catch (ParseException e) {
-		                            log.error("Date parsing error", e);
-		                        }
-		                    }
+		                    } 
+		                    
+//		                    else {
+//		                        try {
+//		                            long timestamp = ((Number) json.get("timestamp")).longValue();
+//		                            Date jsonDate = new Date(timestamp);
+//
+//		                            SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+//		                            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+//		                            Date specificDate = sdf.parse("2024-08-07");
+//
+//		                            Date userCreatedAt = user.getCreatedAt();
+//
+//		                            long specificDateMillis = specificDate.getTime();
+//		                            long userCreatedAtMillis = userCreatedAt.getTime();
+//
+//		                            if (userCreatedAtMillis < specificDateMillis) {
+//		                                Map<String, Object> map = new HashMap<>();
+//		                                Map<String, Object> dataMap = new HashMap<>();
+//		                                map.put("success", true);
+//		                                map.put("message", "Request complete");
+//		                                dataMap.put("action", "upgrade");
+//		                                dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits");
+//		                                dataMap.put("kycType", "v3");
+//		                                dataMap.put("canSkip", specificDateMillis >= userCreatedAtMillis);
+//		                                dataMap.put("title", "Account Upgrade Required");
+//		                                dataMap.put("accountType", "C002");
+//
+//		                                map.put("data", dataMap);
+//		                                return map;
+//		                            }
+//		                        } catch (ParseException e) {
+//		                            log.error("Date parsing error", e);
+//		                        }
+//		                    }
 		                }
 
 		                Integer userAppVersion = Integer.valueOf(user.getCurrentAppVersion().replace(".", ""));
