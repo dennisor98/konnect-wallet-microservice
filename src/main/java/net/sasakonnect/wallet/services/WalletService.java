@@ -350,39 +350,7 @@ public class WalletService {
 		                        }
 		                    } 
 		                    
-//		                    else {
-//		                        try {
-//		                            long timestamp = ((Number) json.get("timestamp")).longValue();
-//		                            Date jsonDate = new Date(timestamp);
-//
-//		                            SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
-//		                            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-//		                            Date specificDate = sdf.parse("2024-08-07");
-//
-//		                            Date userCreatedAt = user.getCreatedAt();
-//
-//		                            long specificDateMillis = specificDate.getTime();
-//		                            long userCreatedAtMillis = userCreatedAt.getTime();
-//
-//		                            if (userCreatedAtMillis < specificDateMillis) {
-//		                                Map<String, Object> map = new HashMap<>();
-//		                                Map<String, Object> dataMap = new HashMap<>();
-//		                                map.put("success", true);
-//		                                map.put("message", "Request complete");
-//		                                dataMap.put("action", "upgrade");
-//		                                dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits");
-//		                                dataMap.put("kycType", "v3");
-//		                                dataMap.put("canSkip", specificDateMillis >= userCreatedAtMillis);
-//		                                dataMap.put("title", "Account Upgrade Required");
-//		                                dataMap.put("accountType", "C002");
-//
-//		                                map.put("data", dataMap);
-//		                                return map;
-//		                            }
-//		                        } catch (ParseException e) {
-//		                            log.error("Date parsing error", e);
-//		                        }
-//		                    }
+
 		                }
 
 		                

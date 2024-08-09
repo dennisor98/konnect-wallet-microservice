@@ -127,6 +127,7 @@ public class WebSecurityConfig {
 		http.headers(headers -> headers.disable());
 
 		http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+	
 
 		return http.build();
 
