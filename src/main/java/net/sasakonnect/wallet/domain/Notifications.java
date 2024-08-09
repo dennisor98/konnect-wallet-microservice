@@ -45,7 +45,7 @@ public class Notifications extends BaseWalletDomain {
 	@Column()
 	Date expiryDate;
 	
-	@Column()
+	@Column(columnDefinition = "LONGTEXT")
 	String caption;
 	
 	 @PrePersist

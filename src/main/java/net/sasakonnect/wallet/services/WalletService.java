@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,8 +61,10 @@ import net.sasakonnect.wallet.RequestDto.admin.CheckUserAccount;
 import net.sasakonnect.wallet.ResponseDto.TransactionResponseDto;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
+import net.sasakonnect.wallet.domain.AppVersions;
 import net.sasakonnect.wallet.domain.CorporateDetails;
 import net.sasakonnect.wallet.domain.FinancialContact;
+import net.sasakonnect.wallet.domain.KycUpgrade;
 import net.sasakonnect.wallet.domain.Logs;
 import net.sasakonnect.wallet.domain.Notifications;
 import net.sasakonnect.wallet.domain.RejectedAccount;
@@ -89,8 +92,11 @@ import net.sasakonnect.wallet.notification.NotificationResult;
 import net.sasakonnect.wallet.notification.SmeAccountOpeningResultNotification;
 import net.sasakonnect.wallet.notification.TransactionResultNotification;
 import net.sasakonnect.wallet.notification.WalletAccountUpgradeResultNotification;
+import net.sasakonnect.wallet.repository.AppVersionsRepository;
 import net.sasakonnect.wallet.repository.CurrencyRepository;
 import net.sasakonnect.wallet.repository.FirebaseTokenRepository;
+import net.sasakonnect.wallet.repository.KycUpgradeRepository;
+import net.sasakonnect.wallet.repository.KycVersionsRepository;
 import net.sasakonnect.wallet.repository.LogsRepository;
 import net.sasakonnect.wallet.repository.RejectedAccountRepository;
 import net.sasakonnect.wallet.repository.UserJobRepository;
@@ -105,6 +111,7 @@ import net.sasakonnect.wallet.services.sme.SmeTransactionService;
 import net.sasakonnect.wallet.services.sme.SmeUserService;
 import net.sasakonnect.wallet.tools.RequestSigner;
 import reactor.core.publisher.Mono;
+import net.sasakonnect.wallet.domain.KycVersions;
 
 @Service
 @Slf4j
@@ -133,6 +140,9 @@ public class WalletService {
 	WalletRepository walletRepository;
 	@Autowired
 	CurrencyRepository currencyRepository;
+	
+	@Autowired
+	KycVersionsRepository kycVersionsRepository;
 
 	@Autowired
 	UserWalletRepository userWalletRepository;
@@ -173,113 +183,185 @@ public class WalletService {
 	
 	@Autowired
 	UserPinRepository userPinRepository;
+	
+	@Autowired
+	KycUpgradeRepository kycUpgradeRepository;
+	
+	
+	@Autowired
+	AppVersionsRepository appVersionsRepository;
 
 	@Value("${internetTillNumber}")
 	String internetTillNumber;
 	
-	@Value("${latestAppVesrion}")
-	String latestAppVesrion;
+	
 	
 	
 
 	@Value("${KONNECT_BANK}")
 	private String konnectBank;
 	 private static final String DATE_FORMAT = "yyyy-MM-dd";
-	public Object getWalletInfo() {
-		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		var reqId = new HashMap<String, Object>();
-		reqId.put("userId", user.getId());
-		var reqs = requestSigner.signRequest(reqId);
+	 public Object getWalletInfo() throws ParseException {
+		    User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		    var reqId = new HashMap<String, Object>();
+		    reqId.put("userId", user.getId());
+		    var reqs = requestSigner.signRequest(reqId);
 
-		Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.GET_WALLET_INFO)
-				.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
-				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
+		    Mono<String> responseMono = this.bankClientBean.webClient.post()
+		            .uri(ChoiceEndpointsConstants.GET_WALLET_INFO)
+		            .contentType(MediaType.APPLICATION_JSON)
+		            .body(BodyInserters.fromValue(reqs))
+		            .accept(MediaType.APPLICATION_JSON)
+		            .retrieve()
+		            .bodyToMono(String.class);
 
-		String responseJson = responseMono.block();
+		    String responseJson = responseMono.block();
+            
+		    if (responseJson != null) {
+		        var gson = new Gson();
+		        Map<String, Object> json = gson.fromJson(responseJson, Map.class);
+		        log.info("{}", json);
 
-		if (responseJson != null) {
-		  var json = new  Gson().fromJson(responseJson, Map.class);
-		  log.info("{}",json);
+		        Map<String, Object> data = (Map<String, Object>) json.get("data");
+		        if (data != null) {
+		            log.info("{}", data);
+		            String accountType = (String) data.get("accountType");
 
-		  Map<String,Object> data = (Map<String,Object>)json.get("data");
-		  if(data !=null) {
-			  log.info("{}",data);
-			  var accType = data.get("accountType");
+		            if (accountType == null) {
+		                return null;
+		            }
+		            Integer userAppVersion = Integer.valueOf(user.getCurrentAppVersion().replace(".", ""));
+	                Optional<AppVersions> latestAppVersion = this.appVersionsRepository.findMaxVersion();
 
-			  if(accType == null) {
-				  return null;
-			  }
-			  String accountType =  accType.toString();
-			  
-			  if(accountType.equalsIgnoreCase("C002")) {
-				  try {
-					  long timestamp = ((Number) json.get("timestamp")).longValue();
-                      Date jsonDate = new Date(timestamp);
+	                if (latestAppVersion.isPresent()) {
+	                    Integer latestVersion = Integer.valueOf(latestAppVersion.get().getVersion().replace(".", ""));
 
-                      // Parse specific date
-                      SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
-                      sdf.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
-                      Date specificDate = sdf.parse("2024-08-07");
+	                    if (latestVersion > userAppVersion) {
+//	                        String accountType = (String) data.get("accountType");
+	                        Date dateline = latestAppVersion.get().getUpdateDateline();
+	                        Date currentTime = new Date();
+	                        boolean canSkip;
+	                        if(dateline == null) {
+	                        	canSkip = true;
+	                        }else {
+	                        	canSkip =  currentTime.after(dateline);
+	                        }
+	                      
 
-                      // Retrieve user creation date
-                      Date userCreatedAt = user.getCreatedAt();
+	                        Map<String, Object> map = new HashMap<>();
+	                        Map<String, Object> dataMap = new HashMap<>();
+	                        map.put("success", true);
+	                        map.put("message", "Request complete");
+	                        dataMap.put("action", "update");
+	                        dataMap.put("message", "Please update your app to enjoy more features and seamless transaction experience");
+	                        dataMap.put("canSkip", canSkip);
+	                        dataMap.put("title", "New App Version available");
+	                        dataMap.put("accountType", accountType);
 
-                      // Convert dates to epoch time for comparison
-                      long jsonDateMillis = jsonDate.getTime();
-                      long specificDateMillis = specificDate.getTime();
-                      long userCreatedAtMillis = userCreatedAt.getTime();
-                      long currentDateMillis = System.currentTimeMillis();
-                      
-                      if (userCreatedAtMillis < specificDateMillis)  {
-                    	  Map<String,Object> map = new HashMap<>();
-                    	  Map<String,Object> datamap = new HashMap<>();
-                    	  map.put("success",true);
-                    	  map.put("message","Request complete");
-                    	  datamap.put("action","upgrade");
-                    	  datamap.put("message","You are required to upgrade your account to continue enjoying higher transaction limits");		
-                    	  datamap.put("kycType","v1");
-                    	  boolean canSkip = specificDateMillis >= currentDateMillis;
-                    	  datamap.put("canSkip", canSkip);
-                    	  datamap.put("title","Account Upgrade Required");    
-                    	  datamap.put("accountType","C002");
-                    	  
-                    	  map.put("data", datamap);                	
-                    	  
-                    	  return map;
-                      }
+	                        map.put("data", dataMap);
+	                        return map;
+	                    }
+	                }
 
-                  } catch (ParseException e){
-                      log.error("Date parsing error", e);
-                  }
-			  }
-			  
-			  log.error("{}"+accountType);
-		  }
-		  
-		  Integer userAppVersion = Integer.valueOf(user.getCurrentAppVersion().replace(".", ""));
-		  Integer latestVesrion = Integer.valueOf(latestAppVesrion.replace(".", ""));
-		  if(latestVesrion > userAppVersion) {
-			  String accountType =  data.get("accountType").toString();
-			  Map<String,Object> map = new HashMap<>();
-			  Map<String,Object> datamap = new HashMap<>();
-			  map.put("success",true);
-			  map.put("message","Request complete");
-			  datamap.put("action","update");
-			  datamap.put("message","Please update your app to enjoy more features and seamless transaction exprience");		
-			  datamap.put("canSkip",true);
-			  datamap.put("title","New App Version available");    
-			  datamap.put("accountType",accountType);
-			  
-			  map.put("data",datamap);        	
-			  return map;
-			  
-		  }
-//		  log.error(data+"{}");
-			return new Gson().fromJson(responseJson, Object.class);
+		            List<KycVersions> kycVersions = this.kycVersionsRepository.findAll();
+		            Optional<KycVersions> maxKycVersion = this.kycVersionsRepository.findMaximumVersion();
+		            SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+                    sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+		            if (kycVersions.isEmpty()) {
+		                return gson.fromJson(responseJson, Object.class);
+		            } else {
+		                Optional<KycUpgrade> userMaxKycOpt = this.kycUpgradeRepository.findMaxVersionByUser(user);
+                        log.info(userMaxKycOpt+"");
+                        if(userMaxKycOpt.isEmpty() && accountType.equalsIgnoreCase("C001")) {
+                        	var userKyc = KycUpgrade.builder().user(user).version(2).build();
+                        	this.kycUpgradeRepository.save(userKyc);
+                        }
+                        if(userMaxKycOpt.isEmpty() && accountType.equalsIgnoreCase("C002") && maxKycVersion.isPresent()) {
+                        	 Map<String, Object> map = new HashMap<>();
+                             Map<String, Object> dataMap = new HashMap<>();
+                             map.put("success", true);
+                             map.put("message", "Request complete");
+                             boolean canSkip;
+	                         KycVersions upgradeVersion = maxKycVersion.get();
+                             if(upgradeVersion.getDateLine() !=null) {
+                             	Date specificDate = sdf.parse(upgradeVersion.getDateLine().toString());
+                             	long specificDateMillis = specificDate.getTime();
+	                                long currentDateMillis = System.currentTimeMillis();
+	                                
+	                                canSkip = specificDateMillis >= currentDateMillis;
+                             }else {
+                            	 canSkip = true;
+                             }
+                             dataMap.put("action", "upgrade");
+                             dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits");
+                             dataMap.put("kycType", "v2");
+                             dataMap.put("canSkip",canSkip);
+                             dataMap.put("title", "Account Upgrade Required");
+                             dataMap.put("accountType", "C002");
+                             map.put("data", dataMap);
+                             
+                             return map;
+                        }
+		                if (userMaxKycOpt.isPresent() && maxKycVersion.isPresent()) {
+		                    KycUpgrade userKyc = userMaxKycOpt.get();
+		                    KycVersions maxVersion = maxKycVersion.get();
+		                    log.error(userKyc.getVersion()+"{}");
+		                    log.error(maxVersion.getVersion()+"{}");
+		                    log.info((maxVersion.getVersion() > userKyc.getVersion())+"{}");
+
+		                    if ( maxVersion.getVersion() > userKyc.getVersion() ) {
+		                        try {
+		                            Integer nextVersion = userKyc.getVersion() + 1;
+		                            Optional<KycVersions> requiredUpgrade = this.kycVersionsRepository.findByVersion(nextVersion);
+
+		                            if (requiredUpgrade.isPresent()) {
+		                                KycVersions upgradeVersion = requiredUpgrade.get();
+		                                
+		                                Date specificDate;
+		                                
+		                                Boolean canSkip = false;
+		                                if(upgradeVersion.getDateLine() !=null) {
+		                                	specificDate = sdf.parse(upgradeVersion.getDateLine().toString());
+		                                	long specificDateMillis = specificDate.getTime();
+			                                long currentDateMillis = System.currentTimeMillis();
+			                                
+			                                canSkip = specificDateMillis >= currentDateMillis;
+		                                }
+		                               
+
+		                                
+
+		                                Map<String, Object> map = new HashMap<>();
+		                                Map<String, Object> dataMap = new HashMap<>();
+		                                map.put("success", true);
+		                                map.put("message", "Request complete");
+		                                dataMap.put("action", "upgrade");
+		                                dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits");
+		                                dataMap.put("kycType", "v" + nextVersion);
+		                                dataMap.put("canSkip",canSkip);
+		                                dataMap.put("title", "Account Upgrade Required");
+		                                dataMap.put("accountType", "C002");
+
+		                                map.put("data", dataMap);
+		                                return map;
+		                            }
+		                        } catch (ParseException e) {
+		                            log.error("Date parsing error", e);
+		                        }
+		                    } 
+		                    
+
+		                }
+
+		                
+
+		                return gson.fromJson(responseJson, Object.class);
+		            }
+		        }
+		    }
+
+		    return null;
 		}
-
-		return null;
-	}
 
 	public Object getBankCode() {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

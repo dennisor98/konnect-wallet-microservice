@@ -1,5 +1,6 @@
 package net.sasakonnect.wallet.controllers;
 
+import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -98,7 +99,7 @@ public class WalletController {
 	}
 
 	@GetMapping("/info")
-	public ResponseEntity<Object> info() {
+	public ResponseEntity<Object> info() throws ParseException {
 		return ResponseEntity.ok(this.walletService.getWalletInfo());
 	}
 

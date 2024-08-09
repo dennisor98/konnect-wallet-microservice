@@ -802,5 +802,7 @@ public class AdministrationController {
 	public Object confirmPhoneChange(@Valid @RequestBody() ConfirmPhoneNumberChangeDto request) {
 		return this.userService.confirmPhoneChange(request);
 	}
+	
+	
 
 }
