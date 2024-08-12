@@ -264,7 +264,7 @@ public class WalletService {
 		    				dataMap.put("title", "Account Upgrade Required");
 		    				dataMap.put("accountType", "C002");
 		    				map.put("data", dataMap);
-		    				return null;
+		    				return map;
 		    			}
 		    		}
 		    		
