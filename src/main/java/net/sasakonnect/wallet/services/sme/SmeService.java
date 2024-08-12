@@ -480,6 +480,19 @@ public class SmeService {
 
 	}
 
+	public Object createSmeMultiAccount(String smeId) {
+		Optional<Sme> smeOpt =  this.smeRepository.findById(smeId);
+		if(smeOpt.isEmpty()) {
+			
+		}
+		
+		var sme = smeOpt.get();
+		var reqId =  new HashMap<String,Object>();
+		reqId.put("businessName",sme.getAccountDetails().getBusinessName());
+		reqId.put("businessCertId", sme.getAccountDetails().getBusinessCerNum());
+		return null;
+	}
+	
 	public Object submitSmeMaterials(@Valid SubmitSmeAccount document) {
 		var smeRepo = this.smeRepository.findSmeByOnboardingId(document.getOnboardingRequestId());
 		if (!smeRepo.isEmpty()) {

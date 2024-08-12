@@ -258,7 +258,7 @@ public class WalletService {
 		    					canSkip = true;
 		    				}
 		    				dataMap.put("action", "upgrade");
-		    				dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits");
+		    				dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits.\nUpgrade by"+upgradeVersion.getDateLine().toString());
 		    				dataMap.put("kycType", "v2");
 		    				dataMap.put("canSkip",canSkip);
 		    				dataMap.put("title", "Account Upgrade Required");
@@ -279,12 +279,14 @@ public class WalletService {
 //	                        String accountType = (String) data.get("accountType");
 	                        Date dateline = latestAppVersion.get().getUpdateDateline();
 	                        Date currentTime = new Date();
-	                        boolean canSkip;
-	                        if(dateline == null) {
-	                        	canSkip = true;
-	                        }else {
-	                        	canSkip =  currentTime.after(dateline);
-	                        }
+//	                        boolean canSkip = true;
+//	                        log.info(dateline.toString());
+//	                        if(dateline == null) {
+//	                        	canSkip = true;
+//	                        }else {
+//	                        	log.info(currentTime.after(dateline)+"{}");
+//	                        	canSkip =  ;
+//	                        }
 	                      
 
 	                        Map<String, Object> map = new HashMap<>();
@@ -293,7 +295,7 @@ public class WalletService {
 	                        map.put("message", "Request complete");
 	                        dataMap.put("action", "update");
 	                        dataMap.put("message", "Please update your app to enjoy more features and seamless transaction experience");
-	                        dataMap.put("canSkip", canSkip);
+	                        dataMap.put("canSkip",dateline == null ? true : !currentTime.after(dateline));
 	                        dataMap.put("title", "New App Version available");
 	                        dataMap.put("accountType", accountType);
 
@@ -332,7 +334,7 @@ public class WalletService {
                             	 canSkip = true;
                              }
                              dataMap.put("action", "upgrade");
-                             dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits");
+                             dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits.\nUpgrade by"+upgradeVersion.getDateLine().toString());
                              dataMap.put("kycType", "v2");
                              dataMap.put("canSkip",canSkip);
                              dataMap.put("title", "Account Upgrade Required");
@@ -375,7 +377,7 @@ public class WalletService {
 		                                map.put("success", true);
 		                                map.put("message", "Request complete");
 		                                dataMap.put("action", "upgrade");
-		                                dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits");
+		    		    				dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits.\nUpgrade by"+upgradeVersion.getDateLine().toString());
 		                                dataMap.put("kycType", "v" + nextVersion);
 		                                dataMap.put("canSkip",canSkip);
 		                                dataMap.put("title", "Account Upgrade Required");
