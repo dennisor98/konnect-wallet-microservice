@@ -444,7 +444,7 @@ public class SmeService {
 					.sme(smedata).build();
 //			smedata.getSmeAccounts().add(smeAccount);
 		var savedsmeAccount =	this.smeAccountRepository.save(smeAccount);
-		var smeAccManagerBuild = SmeAccountManager.builder().smeAccount(List.of(savedsmeAccount)).user(smedata.getSmeMembers().get(0).getUser()).build();
+		var smeAccManagerBuild = SmeAccountManager.builder().smeAccount(savedsmeAccount).user(smedata.getSmeMembers().get(0).getUser()).build();
 		this.smeAccountManagerRepository.save(smeAccManagerBuild);
 		Optional<SmeRole> existingRole =  this.smeRoleRepository.findByRoleNameAndEnterprise("SUPER_ADMIN",smedata.getEnterprise());
 		if(existingRole.isEmpty()) {
@@ -652,7 +652,7 @@ public Object AddSmeAccountManager(SmeAccountManagerDto managerDto) {
 	}
 	var user = userOpt.get();	
 	var smeAcc =  smeAccOpt.get();
-	var accManager =  SmeAccountManager.builder().smeAccount(List.of(smeAcc) ).user(user).build();
+	var accManager =  SmeAccountManager.builder().smeAccount(smeAcc).user(user).build();
 	
 	Optional<SmeAccountManager> smeAccManagerOpt =  this.smeAccountManagerRepository.findBySmeAccountAndUser(smeAcc,user);
 	//check if user is already a manager in the account

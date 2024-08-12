@@ -218,18 +218,57 @@ public class WalletService {
 		    String responseJson = responseMono.block();
             
 		    if (responseJson != null) {
-		        var gson = new Gson();
-		        Map<String, Object> json = gson.fromJson(responseJson, Map.class);
-		        log.info("{}", json);
+		    	var gson = new Gson();
+		    	Map<String, Object> json = gson.fromJson(responseJson, Map.class);
+		    	log.info("{}", json);
 
-		        Map<String, Object> data = (Map<String, Object>) json.get("data");
-		        if (data != null) {
-		            log.info("{}", data);
-		            String accountType = (String) data.get("accountType");
+		    	Map<String, Object> data = (Map<String, Object>) json.get("data");
+		    	if (data != null) {
+		    		log.info("{}", data);
+		    		String accountId =  (String) data.get("accountId");
+		    		var rejectionIds = data.get("accountType");
+		    		Double onboardingStatus = (Double) data.get("onboardingStatus");
+		    		String accountType = (String) data.get("accountType");
 
-		            if (accountType == null) {
-		                return null;
-		            }
+		    		if (accountType == null  && accountId==null && rejectionIds == null  && onboardingStatus == 4.0) {
+		    			Map<String, Object> map = new HashMap<>();
+		    			Map<String, Object> dataMap = new HashMap<>();
+		    			map.put("success", true);
+		    			map.put("message", "Request complete");
+		    			boolean canSkip;
+		    			List<KycVersions> kycVersions = this.kycVersionsRepository.findAll();
+		    			Optional<KycVersions> maxKycVersion = this.kycVersionsRepository.findMaximumVersion();
+		    			SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+		    			sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+		    			if (kycVersions.isEmpty()) {
+		    				dataMap.put("accountType", "C002");
+		    				map.put("data",dataMap);
+		    			} else {
+		    				Optional<KycUpgrade> userMaxKycOpt = this.kycUpgradeRepository.findMaxVersionByUser(user);
+		    				log.info(userMaxKycOpt+"");
+
+		    				KycVersions upgradeVersion = maxKycVersion.get();
+		    				if(upgradeVersion.getDateLine() !=null) {
+		    					Date specificDate = sdf.parse(upgradeVersion.getDateLine().toString());
+		    					long specificDateMillis = specificDate.getTime();
+		    					long currentDateMillis = System.currentTimeMillis();
+
+		    					canSkip = specificDateMillis >= currentDateMillis;
+		    				}else {
+		    					canSkip = true;
+		    				}
+		    				dataMap.put("action", "upgrade");
+		    				dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits");
+		    				dataMap.put("kycType", "v2");
+		    				dataMap.put("canSkip",canSkip);
+		    				dataMap.put("title", "Account Upgrade Required");
+		    				dataMap.put("accountType", "C002");
+		    				map.put("data", dataMap);
+		    				return map;
+		    			}
+		    		}
+		    		
+		    		
 		            Integer userAppVersion = Integer.valueOf(user.getCurrentAppVersion().replace(".", ""));
 	                Optional<AppVersions> latestAppVersion = this.appVersionsRepository.findMaxVersion();
 

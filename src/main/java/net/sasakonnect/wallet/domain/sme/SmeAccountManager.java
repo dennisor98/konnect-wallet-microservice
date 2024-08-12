@@ -6,6 +6,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
@@ -23,8 +24,9 @@ import net.sasakonnect.wallet.domain.User;
 
 @Entity
 public class SmeAccountManager extends BaseWalletDomain{
-   @ManyToMany()
-   List<SmeAccount> smeAccount;
+   @ManyToOne()
+   @JoinColumn(name="sme_account")
+   SmeAccount smeAccount;
    
    @OneToOne()
    @JoinColumn(name="wallet_user_id")
