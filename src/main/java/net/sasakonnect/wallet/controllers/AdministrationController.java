@@ -48,10 +48,13 @@ import net.sasakonnect.wallet.RequestDto.admin.CheckUserAccount;
 import net.sasakonnect.wallet.RequestDto.admin.PinReset;
 import net.sasakonnect.wallet.RequestDto.sme.ChangeUserPhoneNumberDto;
 import net.sasakonnect.wallet.RequestDto.sme.ConfirmPhoneNumberChangeDto;
+import net.sasakonnect.wallet.RequestDto.sme.SmeAccountManagerDto;
+import net.sasakonnect.wallet.RequestDto.sme.SmeMultiAccountDto;
 import net.sasakonnect.wallet.RequestDto.tarrif.TariffDTO;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.IsCorporate;
 import net.sasakonnect.wallet.annotations.RequirePermission;
+import net.sasakonnect.wallet.annotations.sme.HasSmePermission;
 import net.sasakonnect.wallet.constant.ChannelType;
 import net.sasakonnect.wallet.constant.GlobalPermissionConstants;
 import net.sasakonnect.wallet.domain.Role;
@@ -73,6 +76,7 @@ import net.sasakonnect.wallet.services.TransactionService;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.services.WalletClientService;
 import net.sasakonnect.wallet.services.WalletService;
+import net.sasakonnect.wallet.services.sme.SmeService;
 import net.sasakonnect.wallet.services.sme.SmeUserService;
 
 @RequestMapping("/administration")
@@ -133,6 +137,9 @@ public class AdministrationController {
 
 	@Autowired
 	SmeUserService smeUserService;
+	
+	@Autowired
+	SmeService smeService;
 
 	@GetMapping("/upload/app")
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CreateSuperApp.PERMISSION + "')")
@@ -801,6 +808,22 @@ public class AdministrationController {
 	@RequirePermission(GlobalPermissionConstants.ConfirmChangeUserPhoneNumber.PERMISSION)
 	public Object confirmPhoneChange(@Valid @RequestBody() ConfirmPhoneNumberChangeDto request) {
 		return this.userService.confirmPhoneChange(request);
+	}
+	
+	
+	@IsCorporate
+	@PostMapping("/sme/multiAccount")
+	@RequirePermission(GlobalPermissionConstants.CanCreateAnEnterprise.PERMISSION)
+	public Object createSmeMultiAccount(@Valid @RequestBody() SmeMultiAccountDto accountDto) {
+		return this.smeService.createSmeMultiAccount(accountDto);
+	}
+	
+	
+	@IsCorporate
+	@GetMapping("/user/kycMaterials")
+	@RequirePermission(GlobalPermissionConstants.CanQueryUserKycMaterials.PERMISSION)
+	public Object getUserKycMaterials(@RequestParam("userId") String userId) {
+		return this.walletService.getUserKycMaterials(userId);
 	}
 	
 	

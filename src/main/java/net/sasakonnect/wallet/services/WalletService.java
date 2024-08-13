@@ -313,11 +313,11 @@ public class WalletService {
 		            } else {
 		                Optional<KycUpgrade> userMaxKycOpt = this.kycUpgradeRepository.findMaxVersionByUser(user);
                         log.info(userMaxKycOpt+"");
-                        if(userMaxKycOpt.isEmpty() && accountType.equalsIgnoreCase("C001")) {
+                        if(userMaxKycOpt.isEmpty() && accountType !=null && accountType.equalsIgnoreCase("C001")) {
                         	var userKyc = KycUpgrade.builder().user(user).version(2).build();
                         	this.kycUpgradeRepository.save(userKyc);
                         }
-                        if(userMaxKycOpt.isEmpty() && accountType.equalsIgnoreCase("C002") && maxKycVersion.isPresent()) {
+                        if(userMaxKycOpt.isEmpty() &&  accountType !=null && accountType.equalsIgnoreCase("C002") && maxKycVersion.isPresent()) {
                         	 Map<String, Object> map = new HashMap<>();
                              Map<String, Object> dataMap = new HashMap<>();
                              map.put("success", true);
@@ -2055,6 +2055,35 @@ public class WalletService {
 		} else {
 			return null;
 		}
+	}
+	
+	public Object getUserKycMaterials(String userId) {
+		Optional<User> userOpt =  this.userService.findUserById(userId);
+		if(userOpt.isEmpty()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","Unknown userId");
+			
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		var user = userOpt.get();
+		var reqId =  new HashMap<String,Object>();
+		reqId.put("onboardingRequestId", user.getOnboardingRequestId());	
+		
+		var reqs = requestSigner.signRequest(reqId);
+
+		Mono<String> responseMono = this.bankClientBean.webClient.post()
+				.uri(ChoiceEndpointsConstants.PULL_KYC_MATERIALS)
+				.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
+				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
+
+		String responseJson = responseMono.block();
+		if(responseJson !=null) {
+			var gson = new Gson().fromJson(responseJson, JsonObject.class);
+			
+			return gson;
+		}
+		return null;
 	}
 
 	public ResponseEntity<Object> getUserRequestedstatements() {

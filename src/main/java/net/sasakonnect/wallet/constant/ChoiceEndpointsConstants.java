@@ -12,6 +12,7 @@ public class ChoiceEndpointsConstants {
 	public static final String UPLOAD_ID_CARDS = "/onboarding/uploadIdCardPhoto";
 	public static final String GET_METAMASK = "/onboarding/getMetaMapProperties";
 	public static final String POLL_ONBOARDING = "/onboarding/getUserKyc";
+	public static final String PULL_KYC_MATERIALS = "/onboarding/getKycMediaList";
 	public static final String OPEN_WALLET_ACCOUNT = "/onboarding/v2/submitEasyOnboardingRequest";
 	public static final String GET_WALLET_INFO = "/onboarding/getOnboardingStatus";
 	public static final String CLOSE_USER_ACCOUNT = "/account/closeIndividualAccount";

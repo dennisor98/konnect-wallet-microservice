@@ -760,6 +760,25 @@ public final class GlobalPermissionConstants {
 		}
 
 	}
+	
+	public static class CanQueryUserKycMaterials extends PermissionEntry {
+		public static final String PERMISSION = "can.query.user.kyc.materials";
+		public static final String DESCRIPTION = "can obtain user kyc materials";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+
+		}
+
+	
+
+	}
 
 	public static Map<String, String> scan() {
 		Class<?>[] innerClasses = GlobalPermissionConstants.class.getDeclaredClasses();
