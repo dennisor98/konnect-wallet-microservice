@@ -272,12 +272,12 @@ public class WalletService {
 		    						dataMap.put("canSkip",canSkip);
 		    						dataMap.put("title", "Account Upgrade Required");
 		    					}
-		    					dataMap.put("accountType", "C002");
-		    					map.put("data", dataMap);
-		    					return map;
+		    					
 
 		    				}
-
+		    				dataMap.put("accountType", "C002");
+	    					map.put("data", dataMap);
+	    					return map;
 		    				
 		    			}
 		    		}
@@ -350,13 +350,13 @@ public class WalletService {
  		    						dataMap.put("canSkip",canSkip);
  		    						dataMap.put("title", "Account Upgrade Required");
  		    					}
- 		    					dataMap.put("accountType", "C002");
- 		    					map.put("data", dataMap);
- 		    					return map;
+ 		    					
 
  		    				}
-                             
+                             dataMap.put("accountType", "C002");
+                             map.put("data", dataMap);
                              return map;
+                             
                         }
 		                if (userMaxKycOpt.isPresent() && maxKycVersion.isPresent()) {
 		                    KycUpgrade userKyc = userMaxKycOpt.get();
@@ -404,12 +404,12 @@ public class WalletService {
 		    		    						dataMap.put("canSkip",canSkip);
 		    		    						dataMap.put("title", "Account Upgrade Required");
 		    		    					}
-		    		    					dataMap.put("accountType", "C002");
-		    		    					map.put("data", dataMap);
-		    		    					return map;
+		    		    					
 
 		    		    				}
-		                               
+		                                dataMap.put("accountType", "C002");
+	    		    					map.put("data", dataMap);
+	    		    					return map;
 		                            }
 		                        } catch (ParseException e) {
 		                            log.error("Date parsing error", e);
