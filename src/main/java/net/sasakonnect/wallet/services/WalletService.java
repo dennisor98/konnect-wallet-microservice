@@ -229,8 +229,11 @@ public class WalletService {
 		    		var rejectionIds = data.get("accountType");
 		    		Double onboardingStatus = (Double) data.get("onboardingStatus");
 		    		String accountType = (String) data.get("accountType");
-
-		    		if (accountType == null  && accountId==null && rejectionIds == null  && onboardingStatus == 4.0) {
+		    		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+		    		
+	    			sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+		    		if (accountType == null  && accountId==null && rejectionIds == null  && onboardingStatus == 4.0 ) {
+		    			
 		    			Map<String, Object> map = new HashMap<>();
 		    			Map<String, Object> dataMap = new HashMap<>();
 		    			map.put("success", true);
@@ -238,8 +241,6 @@ public class WalletService {
 		    			boolean canSkip;
 		    			List<KycVersions> kycVersions = this.kycVersionsRepository.findAll();
 		    			Optional<KycVersions> maxKycVersion = this.kycVersionsRepository.findMaximumVersion();
-		    			SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
-		    			sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 		    			if (kycVersions.isEmpty()) {
 		    				dataMap.put("accountType", "C002");
 		    				map.put("data",dataMap);
@@ -257,14 +258,27 @@ public class WalletService {
 		    				}else {
 		    					canSkip = true;
 		    				}
-		    				dataMap.put("action", "upgrade");
-		    				dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits.\nUpgrade by"+upgradeVersion.getDateLine().toString());
-		    				dataMap.put("kycType", "v2");
-		    				dataMap.put("canSkip",canSkip);
-		    				dataMap.put("title", "Account Upgrade Required");
-		    				dataMap.put("accountType", "C002");
-		    				map.put("data", dataMap);
-		    				return map;
+		    				
+		    				if(upgradeVersion.getStartDate() !=null) {
+		    					Date startDate = sdf.parse(upgradeVersion.getStartDate().toString());
+		    					long startDateMillis = startDate.getTime();
+		    					Date userRegDate = sdf.parse(user.getCreatedAt().toString());
+		    					long userRegDateMillis = userRegDate.getTime();
+
+		    					if(startDateMillis > userRegDateMillis) {
+		    						dataMap.put("action", "upgrade");
+		    						dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits.\nUpgrade by"+upgradeVersion.getDateLine().toString());
+		    						dataMap.put("kycType", "v2");
+		    						dataMap.put("canSkip",canSkip);
+		    						dataMap.put("title", "Account Upgrade Required");
+		    					}
+		    					dataMap.put("accountType", "C002");
+		    					map.put("data", dataMap);
+		    					return map;
+
+		    				}
+
+		    				
 		    			}
 		    		}
 		    		
@@ -279,15 +293,6 @@ public class WalletService {
 //	                        String accountType = (String) data.get("accountType");
 	                        Date dateline = latestAppVersion.get().getUpdateDateline();
 	                        Date currentTime = new Date();
-//	                        boolean canSkip = true;
-//	                        log.info(dateline.toString());
-//	                        if(dateline == null) {
-//	                        	canSkip = true;
-//	                        }else {
-//	                        	log.info(currentTime.after(dateline)+"{}");
-//	                        	canSkip =  ;
-//	                        }
-	                      
 
 	                        Map<String, Object> map = new HashMap<>();
 	                        Map<String, Object> dataMap = new HashMap<>();
@@ -306,7 +311,6 @@ public class WalletService {
 
 		            List<KycVersions> kycVersions = this.kycVersionsRepository.findAll();
 		            Optional<KycVersions> maxKycVersion = this.kycVersionsRepository.findMaximumVersion();
-		            SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
                     sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 		            if (kycVersions.isEmpty()) {
 		                return gson.fromJson(responseJson, Object.class);
@@ -320,7 +324,7 @@ public class WalletService {
                         if(userMaxKycOpt.isEmpty() &&  accountType !=null && accountType.equalsIgnoreCase("C002") && maxKycVersion.isPresent()) {
                         	 Map<String, Object> map = new HashMap<>();
                              Map<String, Object> dataMap = new HashMap<>();
-                             map.put("success", true);
+                             map.put("success",true);
                              map.put("message", "Request complete");
                              boolean canSkip;
 	                         KycVersions upgradeVersion = maxKycVersion.get();
@@ -333,13 +337,24 @@ public class WalletService {
                              }else {
                             	 canSkip = true;
                              }
-                             dataMap.put("action", "upgrade");
-                             dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits.\nUpgrade by"+upgradeVersion.getDateLine().toString());
-                             dataMap.put("kycType", "v2");
-                             dataMap.put("canSkip",canSkip);
-                             dataMap.put("title", "Account Upgrade Required");
-                             dataMap.put("accountType", "C002");
-                             map.put("data", dataMap);
+                             if(upgradeVersion.getStartDate() !=null) {
+                            	 Date startDate = sdf.parse(upgradeVersion.getStartDate().toString());
+ 		    					long startDateMillis = startDate.getTime();
+ 		    					Date userRegDate = sdf.parse(user.getCreatedAt().toString());
+ 		    					long userRegDateMillis = userRegDate.getTime();
+
+ 		    					if(startDateMillis > userRegDateMillis) {
+ 		    						dataMap.put("action", "upgrade");
+ 		    						dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits.\nUpgrade by"+upgradeVersion.getDateLine().toString());
+ 		    						dataMap.put("kycType", "v2");
+ 		    						dataMap.put("canSkip",canSkip);
+ 		    						dataMap.put("title", "Account Upgrade Required");
+ 		    					}
+ 		    					dataMap.put("accountType", "C002");
+ 		    					map.put("data", dataMap);
+ 		    					return map;
+
+ 		    				}
                              
                              return map;
                         }
@@ -376,15 +391,25 @@ public class WalletService {
 		                                Map<String, Object> dataMap = new HashMap<>();
 		                                map.put("success", true);
 		                                map.put("message", "Request complete");
-		                                dataMap.put("action", "upgrade");
-		    		    				dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits.\nUpgrade by"+upgradeVersion.getDateLine().toString());
-		                                dataMap.put("kycType", "v" + nextVersion);
-		                                dataMap.put("canSkip",canSkip);
-		                                dataMap.put("title", "Account Upgrade Required");
-		                                dataMap.put("accountType", "C002");
+		                                if(upgradeVersion.getStartDate() !=null) {
+		    		    					Date startDate = sdf.parse(upgradeVersion.getStartDate().toString());
+		    		    					long startDateMillis = startDate.getTime();
+		    		    					Date userRegDate = sdf.parse(user.getCreatedAt().toString());
+		    		    					long userRegDateMillis = userRegDate.getTime();
 
-		                                map.put("data", dataMap);
-		                                return map;
+		    		    					if(startDateMillis > userRegDateMillis) {
+		    		    						dataMap.put("action", "upgrade");
+		    		    						dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits.\nUpgrade by"+upgradeVersion.getDateLine().toString());
+		    		    						dataMap.put("kycType", "v" + nextVersion);
+		    		    						dataMap.put("canSkip",canSkip);
+		    		    						dataMap.put("title", "Account Upgrade Required");
+		    		    					}
+		    		    					dataMap.put("accountType", "C002");
+		    		    					map.put("data", dataMap);
+		    		    					return map;
+
+		    		    				}
+		                               
 		                            }
 		                        } catch (ParseException e) {
 		                            log.error("Date parsing error", e);
@@ -2079,7 +2104,7 @@ public class WalletService {
 
 		String responseJson = responseMono.block();
 		if(responseJson !=null) {
-			var gson = new Gson().fromJson(responseJson, JsonObject.class);
+			var gson = new Gson().fromJson(responseJson, Map.class);
 			
 			return gson;
 		}

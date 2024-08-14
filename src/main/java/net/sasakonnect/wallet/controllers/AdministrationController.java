@@ -816,6 +816,7 @@ public class AdministrationController {
 	@RequirePermission(GlobalPermissionConstants.CanCreateAnEnterprise.PERMISSION)
 	public Object createSmeMultiAccount(@Valid @RequestBody() SmeMultiAccountDto accountDto) {
 		return this.smeService.createSmeMultiAccount(accountDto);
+
 	}
 	
 	
