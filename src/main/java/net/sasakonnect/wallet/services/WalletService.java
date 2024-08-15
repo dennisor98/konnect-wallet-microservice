@@ -315,11 +315,11 @@ public class WalletService {
 		            } else {
 		                Optional<KycUpgrade> userMaxKycOpt = this.kycUpgradeRepository.findMaxVersionByUser(user);
                         log.info(userMaxKycOpt+"");
-                        if(userMaxKycOpt.isEmpty() && accountType.equalsIgnoreCase("C001")) {
+                        if(userMaxKycOpt.isEmpty() && accountType !=null && accountType.equalsIgnoreCase("C001")) {
                         	var userKyc = KycUpgrade.builder().user(user).version(2).build();
                         	this.kycUpgradeRepository.save(userKyc);
                         }
-                        if(userMaxKycOpt.isEmpty() && accountType.equalsIgnoreCase("C002") && maxKycVersion.isPresent()) {
+                        if(userMaxKycOpt.isEmpty() && accountType !=null && accountType.equalsIgnoreCase("C002") && maxKycVersion.isPresent()) {
                         	 Map<String, Object> map = new HashMap<>();
                              Map<String, Object> dataMap = new HashMap<>();
                              map.put("success", true);
