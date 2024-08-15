@@ -230,7 +230,7 @@ public class WalletService {
 		    		Double onboardingStatus = (Double) data.get("onboardingStatus");
 		    		String accountType = (String) data.get("accountType");
 
-		    		if (accountType == null  && accountId==null && rejectionIds == null  && onboardingStatus == 4.0) {
+		    		if (accountType == null  && accountId==null && rejectionIds == null  && (onboardingStatus == 4.0 || onboardingStatus == 9.0)) {
 		    			Map<String, Object> map = new HashMap<>();
 		    			Map<String, Object> dataMap = new HashMap<>();
 		    			map.put("success", true);
@@ -257,8 +257,15 @@ public class WalletService {
 		    				}else {
 		    					canSkip = true;
 		    				}
+		    				
+		    				
 		    				dataMap.put("action", "upgrade");
-		    				dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits.\nUpgrade by"+upgradeVersion.getDateLine().toString());
+		    				if(onboardingStatus == 9.0) {
+		    					dataMap.put("message", "Your account upgarde is on manual review.Kindly wait as we review the submitted information");
+		    				}else {
+		    					dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits.\nUpgrade by"+upgradeVersion.getDateLine().toString());
+
+		    				}
 		    				dataMap.put("kycType", "v2");
 		    				dataMap.put("canSkip",canSkip);
 		    				dataMap.put("onboardingStatus", onboardingStatus);
