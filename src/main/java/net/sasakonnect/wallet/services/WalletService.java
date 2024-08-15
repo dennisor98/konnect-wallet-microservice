@@ -270,7 +270,7 @@ public class WalletService {
 		    				dataMap.put("canSkip",canSkip);
 		    				dataMap.put("onboardingStatus", onboardingStatus);
 		    				dataMap.put("title", "Account Upgrade Required");
-		    				dataMap.put("accountType",accountType);
+		    				dataMap.put("accountType",null);
 		    				map.put("data", dataMap);
 		    				return map;
 		    			}
