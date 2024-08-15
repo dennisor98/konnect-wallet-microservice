@@ -231,16 +231,6 @@ public class WalletService {
 		    		String accountType = (String) data.get("accountType");
 		    		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
 	    			sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-	    			if(onboardingStatus != null && onboardingStatus == 9.0 ) {
-	    				Map<String, Object> map = new HashMap<>();
-	    				Map<String, Object> dataMap = new HashMap<>();
-	    				map.put("success", true);
-	    				map.put("message", "Request complete");
-	    				dataMap.put("accountType", accountType);
-	    				dataMap.put("onboardingStatus",onboardingStatus);
-	    				map.put("data", dataMap);	
-                       return map;
-	    			}
 		    		if (accountType == null  && accountId==null && rejectionIds == null  && onboardingStatus == 4.0 ) {
 		    			
 		    			Map<String, Object> map = new HashMap<>();
@@ -278,6 +268,7 @@ public class WalletService {
 		    						dataMap.put("action", "upgrade");
 		    						dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits.\nUpgrade by"+upgradeVersion.getDateLine().toString());
 		    						dataMap.put("kycType", "v2");
+		    	    				dataMap.put("onboardingStatus",onboardingStatus);
 		    						dataMap.put("canSkip",canSkip);
 		    						dataMap.put("title", "Account Upgrade Required");
 		    					}
@@ -310,6 +301,7 @@ public class WalletService {
 	                        dataMap.put("action", "update");
 	                        dataMap.put("message", "Please update your app to enjoy more features and seamless transaction experience");
 	                        dataMap.put("canSkip",dateline == null ? true : !currentTime.after(dateline));
+		    				dataMap.put("onboardingStatus",onboardingStatus);
 	                        dataMap.put("title", "New App Version available");
 	                        dataMap.put("accountType", accountType);
 
@@ -357,6 +349,7 @@ public class WalletService {
  		    						dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits.\nUpgrade by"+upgradeVersion.getDateLine().toString());
  		    						dataMap.put("kycType", "v2");
  		    						dataMap.put("canSkip",canSkip);
+ 		    						dataMap.put("onboardingStatus",onboardingStatus);
  		    						dataMap.put("title", "Account Upgrade Required");
  		    					}
  		    					
@@ -411,6 +404,7 @@ public class WalletService {
 		    		    						dataMap.put("message", "You are required to upgrade your account to continue enjoying higher transaction limits.\nUpgrade by"+upgradeVersion.getDateLine().toString());
 		    		    						dataMap.put("kycType", "v" + nextVersion);
 		    		    						dataMap.put("canSkip",canSkip);
+		    		    	    				dataMap.put("onboardingStatus",onboardingStatus);
 		    		    						dataMap.put("title", "Account Upgrade Required");
 		    		    					}
 		    		    					
