@@ -12,4 +12,6 @@ public enum BusinessType {
 	public int getCode() {
 		return code;
 	}
+	
+	
 }

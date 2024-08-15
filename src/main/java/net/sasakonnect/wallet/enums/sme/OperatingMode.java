@@ -21,4 +21,13 @@ public enum OperatingMode {
 		}
 		throw new IllegalArgumentException("Invalid OperatingMode value: " + value);
 	}
+	
+	public static int getCodeByName(String name) {
+        try {
+            return OperatingMode.valueOf(name).getValue();
+        } catch (IllegalArgumentException e) {
+            // Handle the case where the name does not match any enum constant
+            throw new IllegalArgumentException("No enum constant with name " + name);
+        }
+    }
 }

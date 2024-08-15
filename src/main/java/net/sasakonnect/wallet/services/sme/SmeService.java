@@ -29,6 +29,7 @@ import net.sasakonnect.wallet.RequestDto.sme.LlcSmeMemberDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmeAccountDocuments;
 import net.sasakonnect.wallet.RequestDto.sme.SmeAccountManagerDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmeBusinessAccountDto;
+import net.sasakonnect.wallet.RequestDto.sme.SmeMultiAccountDto;
 import net.sasakonnect.wallet.RequestDto.sme.SubmitSmeAccount;
 import net.sasakonnect.wallet.ResponseDto.TransactionResponseDto;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
@@ -480,16 +481,40 @@ public class SmeService {
 
 	}
 
-	public Object createSmeMultiAccount(String smeId) {
-		Optional<Sme> smeOpt =  this.smeRepository.findById(smeId);
+	public Object createSmeMultiAccount(SmeMultiAccountDto accountDto) {
+		Optional<Sme> smeOpt =  this.smeRepository.findById(accountDto.getAccountName());
 		if(smeOpt.isEmpty()) {
-			
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","Unkown Sme Account");
 		}
 		
 		var sme = smeOpt.get();
 		var reqId =  new HashMap<String,Object>();
 		reqId.put("businessName",sme.getAccountDetails().getBusinessName());
 		reqId.put("businessCertId", sme.getAccountDetails().getBusinessCerNum());
+		reqId.put("currency","KES");
+		reqId.put("operatingMode",OperatingMode.getCodeByName(sme.getAccountDetails().getOperatingMode().toString().trim()));
+		var reqs = requestSigner.signRequest(reqId);
+		Mono<String> responseMono = this.bankClientBean.webClient.post()
+				.uri(ChoiceEndpointsConstants.APPLY_FOR_MULTIPLE_SME_ACCOUNT).contentType(MediaType.APPLICATION_JSON)
+				.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+				.bodyToMono(String.class);
+
+		String responseJson = responseMono.block();
+		if (responseJson != null) {
+			var gson = new Gson().fromJson(responseJson, HashMap.class);
+			log.info(gson+"{}");
+           var applicationId =  (String)((Map<?, ?>) gson.get("data")).get("applicationId");
+
+				var smeAccBuild =  SmeAccount.builder().accountName(accountDto.getAccountName()).accountNo(null).appliactionId(applicationId).sme(sme).build();
+
+				this.smeAccountRepository.save(smeAccBuild);
+			
+			return gson;
+
+		}
+	
 		return null;
 	}
 	

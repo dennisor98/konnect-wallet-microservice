@@ -27,8 +27,10 @@ import net.sasakonnect.wallet.ResponseDto.sme.SmeAccRoleDto;
 import net.sasakonnect.wallet.ResponseDto.sme.SmeCorporateDto;
 import net.sasakonnect.wallet.ResponseDto.sme.SmeRoleDto;
 import net.sasakonnect.wallet.annotations.CustomController;
+import net.sasakonnect.wallet.annotations.IsCorporate;
 import net.sasakonnect.wallet.annotations.sme.HasSmePermission;
 import net.sasakonnect.wallet.annotations.sme.SmeCorporate;
+import net.sasakonnect.wallet.constant.GlobalPermissionConstants;
 import net.sasakonnect.wallet.constant.sme.GlobalSmePermissionConstants;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.services.sme.SmePermissionService;
@@ -230,6 +232,8 @@ public class SmeController {
 	public Object verifyAccountManager(@Valid @RequestBody() SmeAccountManagerDto managerDto) {
 		return this.smeService.AddSmeAccountManager(managerDto);
 	}
+	
+
 	
 	
 }

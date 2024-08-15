@@ -55,11 +55,12 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
 	@Query("SELECT COUNT(t) FROM Transaction t WHERE t.txStatus = 8 AND t.oppoAccountId =:accountId")
 	Long findAllReceived(@Param("accountId") String accountId);
 	
-	@Query(value = "SELECT DATE(t.created_at) date_created,SUM(t.amount) FROM transaction t WHERE t.tx_status = 8 AND t.oppo_account_id = :accountId AND t.created_at >= DATE_SUB(CURRENT_TIMESTAMP, INTERVAL :period DAY) GROUP BY date_created ORDER BY date_created DESC", nativeQuery = true)
-	List<Object[]> findTransactionsInByPeriod(@Param("accountId") String accountId,@Param("period") String period);
+	@Query(value = "SELECT DATE(t.created_at) AS date_created, SUM(t.amount) FROM transaction t WHERE t.tx_status = 8 AND t.oppo_account_id = :accountId AND t.created_at >= DATE_SUB(CURRENT_TIMESTAMP, INTERVAL :period DAY) GROUP BY date_created ORDER BY date_created DESC", nativeQuery = true)
+	List<Object[]> findTransactionsInByPeriod(@Param("accountId") String accountId, @Param("period") String period);
 
-	@Query(value = "SELECT DATE(t.created_at) date_created,SUM(t.amount) FROM transaction t WHERE t.tx_status = 8 AND t.account_id = :accountId AND t.created_at >= DATE_SUB(CURRENT_TIMESTAMP, INTERVAL :period DAY) GROUP BY date_created ORDER BY date_created DESC", nativeQuery = true)
-	List<Object[]> findTransactionOutByPeriod(@Param("accountId") String accountId,@Param("period") String period);
+
+	@Query(value = "SELECT DATE(t.created_at) date_created, SUM(t.amount) FROM transaction t WHERE t.tx_status = 8 AND t.account_id = :accountId AND t.created_at >= DATE_SUB(CURRENT_TIMESTAMP, INTERVAL :period DAY) GROUP BY date_created ORDER BY date_created DESC", nativeQuery = true)
+	List<Object[]> findTransactionOutByPeriod(@Param("accountId") String accountId, @Param("period") String period);
 
 	@Query("SELECT COUNT(t)  FROM Transaction t WHERE t.txStatus = 8 AND t.accountId =:accountId ")
 	Long findAllSent(@Param("accountId") String accountId);
