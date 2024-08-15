@@ -230,8 +230,17 @@ public class WalletService {
 		    		Double onboardingStatus = (Double) data.get("onboardingStatus");
 		    		String accountType = (String) data.get("accountType");
 		    		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
-		    		
 	    			sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+	    			if(onboardingStatus != null && onboardingStatus == 9.0 ) {
+	    				Map<String, Object> map = new HashMap<>();
+	    				Map<String, Object> dataMap = new HashMap<>();
+	    				map.put("success", true);
+	    				map.put("message", "Request complete");
+	    				dataMap.put("accountType", accountType);
+	    				dataMap.put("onboardingStatus",onboardingStatus);
+	    				map.put("data", dataMap);	
+                       return map;
+	    			}
 		    		if (accountType == null  && accountId==null && rejectionIds == null  && onboardingStatus == 4.0 ) {
 		    			
 		    			Map<String, Object> map = new HashMap<>();
@@ -2099,6 +2108,35 @@ public class WalletService {
 
 		Mono<String> responseMono = this.bankClientBean.webClient.post()
 				.uri(ChoiceEndpointsConstants.PULL_KYC_MATERIALS)
+				.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
+				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
+
+		String responseJson = responseMono.block();
+		if(responseJson !=null) {
+			var gson = new Gson().fromJson(responseJson, Map.class);
+			
+			return gson;
+		}
+		return null;
+	}
+	
+	public Object getUserWalletInfo(String userId) {
+		Optional<User> userOpt =  this.userService.findUserById(userId);
+		if(userOpt.isEmpty()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","Unknown userId");
+			
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		var user = userOpt.get();
+		var reqId =  new HashMap<String,Object>();
+		reqId.put("userId",userId);	
+		
+		var reqs = requestSigner.signRequest(reqId);
+
+		Mono<String> responseMono = this.bankClientBean.webClient.post()
+				.uri(ChoiceEndpointsConstants.GET_WALLET_INFO)
 				.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
 				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 

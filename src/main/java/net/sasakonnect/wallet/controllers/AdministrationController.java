@@ -828,5 +828,12 @@ public class AdministrationController {
 	}
 	
 	
+	@IsCorporate
+	@GetMapping("/user/walletInfo")
+	@RequirePermission(GlobalPermissionConstants.CanQueryUserKycMaterials.PERMISSION)
+	public Object getUserWalletinfo(@RequestParam("userId") String userId) {
+		return this.walletService.getUserWalletInfo(userId);
+	}
+	
 
 }

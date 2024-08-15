@@ -565,7 +565,7 @@ public class TransactionService {
 		var wallet = walletList.get(0);
 		String accId =  wallet.getAccountId();
 		List<Object[]> transactionsOut = this.transactionRepository.findTransactionOutByPeriod(accId, period);
-		List<Object[]>transactionsIn =  this.transactionRepository.findTransactionsInByPeriod(accId, period);		
+		List<Object[]> transactionsIn =  this.transactionRepository.findTransactionsInByPeriod(accId, period);		
 		Map<String,Object> map = new HashMap<>();
 		map.put("success",true);
 		map.put("message","Request completed");
@@ -574,12 +574,12 @@ public class TransactionService {
 		log.info("{in}"+transactionsIn.toString());
 		Map<String,Object> tmap =  new HashMap<>();
 		Map<String,Object> tinmap =  new HashMap<>();
-		tinmap.put("date",transactionsIn.get(0));
-		tinmap.put("amount",transactionsIn.get(1));
+		tinmap.put("date",transactionsIn.get(0)[0]);
+		tinmap.put("amount",transactionsIn.get(0)[1]);
 		tmap.put("transactions_in", tinmap);
 		Map<String,Object> toutmap =  new HashMap<>();
-		toutmap.put("date", transactionsOut.get(0));
-		toutmap.put("amount",transactionsOut.get(1));
+		toutmap.put("date", transactionsOut.get(0)[0]);
+		toutmap.put("amount",transactionsOut.get(0)[1]);
 		tmap.put("transactions_out", toutmap);
 		map.put("transactions",tmap);
 		return ResponseEntity.status(HttpStatus.OK).body(map);
@@ -587,40 +587,61 @@ public class TransactionService {
 
 	}
 	
-	public ResponseEntity<Object> getAccountTransactionSummary(String userId,String period){
-		Optional<User> useroptional = this.userService.findUserById(userId);
-		if(useroptional.isPresent()) {
-			var user =  useroptional.get();
-			List<Wallet> walletList =  this.walletRepository.findByUserWalletsUser(user);
-			if(walletList.isEmpty()) {
-				Map<String,Object> map = new HashMap<>();
-				map.put("success",true);
-				map.put("message","Request completed");
-				map.put("transactions",new ArrayList<>());
-			}
-			var wallet = walletList.get(0);
-			String accId =  wallet.getAccountId();
-			List<Object[]> transactionsOut = this.transactionRepository.findTransactionOutByPeriod(accId, period);
-			List<Object[]> transactionsIn =  this.transactionRepository.findTransactionsInByPeriod(accId, period);		
-			Map<String,Object> map = new HashMap<>();
-			map.put("success",true);
-			map.put("message","Request completed");
-			log.info("{out}"+transactionsOut.toString());
-			log.info("{in}"+transactionsIn.toString());
-			Map<String,Object> tmap =  new HashMap<>();
-			Map<String,Object> tinmap =  new HashMap<>();
-			tinmap.put("date",transactionsIn.get(0)[0]);
-			tinmap.put("amount",transactionsIn.get(0)[1]);
-			tmap.put("transactions_in", tinmap);
-			Map<String,Object> toutmap =  new HashMap<>();
-			toutmap.put("date", transactionsOut.get(0)[0]);
-			toutmap.put("amount",transactionsOut.get(1)[1]);
-			tmap.put("transactions_out", toutmap);
-			map.put("transactions",tmap);
-			return ResponseEntity.status(HttpStatus.OK).body(map);
-		}
-		return null;
+	
+
+	public ResponseEntity<Object> getAccountTransactionSummary(String userId, String period) {
+	    Optional<User> userOptional = this.userService.findUserById(userId);
+	    if (userOptional.isPresent()) {
+	        User user = userOptional.get();
+	        List<Wallet> walletList = this.walletRepository.findByUserWalletsUser(user);
+	        if (walletList.isEmpty()) {
+	            Map<String, Object> map = new HashMap<>();
+	            map.put("success", true);
+	            map.put("message", "Request completed");
+	            map.put("transactions", new ArrayList<>());
+	            return ResponseEntity.status(HttpStatus.OK).body(map);
+	        }
+
+	        Wallet wallet = walletList.get(0);
+	        String accId = wallet.getAccountId();
+
+	        // Ensure these return lists instead of arrays
+	        List<Object[]> transactionsOut = this.transactionRepository.findTransactionOutByPeriod(accId, period);
+	        List<Object[]> transactionsIn = this.transactionRepository.findTransactionsInByPeriod(accId, period);
+
+	        Map<String, Object> map = new HashMap<>();
+	        map.put("success", true);
+	        map.put("message", "Request completed");
+
+	        List<Map<String, Object>> transactions = new ArrayList<>();
+
+	        // Handling transactions out
+	        if (!transactionsOut.isEmpty()) {
+	            for (Object[] transactionOut : transactionsOut) {
+	                Map<String, Object> transactionOutMap = new HashMap<>();
+	                transactionOutMap.put("date", transactionOut[0]);
+	                transactionOutMap.put("amount", transactionOut[1]);
+	                transactions.add(transactionOutMap);
+	            }
+	        }
+
+	        // Handling transactions in
+	        if (!transactionsIn.isEmpty()) {
+	            for (Object[] transactionIn : transactionsIn) {
+	                Map<String, Object> transactionInMap = new HashMap<>();
+	                transactionInMap.put("date", transactionIn[0]);
+	                transactionInMap.put("amount", transactionIn[1]);
+	                transactions.add(transactionInMap);
+	            }
+	        }
+
+	        map.put("transaction", transactions);
+
+	        return ResponseEntity.status(HttpStatus.OK).body(map);
+	    }
+	    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
 	}
+
 	
 	
 	

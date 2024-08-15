@@ -16,7 +16,6 @@ public class ChoiceEndpointsConstants {
 	public static final String OPEN_WALLET_ACCOUNT = "/onboarding/v2/submitEasyOnboardingRequest";
 	public static final String GET_WALLET_INFO = "/onboarding/getOnboardingStatus";
 	public static final String CLOSE_USER_ACCOUNT = "/account/closeIndividualAccount";
-
 	public static final String REQUEST_OTP_RESEND = "/common/resendOtp";
 	public static final String CONFIRM_OTP = "/common/confirmOperation";
 	public static final String GET_ACCOUNT_INFO = "/query/getAccountDetail";
