@@ -2246,6 +2246,65 @@ public class WalletService {
 		}
 		return null;
 	}
+	
+	
+	public Object getUserKycMaterials(String userId) {
+		Optional<User> userOpt =  this.userService.findUserById(userId);
+		if(userOpt.isEmpty()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","Unknown userId");
+			
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		var user = userOpt.get();
+		var reqId =  new HashMap<String,Object>();
+		reqId.put("onboardingRequestId", user.getOnboardingRequestId());	
+		
+		var reqs = requestSigner.signRequest(reqId);
+
+		Mono<String> responseMono = this.bankClientBean.webClient.post()
+				.uri(ChoiceEndpointsConstants.PULL_KYC_MATERIALS)
+				.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
+				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
+
+		String responseJson = responseMono.block();
+		if(responseJson !=null) {
+			var gson = new Gson().fromJson(responseJson, Map.class);
+			
+			return gson;
+		}
+		return null;
+	}
+	
+	public Object getUserWalletInfo(String userId) {
+		Optional<User> userOpt =  this.userService.findUserById(userId);
+		if(userOpt.isEmpty()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","Unknown userId");
+			
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		var user = userOpt.get();
+		var reqId =  new HashMap<String,Object>();
+		reqId.put("userId",userId);	
+		
+		var reqs = requestSigner.signRequest(reqId);
+
+		Mono<String> responseMono = this.bankClientBean.webClient.post()
+				.uri(ChoiceEndpointsConstants.GET_WALLET_INFO)
+				.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
+				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
+
+		String responseJson = responseMono.block();
+		if(responseJson !=null) {
+			var gson = new Gson().fromJson(responseJson, Map.class);
+			
+			return gson;
+		}
+		return null;
+	}
 
 }
  
