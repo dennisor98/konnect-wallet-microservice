@@ -1863,12 +1863,12 @@ public class WalletService {
 
 		this.processUserKycDocs(upgradeWalletAccount, user);
 
-//		String responseJson = responseMono.block();
-//		log.info(responseJson);
-//		if (responseJson != null) {
-//			return new Gson().fromJson(responseJson, Object.class);
-//
-//		}
+		String responseJson = responseMono.block();
+		log.info(responseJson);
+		if (responseJson != null) {
+		   this.processUserKycDocs(upgradeWalletAccount, user);
+			return new Gson().fromJson(responseJson, Object.class);
+		}
 		this.processUserKycDocs(upgradeWalletAccount, user);
 
 		// TODO Auto-generated method stub
