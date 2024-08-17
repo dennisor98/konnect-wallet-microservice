@@ -829,6 +829,18 @@ public class AdministrationController {
 	
 	
 	@IsCorporate
+	@GetMapping("/user/kycdocs")
+	@RequirePermission(GlobalPermissionConstants.CanQueryUserKycMaterials.PERMISSION)
+	public Object getUserKycDocs(@RequestParam(name="userId",required=true) String userId,
+			@RequestParam(name="startDate",required=false) String startDate,
+			@RequestParam(name="endDate",required=false) String endDate,
+			@RequestParam(name="pageNumber",required=false,defaultValue="0") Integer pageNumber,
+			@RequestParam(name="pageSize",required=false,defaultValue="10") Integer pageSize
+			) {
+		return this.walletService.getUserKycDocs(userId,startDate,endDate,pageNumber,pageSize);
+	}
+	
+	@IsCorporate
 	@GetMapping("/user/walletInfo")
 	@RequirePermission(GlobalPermissionConstants.CanQueryUserKycMaterials.PERMISSION)
 	public Object getUserWalletinfo(@RequestParam("userId") String userId) {
