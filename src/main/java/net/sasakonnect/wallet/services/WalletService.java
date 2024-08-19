@@ -37,7 +37,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Transazctional;
 import org.springframework.web.reactive.function.BodyInserters;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -2402,9 +2402,9 @@ public class WalletService {
 				var arl = new HashMap<String,Object>();
 				
 				arl.put("createdAt",k.getCreatedAt());
-				arl.put("idFrontUrl",k.getIdFrontUrl());
-				arl.put("idBackurl",k.getIdBackUrl());
-				arl.put("selfieUrl",k.getSelfieUrl());
+				arl.put("idFrontUrl",this.readFileAsBytes(this.kycdocsdir+"/"+k.getIdFrontUrl()));
+				arl.put("idBackurl",this.readFileAsBytes(this.kycdocsdir+"/"+k.getIdBackUrl()));
+				arl.put("selfieUrl",this.readFileAsBytes(this.kycdocsdir+"/"+k.getSelfieUrl()));
 				
 				return arl;
 			}).collect(Collectors.toList());
@@ -2426,6 +2426,25 @@ public class WalletService {
 		
 	}
 	
+	/**
+     * Reads the content of a file and returns it as a byte array.
+     *
+     * @param filePath the path to the file
+     * @return the content of the file as a byte array
+     * @throws IOException if an I/O error occurs
+     */
+	
+	private   static String readFileAsBytes(String filePath)  {
+		try {
+			byte[] bytes = Files.readAllBytes(Paths.get(filePath));
+			return new String(bytes);
+		}catch(IOException ex) {
+            log.error("Error reading file at path: {}. Error: {}", filePath, ex.getMessage());
+
+		}
+		return null;   
+	}
+
 	public Object getUserWalletInfo(String userId) {
 		Optional<User> userOpt =  this.userService.findUserById(userId);
 		if(userOpt.isEmpty()) {
