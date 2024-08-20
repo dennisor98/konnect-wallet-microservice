@@ -273,7 +273,7 @@ public void getLarkDepartments() {
 	        }
 	  }
 	
-//	  @Scheduled(fixedDelay = 604800000)	
+//      @Scheduled(fixedDelay = 604800000)	
 	  public void syncLarkDeptUsers() {
 	       Thread thread = new Thread(()->{
 	    	   var depIds =   this.getDepartmentIds().stream().map(depId -> {

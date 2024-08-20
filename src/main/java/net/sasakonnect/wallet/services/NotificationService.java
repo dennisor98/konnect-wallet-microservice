@@ -25,7 +25,6 @@ import net.sasakonnect.wallet.enums.NotificationTargetType;
 import net.sasakonnect.wallet.repository.NotificationsReadRepository;
 import net.sasakonnect.wallet.repository.NotificationsRepository;
 import net.sasakonnect.wallet.repository.UserRepository;
-import net.sasakonnect.wallet.services.sme.FirebaseService;
 import net.sasakonnect.wallet.tools.ResponsePagerClass;
 
 @Service

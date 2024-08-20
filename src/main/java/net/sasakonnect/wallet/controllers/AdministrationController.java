@@ -29,6 +29,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import net.bytebuddy.asm.Advice.This;
 import net.sasakonnect.wallet.RequestDto.CloseUserAccount;
 import net.sasakonnect.wallet.RequestDto.Corporate;
 import net.sasakonnect.wallet.RequestDto.NotificationDto;
@@ -46,6 +47,7 @@ import net.sasakonnect.wallet.RequestDto.WalletClientDTO;
 import net.sasakonnect.wallet.RequestDto.WalletClientUpdateDto;
 import net.sasakonnect.wallet.RequestDto.admin.CheckUserAccount;
 import net.sasakonnect.wallet.RequestDto.admin.PinReset;
+import net.sasakonnect.wallet.RequestDto.authz.ClientAuthorityDto;
 import net.sasakonnect.wallet.RequestDto.sme.ChangeUserPhoneNumberDto;
 import net.sasakonnect.wallet.RequestDto.sme.ConfirmPhoneNumberChangeDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmeAccountManagerDto;
@@ -829,10 +831,29 @@ public class AdministrationController {
 	
 	
 	@IsCorporate
+	@GetMapping("/user/kycdocs")
+	@RequirePermission(GlobalPermissionConstants.CanQueryUserKycMaterials.PERMISSION)
+	public Object getUserKycDocs(@RequestParam(name="userId",required=true) String userId,
+			@RequestParam(name="startDate",required=false) String startDate,
+			@RequestParam(name="endDate",required=false) String endDate,
+			@RequestParam(name="pageNumber",required=false,defaultValue="0") Integer pageNumber,
+			@RequestParam(name="pageSize",required=false,defaultValue="10") Integer pageSize
+			) {
+		return this.walletService.getUserKycDocs(userId,startDate,endDate,pageNumber,pageSize);
+	}
+	
+	@IsCorporate
 	@GetMapping("/user/walletInfo")
 	@RequirePermission(GlobalPermissionConstants.CanQueryUserKycMaterials.PERMISSION)
 	public Object getUserWalletinfo(@RequestParam("userId") String userId) {
 		return this.walletService.getUserWalletInfo(userId);
+	}
+	
+	@IsCorporate
+	@PostMapping("/client/authority")
+	@RequirePermission(GlobalPermissionConstants.CanCreateClientAuthorities.PERMISSION)
+	public Object createClientAuthority(@Valid @RequestBody() ClientAuthorityDto clientDto) {
+		return this.walletClientService.createClientAuthorities(clientDto);
 	}
 	
 

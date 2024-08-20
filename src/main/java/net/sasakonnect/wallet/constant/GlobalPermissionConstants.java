@@ -260,6 +260,21 @@ public final class GlobalPermissionConstants {
 			return DESCRIPTION;
 		}
 	}
+	
+	public static class CanCreateClientAuthorities extends PermissionEntry {
+		public static final String PERMISSION = "can.create.client.authority";
+		public static final String DESCRIPTION = "Can create wallet client authority";
+
+		@Override
+		public String getPERMISSION() {
+			return PERMISSION;
+		}
+
+		@Override
+		public String getDESCRIPTION() {
+			return DESCRIPTION;
+		}
+	}
 
 	public static class AssignRolePermissions extends PermissionEntry {
 		public static final String PERMISSION = "can.assign.role.permissions";

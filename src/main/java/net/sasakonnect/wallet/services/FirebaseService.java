@@ -1,4 +1,4 @@
-package net.sasakonnect.wallet.services.sme;
+package net.sasakonnect.wallet.services;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,9 +26,6 @@ FirebaseTokenRepository firebaseTokenRepository;
 @Value("${firebaseBroadcastTopic}")
 String firrebaseBrodcastTopic;
  public void sendMessage(Notifications notification) {
-	 
-	 
-	 String token = notification.getTargetUser().getFirebaseTokens().get(0).getToken();
 	 Message message = Message.builder()
 	     .putData("title",notification.getTitle())
 	     .putData("message",notification.getMessage())

@@ -21,6 +21,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.domain.WalletClient;
 import net.sasakonnect.wallet.domain.sme.Sme;
 import net.sasakonnect.wallet.enums.JwtType;
 
@@ -321,6 +322,24 @@ public class JwtService {
 			throw e;
 		}
 
+	}
+	
+	
+	public String getWalletClientAuthToken(WalletClient client) {
+		try {
+			Map<String, Object> claims = new HashMap<>();
+			claims.put("id", client.getId());
+			claims.put("token_type",JwtType.WALLET_CLIENT_TOKEN.getToken());
+			claims.put("authorities",client.getAuthorities());
+			return Jwts.builder().setClaims(claims).setSubject(client.getId().toString()).setIssuedAt(new Date())
+					.setExpiration(new Date(System.currentTimeMillis() + jwtExpiryTime))// 10 days validity
+					.setId(UUID.randomUUID().toString()).signWith(secretKey, SignatureAlgorithm.HS256).compact();
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 }

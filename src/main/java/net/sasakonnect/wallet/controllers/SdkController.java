@@ -26,6 +26,7 @@ import net.sasakonnect.wallet.RequestDto.SdkPayDto;
 import net.sasakonnect.wallet.RequestDto.SdkRequestOpenId;
 import net.sasakonnect.wallet.RequestDto.SdkSearchCustomer;
 import net.sasakonnect.wallet.RequestDto.SdkSearchCustomers;
+import net.sasakonnect.wallet.RequestDto.authz.GetClientAuthsDto;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.annotations.RateLimit;
 import net.sasakonnect.wallet.annotations.SdkMiddleware;
@@ -41,6 +42,7 @@ import net.sasakonnect.wallet.services.TransactionService;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.services.WalletClientService;
 import net.sasakonnect.wallet.services.WalletService;
+import net.sasakonnect.wallet.tools.JwtService;
 import net.sasakonnect.wallet.tools.RequestSigner;
 import net.sasakonnect.wallet.workers.MerchantWoker;
 
@@ -65,7 +67,8 @@ public class SdkController {
 	UserService userService;
 	@Autowired
 	WalletService walletService;
-
+	
+	
 	ClientAppsBean clientDataService;
 
 	public SdkController(TransactionService transactionService, ClientAppsBean clientDataService) {
@@ -265,5 +268,19 @@ public class SdkController {
 		return null;
 
 	}
+	
+	@PostMapping("app/authorities")
+	@ServiceInteractionMiddleware
+	public Object getClientAuthorities(@Valid @RequestBody() GetClientAuthsDto sdkAuthRequest) {
+		return this.walletClientService.getClientAuthorities(sdkAuthRequest);
 
+	}
+
+	
+	@PostMapping("app/authorities/accept")
+	@ServiceInteractionMiddleware
+	public Object grantClientAuthorities(@Valid @RequestBody() GetClientAuthsDto sdkAuthRequest) {
+		return this.walletClientService.acceptClientAuthorities(sdkAuthRequest);
+
+	}
 }

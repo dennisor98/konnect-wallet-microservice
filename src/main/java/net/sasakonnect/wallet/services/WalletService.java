@@ -1,6 +1,14 @@
 package net.sasakonnect.wallet.services;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -22,6 +30,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -71,6 +81,7 @@ import net.sasakonnect.wallet.domain.RejectedAccount;
 import net.sasakonnect.wallet.domain.Transaction;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.UserJob;
+import net.sasakonnect.wallet.domain.UserKycDoc;
 import net.sasakonnect.wallet.domain.UserPin;
 import net.sasakonnect.wallet.domain.UserWallet;
 import net.sasakonnect.wallet.domain.Wallet;
@@ -100,11 +111,11 @@ import net.sasakonnect.wallet.repository.KycVersionsRepository;
 import net.sasakonnect.wallet.repository.LogsRepository;
 import net.sasakonnect.wallet.repository.RejectedAccountRepository;
 import net.sasakonnect.wallet.repository.UserJobRepository;
+import net.sasakonnect.wallet.repository.UserKycDocRepository;
 import net.sasakonnect.wallet.repository.UserPinRepository;
 import net.sasakonnect.wallet.repository.UserWalletRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.services.extensions.LarkUtilityService;
-import net.sasakonnect.wallet.services.sme.FirebaseService;
 import net.sasakonnect.wallet.services.sme.SmeAccountService;
 import net.sasakonnect.wallet.services.sme.SmeService;
 import net.sasakonnect.wallet.services.sme.SmeTransactionService;
@@ -190,9 +201,15 @@ public class WalletService {
 	
 	@Autowired
 	AppVersionsRepository appVersionsRepository;
+	
+	@Autowired
+	UserKycDocRepository userKycDocRepository;
 
 	@Value("${internetTillNumber}")
 	String internetTillNumber;
+	
+	@Value("${kycdocsdir}")
+	String kycdocsdir;
 	
 	
 	
@@ -1843,16 +1860,75 @@ public class WalletService {
 				.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
 				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 
+		this.processUserKycDocs(upgradeWalletAccount, user);
+
 		String responseJson = responseMono.block();
 		log.info(responseJson);
 		if (responseJson != null) {
+		   this.processUserKycDocs(upgradeWalletAccount, user);
 			return new Gson().fromJson(responseJson, Object.class);
-
 		}
+		this.processUserKycDocs(upgradeWalletAccount, user);
 
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	private void processUserKycDocs(@Valid UpgradeWalletAccountDto upgradeDto, User user) {
+        Runnable task = () -> {
+            // Define the base directory for user KYC docs
+            Path userParentPath = Paths.get(kycdocsdir + "/" + user.getId());
+            
+            // Format the date to create a directory with only the date and time
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss");
+            String dateStr = dateFormat.format(new Date());
+            
+            try {
+                // Create user directory if it does not exist
+                Path userParentDir = Files.createDirectories(userParentPath);
+                
+                // Create directories for idFront, idBack, and selfie
+                Path idFront = Files.createDirectories(userParentDir.resolve("idFront"));
+                Path idBack = Files.createDirectories(userParentDir.resolve("idBack"));
+                Path selfie = Files.createDirectories(userParentDir.resolve("selfie"));
+                
+                // Create text files for each photo with the current date and time
+                Path fronttextFile = idFront.resolve("idFront_" + dateStr + ".txt");
+                Files.createFile(fronttextFile);
+                
+                Path backtextFile = idBack.resolve("idBack_" + dateStr + ".txt");
+                Files.createFile(backtextFile);
+                
+                Path selfietextFile = selfie.resolve("selfie_" + dateStr + ".txt");
+                Files.createFile(selfietextFile);
+                
+                // Write the Base64-encoded photo data to the text files
+                Files.write(fronttextFile, upgradeDto.getFrontSidePhoto().getBytes(StandardCharsets.UTF_8));
+                Files.write(backtextFile, upgradeDto.getBackSidePhoto().getBytes(StandardCharsets.UTF_8));
+                Files.write(selfietextFile, upgradeDto.getSelfiePhoto().getBytes(StandardCharsets.UTF_8));
+                
+                // Build the UserKycDoc object and save it
+                var userId = user.getId();
+                var kycBuild = UserKycDoc.builder()
+                        .idBackUrl(userId + "/idBack/" + backtextFile.getFileName())
+                        .idFrontUrl(userId + "/idFront/" + fronttextFile.getFileName())
+                        .selfieUrl(userId + "/selfie/" + selfietextFile.getFileName())
+                        .user(user)
+                        .build();
+                try {
+                    this.userKycDocRepository.save(kycBuild);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        };
+        
+        // Start the task in a new thread
+        new Thread(task).start();
+    }
 
 	public Object getAccountStatement(LocalDate startdate, LocalDate endDate) {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -2284,6 +2360,90 @@ public class WalletService {
 		return null;
 	}
 	
+	public Object getUserKycDocs(String userId,String startDate,String endDate,Integer pageNumber,Integer pageSize) {
+		//only allow a maximum of 50 items to be returned per page
+		if(pageSize > 50) {
+			pageSize =  50;
+		}
+		Optional<User> userOpt = this.userService.getUserById(userId);
+		
+		if(userOpt.isEmpty()){
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","Uknown userId");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);			
+		}
+		
+		var page  = PageRequest.of(pageNumber,pageSize);
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		try {
+			Date start = null;
+			Date end = null;
+			
+			if(startDate !=null && endDate !=null) {
+				start = dateFormat.parse(startDate);
+				end = dateFormat.parse(endDate);
+
+			}
+			Page<UserKycDoc> userKyc =   startDate !=null && endDate !=null ? this.userKycDocRepository.findKycDocByUserAndDateRange(userOpt.get(),start,end,page) :
+				this.userKycDocRepository.findKycDocByUser(userOpt.get(),page);
+			
+			if(userKyc.isEmpty()) {
+				Map<String,Object> map = new HashMap<>();
+				map.put("success",true);
+				map.put("message","Request complete");
+				map.put("kyc",new ArrayList<>());	
+				return ResponseEntity.status(HttpStatus.OK).body(map);		
+			}
+			
+			
+			var kycData = userKyc.stream().map(k->{
+				var arl = new HashMap<String,Object>();
+				
+				arl.put("createdAt",k.getCreatedAt());
+				arl.put("idFrontUrl",this.readFileAsBytes(this.kycdocsdir+"/"+k.getIdFrontUrl()));
+				arl.put("idBackurl",this.readFileAsBytes(this.kycdocsdir+"/"+k.getIdBackUrl()));
+				arl.put("selfieUrl",this.readFileAsBytes(this.kycdocsdir+"/"+k.getSelfieUrl()));
+				
+				return arl;
+			}).collect(Collectors.toList());
+			
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",true);
+			map.put("message","Request complete");
+			map.put("kyc",kycData);	
+			
+			return ResponseEntity.status(HttpStatus.OK).body(map);
+		}catch(ParseException ex) {
+			ex.printStackTrace();
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","A server error occured");
+			
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+		}
+		
+	}
+	
+	/**
+     * Reads the content of a file and returns it as a byte array.
+     *
+     * @param filePath the path to the file
+     * @return the content of the file as a byte array
+     * @throws IOException if an I/O error occurs
+     */
+	
+	private   static String readFileAsBytes(String filePath)  {
+		try {
+			byte[] bytes = Files.readAllBytes(Paths.get(filePath));
+			return new String(bytes);
+		}catch(IOException ex) {
+            log.error("Error reading file at path: {}. Error: {}", filePath, ex.getMessage());
+
+		}
+		return null;   
+	}
+
 	public Object getUserWalletInfo(String userId) {
 		Optional<User> userOpt =  this.userService.findUserById(userId);
 		if(userOpt.isEmpty()) {
