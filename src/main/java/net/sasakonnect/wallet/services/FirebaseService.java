@@ -1,4 +1,4 @@
-package net.sasakonnect.wallet.services.sme;
+package net.sasakonnect.wallet.services;
 
 import java.util.HashMap;
 import java.util.Map;

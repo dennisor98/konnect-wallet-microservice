@@ -26,14 +26,18 @@ import net.sasakonnect.wallet.RequestDto.WalletClientAccountDto;
 import net.sasakonnect.wallet.RequestDto.WalletClientAccountUpdateDto;
 import net.sasakonnect.wallet.RequestDto.WalletClientDTO;
 import net.sasakonnect.wallet.RequestDto.WalletClientUpdateDto;
+import net.sasakonnect.wallet.RequestDto.authz.ClientAuthorityDto;
+import net.sasakonnect.wallet.RequestDto.authz.GetClientAuthsDto;
 import net.sasakonnect.wallet.ResponseDto.TransactionResponseDto;
 import net.sasakonnect.wallet.beans.ClientAppsBean;
 import net.sasakonnect.wallet.beans.RedisBean;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.WalletClient;
 import net.sasakonnect.wallet.domain.WalletClientAccount;
+import net.sasakonnect.wallet.domain.authz.ClientAuthority;
 import net.sasakonnect.wallet.repository.WalletClientAccountRepository;
 import net.sasakonnect.wallet.repository.WalletClientRepository;
+import net.sasakonnect.wallet.repository.authz.ClientAuthorityRepository;
 import net.sasakonnect.wallet.tools.Helper;
 import net.sasakonnect.wallet.tools.JwtService;
 import net.sasakonnect.wallet.tools.ResponsePagerClass;
@@ -57,6 +61,9 @@ public class WalletClientService {
 	private RedisBean<String> redisBean;
 	@Autowired
 	private JwtService jwtService;
+	
+	@Autowired
+	private ClientAuthorityRepository clientAuthorityRepository;
 
 	public ResponseEntity<Object> createWallectClientApp(WalletClientDTO walleClientDto) {
 		try {
@@ -141,6 +148,7 @@ public class WalletClientService {
 				app.setAppSecret(walletClientUpdateDto.getAppSecret());
 				app.setCallBackUrl(walletClientUpdateDto.getCallBackUrl());
 				app.setEnabled(walletClientUpdateDto.getEnabled());
+				app.setAppIcon(walletClientUpdateDto.getIcon());
 				this.wallectClientRepository.save(app);
 
 				Map<String, Object> map = new HashMap<>();
@@ -185,6 +193,7 @@ public class WalletClientService {
 					cMap.put("appSecret", cl.getAppSecret());
 					cMap.put("callBackUrl", cl.getCallBackUrl());
 					cMap.put("enabled", cl.getEnabled());
+					cMap.put("icon",cl.getAppIcon());
 					cMap.put("accounts", cl.getWalletClientAccount().stream().map(a -> {
 						Map<String, Object> aMap = new HashMap<>();
 						aMap.put("createdAt", a.getCreatedAt());
@@ -377,6 +386,92 @@ public class WalletClientService {
 		// TODO Auto-generated method stub
 		return this.wallectClientRepository.findWalletClientByAppKey(client_app_key);
 
+	}
+	
+	
+	public Object createClientAuthorities(ClientAuthorityDto clientDto) {
+		Optional<WalletClient> clientOpt = this.wallectClientRepository.findById(clientDto.getClientId());
+		if(clientOpt.isEmpty()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",true);
+			map.put("message","Unkown clientId");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		
+		var client = clientOpt.get();
+		Optional<ClientAuthority> authorityExists = this.clientAuthorityRepository.findByAuthNameAndClient(clientDto.getAuthName(),client);
+		if(authorityExists.isPresent()) {
+			Map<String,Object> map = new HashMap();
+			map.put("success",false);
+			map.put("message","Authority already exists");
+
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+		}
+		var authbuild =  ClientAuthority.builder().authName(clientDto.getAuthName()).client(client).description(clientDto.getDescription()).build();
+		try {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",true);
+			map.put("message","Request complete.Authorities created");
+			return ResponseEntity.status(HttpStatus.OK).body(map);
+		}catch(Exception ex) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","A server error encountered");
+			
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+		}
+	}
+	
+	public Object getClientAuthorities(GetClientAuthsDto authDto) {
+		Optional<List<WalletClient>> walletClientOpt = this.wallectClientRepository.findByAppKeyAndAppSecret(authDto.getAppKey(),authDto.getAppSecret());
+		if(walletClientOpt.isEmpty()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","Uknown cridentials");
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
+		}
+		var client =  walletClientOpt.get().get(0);
+
+		List<ClientAuthority> authoritiesList = client.getAuthorities();
+
+		if(authoritiesList.isEmpty()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",true);
+			map.put("message","Request complete");
+			map.put("authorities",new ArrayList<>());
+
+			return ResponseEntity.status(HttpStatus.OK).body(map);
+
+		}
+
+		var authorities = authoritiesList.stream()
+				.map(a->{
+					var map = new HashMap<>();
+					map.put("id",a.getId());
+					map.put("authName",a.getAuthName());
+					map.put("description",a.getDescription());
+
+					return map;
+				}).collect(Collectors.toList());
+
+		Map<String,Object> map = new HashMap<>();
+		map.put("success",true);
+		map.put("message","Request complete");
+		map.put("authorities",authorities);
+		return ResponseEntity.status(HttpStatus.OK).body(map);
+	}
+	
+	public Object acceptClientAuthorities(GetClientAuthsDto authRequest) {
+		Optional<List<WalletClient>> walletClientOpt = this.wallectClientRepository.findByAppKeyAndAppSecret(authRequest.getAppKey(),authRequest.getAppSecret());
+		if(walletClientOpt.isEmpty()) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","Uknown cridentials");
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
+		}
+		var client =  walletClientOpt.get().get(0);
+		
+		return this.jwtService.getWalletClientAuthToken(client);
 	}
 
 }

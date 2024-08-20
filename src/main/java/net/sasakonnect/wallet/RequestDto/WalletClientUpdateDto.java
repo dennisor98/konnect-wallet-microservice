@@ -22,4 +22,6 @@ public class WalletClientUpdateDto {
 
 	@Size(max = 255)
 	private String callBackUrl;
+	
+	private String icon;
 }

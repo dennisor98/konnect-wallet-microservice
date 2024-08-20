@@ -2,7 +2,7 @@ package net.sasakonnect.wallet.enums;
 
 public enum JwtType {
 
-	ACCESS_TOKEN("access_token"),SME_TOKEN("sme_member_token"), REFRESH_TOKEN("refresh_token");
+	ACCESS_TOKEN("access_token"),SME_TOKEN("sme_member_token"), REFRESH_TOKEN("refresh_token"),WALLET_CLIENT_TOKEN("wallet_client_token");
 
 	String token;
 

@@ -11,11 +11,13 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import net.sasakonnect.wallet.domain.authz.ClientAuthority;
 
 @Data
 @Entity
@@ -40,11 +42,19 @@ public class WalletClient extends BaseWalletDomain {
 	
 	@OneToMany(mappedBy = "walletClient")
 	private List<WalletClientAccount> walletClientAccount;
+	
+	
+	//base64 icon
+	@Column(columnDefinition = "LONGTEXT",nullable=true)
+	String appIcon;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name = "owner_id", referencedColumnName = "id")
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private User user;
+	
+	@OneToMany(mappedBy="client")
+	List<ClientAuthority> authorities;
 	
 	
 

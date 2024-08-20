@@ -37,7 +37,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transazctional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.BodyInserters;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -116,7 +116,6 @@ import net.sasakonnect.wallet.repository.UserPinRepository;
 import net.sasakonnect.wallet.repository.UserWalletRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.services.extensions.LarkUtilityService;
-import net.sasakonnect.wallet.services.sme.FirebaseService;
 import net.sasakonnect.wallet.services.sme.SmeAccountService;
 import net.sasakonnect.wallet.services.sme.SmeService;
 import net.sasakonnect.wallet.services.sme.SmeTransactionService;

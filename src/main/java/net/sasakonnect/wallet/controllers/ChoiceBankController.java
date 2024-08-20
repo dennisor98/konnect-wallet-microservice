@@ -23,9 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 import net.sasakonnect.wallet.RequestDto.OnboardingStatus;
 import net.sasakonnect.wallet.annotations.CustomController;
 import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.services.FirebaseService;
 import net.sasakonnect.wallet.services.UserService;
 import net.sasakonnect.wallet.services.WalletService;
-import net.sasakonnect.wallet.services.sme.FirebaseService;
 
 @CustomController()
 @Tag(name = "Choice-Bank", description = "Bank Routes routes")
