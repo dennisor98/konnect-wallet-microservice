@@ -412,6 +412,8 @@ public class WalletClientService {
 			Map<String,Object> map = new HashMap<>();
 			map.put("success",true);
 			map.put("message","Request complete.Authorities created");
+			
+			this.clientAuthorityRepository.save(authbuild);
 			return ResponseEntity.status(HttpStatus.OK).body(map);
 		}catch(Exception ex) {
 			Map<String,Object> map = new HashMap<>();
@@ -471,7 +473,21 @@ public class WalletClientService {
 		}
 		var client =  walletClientOpt.get().get(0);
 		
-		return this.jwtService.getWalletClientAuthToken(client);
+		try {
+			String token = this.jwtService.getWalletClientAuthToken(client);
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",true);
+			map.put("message","Request completed");
+			map.put("token",token);
+			
+			return ResponseEntity.status(HttpStatus.OK).body(map);
+		}catch(Exception ex) {
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","A server error occured");
+			ex.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+		}
 	}
 
 }

@@ -21,6 +21,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.BodyInserters;
+
+import com.google.gson.Gson;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +34,8 @@ import net.sasakonnect.wallet.RequestDto.lark.ReplyBody;
 import net.sasakonnect.wallet.RequestDto.lark.user.LarkMessageDTO;
 import net.sasakonnect.wallet.ResponseDto.lark.Event;
 import net.sasakonnect.wallet.ResponseDto.lark.EventCallbackDto;
+import net.sasakonnect.wallet.beans.BankWebClientBean;
+import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
 import net.sasakonnect.wallet.domain.LarkUser;
 import net.sasakonnect.wallet.domain.RejectedAccount;
 import net.sasakonnect.wallet.domain.Transaction;
@@ -43,7 +48,9 @@ import net.sasakonnect.wallet.jobs.LarkUsersSync;
 import net.sasakonnect.wallet.repository.LarkUserRepository;
 import net.sasakonnect.wallet.repository.RejectedAccountRepository;
 import net.sasakonnect.wallet.repository.UserRepository;
+import net.sasakonnect.wallet.tools.RequestSigner;
 import net.sasakonnect.wallet.tools.ResponsePagerClass;
+import reactor.core.publisher.Mono;
 
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
@@ -126,6 +133,12 @@ public class LarkService {
 
 	@Autowired
 	RejectedAccountRepository rejectedaccuntRepository;
+	
+	@Autowired
+	RequestSigner requestSigner;
+	
+	@Autowired
+	BankWebClientBean bankClientBean;
 	
 	protected final String botId = "cli_a53a08afc8b8d00a";
 	protected String botSecret = "v0SWDp3ppqPHuKQ0ihtTefQiazd7lUFh";
@@ -699,7 +712,72 @@ public class LarkService {
 	String status;
 
    String mobile_string  = event.getText_without_at_bot().trim();
-  
+   
+   //test if user is checking for kyc
+  if(mobile_string.startsWith("#kyc")) {
+	 String mobile = mobile_string.split("#kyc")[1];	 
+	 if(mobile.length() < 9) {
+		 template += "\nInvalid phone number";
+	 }
+	  Optional<User> userOpt =  this.userRepository.findByMobile(mobile.substring(mobile.length() - 9));
+	  if(userOpt.isEmpty()) {
+		  template += ",\nNo account found";
+	  }else {
+		  var user = userOpt.get();
+		  var reqId = new HashMap<String, Object>();
+		    reqId.put("userId", user.getId());
+		    var reqs = requestSigner.signRequest(reqId);
+
+		    Mono<String> responseMono = this.bankClientBean.webClient.post()
+		            .uri(ChoiceEndpointsConstants.GET_WALLET_INFO)
+		            .contentType(MediaType.APPLICATION_JSON)
+		            .body(BodyInserters.fromValue(reqs))
+		            .accept(MediaType.APPLICATION_JSON)
+		            .retrieve()
+		            .bodyToMono(String.class);
+
+		    String responseJson = responseMono.block();
+          
+		    if (responseJson != null) {
+		    	var gson = new Gson();
+		    	Map<String, Object> json = gson.fromJson(responseJson, Map.class);
+		    	Map<String, Object> data = (Map<String, Object>) json.get("data");
+
+		    	if (data != null) {
+		    		log.info("{}", data);
+		    		String accountId =  (String) data.get("accountId");
+		    		List<String> rejectionIds = (List<String>) data.get("rejectionIds");
+		    		List<String> rejectionMsgs = (List<String>) data.get("rejectionReasonMsgs");
+		    		Double onboardingStatus = (Double) data.get("onboardingStatus");
+		    		String accountType = (String) data.get("accountType");
+
+		    		if (accountType == null  && accountId==null && rejectionIds == null  && (onboardingStatus == 4.0 || onboardingStatus == 9.0)) {
+		    			template += "\nAccount KYC status is unknown";
+		    		}
+		    		
+		    		if(accountType.equalsIgnoreCase("C002") && onboardingStatus == 7.0) {
+		    			template +="\nStatus:Normal";
+		    		}
+		    		
+		    		if(onboardingStatus == 9.0) {
+		    			template +="\nStatus:Upgrade on manual reviewing";
+		    		}
+		    		
+		    		
+		    		if(onboardingStatus == 4.0 && rejectionIds !=null) {
+		    			template +="\nStatus:Upgrade rejected\nReasons:"+rejectionMsgs.stream().map(Object::toString)
+								.collect(Collectors.joining("\n"));
+		    		}
+		    		if(accountType.equalsIgnoreCase("C001") && onboardingStatus == 7.0) {
+		    			template +="\nStatus:Upgraded";
+		    		}
+		    	
+		    }
+		    }
+		    	
+	  }
+	  
+  }
     log.info(event.getText_without_at_bot());
  if(mobile_string.length() < 9) {
 	 template = "Invalid phone number";

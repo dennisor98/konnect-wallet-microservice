@@ -270,7 +270,7 @@ public class SdkController {
 	}
 	
 	@PostMapping("app/authorities")
-	@ServiceInteractionMiddleware
+//	@ServiceInteractionMiddleware
 	public Object getClientAuthorities(@Valid @RequestBody() GetClientAuthsDto sdkAuthRequest) {
 		return this.walletClientService.getClientAuthorities(sdkAuthRequest);
 
@@ -278,7 +278,7 @@ public class SdkController {
 
 	
 	@PostMapping("app/authorities/accept")
-	@ServiceInteractionMiddleware
+//	@ServiceInteractionMiddleware
 	public Object grantClientAuthorities(@Valid @RequestBody() GetClientAuthsDto sdkAuthRequest) {
 		return this.walletClientService.acceptClientAuthorities(sdkAuthRequest);
 
