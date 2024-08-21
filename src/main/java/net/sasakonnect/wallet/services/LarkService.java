@@ -755,7 +755,7 @@ public class LarkService {
 		    			template += "\nAccount KYC status is unknown";
 		    		}
 		    		
-		    		if(accountType.equalsIgnoreCase("C002") && onboardingStatus == 7.0) {
+		    		if(accountType !=null && accountType.equalsIgnoreCase("C002") && onboardingStatus == 7.0) {
 		    			template +="\nStatus:Normal";
 		    		}
 		    		
@@ -768,7 +768,7 @@ public class LarkService {
 		    			template +="\nStatus:Upgrade rejected\nReasons:"+rejectionMsgs.stream().map(Object::toString)
 								.collect(Collectors.joining("\n"));
 		    		}
-		    		if(accountType.equalsIgnoreCase("C001") && onboardingStatus == 7.0) {
+		    		if(accountType  !=null && accountType.equalsIgnoreCase("C001") && onboardingStatus == 7.0) {
 		    			template +="\nStatus:Upgraded";
 		    		}
 		    	
