@@ -751,7 +751,7 @@ public class LarkService {
 		    		Double onboardingStatus = (Double) data.get("onboardingStatus");
 		    		String accountType = (String) data.get("accountType");
 
-		    		if (accountType == null  && accountId==null && rejectionIds == null  && (onboardingStatus == 4.0 || onboardingStatus == 9.0)) {
+		    		if (accountType == null  && accountId==null && rejectionIds == null) {
 		    			template += "\nAccount KYC status is unknown";
 		    		}
 		    		
