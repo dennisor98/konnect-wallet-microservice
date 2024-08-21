@@ -750,10 +750,6 @@ public class LarkService {
 		    		List<String> rejectionMsgs = (List<String>) data.get("rejectionReasonMsgs");
 		    		Double onboardingStatus = (Double) data.get("onboardingStatus");
 		    		String accountType = (String) data.get("accountType");
-
-		    		if (accountType == null  && accountId==null && rejectionIds == null) {
-		    			template += "\nAccount KYC status is unknown";
-		    		}
 		    		
 		    		if(accountType !=null && accountType.equalsIgnoreCase("C002") && onboardingStatus == 7.0) {
 		    			template +="\nStatus:Normal";
@@ -764,7 +760,7 @@ public class LarkService {
 		    		}
 		    		
 		    		
-		    		if(onboardingStatus == 4.0 && rejectionIds !=null) {
+		    		if(onboardingStatus == 4.0 && rejectionIds !=null && rejectionIds.size() > 0) {
 		    			template +="\nStatus:Upgrade rejected\nReasons:"+rejectionMsgs.stream().map(Object::toString)
 								.collect(Collectors.joining("\n"));
 		    		}
