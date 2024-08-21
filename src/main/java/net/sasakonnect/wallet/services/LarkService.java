@@ -777,59 +777,61 @@ public class LarkService {
 		    	
 	  }
 	  
+  }else {
+	  if(mobile_string.length() < 9) {
+			 template = "Invalid phone number";
+		 }else {
+			 String mobileNumber = mobile_string.substring(mobile_string.length() -9);
+			    Optional<User> user =  this.userRepository.findByMobile(mobileNumber);
+			 if(user.isPresent()) {
+			    	var u = user.get();
+			    	List<UserWallet> wallets = u.getUserWallets();
+			    	if(wallets.isEmpty()) {
+			    		if(u.getStatus() !=null) {
+			    			if(Integer.valueOf(u.getStatus()) == (OnboardingStatusType.MANUAL_REVIEWING.getCode())) {
+			    				status  = "Account on Manual reviewing";
+			    				template += 
+			    		       	        "**\nStatus**: "+status;
+			    			}
+			    			if(Integer.valueOf(u.getStatus()) ==OnboardingStatusType.PROCESSING.getCode()) {
+			    				status  = "Account on processing stage";
+			    				template += 
+			    		       	        "**\nStatus**: "+status;
+			    			}
+			    		}else {
+			    			status = "Unknown.Kindly recheck in 5-10 minutes";
+			    			template += 
+			    	       	        "**\nStatus**: "+status;
+			    		}
+			    		
+			    	}else {
+			    		status =  "Account Approved";
+			    		 template += 
+			       	        "**\nStatus**: "+status;
+			    	}
+			    	
+
+			    }else {
+			    	//check user in rejected accounts
+			    	Optional<RejectedAccount> rejectedOptional = this.rejectedaccuntRepository.findByMobile(mobileNumber);
+			    	
+			    	if(rejectedOptional.isPresent()) {
+			    		var u  = rejectedOptional.get();
+			    		status = "Account Rejected";
+			    		template +="**\nMobile**: "+u.getMobile()+
+			    				   "**\nAcc Name:** "+u.getFirstName()+" "+u.getLastName()+
+			    				 "**\nStatus**: "+status+
+			    				 "**\nReason: **"+u.getRejectionReason();
+			    				
+			    	}else {
+			    		template += ",\nNo account found";
+			    	}
+			    	
+			    }
+		 }
   }
     log.info(event.getText_without_at_bot());
- if(mobile_string.length() < 9) {
-	 template = "Invalid phone number";
- }else {
-	 String mobileNumber = mobile_string.substring(mobile_string.length() -9);
-	    Optional<User> user =  this.userRepository.findByMobile(mobileNumber);
-	 if(user.isPresent()) {
-	    	var u = user.get();
-	    	List<UserWallet> wallets = u.getUserWallets();
-	    	if(wallets.isEmpty()) {
-	    		if(u.getStatus() !=null) {
-	    			if(Integer.valueOf(u.getStatus()) == (OnboardingStatusType.MANUAL_REVIEWING.getCode())) {
-	    				status  = "Account on Manual reviewing";
-	    				template += 
-	    		       	        "**\nStatus**: "+status;
-	    			}
-	    			if(Integer.valueOf(u.getStatus()) ==OnboardingStatusType.PROCESSING.getCode()) {
-	    				status  = "Account on processing stage";
-	    				template += 
-	    		       	        "**\nStatus**: "+status;
-	    			}
-	    		}else {
-	    			status = "Unknown.Kindly recheck in 5-10 minutes";
-	    			template += 
-	    	       	        "**\nStatus**: "+status;
-	    		}
-	    		
-	    	}else {
-	    		status =  "Account Approved";
-	    		 template += 
-	       	        "**\nStatus**: "+status;
-	    	}
-	    	
-
-	    }else {
-	    	//check user in rejected accounts
-	    	Optional<RejectedAccount> rejectedOptional = this.rejectedaccuntRepository.findByMobile(mobileNumber);
-	    	
-	    	if(rejectedOptional.isPresent()) {
-	    		var u  = rejectedOptional.get();
-	    		status = "Account Rejected";
-	    		template +="**\nMobile**: "+u.getMobile()+
-	    				   "**\nAcc Name:** "+u.getFirstName()+" "+u.getLastName()+
-	    				 "**\nStatus**: "+status+
-	    				 "**\nReason: **"+u.getRejectionReason();
-	    				
-	    	}else {
-	    		template += ",\nNo account found";
-	    	}
-	    	
-	    }
- }
+ 
    
     message =template;
 
