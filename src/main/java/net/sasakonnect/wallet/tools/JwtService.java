@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.crypto.spec.SecretKeySpec;
 
@@ -24,6 +25,7 @@ import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.WalletClient;
 import net.sasakonnect.wallet.domain.sme.Sme;
 import net.sasakonnect.wallet.enums.JwtType;
+import java.security.Key;
 
 @Slf4j
 @Service
@@ -330,10 +332,17 @@ public class JwtService {
 			Map<String, Object> claims = new HashMap<>();
 			claims.put("id", client.getId());
 			claims.put("token_type",JwtType.WALLET_CLIENT_TOKEN.getToken());
-			claims.put("authorities",client.getAuthorities());
-			return Jwts.builder().setClaims(claims).setSubject(client.getId().toString()).setIssuedAt(new Date())
-					.setExpiration(new Date(System.currentTimeMillis() + jwtExpiryTime))// 10 days validity
-					.setId(UUID.randomUUID().toString()).signWith(secretKey, SignatureAlgorithm.HS256).compact();
+			String combinedSecret = secretKey + client.getAuthorities().stream().map(c->{ return c.getId();}).collect(Collectors.toList()).toString() + client.getAppKey()+client.getAppSecret() ;
+			Key finalKey = new SecretKeySpec(combinedSecret.getBytes(), SignatureAlgorithm.HS256.getJcaName());
+
+			return Jwts.builder()
+			    .setClaims(claims)
+			    .setSubject(client.getId().toString())
+			    .setIssuedAt(new Date())
+			    .setExpiration(new Date(System.currentTimeMillis() + jwtExpiryTime)) // 10 days validity
+			    .setId(UUID.randomUUID().toString())
+			    .signWith(finalKey, SignatureAlgorithm.HS256)
+			    .compact();
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
