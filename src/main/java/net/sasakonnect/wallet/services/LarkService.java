@@ -746,7 +746,7 @@ public class LarkService {
 		    	if (data != null) {
 		    		log.info("{}", data);
 		    		String accountId =  (String) data.get("accountId");
-		    		List<String> rejectionIds = (List<String>) data.get("rejectionIds");
+		    		List<String> rejectionIds = (List<String>) data.get("rejectionReasonIds");
 		    		List<String> rejectionMsgs = (List<String>) data.get("rejectionReasonMsgs");
 		    		Double onboardingStatus = (Double) data.get("onboardingStatus");
 		    		String accountType = (String) data.get("accountType");
@@ -760,7 +760,7 @@ public class LarkService {
 		    		}
 		    		
 		    		
-		    		if(onboardingStatus == 4.0 && rejectionIds !=null && rejectionIds.size() > 0) {
+		    		if(onboardingStatus == 4.0  && rejectionIds.size() > 0) {
 		    			template +="\nStatus:Upgrade rejected\nReasons:"+rejectionMsgs.stream().map(Object::toString)
 								.collect(Collectors.joining("\n"));
 		    		}
