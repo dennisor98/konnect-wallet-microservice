@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import jakarta.transaction.Transactional;
 import net.sasakonnect.wallet.constant.GlobalPermissionConstants;
+import net.sasakonnect.wallet.constant.authz.GlobalClientAppAuthorityConstants;
 import net.sasakonnect.wallet.constant.sme.GlobalSmeAccountPermissionConstants;
 import net.sasakonnect.wallet.constant.sme.GlobalSmePermissionConstants;
 import net.sasakonnect.wallet.domain.Bank;
@@ -20,6 +21,7 @@ import net.sasakonnect.wallet.domain.Currency;
 import net.sasakonnect.wallet.domain.Permission;
 import net.sasakonnect.wallet.domain.Role;
 import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.domain.authz.GlobalAuthority;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeAccountPermissions;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmePermissions;
 import net.sasakonnect.wallet.domain.sme.authorisation.SmeRole;
@@ -29,9 +31,11 @@ import net.sasakonnect.wallet.enums.IdType;
 import net.sasakonnect.wallet.enums.MonthlyIncome;
 import net.sasakonnect.wallet.repository.BankRepository;
 import net.sasakonnect.wallet.repository.CurrencyRepository;
+import net.sasakonnect.wallet.repository.authz.GlobalAuthorityRepository;
 import net.sasakonnect.wallet.services.PermissionService;
 import net.sasakonnect.wallet.services.RoleService;
 import net.sasakonnect.wallet.services.UserService;
+import net.sasakonnect.wallet.services.WalletClientService;
 import net.sasakonnect.wallet.services.sme.SmePermissionService;
 import net.sasakonnect.wallet.services.sme.SmeRoleService;
 import net.sasakonnect.wallet.services.sme.SmeUserService;
@@ -286,6 +290,8 @@ public class AppBootLoader implements ApplicationListener<ApplicationReadyEvent>
 	SmePermissionService smePermissionService;
 	@Autowired
 	SmeRoleService smeRoleService;
+	@Autowired
+	WalletClientService clientService;
 
 	@Override
 	@Transactional
@@ -352,7 +358,16 @@ public class AppBootLoader implements ApplicationListener<ApplicationReadyEvent>
 				return smr.id;
 			}).collect(Collectors.toList());
 		}
-
+		
+		
+		//insert wallet clients authorities
+        var authorities = GlobalClientAppAuthorityConstants.scan();
+        authorities.forEach((authz) -> {
+        	var authority = GlobalAuthority.builder().name(authz.get("authority")).description(authz.get("description")).sensitivity(Integer.valueOf(authz.get("sensitivity"))).category(authz.get("category")).build();
+        	this.clientService.insertNotAvailableAuthority(authority);
+        });
 	}
+	
+	
 
 }
