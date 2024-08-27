@@ -19,11 +19,11 @@ import net.sasakonnect.wallet.domain.WalletClient;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ClientAuthority extends BaseWalletDomain {
-	@Column(nullable=false)
-	String authName;
-
-	@Column(nullable=true)
-	String description;
+	@ManyToOne
+	@JoinColumn(name="authority")
+	GlobalAuthority authority;
+	
+	
 
 	@ManyToOne()
 	@JoinColumn(name="client")
@@ -32,4 +32,7 @@ public class ClientAuthority extends BaseWalletDomain {
 	@OneToOne
 	@JoinColumn(name="creator_id")
 	User user;
+	
+	
+	boolean isOptional;
 }

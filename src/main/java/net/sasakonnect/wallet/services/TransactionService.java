@@ -643,6 +643,11 @@ public class TransactionService {
 	}
 
 	
+	public Page<Object[]> getClientTransactions(String oppoAccountId, String startDate, String endDate, Integer pageNumber, Integer pageSize) {
+	    return this.transactionRepository.findClientTransactions(oppoAccountId, startDate, endDate, PageRequest.of(pageNumber, pageSize));
+	}
+
+	
 	
 	
 

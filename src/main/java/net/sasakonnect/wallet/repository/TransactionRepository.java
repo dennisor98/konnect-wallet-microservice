@@ -186,8 +186,21 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
   Optional<Transaction> findWalletLatestOutTransaction(@Param("accountId") String accountId);
   
 //  t.oppoBankCode != 'MPESA' AND t.oppoBankCode != 'CIC0018'
-  
-  
+  @Query(value = "SELECT t.created_at,t.tx_id,t.account_id,t.account_name,ABS(t.amount),t.oppo_account_id,u.mobile FROM transaction t " +
+          "LEFT JOIN wallet w ON w.account_id = t.account_id " +
+          "LEFT JOIN user_wallet uw ON w.id = uw.wallet_id " +
+          "LEFT JOIN `user` u ON uw.user_id = u.id " +
+          "WHERE t.oppo_account_id = :accountId " +
+          "AND t.created_at BETWEEN DATE(:startDate) AND DATE(:endDate)", 
+  nativeQuery = true)
+Page<Object[]> findClientTransactions(
+                       @Param("accountId") String accountId,
+                       @Param("startDate") String startDate,
+                       @Param("endDate") String endDate,
+                       Pageable pageable);
+
+
+
   
   
    

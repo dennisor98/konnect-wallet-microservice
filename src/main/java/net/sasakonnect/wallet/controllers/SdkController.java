@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import net.sasakonnect.wallet.RequestDto.ClientTransReqDto;
 import net.sasakonnect.wallet.RequestDto.MerchantKeyDto;
 import net.sasakonnect.wallet.RequestDto.MerchantStkPush;
 import net.sasakonnect.wallet.RequestDto.SdkPayDto;
@@ -32,6 +33,7 @@ import net.sasakonnect.wallet.annotations.RateLimit;
 import net.sasakonnect.wallet.annotations.SdkMiddleware;
 import net.sasakonnect.wallet.annotations.ServiceInteractionMiddleware;
 import net.sasakonnect.wallet.annotations.TransactionMiddleware;
+import net.sasakonnect.wallet.annotations.WalletClientReqMiddleware;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.beans.ClientAppsBean;
 import net.sasakonnect.wallet.domain.FinancialInstituation;
@@ -281,6 +283,13 @@ public class SdkController {
 //	@ServiceInteractionMiddleware
 	public Object grantClientAuthorities(@Valid @RequestBody() GetClientAuthsDto sdkAuthRequest) {
 		return this.walletClientService.acceptClientAuthorities(sdkAuthRequest);
+
+	}
+	
+	@PostMapping("transaction/history")
+	@WalletClientReqMiddleware()
+	public Object getTransactionHistory(@Valid @RequestBody() ClientTransReqDto trans, @RequestHeader("app-key") String appKey,@RequestHeader("secret-key") String appSecret) {
+		return this.walletClientService.getClientTransactions(trans);
 
 	}
 }

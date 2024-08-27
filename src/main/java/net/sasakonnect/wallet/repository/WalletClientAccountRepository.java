@@ -24,6 +24,9 @@ public interface WalletClientAccountRepository extends JpaRepository<WalletClien
 
 	@Query("SELECT wa FROM WalletClientAccount wa WHERE wa.walletClient =:walletClient AND wa.isPrimary = true")
 	Optional<WalletClientAccount> findPrimaryWalletClientaccount(@Param("walletClient") String client);
+	
+	@Query("SELECT wa FROM WalletClientAccount wa WHERE wa.walletClient =:walletClient AND wa.isPrimary = true")
+	Optional<WalletClientAccount> findPrimaryAccount(@Param("walletClient") WalletClient client);
 
 	@Query("SELECT wc FROM WalletClient wc " + "LEFT JOIN FETCH wc.walletClientAccount wca "
 			+ "LEFT JOIN FETCH wc.user u " + "LEFT JOIN FETCH wca.smeAccount sa " + "LEFT JOIN FETCH sa.sme s "

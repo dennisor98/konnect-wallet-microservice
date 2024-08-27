@@ -46,6 +46,7 @@ import net.sasakonnect.wallet.RequestDto.WalletClientDTO;
 import net.sasakonnect.wallet.RequestDto.WalletClientUpdateDto;
 import net.sasakonnect.wallet.RequestDto.admin.CheckUserAccount;
 import net.sasakonnect.wallet.RequestDto.admin.PinReset;
+import net.sasakonnect.wallet.RequestDto.authz.AssignAuthorityDto;
 import net.sasakonnect.wallet.RequestDto.authz.ClientAuthorityDto;
 import net.sasakonnect.wallet.RequestDto.sme.ChangeUserPhoneNumberDto;
 import net.sasakonnect.wallet.RequestDto.sme.ConfirmPhoneNumberChangeDto;
@@ -849,11 +850,19 @@ public class AdministrationController {
 	}
 	
 	@IsCorporate
-	@PostMapping("/client/authority")
+	@GetMapping("/client/authorities")
 	@RequirePermission(GlobalPermissionConstants.CanCreateClientAuthorities.PERMISSION)
-	public Object createClientAuthority(@Valid @RequestBody() ClientAuthorityDto clientDto) {
-		return this.walletClientService.createClientAuthorities(clientDto);
+	public Object getClientAuthorities() {
+		return this.walletClientService.getGlobalClientAuthorities();
 	}
+	
+	@IsCorporate
+	@PostMapping("/client/authorities/assign")
+	@RequirePermission(GlobalPermissionConstants.CanCreateClientAuthorities.PERMISSION)
+	public Object attachClientAuthorities(@Valid @RequestBody AssignAuthorityDto authDto) {
+		return this.walletClientService.assignClientAuthority(authDto);
+	}
+	
 	
 
 }

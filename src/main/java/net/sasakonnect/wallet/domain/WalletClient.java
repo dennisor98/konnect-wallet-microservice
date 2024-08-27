@@ -56,6 +56,9 @@ public class WalletClient extends BaseWalletDomain {
 	@OneToMany(mappedBy="client")
 	List<ClientAuthority> authorities;
 	
+	@OneToMany(mappedBy="client")
+	List<ClientAppScopes> scopes;
+	
 	
 
 }
