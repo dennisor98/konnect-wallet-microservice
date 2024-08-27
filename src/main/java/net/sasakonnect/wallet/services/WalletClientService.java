@@ -550,10 +550,9 @@ public class WalletClientService {
 
 						        map.put("dateCreated", result[0]);  // Assuming the createdAt is the 2nd column
 						        map.put("txId", result[1]);         // Assuming the txId is the 3rd column
-						        map.put("accountName", result[3]);  // and so on...
-						        map.put("accountId", result[2]);
-						        map.put("amount", new BigDecimal(result[4].toString()).abs()); // Convert to BigDecimal if it's numeric
-						        map.put("beneficiaryAccount", result[5]);
+						        map.put("accountName", result[2]);  // and so on...
+						        map.put("amount", new BigDecimal(result[3].toString()).abs()); // Convert to BigDecimal if it's numeric
+						        map.put("beneficiaryAccount", result[4]);
 						        map.put("mobile", result[result.length - 1]);
 
 						        return map;
