@@ -1,5 +1,6 @@
 package net.sasakonnect.wallet.services;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,11 +17,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import net.sasakonnect.wallet.RequestDto.ClientTransReqDto;
 import net.sasakonnect.wallet.RequestDto.SdkPayDto;
 import net.sasakonnect.wallet.RequestDto.SdkRequestOpenId;
 import net.sasakonnect.wallet.RequestDto.WalletClientAccountDto;
@@ -34,11 +39,15 @@ import net.sasakonnect.wallet.RequestDto.authz.GetClientAuthsDto;
 import net.sasakonnect.wallet.ResponseDto.TransactionResponseDto;
 import net.sasakonnect.wallet.beans.ClientAppsBean;
 import net.sasakonnect.wallet.beans.RedisBean;
+import net.sasakonnect.wallet.config.KonnectHeader;
+import net.sasakonnect.wallet.domain.ClientAppScopes;
+import net.sasakonnect.wallet.domain.Transaction;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.WalletClient;
 import net.sasakonnect.wallet.domain.WalletClientAccount;
 import net.sasakonnect.wallet.domain.authz.ClientAuthority;
 import net.sasakonnect.wallet.domain.authz.GlobalAuthority;
+import net.sasakonnect.wallet.repository.ClientAppScopesRepository;
 import net.sasakonnect.wallet.repository.WalletClientAccountRepository;
 import net.sasakonnect.wallet.repository.WalletClientRepository;
 import net.sasakonnect.wallet.repository.authz.ClientAuthorityRepository;
@@ -70,6 +79,10 @@ public class WalletClientService {
 	private GlobalAuthorityRepository globalAuthorityRepository;	
 	@Autowired
 	private ClientAuthorityRepository clientAuthorityRepository;
+	@Autowired
+	private TransactionService transactionService;
+	@Autowired
+	private ClientAppScopesRepository clientAppScopesRepository;
 
 	public ResponseEntity<Object> createWallectClientApp(WalletClientDTO walleClientDto) {
 		try {
@@ -395,6 +408,8 @@ public class WalletClientService {
 	}
 	
 	
+
+	
 	
 	
 	public Object getClientAuthorities(GetClientAuthsDto authDto) {
@@ -460,6 +475,110 @@ public class WalletClientService {
 			ex.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
 		}
+	}
+	
+	public Object getClientTransactions(ClientTransReqDto trans) {
+		//get appKey and appSecret
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+				.getRequest();
+		
+		var appKey = request.getHeader(KonnectHeader.CLIENT_APP_KEY_HEADER.toString());
+		var appSecret = request.getHeader(KonnectHeader.SECRET_APP_KEY_HEADER.toString());
+		System.out.println("{{key}}"+appKey);
+		System.out.println("{{secret}}"+appSecret);
+		if(appKey !=null && appSecret !=null) {
+			Optional<WalletClient> loggedInClientOpt = this.wallectClientRepository.findByAppKey(appKey);
+			if(loggedInClientOpt.isEmpty()) {
+				Map<String,Object> map = new HashMap<>();
+				map.put("success",false);
+				map.put("message","Unknown client");
+				
+				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
+			}
+			var loggedInClient = loggedInClientOpt.get();		
+			Optional<ClientAppScopes> hasScope = this.clientAppScopesRepository.findByClientAndAppKey(loggedInClient,trans.getClientPublicKey());
+			if(hasScope.isEmpty()) {
+				Map<String,Object> map = new HashMap<>();
+				map.put("success",false);
+				map.put("message","Operation not allowed");
+				
+				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(map);
+			}
+			Optional<WalletClient> clientOpt =  this.wallectClientRepository.findByAppKey(trans.getClientPublicKey());
+			if(clientOpt.isPresent()) {
+				var client =  clientOpt.get();
+				Optional<WalletClientAccount> clientAccOpt = this.walletClientAccountRepository.findPrimaryAccount(client);
+				if(clientAccOpt.isEmpty() && client.getWalletClientAccount() ==null) {
+					Map<String,Object> map = new HashMap<>();
+					map.put("success",false);
+					map.put("message","Account not set");
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+				}
+				
+				
+			
+				var pageNumber = trans.getPageNumber();
+				var pageSize =  trans.getPageSize();
+				if(pageNumber == null) {
+					pageNumber = 0;
+				}
+				
+				if(pageSize == null || pageSize > 100) {
+					pageSize = 100;
+				}
+				//get transactions
+				Page<Object[]> transactionsPage = this.transactionService.getClientTransactions(
+					    client.getWalletClientAccount().get(0).getTillNumber(),
+					    trans.getStartDate(),
+					    trans.getEndDate(),
+					    pageNumber,
+					    pageSize
+					);
+
+					if (transactionsPage.isEmpty()) {
+					    Map<String, Object> map = new HashMap<>();
+					    map.put("success", true);
+					    map.put("message", "Request complete");
+					    map.put("transactions", new ArrayList<>());
+
+					    return ResponseEntity.status(HttpStatus.OK).body(map);
+					}
+
+					var transactions = transactionsPage.stream()
+						    .map(result -> {
+						        Map<String, Object> map = new HashMap<>();
+
+						        map.put("dateCreated", result[0]);  // Assuming the createdAt is the 2nd column
+						        map.put("txId", result[1]);         // Assuming the txId is the 3rd column
+						        map.put("accountName", result[3]);  // and so on...
+						        map.put("accountId", result[2]);
+						        map.put("amount", new BigDecimal(result[4].toString()).abs()); // Convert to BigDecimal if it's numeric
+						        map.put("beneficiaryAccount", result[5]);
+						        map.put("mobile", result[result.length - 1]);
+
+						        return map;
+						    })
+						    .collect(Collectors.toList());
+
+					Map<String, Object> responseMap = new HashMap<>();
+					responseMap.put("success", true);
+					responseMap.put("message", "Request complete");
+					responseMap.put("transactions", transactions);
+					
+					var pageMap = new HashMap<>();
+					ResponsePagerClass<Object[]> page = ResponsePagerClass.<Object[]>builder().page(transactionsPage)
+							.build();
+					pageMap.putAll(page.getPagingInfo());
+					responseMap.put("page",pageMap);
+					return ResponseEntity.status(HttpStatus.OK).body(responseMap);
+
+			}
+			
+			
+			
+			
+		}
+		return null;
 	}
 	
 	public void insertNotAvailableAuthority(GlobalAuthority authority) {

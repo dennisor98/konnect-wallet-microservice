@@ -31,5 +31,8 @@ public interface WalletClientRepository extends JpaRepository<WalletClient, Stri
 			+ "LEFT JOIN FETCH s.accountDetails sad " + "WHERE wc.appKey = :key AND wc.enabled = true "
 			+ "ORDER BY wc.createdAt DESC")
 	Optional<List<WalletClient>> findWalletClientByAppKey(@Param("key") String client_app_key);
+	
+	
+	Optional<WalletClient> findByAppKey(String appKey);
 
 }
