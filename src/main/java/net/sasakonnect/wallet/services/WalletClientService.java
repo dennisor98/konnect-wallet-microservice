@@ -552,7 +552,7 @@ public class WalletClientService {
 						        map.put("accountName", result[2]);  // and so on...
 						        map.put("amount", new BigDecimal(result[3].toString()).abs()); // Convert to BigDecimal if it's numeric
 						        map.put("beneficiaryAccount", result[4]);
-						        map.put("successful",result[5] == "8" ? true : false);
+						        map.put("successful",Integer.valueOf(result[5].toString()) == 8 ? true : false );
 						        map.put("mpesaCode",result[6]);
 						        map.put("mobile", result[result.length - 1]);
 
