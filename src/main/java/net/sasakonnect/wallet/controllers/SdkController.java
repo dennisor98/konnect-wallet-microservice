@@ -1,14 +1,21 @@
 package net.sasakonnect.wallet.controllers;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -286,10 +293,34 @@ public class SdkController {
 
 	}
 	
-	@PostMapping("transaction/history")
-	@WalletClientReqMiddleware()
-	public Object getTransactionHistory(@Valid @RequestBody() ClientTransReqDto trans, @RequestHeader("app-key") String appKey,@RequestHeader("secret-key") String appSecret) {
-		return this.walletClientService.getClientTransactions(trans);
+	
+	@InitBinder
+    public void initBinder(WebDataBinder binder) {
+        // This is only needed if you're handling Date objects directly
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        dateFormat.setLenient(false);
+        binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
+    }
 
-	}
+    @PostMapping("transaction/history")
+    @WalletClientReqMiddleware()
+    public Object getTransactionHistory(
+            @Valid @RequestBody ClientTransReqDto trans,
+            @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "100") Integer pageSize,
+            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestHeader("app-key") String appKey,
+            @RequestHeader("secret-key") String appSecret) {
+
+        // If you still want to format the LocalDate to a String
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        // Passing formatted dates as Strings to the service
+        return this.walletClientService.getClientTransactions(
+                trans, pageNumber, pageSize, 
+                dateFormat.format(java.sql.Date.valueOf(startDate)), 
+                dateFormat.format(java.sql.Date.valueOf(endDate))
+        );
+    }
 }
