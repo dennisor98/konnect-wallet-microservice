@@ -7,10 +7,4 @@ import lombok.Data;
 public class ClientTransReqDto {
 	@NotNull(message="clientPublicKey is missing")
 	String clientPublicKey;
-   @NotNull(message="startDate is missing")
-   String startDate;
-   @NotNull(message="endDate is missing")
-   String endDate;
-   Integer pageNumber;
-   Integer pageSize;
 }

@@ -477,7 +477,7 @@ public class WalletClientService {
 		}
 	}
 	
-	public Object getClientTransactions(ClientTransReqDto trans) {
+	public Object getClientTransactions(ClientTransReqDto trans,Integer pageNumber,Integer pageSize,String startDate,String endDate) {
 		//get appKey and appSecret
 		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
 				.getRequest();
@@ -517,8 +517,7 @@ public class WalletClientService {
 				
 				
 			
-				var pageNumber = trans.getPageNumber();
-				var pageSize =  trans.getPageSize();
+				
 				if(pageNumber == null) {
 					pageNumber = 0;
 				}
@@ -529,8 +528,8 @@ public class WalletClientService {
 				//get transactions
 				Page<Object[]> transactionsPage = this.transactionService.getClientTransactions(
 					    client.getWalletClientAccount().get(0).getTillNumber(),
-					    trans.getStartDate(),
-					    trans.getEndDate(),
+					    startDate,
+					    endDate,
 					    pageNumber,
 					    pageSize
 					);
@@ -553,6 +552,8 @@ public class WalletClientService {
 						        map.put("accountName", result[2]);  // and so on...
 						        map.put("amount", new BigDecimal(result[3].toString()).abs()); // Convert to BigDecimal if it's numeric
 						        map.put("beneficiaryAccount", result[4]);
+						        map.put("successful",result[5] == "8" ? true : false);
+						        map.put("mpesaCode",result[6]);
 						        map.put("mobile", result[result.length - 1]);
 
 						        return map;
