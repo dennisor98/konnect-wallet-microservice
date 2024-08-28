@@ -191,7 +191,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
           "LEFT JOIN user_wallet uw ON w.id = uw.wallet_id " +
           "LEFT JOIN `user` u ON uw.user_id = u.id " +
           "WHERE t.oppo_account_id = :accountId " +
-          "AND t.created_at BETWEEN DATE(:startDate) AND DATE(:endDate)", 
+          "AND t.created_at BETWEEN DATE(:startDate) AND DATE(:endDate) ORDER BY t.created_at DESC", 
   nativeQuery = true)
 Page<Object[]> findClientTransactions(
                        @Param("accountId") String accountId,
