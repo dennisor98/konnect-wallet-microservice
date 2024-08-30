@@ -82,6 +82,7 @@ import net.sasakonnect.wallet.domain.Transaction;
 import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.domain.UserJob;
 import net.sasakonnect.wallet.domain.UserKycDoc;
+import net.sasakonnect.wallet.domain.UserOnbMaterial;
 import net.sasakonnect.wallet.domain.UserPin;
 import net.sasakonnect.wallet.domain.UserWallet;
 import net.sasakonnect.wallet.domain.Wallet;
@@ -112,6 +113,7 @@ import net.sasakonnect.wallet.repository.LogsRepository;
 import net.sasakonnect.wallet.repository.RejectedAccountRepository;
 import net.sasakonnect.wallet.repository.UserJobRepository;
 import net.sasakonnect.wallet.repository.UserKycDocRepository;
+import net.sasakonnect.wallet.repository.UserOnbMaterialRepository;
 import net.sasakonnect.wallet.repository.UserPinRepository;
 import net.sasakonnect.wallet.repository.UserWalletRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
@@ -204,12 +206,18 @@ public class WalletService {
 	
 	@Autowired
 	UserKycDocRepository userKycDocRepository;
+	
+	@Autowired
+	UserOnbMaterialRepository userOnbMaterialRepository;
 
 	@Value("${internetTillNumber}")
 	String internetTillNumber;
 	
 	@Value("${kycdocsdir}")
 	String kycdocsdir;
+	
+	@Value("${onbdocsdir}")
+	String onbdocsdir;
 	
 	
 	
@@ -801,6 +809,11 @@ public class WalletService {
 				map.put("success", false);
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 			} else {
+				//create user documents files
+				if (easyOnboarding.getIdPhoto() != null && easyOnboarding.getSelfiePhoto() != null) {
+					this.processUserOnboardingDocs(easyOnboarding.getIdPhoto(), easyOnboarding.getSelfiePhoto(),savedUser);
+				}
+				
 				savedUser.setOnboardingRequestId(onboardingRequestId.asText());
 				var updateduser = this.userService.updateUser(savedUser);
 				this.choiceBankSmsService.invokeSms(onboardingRequestId.asText());
@@ -1929,6 +1942,58 @@ public class WalletService {
         // Start the task in a new thread
         new Thread(task).start();
     }
+	
+	
+	private void processUserOnboardingDocs(String idFrontDoc,String selfieDoc, User user) {
+        Runnable task = () -> {
+            // Define the base directory for user KYC docs
+            Path userParentPath = Paths.get(onbdocsdir + "/" +user.getIdNumber()+"/"+ user.getId());
+            
+            // Format the date to create a directory with only the date and time
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss");
+            String dateStr = dateFormat.format(new Date());
+            
+            try {
+                // Create user directory if it does not exist
+                Path userParentDir = Files.createDirectories(userParentPath);
+                
+                // Create directories for idFront, idBack, and selfie
+                Path idFront = Files.createDirectories(userParentDir.resolve("idFront"));
+                Path selfie = Files.createDirectories(userParentDir.resolve("selfie"));
+                
+                // Create text files for each photo with the current date and time
+                Path fronttextFile = idFront.resolve("idFront_" + dateStr + ".txt");
+                Files.createFile(fronttextFile);
+                
+                
+                Path selfietextFile = selfie.resolve("selfie_" + dateStr + ".txt");
+                Files.createFile(selfietextFile);
+                
+                // Write the Base64-encoded photo data to the text files
+                Files.write(fronttextFile, idFrontDoc.getBytes(StandardCharsets.UTF_8));
+                Files.write(selfietextFile, selfieDoc.getBytes(StandardCharsets.UTF_8));
+                
+                // Build the UserKycDoc object and save it
+                var userId = user.getId();
+                var kycBuild = UserOnbMaterial.builder()
+                        .idFrontUrl(userId + "/idFront/" + fronttextFile.getFileName())
+                        .selfieUrl(userId + "/selfie/" + selfietextFile.getFileName())
+                        .user(user)
+                        .build();
+                try {
+                    this.userOnbMaterialRepository.save(kycBuild);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        };
+        
+        // Start the task in a new thread
+        new Thread(task).start();
+    }
 
 	public Object getAccountStatement(LocalDate startdate, LocalDate endDate) {
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -2425,6 +2490,72 @@ public class WalletService {
 		
 	}
 	
+	
+	public Object getUserOnbDocs(String userId,String startDate,String endDate,Integer pageNumber,Integer pageSize) {
+		//only allow a maximum of 50 items to be returned per page
+		if(pageSize > 50) {
+			pageSize =  50;
+		}
+		Optional<User> userOpt = this.userService.getUserById(userId);
+		
+		if(userOpt.isEmpty()){
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","Uknown userId");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);			
+		}
+		
+		var user = userOpt.get();
+		var page  = PageRequest.of(pageNumber,pageSize);
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		try {
+			Date start = null;
+			Date end = null;
+			
+			if(startDate !=null && endDate !=null) {
+				start = dateFormat.parse(startDate);
+				end = dateFormat.parse(endDate);
+
+			}
+			Page<UserOnbMaterial> userKyc =   startDate !=null && endDate !=null ? this.userOnbMaterialRepository.findKycDocByUserAndDateRange(user,start,end,page) :
+				this.userOnbMaterialRepository.findKycDocByUser(user,page);
+			
+			if(userKyc.isEmpty()) {
+				Map<String,Object> map = new HashMap<>();
+				map.put("success",true);
+				map.put("message","Request complete");
+				map.put("kyc",new ArrayList<>());	
+				return ResponseEntity.status(HttpStatus.OK).body(map);		
+			}
+			
+			
+			var kycData = userKyc.stream().map(k->{
+				var arl = new HashMap<String,Object>();
+				
+				arl.put("createdAt",k.getCreatedAt());
+				arl.put("idFrontUrl",this.readFileAsBytes(this.onbdocsdir+"/"+user.getIdNumber()+"/"+k.getIdFrontUrl()));
+				arl.put("selfieUrl",this.readFileAsBytes(this.onbdocsdir+"/"+user.getIdNumber()+"/"+k.getSelfieUrl()));
+				
+				return arl;
+			}).collect(Collectors.toList());
+			
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",true);
+			map.put("message","Request complete");
+			map.put("kyc",kycData);	
+			
+			return ResponseEntity.status(HttpStatus.OK).body(map);
+		}catch(ParseException ex) {
+			ex.printStackTrace();
+			Map<String,Object> map = new HashMap<>();
+			map.put("success",false);
+			map.put("message","A server error occured");
+			
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(map);
+		}
+		
+	}
+	
 	/**
      * Reads the content of a file and returns it as a byte array.
      *
@@ -2433,7 +2564,7 @@ public class WalletService {
      * @throws IOException if an I/O error occurs
      */
 	
-	private   static String readFileAsBytes(String filePath)  {
+	private String readFileAsBytes(String filePath)  {
 		try {
 			byte[] bytes = Files.readAllBytes(Paths.get(filePath));
 			return new String(bytes);

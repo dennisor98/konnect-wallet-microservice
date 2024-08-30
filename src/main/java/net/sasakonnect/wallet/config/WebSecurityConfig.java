@@ -110,7 +110,7 @@ public class WebSecurityConfig {
 				.requestMatchers("/user/userLogin", "/user/confirmOtp", "/user/admin/confirmOtp", "/konnect/callBack","/user/account/confirm",
 						"/user/refresh/token", "/sme/login", "/sme/verifyOtp", "/lark/callback","/user/login/resendOtp","/sdk/mobile/confirm",
 						"/wallet/getOnboardingStatusById", "/sdk/transaction/{id}", "user/corporateLogin",
-						"/sdk/openId", "/sdk/customer", "/sdk/customers", "/sdk/customer/stkpush","/sdk/transaction/history")
+						"/sdk/openId", "/sdk/customer", "/sdk/customers", "/sdk/customer/stkpush","/sdk/transaction/history","/sdk/app/authorities")
 
 				.permitAll().requestMatchers("/wallet").permitAll().requestMatchers(HttpMethod.OPTIONS, "/**")
 				.permitAll() // Permit OPTIONS requests
