@@ -34,5 +34,5 @@ public class ClientAuthority extends BaseWalletDomain {
 	User user;
 	
 	
-	boolean isOptional;
+	Boolean isOptional;
 }

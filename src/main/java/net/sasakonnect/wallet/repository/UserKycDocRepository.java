@@ -14,7 +14,7 @@ import net.sasakonnect.wallet.domain.UserKycDoc;
 
 public interface UserKycDocRepository extends JpaRepository<UserKycDoc,String> {
 	@Query("SELECT d FROM UserKycDoc d WHERE d.user =:user ORDER BY d.createdAt DESC")
-  Page<UserKycDoc> findKycDocByUser(@Param("user") User user,Pageable pageable);
+	Page<UserKycDoc> findKycDocByUser(@Param("user") User user,Pageable pageable);
 	
   @Query("SELECT d FROM UserKycDoc d WHERE d.user =:user AND d.createdAt BETWEEN :startDate AND :endDate ORDER BY d.createdAt DESC")
   Page<UserKycDoc> findKycDocByUserAndDateRange(@Param("user") User user,@Param("startDate") Date startDate,@Param("endDate") Date endDate,Pageable pageable);

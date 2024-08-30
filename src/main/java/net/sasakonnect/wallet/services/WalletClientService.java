@@ -429,7 +429,7 @@ public class WalletClientService {
 			map.put("success",true);
 			map.put("message","Request complete");
 			map.put("authorities",new ArrayList<>());
-
+            map.put("icon",client.getAppIcon());
 			return ResponseEntity.status(HttpStatus.OK).body(map);
 
 		}
@@ -437,8 +437,9 @@ public class WalletClientService {
 		var authorities = authoritiesList.stream()
 				.map(a->{
 					var map = new HashMap<>();
-					map.put("id",a.getId());
+					map.put("id",a.getAuthority().getId());
 					map.put("authName",a.getAuthority().getName());
+					map.put("isOptional",a.getIsOptional());
 					map.put("description",a.getAuthority().getDescription());
 					return map;
 				}).collect(Collectors.toList());
@@ -447,6 +448,7 @@ public class WalletClientService {
 		map.put("success",true);
 		map.put("message","Request complete");
 		map.put("authorities",authorities);
+		map.put("icon",client.getAppIcon());
 		return ResponseEntity.status(HttpStatus.OK).body(map);
 	}
 	
@@ -614,6 +616,8 @@ public class WalletClientService {
 		return ResponseEntity.status(HttpStatus.OK).body(map);
 	}
 	
+	
+	@Transactional
 	public Object assignClientAuthority(AssignAuthorityDto authDto) {
 		Optional<WalletClient> clientOpt =  this.wallectClientRepository.findById(authDto.getClientId());
 		if(clientOpt.isEmpty()) {
@@ -631,21 +635,18 @@ public class WalletClientService {
 			for(Authority auth: authDto.getAuthorities()) {
 				Optional<GlobalAuthority> authorityOpt =  this.globalAuthorityRepository.findById(auth.getAuthId());
 				if(authorityOpt.isPresent()) {
-					Optional<ClientAuthority> clientAuthorityOpt =  this.clientAuthorityRepository.findByAuthorityAndClient(authorityOpt.get(),client);
-					if(authorityOpt.isEmpty()) {
-						var authBuild = ClientAuthority.builder().authority(authorityOpt.get()).client(client).isOptional(auth.getIsOptional()).build();
-						authorities.add(authBuild);
+					List<ClientAuthority> authOpt = this.clientAuthorityRepository.findByClient(client);
+					if(!authOpt.isEmpty()) {
+						this.clientAuthorityRepository.deleteAll(authOpt);
 					}
+					var authBuild = ClientAuthority.builder().authority(authorityOpt.get()).client(client).isOptional(auth.getIsOptional()).build();
+					authorities.add(authBuild);
 				}
 			}
 			
 			
 			if(authorities.size() > 0) {
 				try {
-					List<ClientAuthority> authOpt = this.clientAuthorityRepository.findByClient(client);
-					if(!authOpt.isEmpty()) {
-						this.clientAuthorityRepository.deleteAll(authOpt);
-					}
 					this.clientAuthorityRepository.saveAll(authorities);
 					Map<String,Object> map = new HashMap<>();
 					map.put("success",true);

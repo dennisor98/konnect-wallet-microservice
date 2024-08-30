@@ -278,10 +278,11 @@ public class SdkController {
 
 	}
 	
-	@PostMapping("app/authorities")
-//	@ServiceInteractionMiddleware
-	public Object getClientAuthorities(@Valid @RequestBody() GetClientAuthsDto sdkAuthRequest) {
-		return this.walletClientService.getClientAuthorities(sdkAuthRequest);
+	@GetMapping("app/authorities")
+	@WalletClientReqMiddleware()
+	public Object getClientAuthorities(@RequestHeader("app-key") String appKey,@RequestHeader("secret-key") String secretKey) {
+		var auths = GetClientAuthsDto.builder().appKey(appKey).appSecret(secretKey).build();
+		return this.walletClientService.getClientAuthorities(auths);
 
 	}
 
