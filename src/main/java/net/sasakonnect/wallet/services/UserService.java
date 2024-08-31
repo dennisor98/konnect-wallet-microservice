@@ -197,6 +197,55 @@ public class UserService extends RestClientService implements UserDetailsService
 //        }	
 //	}
 //	
+	public ResponseEntity<Object> getRejectedUsers(Integer pageNumber, Integer pageSize) {
+		Map<String, Object> resObject = new HashMap<String, Object>();
+		Map<String, Object> payloadMap = new HashMap<>();
+		try {
+			Page<RejectedAccount> user = this.rejectedAccountRepository.findAll(PageRequest.of(pageNumber, pageSize));
+//			var us = user.get();
+//			log.error("users" + us.size());
+
+			var usermaps = user.stream().map(u -> {
+				Map<String, Object> map = new HashMap<>();
+				map.put("id", u.getId());
+				map.put("firstname", u.getFirstName());
+				map.put("middlename", u.getMiddleName());
+				map.put("lastname", u.getLastName());
+				map.put("user_id", u.getId());
+				map.put("phone", u.getMobile());
+				map.put("status", u.getStatus());
+				map.put("createdAt",u.getCreatedAt());
+				map.put("updatedAt", u.getUpdatedAt());
+				map.put("idNumber", u.getIdNumber());
+//	            map.put("wallet", u.getUserWallets());
+		
+				// Add other mappings as needed
+				return map;
+
+			}).collect(Collectors.toList());
+
+			payloadMap.put("success", "true");
+			payloadMap.put("totalRows", Double.valueOf(user.getTotalElements()));
+			payloadMap.put("pageSize", user.getSize());
+			payloadMap.put("currentPage", user.getNumber());
+			payloadMap.put("hasMore", user.hasNext() ? true : false);
+			payloadMap.put("nextPage", user.hasNext() ? user.nextPageable().getPageNumber() : null);
+			payloadMap.put("hasNextPage", user.hasNext());
+			payloadMap.put("hasPreviousPage", user.hasPrevious());
+			payloadMap.put("users", usermaps);
+			resObject.put("payload", payloadMap);
+			return ResponseEntity.status(HttpStatus.ACCEPTED).body(resObject);
+		} catch (Exception e) {
+			payloadMap.put("success", "false");
+			payloadMap.put("message", "A system error occured");
+			payloadMap.put("error", e.getMessage());
+			resObject.put("payload", payloadMap);
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resObject);
+		}
+
+	}
+	
+	
 	public ResponseEntity<Object> getAllUsers(Integer pageNumber, Integer pageSize) {
 		Map<String, Object> resObject = new HashMap<String, Object>();
 		Map<String, Object> payloadMap = new HashMap<>();
@@ -214,6 +263,7 @@ public class UserService extends RestClientService implements UserDetailsService
 				map.put("user_id", u.getId());
 				map.put("phone", u.getMobile());
 				map.put("status", u.getStatus());
+				map.put("idNumber", u.getIdNumber());
 //	            map.put("wallet", u.getUserWallets());
 				map.put("corporate", u.getCorporate());
 				if (u.getUserRole() != null) {
@@ -336,6 +386,12 @@ public class UserService extends RestClientService implements UserDetailsService
 		return this.userRepository.findById(id);
 
 	}
+	
+	public Optional<User> getUserByIdNumber(String idNumber) {
+		return this.userRepository.findByIdNumber(idNumber);
+
+	}
+
 
 	public Optional<Role> getUserRoleByUserId(String id) {
 
@@ -968,6 +1024,10 @@ public class UserService extends RestClientService implements UserDetailsService
 
 	public void deleteSuccessfulFromRejected(String IdNumber) {
 		this.rejectedAccountRepository.deleteByIdNumber(IdNumber);
+	}
+	
+	public Object getRejectedAccounts() {
+		return null;
 	}
 
 	public Optional<User> findUserByAccountd(String accountId) {

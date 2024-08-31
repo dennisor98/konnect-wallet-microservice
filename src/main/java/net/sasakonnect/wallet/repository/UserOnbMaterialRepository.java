@@ -18,4 +18,11 @@ public interface UserOnbMaterialRepository extends JpaRepository<UserOnbMaterial
 	 
 	 @Query("SELECT d FROM UserKycDoc d WHERE d.user =:user ORDER BY d.createdAt DESC")
 	 Page<UserOnbMaterial> findKycDocByUser(@Param("user") User user,Pageable pageable);
+	 
+	 
+	 @Query("SELECT d FROM UserOnbMaterial d WHERE d.idNumber =:idNumber AND d.createdAt BETWEEN :startDate AND :endDate ORDER BY d.createdAt DESC")
+	  Page<UserOnbMaterial> findKycDocByIdNumberAndDateRange(@Param("idNumber") String idNumber,@Param("startDate") Date startDate,@Param("endDate") Date endDate,Pageable pageable);
+	 
+	 @Query("SELECT d FROM UserKycDoc d WHERE d.idNumber =:idNumber ORDER BY d.createdAt DESC")
+	 Page<UserOnbMaterial> findKycDocByIdNumber(@Param("idNumber") String idNumber,Pageable pageable);
 }

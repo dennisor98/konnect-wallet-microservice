@@ -220,6 +220,18 @@ public class AdministrationController {
 		}
 		return this.userService.getAllUsers(pageNumber, pageSize);
 	}
+	
+	@GetMapping("/users/rejected")
+	@IsCorporate()
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.ViewAllUsers.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.ViewAllUsers.PERMISSION)
+	public ResponseEntity<Object> getRejectedUsers(@RequestParam(name = "pageSize", defaultValue = "100") Integer pageSize,
+			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber) {
+		if (pageSize > 100) {
+			pageSize = 100;
+		}
+		return this.userService.getRejectedUsers(pageNumber, pageSize);
+	}
 
 	@GetMapping("/user/corporate")
 	@IsCorporate()
