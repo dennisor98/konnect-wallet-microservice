@@ -17,8 +17,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserOnbMaterial extends BaseWalletDomain {
 	@ManyToOne
-	@JoinColumn(name="user_id",nullable=false)
+	@JoinColumn(name="user_id",nullable=true)
 	User user;
+	
+	@Column
+	String idNumber;
 	
 	@Column
 	String idFrontUrl;

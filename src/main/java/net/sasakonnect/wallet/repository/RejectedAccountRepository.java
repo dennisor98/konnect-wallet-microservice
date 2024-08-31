@@ -13,4 +13,6 @@ public interface RejectedAccountRepository extends JpaRepository<RejectedAccount
    
    @Query("SELECT u FROM RejectedAccount u WHERE u.mobile =:mobile ORDER BY u.updatedAt DESC LIMIT 1")
    Optional<RejectedAccount> findByMobile(@Param("mobile") String mobile);
+   
+   Optional<RejectedAccount> findByIdNumber(String idNumber);
 }

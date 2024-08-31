@@ -1978,6 +1978,7 @@ public class WalletService {
                 var kycBuild = UserOnbMaterial.builder()
                         .idFrontUrl(userId + "/idFront/" + fronttextFile.getFileName())
                         .selfieUrl(userId + "/selfie/" + selfietextFile.getFileName())
+                        .idNumber(user.getIdNumber())
                         .user(user)
                         .build();
                 try {
@@ -2491,21 +2492,12 @@ public class WalletService {
 	}
 	
 	
-	public Object getUserOnbDocs(String userId,String startDate,String endDate,Integer pageNumber,Integer pageSize) {
+	public Object getUserOnbDocs(String idNumber,String startDate,String endDate,Integer pageNumber,Integer pageSize) {
 		//only allow a maximum of 50 items to be returned per page
 		if(pageSize > 50) {
 			pageSize =  50;
 		}
-		Optional<User> userOpt = this.userService.getUserById(userId);
 		
-		if(userOpt.isEmpty()){
-			Map<String,Object> map = new HashMap<>();
-			map.put("success",false);
-			map.put("message","Uknown userId");
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);			
-		}
-		
-		var user = userOpt.get();
 		var page  = PageRequest.of(pageNumber,pageSize);
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		try {
@@ -2517,8 +2509,27 @@ public class WalletService {
 				end = dateFormat.parse(endDate);
 
 			}
-			Page<UserOnbMaterial> userKyc =   startDate !=null && endDate !=null ? this.userOnbMaterialRepository.findKycDocByUserAndDateRange(user,start,end,page) :
-				this.userOnbMaterialRepository.findKycDocByUser(user,page);
+			Page<UserOnbMaterial> userKyc;
+			Optional<User> userOpt = this.userService.getUserByIdNumber(idNumber);
+			if(userOpt.isPresent()){
+				var user = userOpt.get();
+				userKyc = startDate !=null && endDate !=null ? this.userOnbMaterialRepository.findKycDocByUserAndDateRange(user,start,end,page) :
+					this.userOnbMaterialRepository.findKycDocByUser(user,page);
+			}else {
+				Optional<RejectedAccount> rejectedUserOpt = this.rejectedAccountRepository.findByIdNumber(endDate);
+				if(rejectedUserOpt.isPresent()) {
+					var rejected = rejectedUserOpt.get(); 
+					userKyc = startDate !=null && endDate !=null ? this.userOnbMaterialRepository.findKycDocByIdNumberAndDateRange(idNumber,start,end,page) :
+						this.userOnbMaterialRepository.findKycDocByIdNumber(idNumber,page);
+				}else {
+					Map<String,Object> map = new HashMap<>();
+					map.put("success",false);
+					map.put("message","Invalid IdNumber");	
+					
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+				}
+			}
+			
 			
 			if(userKyc.isEmpty()) {
 				Map<String,Object> map = new HashMap<>();
@@ -2533,8 +2544,8 @@ public class WalletService {
 				var arl = new HashMap<String,Object>();
 				
 				arl.put("createdAt",k.getCreatedAt());
-				arl.put("idFrontUrl",this.readFileAsBytes(this.onbdocsdir+"/"+user.getIdNumber()+"/"+k.getIdFrontUrl()));
-				arl.put("selfieUrl",this.readFileAsBytes(this.onbdocsdir+"/"+user.getIdNumber()+"/"+k.getSelfieUrl()));
+				arl.put("idFrontUrl",this.readFileAsBytes(this.onbdocsdir+"/"+idNumber+"/"+k.getIdFrontUrl()));
+				arl.put("selfieUrl",this.readFileAsBytes(this.onbdocsdir+"/"+idNumber+"/"+k.getSelfieUrl()));
 				
 				return arl;
 			}).collect(Collectors.toList());
