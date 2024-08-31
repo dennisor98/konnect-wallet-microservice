@@ -2516,7 +2516,7 @@ public class WalletService {
 				userKyc = startDate !=null && endDate !=null ? this.userOnbMaterialRepository.findKycDocByUserAndDateRange(user,start,end,page) :
 					this.userOnbMaterialRepository.findKycDocByUser(user,page);
 			}else {
-				Optional<RejectedAccount> rejectedUserOpt = this.rejectedAccountRepository.findByIdNumber(endDate);
+				Optional<RejectedAccount> rejectedUserOpt = this.rejectedAccountRepository.findByIdNumber(idNumber);
 				if(rejectedUserOpt.isPresent()) {
 					var rejected = rejectedUserOpt.get(); 
 					userKyc = startDate !=null && endDate !=null ? this.userOnbMaterialRepository.findKycDocByIdNumberAndDateRange(idNumber,start,end,page) :
