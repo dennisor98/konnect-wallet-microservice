@@ -317,6 +317,7 @@ public class UserService extends RestClientService implements UserDetailsService
 				usermap.put("middlename", u.getMiddleName());
 				usermap.put("user_id", u.getId());
 				usermap.put("phone", u.getMobile());
+				usermap.put("idNumber", u.getIdNumber());
 				if (u.getUserWallets() != null && !u.getUserWallets().isEmpty()) {
 					usermap.put("wallet", u.getUserWallets().get(0).getWallet());
 				} else {
