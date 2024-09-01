@@ -2513,8 +2513,8 @@ public class WalletService {
 			Optional<User> userOpt = this.userService.getUserByIdNumber(idNumber);
 			if(userOpt.isPresent()){
 				var user = userOpt.get();
-				userKyc = startDate !=null && endDate !=null ? this.userOnbMaterialRepository.findKycDocByUserAndDateRange(user,start,end,page) :
-					this.userOnbMaterialRepository.findKycDocByUser(user,page);
+				userKyc = startDate !=null && endDate !=null ? this.userOnbMaterialRepository.findKycDocByIdNumberAndDateRange(idNumber,start,end,page) :
+					this.userOnbMaterialRepository.findKycDocByIdNumber(idNumber,page);
 			}else {
 				Optional<RejectedAccount> rejectedUserOpt = this.rejectedAccountRepository.findByIdNumber(idNumber);
 				if(rejectedUserOpt.isPresent()) {
