@@ -347,6 +347,46 @@ public class UserService extends RestClientService implements UserDetailsService
 
 		}
 	}
+	
+	public ResponseEntity<Object> searchRejectedUser(String queryString, Integer pageNumber, Integer pageSize) {
+		Page<RejectedAccount> user = this.rejectedAccountRepository.searchUser(queryString, PageRequest.of(pageNumber, pageSize));
+		if (!user.isEmpty()) {
+			Map<String, Object> map = new HashMap<>();
+			Map<String, Object> resObject = new HashMap<>();
+			var res = user.stream().map(u -> {
+				Map<String, Object> usermap = new HashMap<>();
+				usermap.put("id", u.getId());
+				usermap.put("firstname", u.getFirstName());
+				usermap.put("lastname", u.getLastName());
+				usermap.put("middlename", u.getMiddleName());
+				usermap.put("user_id", u.getId());
+				usermap.put("phone", u.getMobile());
+				usermap.put("idNumber", u.getIdNumber());
+				usermap.put("wallet", "null");
+				usermap.put("profileImage",null);
+				return usermap;
+			}).collect(Collectors.toList());
+			map.put("success", "true");
+			map.put("totalRows", Double.valueOf(user.getTotalElements()));
+			map.put("pageSize", user.getSize());
+			map.put("currentPage", user.getNumber());
+			map.put("hasMore", user.hasNext() ? true : false);
+			map.put("nextPage", user.hasNext() ? user.nextPageable().getPageNumber() : null);
+			map.put("hasNextPage", user.hasNext());
+			map.put("hasPreviousPage", user.hasPrevious());
+			map.put("message", "Request successful");
+			map.put("users", res);
+			resObject.put("payload", map);
+			return ResponseEntity.status(HttpStatus.OK).body(resObject);
+
+		} else {
+			Map<String, Object> map = new HashMap<>();
+			map.put("success", false);
+			map.put("message", "User not found");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+
+		}
+	}
 
 	public Object getCorporateUsers() {
 		Map<String, Object> resObject = new HashMap<String, Object>();

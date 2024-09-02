@@ -257,6 +257,23 @@ public class AdministrationController {
 
 		return null;
 	}
+	
+	@GetMapping("/user/rejected/search")
+	@IsCorporate()
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanSearchUsers.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.CanSearchUsers.PERMISSION)
+	public Object searchRejectedUser(@RequestParam(name = "queryString", required = true) String phone,
+			@RequestParam(name = "pageNumber", required = false, defaultValue = "0") Integer pageNumber,
+			@RequestParam(name = "pageSize", required = false, defaultValue = "10") Integer pageSize) {
+		if (pageSize > 10) {
+			pageSize = 10;
+		}
+		if (!phone.isEmpty()) {
+			return this.userService.searchUser(phone, pageNumber, pageSize);
+		}
+
+		return null;
+	}
 
 	@PostMapping("/user/corporate/create")
 	@IsCorporate()
