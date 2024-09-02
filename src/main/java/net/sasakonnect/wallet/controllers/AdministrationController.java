@@ -269,7 +269,7 @@ public class AdministrationController {
 			pageSize = 10;
 		}
 		if (!phone.isEmpty()) {
-			return this.userService.searchUser(phone, pageNumber, pageSize);
+			return this.userService.searchRejectedUser(phone, pageNumber, pageSize);
 		}
 
 		return null;
