@@ -11,11 +11,17 @@ import net.sasakonnect.wallet.enums.sme.OperatingMode;
 public class OperatingModeConverter implements AttributeConverter<OperatingMode, Integer> {
 	@Override
 	public Integer convertToDatabaseColumn(OperatingMode operatingMode) {
+		if(operatingMode == null) {
+			return null;
+		}
 		return operatingMode.getValue();
 	}
 
 	@Override
 	public OperatingMode convertToEntityAttribute(Integer value) {
+		if(value == null ) {
+			return null;
+		}
 		return OperatingMode.fromValue(value);
 	}
 }

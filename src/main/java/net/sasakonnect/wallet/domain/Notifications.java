@@ -3,6 +3,9 @@ package net.sasakonnect.wallet.domain;
 import java.util.Date;
 import java.util.List;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -31,6 +34,7 @@ public class Notifications extends BaseWalletDomain {
 	
 	@ManyToOne()
 	@JoinColumn(name = "user_id",nullable=true)
+	@OnDelete(action = OnDeleteAction.SET_NULL)
 	User targetUser;
 	
 	@Column()

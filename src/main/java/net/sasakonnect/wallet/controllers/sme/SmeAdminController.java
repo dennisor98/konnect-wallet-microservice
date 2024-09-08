@@ -24,6 +24,7 @@ import net.sasakonnect.wallet.RequestDto.sme.LLCInformationDto;
 import net.sasakonnect.wallet.RequestDto.sme.LlcSmeMemberDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmeAccountDocuments;
 import net.sasakonnect.wallet.RequestDto.sme.SmeBusinessAccountDto;
+import net.sasakonnect.wallet.RequestDto.sme.SolePDto;
 import net.sasakonnect.wallet.RequestDto.sme.SubmitSmeAccount;
 import net.sasakonnect.wallet.ResponseDto.sme.SmeCorporateDto;
 import net.sasakonnect.wallet.annotations.CustomController;
@@ -104,13 +105,23 @@ public class SmeAdminController {
 
 	}
 
-	@PostMapping("/sme/information")
+	@PostMapping("/sme/llc/information")
  	@IsCorporate()
 	@PreAuthorize("hasPermission(#apartmentId, '"
 			+ GlobalPermissionConstants.CanConfirmOnboardingSmeAccountOtp.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.CanConfirmOnboardingSmeAccountOtp.PERMISSION)
-	public Object confirmSmePhoneNumber(@RequestBody LLCInformationDto confirmsmeDto) {
+	public Object registerLlcInformation(@RequestBody LLCInformationDto confirmsmeDto) {
 		return this.smeService.registerLccInformation(confirmsmeDto);
+
+	}
+	
+	@PostMapping("/sme/sp/information")
+ 	@IsCorporate()
+	@PreAuthorize("hasPermission(#apartmentId, '"
+			+ GlobalPermissionConstants.CanConfirmOnboardingSmeAccountOtp.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.CanConfirmOnboardingSmeAccountOtp.PERMISSION)
+	public Object registerSolePropInformation(@RequestBody SolePDto confirmsmeDto) {
+		return this.smeService.registerSoleProprietorInformation(confirmsmeDto);
 
 	}
 

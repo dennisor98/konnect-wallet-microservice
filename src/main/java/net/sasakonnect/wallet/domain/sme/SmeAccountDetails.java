@@ -2,6 +2,7 @@ package net.sasakonnect.wallet.domain.sme;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Date;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -41,7 +42,7 @@ public class SmeAccountDetails extends BaseWalletDomain implements Serializable 
 //	private Integer operatingMode;
 
 	@Convert(converter = OperatingModeConverter.class)
-	@Column(nullable = false)
+	@Column(nullable = true)
 	private OperatingMode operatingMode;
 
 	@Column(nullable = true)
@@ -60,7 +61,7 @@ public class SmeAccountDetails extends BaseWalletDomain implements Serializable 
 	private Integer gender;
 
 	@Column(nullable = true)
-	private LocalDate birthday;
+	private String birthday;
 
 	@Column(nullable = true)
 	private String idNumber;
