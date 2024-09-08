@@ -784,6 +784,14 @@ public class AdministrationController {
 		return this.notificationService.createNotification(request);
 	}
 
+	@GetMapping("user/notification/history")
+	@IsCorporate()
+	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanSearchAccountInfo.PERMISSION + "')")
+	@RequirePermission(GlobalPermissionConstants.CanSearchAccountInfo.PERMISSION)
+	public Object getNotifications(@RequestParam("userId") String userId,@RequestParam(name="pageNumber",defaultValue="0") Integer pageNumber,@RequestParam(name="pageSize",defaultValue="10") Integer pageSize) {
+		return this.notificationService.getUserNotificationHistory(userId, pageNumber, pageSize);
+	}
+	
 	@GetMapping("apps/clients")
 	@IsCorporate()
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.CanSearchAccountInfo.PERMISSION + "')")

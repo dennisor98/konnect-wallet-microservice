@@ -1,5 +1,8 @@
 package net.sasakonnect.wallet.domain;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -18,6 +21,7 @@ import lombok.NoArgsConstructor;
 public class UserOnbMaterial extends BaseWalletDomain {
 	@ManyToOne
 	@JoinColumn(name="user_id",nullable=true)
+	@OnDelete(action = OnDeleteAction.SET_NULL)
 	User user;
 	
 	@Column

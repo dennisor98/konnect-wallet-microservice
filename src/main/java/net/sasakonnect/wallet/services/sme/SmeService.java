@@ -1,12 +1,20 @@
 package net.sasakonnect.wallet.services.sme;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import org.hibernate.query.sqm.ParsingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -30,6 +38,7 @@ import net.sasakonnect.wallet.RequestDto.sme.SmeAccountDocuments;
 import net.sasakonnect.wallet.RequestDto.sme.SmeAccountManagerDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmeBusinessAccountDto;
 import net.sasakonnect.wallet.RequestDto.sme.SmeMultiAccountDto;
+import net.sasakonnect.wallet.RequestDto.sme.SolePDto;
 import net.sasakonnect.wallet.RequestDto.sme.SubmitSmeAccount;
 import net.sasakonnect.wallet.ResponseDto.TransactionResponseDto;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
@@ -409,6 +418,68 @@ public class SmeService {
 
 			if (responseJson != null) {
 				var gson = new Gson().fromJson(responseJson, HashMap.class);
+				if (!((String) gson.get("code")).equalsIgnoreCase("00000")) {
+					this.smeAccountInfoRepository.delete(smeInfo);
+				} else {
+
+				}
+				return gson;
+
+			}
+		}
+
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public Object registerSoleProprietorInformation(SolePDto createSmeSto) {
+		var sme = this.smeRepository.findSmeByOnboardingId(createSmeSto.getOnboardingRequestId());
+		LocalDate birthday = null;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd"); // Define the format of the date string
+
+		try {
+			 birthday = LocalDate.parse(createSmeSto.getBirthday(), formatter);
+			 
+		}catch(DateTimeParseException ex) {
+		    ex.printStackTrace();	
+		}
+		if (sme.isPresent()) {
+			var smeInformation = SmeAccountDetails.builder().account(sme.get())
+					.businessAddress(createSmeSto.getBusinessAddress()).businessName(createSmeSto.getBusinessName())
+					.businessIndustry(createSmeSto.getBusinessIndustry())
+					.kinFullName(createSmeSto.getKinFullName()).kinMobile(createSmeSto.getKinMobile()).idNumber(createSmeSto.getIdNumber())
+					.birthday(createSmeSto.getBirthday()).firstName(createSmeSto.getFirstName()).middleName(createSmeSto.getMiddleName()).gender(createSmeSto.getGender().getValue())
+					.lastName(createSmeSto.getLastName()).kinCountryCode(createSmeSto.getKinCountryCode()).kinRelationship(createSmeSto.getKinRelationship())
+					.businessCerNum(createSmeSto.getBusinessCerNum()).kraPin(createSmeSto.getKraPin()).build();
+			var smeInfo = this.smeAccountInfoRepository.save(smeInformation);
+			var reqId = new HashMap<String, Object>();
+			reqId.put("onboardingRequestId", sme.get().getOnboardingRequestId());
+			reqId.put("businessName", smeInfo.getBusinessName());
+			reqId.put("businessCerNum", smeInfo.getBusinessCerNum());
+			reqId.put("kraPin", smeInfo.getKraPin());
+			reqId.put("businessIndustry", smeInfo.getBusinessIndustry().getValue());
+			reqId.put("businessAddress", smeInfo.getBusinessAddress());
+			reqId.put("firstName", smeInfo.getFirstName());
+			reqId.put("middleName", smeInfo.getMiddleName());
+			reqId.put("lastName", smeInfo.getLastName());
+			reqId.put("firstName", smeInfo.getFirstName());
+			reqId.put("gender", smeInfo.getGender());
+			reqId.put("birthday", smeInfo.getBirthday());
+			reqId.put("idNumber", smeInfo.getIdNumber());
+			reqId.put("kinFullName", smeInfo.getKinFullName());
+			reqId.put("kinRelationship", smeInfo.getKinRelationship());
+			reqId.put("kinCountryCode", smeInfo.getKinCountryCode());
+			reqId.put("kinMobile", smeInfo.getKinMobile());
+			var reqs = requestSigner.signRequest(reqId);
+			Mono<String> responseMono = this.bankClientBean.webClient.post()
+					.uri(ChoiceEndpointsConstants.UPDATE_SOLE_SME_INFO).contentType(MediaType.APPLICATION_JSON)
+					.body(BodyInserters.fromValue(reqs)).accept(MediaType.APPLICATION_JSON).retrieve()
+					.bodyToMono(String.class);
+
+			String responseJson = responseMono.block();
+
+			if (responseJson != null) {
+				var gson = new Gson().fromJson(responseJson, Map.class);
 				if (!((String) gson.get("code")).equalsIgnoreCase("00000")) {
 					this.smeAccountInfoRepository.delete(smeInfo);
 				} else {

@@ -19,7 +19,7 @@ public enum OperatingMode {
 				return mode;
 			}
 		}
-		throw new IllegalArgumentException("Invalid OperatingMode value: " + value);
+		return null;
 	}
 	
 	public static int getCodeByName(String name) {

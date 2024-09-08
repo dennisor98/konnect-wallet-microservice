@@ -267,4 +267,48 @@ public class NotificationService {
    public void deleteAll(List<Notifications> notifications) {
 	   this.notificationsRepository.deleteAll(notifications);
    }
+   
+   public Object getUserNotificationHistory(String userId,Integer pageNumber,Integer pageSize) {
+	   Optional<User> userOpt = this.userRepository.findById(userId);
+	   if(userOpt.isEmpty()) {
+		   Map<String,Object> map = new HashMap<>();
+		   map.put("success",false);
+		   map.put("message","Invalid userId");
+		   return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map); 
+	   }
+	   var user = userOpt.get();
+	   Page<Notifications> notificationsPage = this.notificationsRepository.findReadNotifications(user,PageRequest.of(pageNumber,pageSize));
+	   if(notificationsPage.isEmpty()) {
+		   Map<String,Object> map = new HashMap<>();
+		   map.put("success",true);
+		   map.put("message","Request complete");
+		   map.put("notifications",new ArrayList<>());
+		   return ResponseEntity.status(HttpStatus.OK).body(map); 
+	   }
+	   var notifications = notificationsPage.stream()
+			   .map(n->{
+				   Map<String,Object> map = new HashMap<>();
+				   map.put("id",n.getId());
+				   map.put("createdAt",n.getCreatedAt());
+				   map.put("updatedAt",n.getUpdatedAt());
+				   map.put("title",n.getTitle());
+				   map.put("message",n.getMessage());
+				   map.put("caption",n.getCaption());
+				   map.put("contentType",n.getContentType());
+				   map.put("target",n.getTargetType());
+				   return map;
+			   }).collect(Collectors.toList());
+	   Map<String,Object> map = new HashMap<>();
+	   ResponsePagerClass<Notifications> page =  ResponsePagerClass.<Notifications>builder()
+	   		    .page(notificationsPage)
+	   		    .build();
+	   
+	   var pageMap =  new HashMap<>();
+	   pageMap.putAll(page.getPagingInfo());
+	   map.put("page",pageMap);
+	   map.put("success",true);
+	   map.put("message","Request complete");
+	   map.put("notifications",notifications);
+	   return ResponseEntity.status(HttpStatus.OK).body(map); 
+   }
 }

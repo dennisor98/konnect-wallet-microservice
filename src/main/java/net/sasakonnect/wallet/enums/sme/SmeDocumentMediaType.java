@@ -13,6 +13,7 @@ import lombok.ToString;
 public enum SmeDocumentMediaType {
 	KYCF00024("Mandatory", Arrays.asList("PDF", "JPEG", "JPG"), "Certificate of Incorporation"),
 	KYCF00011("Mandatory", Arrays.asList("PDF", "JPEG", "JPG"), "CR12"),
+	KYCF00010("Mandatory", Arrays.asList("PDF", "JPEG", "JPG"), "KEB001"),
 	KYCF00012("Optional", Arrays.asList("PDF", "JPEG", "JPG"), "CR2, CR1, CR8 - Memorandum of the Company"),
 	KYCF00013("Mandatory", Arrays.asList("PDF", "JPEG", "JPG"), "KRA Pin certificate"),
 	KYCF00014("Mandatory", Arrays.asList("PDF", "JPEG", "JPG"), "Original Board resolution"),
