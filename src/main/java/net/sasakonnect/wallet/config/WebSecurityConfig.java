@@ -109,6 +109,7 @@ public class WebSecurityConfig {
 
 				.requestMatchers("/user/userLogin", "/user/confirmOtp", "/user/admin/confirmOtp", "/konnect/callBack","/user/account/confirm",
 						"/user/refresh/token", "/sme/login", "/sme/verifyOtp", "/lark/callback","/user/login/resendOtp","/sdk/mobile/confirm",
+//						"/user/admin/password/set",
 						"/wallet/getOnboardingStatusById", "/sdk/transaction/{id}", "user/corporateLogin",
 						"/sdk/openId", "/sdk/customer", "/sdk/customers", "/sdk/customer/stkpush","/sdk/transaction/history","/sdk/app/authorities")
 

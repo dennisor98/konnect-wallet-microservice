@@ -74,14 +74,31 @@ public class JwtService {
 		try {
 			Map<String, Object> claims = new HashMap<>();
 			claims.put("id", user.getId());
-			claims.put("token_type", "corporate_access_token");
+			claims.put("token_type", JwtType.WALLET_ADMIN_TOKEN.getToken());
 			claims.put("firstName", user.getFirstName());
 			return Jwts.builder().setClaims(claims).setSubject(user.getId().toString()).setIssuedAt(new Date())
 					.setExpiration(new Date(System.currentTimeMillis() + jwtExpiryTime))// 10
 																						// days
-																						// validity
+									          											// validity
 					.setId(UUID.randomUUID().toString())
 
+					.signWith(secretKey, SignatureAlgorithm.HS256).compact();
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	public String generateAdminWindowToken(User user) {
+		try {
+			Map<String, Object> claims = new HashMap<>();
+			claims.put("id", user.getId());
+			claims.put("token_type",JwtType.WALLET_ADMIN_WINDOW_TOKEN.getToken());
+			claims.put("firstName", user.getFirstName());
+			return Jwts.builder().setClaims(claims).setSubject(user.getId().toString()).setIssuedAt(new Date())
+					.setExpiration(new Date(System.currentTimeMillis() +360000))//1 minute validity
+					.setId(UUID.randomUUID().toString())
 					.signWith(secretKey, SignatureAlgorithm.HS256).compact();
 
 		} catch (Exception e) {

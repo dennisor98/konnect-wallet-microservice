@@ -1,8 +1,6 @@
 package net.sasakonnect.wallet.aspects;
 
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.crypto.spec.SecretKeySpec;
 
@@ -18,35 +16,18 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
-import net.sasakonnect.wallet.config.KonnectHeader;
-import net.sasakonnect.wallet.domain.User;
 import net.sasakonnect.wallet.enums.JwtType;
-import net.sasakonnect.wallet.services.UserService;
-import net.sasakonnect.wallet.tools.JwtService;
 
 @Aspect
 @Component
-public class CorporateTokenValidatorAspect {
-	private JwtService jwtService;
-	private UserService userService;
-	
+public class AdminPasswordWindowAspect {
 	@Value("${JWT_SECRET}")
 	String jwtSecret;
-	
-	public CorporateTokenValidatorAspect(UserService userService, JwtService jwtService) {
-		this.userService = userService;
-
-		this.jwtService = jwtService;
-	}
-	
 	byte[] decodedKey =  null;
 	SecretKeySpec secretKey = null;
 	
@@ -55,30 +36,30 @@ public class CorporateTokenValidatorAspect {
 		decodedKey = Base64.getDecoder().decode(jwtSecret);
 		secretKey =	new SecretKeySpec(decodedKey, 0, decodedKey.length, "HMACSHA256");
 	}
-
-	@Before("@annotation(net.sasakonnect.wallet.annotations.IsCorporate)")
+	
+	@Before("@annotation(net.sasakonnect.wallet.annotations.AdminwindowMiddleware)")
 	public void beforeControllerMethodExecution() {
 		 HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 	        String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-	        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+	        if (authorizationHeader == null) {
 	            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing or invalid Authorization header");
 	        }
-
+	        
 	        String token = authorizationHeader.substring(7);
 	        try {
 	        	Claims claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
-	            String tokenType = claims.get("token_type", String.class);
+	            String tokenType = claims.get("token_type", String.class).toString();
 
-	            if (!JwtType.WALLET_ADMIN_TOKEN.getToken().equals(tokenType)) {
+	            if (!JwtType.WALLET_ADMIN_WINDOW_TOKEN.getToken().equalsIgnoreCase(tokenType)) {
 	                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token type");
 	            }
 	            // Set the authenticated user in the security context
 	            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();;
 	            SecurityContextHolder.getContext().setAuthentication(authentication);
 	        } catch (JwtException ex) {
+	        	ex.printStackTrace();
 	            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid JWT token");
 	        }
 	}
-	
 }

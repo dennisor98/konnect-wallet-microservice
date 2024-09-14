@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpEntity;
@@ -40,6 +41,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -64,9 +66,12 @@ import net.coobird.thumbnailator.Thumbnails;
 import net.sasakonnect.wallet.RequestDto.ChangePin;
 import net.sasakonnect.wallet.RequestDto.CloseUserAccount;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
+import net.sasakonnect.wallet.RequestDto.CorporateLoginDTO;
+import net.sasakonnect.wallet.RequestDto.CreatePasswordDto;
 import net.sasakonnect.wallet.RequestDto.KompCallbackDto;
 import net.sasakonnect.wallet.RequestDto.LoginOtpResendDto;
 import net.sasakonnect.wallet.RequestDto.OpenIdRequest;
+import net.sasakonnect.wallet.RequestDto.PasswordResetDto;
 import net.sasakonnect.wallet.RequestDto.PhoneCountryPair;
 import net.sasakonnect.wallet.RequestDto.PinDto;
 import net.sasakonnect.wallet.RequestDto.SdkSearchCustomers;
@@ -78,6 +83,7 @@ import net.sasakonnect.wallet.ResponseDto.UserResponseDTO;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.beans.RedisBean;
 import net.sasakonnect.wallet.constant.ChoiceEndpointsConstants;
+import net.sasakonnect.wallet.domain.CorporatePin;
 import net.sasakonnect.wallet.domain.FirebaseToken;
 import net.sasakonnect.wallet.domain.Logs;
 import net.sasakonnect.wallet.domain.Permission;
@@ -93,6 +99,7 @@ import net.sasakonnect.wallet.enums.LogTypes;
 import net.sasakonnect.wallet.notification.AccountClosureNotification;
 import net.sasakonnect.wallet.notification.WalletAccountUpgradeResultNotification;
 import net.sasakonnect.wallet.repository.CorporateDetailsRepository;
+import net.sasakonnect.wallet.repository.CorporatePinRepository;
 import net.sasakonnect.wallet.repository.FirebaseTokenRepository;
 import net.sasakonnect.wallet.repository.LogsRepository;
 import net.sasakonnect.wallet.repository.PermissionRepository;
@@ -154,6 +161,7 @@ public class UserService extends RestClientService implements UserDetailsService
 	@Autowired
 	SmsService smsService;
 
+
 	@Autowired
 	BankWebClientBean bankClientBean;
 	@Value("${MAX_PIN_ATTEMPT:3}")
@@ -185,6 +193,9 @@ public class UserService extends RestClientService implements UserDetailsService
 
 	@Autowired
 	ProfileImageRepository profileImageRepository;
+	
+	@Autowired
+	CorporatePinRepository   corporatePinRepository;
 
 	@Autowired
 	ChoiceBankSmsService choiceBankSmsService;
@@ -265,7 +276,7 @@ public class UserService extends RestClientService implements UserDetailsService
 				map.put("status", u.getStatus());
 				map.put("idNumber", u.getIdNumber());
 //	            map.put("wallet", u.getUserWallets());
-				map.put("corporate", u.getCorporate());
+//				map.put("corporate", u.getCorporate());
 				if (u.getUserRole() != null) {
 					map.put("role", u.getUserRole().getRole());
 
@@ -398,7 +409,7 @@ public class UserService extends RestClientService implements UserDetailsService
 				map.put("lastname", u.getLastName());
 				map.put("user_id", u.getId());
 				map.put("phone", u.getMobile());
-				map.put("corporate", u.getCorporate());
+//				map.put("corporate", u.getCorporate());
 				if (u.getUserRole() != null) {
 					Map<String, Object> roleMap = new HashMap<>();
 					var role = u.getUserRole().getRole();
@@ -501,7 +512,7 @@ public class UserService extends RestClientService implements UserDetailsService
 		return this.otpsmsService.resendLoginOtp(otpDto);
 	}
 	
-	public ResponseEntity<ObjectNode> corporateLogin(UserLogin userLogin) {
+	public Object corporateLogin(CorporateLoginDTO userLogin) {
 		Optional<User> user = Optional.empty();
 		if (profileActive.equalsIgnoreCase("dev")) {
 			if (userLogin.getPhoneNumber().equalsIgnoreCase("700000000")) {
@@ -533,7 +544,6 @@ public class UserService extends RestClientService implements UserDetailsService
 			// check if user is added to corporate
 			if (user.get().getCorporate() == null) {
 				ObjectMapper objectMapper = new ObjectMapper();
-
 				ObjectNode json = JsonNodeFactory.instance.objectNode();
 				ArrayNode arrayNode = objectMapper.createArrayNode();
 				arrayNode.add("Access denied");
@@ -556,8 +566,22 @@ public class UserService extends RestClientService implements UserDetailsService
 			}
 
 			else {
-				return this.otpsmsService.sendSms(userLogin, null, user);
-
+				var corp =  user.get().getCorporate();
+				if(corp.getPin() == null) {
+					return this.otpsmsService.sendAdminSms(userLogin, null, user);
+				}
+				
+				
+				
+				var u = user.get();	
+				var json = new HashMap<>();
+				json.put("success",true);
+				json.put("messsage","Request completed");
+				json.put("window",jwtService.generateAdminWindowToken(u));
+                json.put("success",true);
+                json.put("hasPin",true);
+                json.put("message","Proceed to password screen");
+               return ResponseEntity.status(HttpStatus.OK).body(json);
 			}
 
 		}
@@ -670,56 +694,31 @@ public class UserService extends RestClientService implements UserDetailsService
 		var opt = this.otpsmsService.verifyOtp(confirmOtp);
 
 		if (opt.isPresent()) {
-
 			if (!(opt.get().isValid())) {
 				ObjectNode json = JsonNodeFactory.instance.objectNode();
 				json.put("message", "otp code is Invalid");
 				return ResponseEntity.badRequest().body(json);
 			}
 			var u = opt.get().getUser();
-			this.otpsmsService.deleteOtp(opt.get());
-
 			if (u != null) {
 				if (u.getCorporate() == null) {
 					ObjectNode json = JsonNodeFactory.instance.objectNode();
 					json.put("message", "invalid otp type");
 					return ResponseEntity.badRequest().body(json);
 				}
-				Optional<User> walletUser = this.userRepository.findUserWithUserWalletsById(u.getId());
-				if (walletUser.isPresent()) {
-					u = this.userRepository.findUserWithUserWalletsById(u.getId()).get();
-				}
-
-				System.out.println(u.getCreatedAt());
-				var response = UserResponseDTO.builder().wallets(u.getUserWallets().stream().map((uw) -> {
-					var wallets = uw.getWallet();
-					wallets.setUserWallets(null);
-					return wallets;
-				}).collect(Collectors.toList()))
-
-						.token(jwtService.generateAdminToken(u)).refreshToken(jwtService.generateAdminRefreshToken(u))
-						.middleName(u.getMiddleName()).gender(u.getGender().name()).idType(u.getIdType().name())
-						.idNumber(u.getIdNumber()).onboardingRequestId(u.getOnboardingRequestId())
-						.open_id(u.getOpenId()).birthday(formatter.format(u.getBirthday().toInstant()))
-						.updatedAt(u.getUpdatedAt()).kraPin(u.getKraPin())
-						.employmentStatus(u.getEmploymentStatus().name()).profileImage(u.getProfileImage())
-						.monthlyIncome(u.getMonthlyIncome().toString()).createdAt(u.getCreatedAt()).id(u.getId())
-						.address(u.getAddress()).firstName(u.getFirstName()).lastName(u.getLastName())
-						.mobile(u.getMobile()).countryCode(u.getCountryCode()).build();
-				ObjectMapper objectMapper = new ObjectMapper();
-				objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
-				objectMapper.registerModule(new JavaTimeModule());
-				objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-
-				try {
-					return ResponseEntity.ok(objectMapper.writeValueAsString(response));
-				} catch (JsonProcessingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
+				
+				ObjectNode json = JsonNodeFactory.instance.objectNode();
+				json.put("success",true);
+				json.put("action","setPassword");
+				json.put("message","Proceed to set password");
+				
+				var token = this.jwtService.generateAdminWindowToken(u);
+				json.put("window",token);
+				
+				return ResponseEntity.status(HttpStatus.OK).body(json);
 			}
-		} else {
+			
+	   } else {
 			log.error("otp not there");
 
 			ObjectNode json = JsonNodeFactory.instance.objectNode();
@@ -729,7 +728,147 @@ public class UserService extends RestClientService implements UserDetailsService
 		return null;
 		// TODO Auto-generated method stub
 	}
+	
+//	public Object verifyAdminPassword() {
+//		if (!(opt.get().isValid())) {
+//			ObjectNode json = JsonNodeFactory.instance.objectNode();
+//			json.put("message", "otp code is Invalid");
+//			return ResponseEntity.badRequest().body(json);
+//		}
+//		var u = opt.get().getUser();
+//		this.otpsmsService.deleteOtp(opt.get());
+//
+//		if (u != null) {
+//			if (u.getCorporate() == null) {
+//				ObjectNode json = JsonNodeFactory.instance.objectNode();
+//				json.put("message", "invalid otp type");
+//				return ResponseEntity.badRequest().body(json);
+//			}
+//			Optional<User> walletUser = this.userRepository.findUserWithUserWalletsById(u.getId());
+//			if (walletUser.isPresent()) {
+//				u = this.userRepository.findUserWithUserWalletsById(u.getId()).get();
+//			}
+//
+//			System.out.println(u.getCreatedAt());
+//			var response = UserResponseDTO.builder().wallets(u.getUserWallets().stream().map((uw) -> {
+//				var wallets = uw.getWallet();
+//				wallets.setUserWallets(null);
+//				return wallets;
+//			}).collect(Collectors.toList()))
+//
+//					.token(jwtService.generateAdminToken(u)).refreshToken(jwtService.generateAdminRefreshToken(u))
+//					.middleName(u.getMiddleName()).gender(u.getGender().name()).idType(u.getIdType().name())
+//					.idNumber(u.getIdNumber()).onboardingRequestId(u.getOnboardingRequestId())
+//					.open_id(u.getOpenId()).birthday(formatter.format(u.getBirthday().toInstant()))
+//					.updatedAt(u.getUpdatedAt()).kraPin(u.getKraPin())
+//					.employmentStatus(u.getEmploymentStatus().name()).profileImage(u.getProfileImage())
+//					.monthlyIncome(u.getMonthlyIncome().toString()).createdAt(u.getCreatedAt()).id(u.getId())
+//					.address(u.getAddress()).firstName(u.getFirstName()).lastName(u.getLastName())
+//					.mobile(u.getMobile()).countryCode(u.getCountryCode()).build();
+//			ObjectMapper objectMapper = new ObjectMapper();
+//			objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+//			objectMapper.registerModule(new JavaTimeModule());
+//			objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+//
+//			try {
+//				return ResponseEntity.ok(objectMapper.writeValueAsString(response));
+//			} catch (JsonProcessingException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//
+//		}
+//
+//	}
+	
+	public Object createAdminPassword(CreatePasswordDto createDto) {
+		User u = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		if(u.getCorporate() == null) {
+			ObjectNode json = JsonNodeFactory.instance.objectNode();
+			json.put("success", false);
+			json.put("message","Account not available");
 
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
+
+		}
+		var corp = u.getCorporate();
+		try {
+			if(corp.getPin() !=null) {
+				this.corporatePinRepository.delete(corp.getPin());
+			}
+			var hashedPin = new BCryptPasswordEncoder().encode(createDto.getPassword());
+			var pinBuild = CorporatePin.builder().pin(hashedPin).user(u.getCorporate()).wrongAttempts(0).build();
+			
+		 var savedPin	= this.corporatePinRepository.save(pinBuild);
+		 
+		 corp.setPin(savedPin);
+		 this.corporateRepository.save(corp);
+			var response = UserResponseDTO.builder()
+					.token(jwtService.generateAdminToken(u))
+					.refreshToken(jwtService.generateAdminRefreshToken(u))
+					.middleName(u.getMiddleName())
+					.open_id(u.getOpenId())
+					.profileImage(u.getProfileImage())
+					.firstName(u.getFirstName()).lastName(u.getLastName())
+					.mobile(u.getMobile()).countryCode(u.getCountryCode()).build();
+			ObjectMapper objectMapper = new ObjectMapper();
+			objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+			objectMapper.registerModule(new JavaTimeModule());
+			objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+			var json = new HashMap<>();
+			json.put("success",true);
+			json.put("messsage","Request completed");
+			json.put("data",response);
+			return ResponseEntity.status(HttpStatus.OK).body(json);
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			ObjectNode json = JsonNodeFactory.instance.objectNode();
+			json.put("success",false);
+			json.put("messsage","A server error encountered");
+			
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(json);
+		}
+		
+	}
+
+	public Object verifyAdminPin(CreatePasswordDto password) {
+		User u = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	    var corp =  u.getCorporate();
+	    if(corp == null) {
+	    	var map = new HashMap<>();
+	    	map.put("success",false);
+	    	map.put("message","Request denied");
+	    	
+	    	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+	    }
+	    if(corp.getPin() == null) {
+	    	var map = new HashMap<>();
+	    	map.put("success",false);
+	    	map.put("message","Request denied");
+	    	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
+	    }
+		if(!new BCryptPasswordEncoder().matches(password.getPassword(),corp.getPin().getPin())){
+			var json = new HashMap<>();
+			json.put("success",false);
+			json.put("message","Invalid cridentials");
+			
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(json);
+		}
+		var json = new HashMap<>();
+		json.put("success",true);
+		json.put("message","Login successful");	
+		var response = UserResponseDTO.builder()
+				.token(jwtService.generateAdminToken(u))
+				.refreshToken(jwtService.generateAdminRefreshToken(u))
+				.middleName(u.getMiddleName())
+				.open_id(u.getOpenId())
+				.profileImage(u.getProfileImage().getFilePath())
+				.firstName(u.getFirstName()).lastName(u.getLastName())
+				.mobile(u.getMobile()).countryCode(u.getCountryCode()).build();
+		json.put("data",response);
+		return ResponseEntity.status(HttpStatus.OK).body(json);	
+		
+	}
 	public ResponseEntity<Object> createJwtFor(User u) {
 		var response = UserResponseDTO.builder().token(jwtService.generateToken(u))
 				.refreshToken(jwtService.generateRefreshToken(u)).middleName(u.getMiddleName())
@@ -1850,11 +1989,42 @@ public class UserService extends RestClientService implements UserDetailsService
 		return ResponseEntity.status(HttpStatus.OK).body(map);
 	}
 	
-	public ResponseEntity<Object> confirmUserAction(){
+	public Object updateAdminPassword(PasswordResetDto passwordDto){
 		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
+        if(user.getCorporate() != null && user.getCorporate().getPin() == null) {
+        	ObjectNode json = JsonNodeFactory.instance.objectNode();
+        	json.put("success",false);
+        	json.put("message","PIN not set");
+        	
+        	return ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
+        	
+        }
+        
+        var corp = user.getCorporate();
+        var bcrypt =  new BCryptPasswordEncoder();
+        if(!bcrypt.matches(passwordDto.getOldPassword(),corp.getPin().getPin())) {
+        	ObjectNode json = JsonNodeFactory.instance.objectNode();
+        	json.put("success",false);
+        	json.put("message","Old PIN does not match");
+        	return  ResponseEntity.status(HttpStatus.FORBIDDEN).body(json);
+        }
+        
+        try {
+        	ObjectNode json = JsonNodeFactory.instance.objectNode();
+        	json.put("success",false);
+        	json.put("message","Password update successful");
+        	var corpPin = corp.getPin();
+        	corpPin.setPin(bcrypt.encode(passwordDto.getNewPassword()));
+        	this.corporatePinRepository.save(corpPin);
+        	return  ResponseEntity.status(HttpStatus.OK).body(json);
+        }catch(Exception ex) {
+        	ObjectNode json = JsonNodeFactory.instance.objectNode();
+        	json.put("success",false);
+        	json.put("message","A server error occured");
+        	return  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(json);
+        }
+        
 	
-		return null;
 	}
 
 }

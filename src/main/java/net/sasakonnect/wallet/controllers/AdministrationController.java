@@ -86,7 +86,7 @@ import net.sasakonnect.wallet.services.sme.SmeUserService;
 @CustomController()
 @Slf4j
 @CrossOrigin(origins = "http://localhost:4200")
-public class AdministrationController {
+public class AdministrationController {		
 	@Autowired
 	WalletClientService walletClientService;
 	@Autowired
@@ -430,7 +430,6 @@ public class AdministrationController {
 
 	@PutMapping("/permission")
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.EditPermission.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.EditPermission.PERMISSION)
 	public Object editPermission(@Valid @RequestBody PermissionDTO payload,
@@ -441,7 +440,6 @@ public class AdministrationController {
 
 	@Hidden()
 	@IsCorporate()
-
 	@PreAuthorize("hasPermission(#apartmentId, '" + GlobalPermissionConstants.SyncLark.PERMISSION + "')")
 	@RequirePermission(GlobalPermissionConstants.SyncLark.PERMISSION)
 	@GetMapping("/lark/user/sync")
@@ -911,6 +909,9 @@ public class AdministrationController {
 	public Object attachClientAuthorities(@Valid @RequestBody AssignAuthorityDto authDto) {
 		return this.walletClientService.assignClientAuthority(authDto);
 	}
+	
+	
+	
 	
 	
 
