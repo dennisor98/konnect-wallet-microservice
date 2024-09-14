@@ -1,5 +1,7 @@
 package net.sasakonnect.wallet.RequestDto;
 
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -7,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.sasakonnect.wallet.domain.CorporatePin;
 @Builder
 @Data
 @NoArgsConstructor
@@ -24,5 +27,5 @@ public class Corporate {
 
     @NotNull(message = "isActive cannot be null")
     private Boolean isActive;
-    
+     
 }

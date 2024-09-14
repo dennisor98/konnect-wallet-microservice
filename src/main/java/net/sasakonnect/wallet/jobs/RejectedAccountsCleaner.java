@@ -14,7 +14,7 @@ public class RejectedAccountsCleaner {
     @Autowired
     UserRepository  userRepository;
     
-    @Scheduled(cron="*/3 * * * * *")
+    @Scheduled(cron = "0 */3 * * * *")
     private void clearRejectedAccounts() {
     	List<User> userList = this.userRepository.findRejectedUsers();
     	if(!userList.isEmpty()) {

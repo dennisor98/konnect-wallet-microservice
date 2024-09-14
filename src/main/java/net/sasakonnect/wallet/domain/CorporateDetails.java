@@ -29,6 +29,10 @@ public class CorporateDetails extends BaseWalletDomain implements Serializable {
 
     @Column(name = "isActive")
     private Boolean isActive;
+    
+    @OneToOne()
+    @JoinColumn(name="user_pin")
+    CorporatePin pin;
  
  
 }

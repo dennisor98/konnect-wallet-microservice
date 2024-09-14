@@ -11,6 +11,10 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public enum SmeDocumentMediaType {
+	KYCF00001("Mandatory", Arrays.asList("PDF", "JPEG", "JPG"), "101"),
+	KYCF00002("Mandatory", Arrays.asList("PDF", "JPEG", "JPG"), "101"),
+	KYCF00006("Mandatory", Arrays.asList("PDF", "JPEG", "JPG"), "101"),
+	KYCF00009("Mandatory", Arrays.asList("PDF", "JPEG", "JPG"), "KEC001"),
 	KYCF00024("Mandatory", Arrays.asList("PDF", "JPEG", "JPG"), "Certificate of Incorporation"),
 	KYCF00011("Mandatory", Arrays.asList("PDF", "JPEG", "JPG"), "CR12"),
 	KYCF00010("Mandatory", Arrays.asList("PDF", "JPEG", "JPG"), "KEB001"),

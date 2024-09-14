@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,11 +20,16 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import net.sasakonnect.wallet.RequestDto.ConfirmOtp;
+import net.sasakonnect.wallet.RequestDto.CorporateLoginDTO;
+import net.sasakonnect.wallet.RequestDto.CreatePasswordDto;
 import net.sasakonnect.wallet.RequestDto.LoginOtpResendDto;
 import net.sasakonnect.wallet.RequestDto.OpenIdRequest;
+import net.sasakonnect.wallet.RequestDto.PasswordResetDto;
 import net.sasakonnect.wallet.RequestDto.UserDeviceToken;
 import net.sasakonnect.wallet.RequestDto.UserLogin;
+import net.sasakonnect.wallet.annotations.AdminwindowMiddleware;
 import net.sasakonnect.wallet.annotations.CustomController;
+import net.sasakonnect.wallet.annotations.IsCorporate;
 import net.sasakonnect.wallet.annotations.RefreshMiddleware;
 import net.sasakonnect.wallet.provider.FirebaseMessage;
 import net.sasakonnect.wallet.provider.FirebaseWrapper;
@@ -60,7 +66,7 @@ public class UserController {
 	
 
 	@PostMapping("corporateLogin")
-	public ResponseEntity<ObjectNode> corporateSignin(@Valid @RequestBody UserLogin loginDTO) {
+	public Object corporateSignin(@Valid @RequestBody CorporateLoginDTO loginDTO) {
 		return userService.corporateLogin(loginDTO);
 	}
 
@@ -72,6 +78,24 @@ public class UserController {
 	@PostMapping("admin/confirmOtp")
 	public ResponseEntity confirmAdminOtp(@Valid @RequestBody ConfirmOtp confirmOtp) {
 		return userService.verifyAdminOtp(confirmOtp);
+	}
+	
+	@PostMapping("admin/password/set")
+	@AdminwindowMiddleware()
+	public Object createAdminPassword(@Valid @RequestBody CreatePasswordDto passwordDto) {
+		return userService.createAdminPassword(passwordDto);
+	}
+	
+	@PostMapping("admin/password/update")
+//	@IsCorporate()
+	public Object updateAdminPassword(@Valid @RequestBody PasswordResetDto passwordDto) {
+		return userService.updateAdminPassword(passwordDto);
+	}
+	
+	@PostMapping("admin/verifyPin")
+	@AdminwindowMiddleware()
+	public Object verifyAdminPassword(@Valid @RequestBody CreatePasswordDto passwordDto) {
+		return userService.verifyAdminPin(passwordDto);
 	}
 
 
