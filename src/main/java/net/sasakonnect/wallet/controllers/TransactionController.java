@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import net.sasakonnect.wallet.annotations.CustomController;
+import net.sasakonnect.wallet.annotations.IsUser;
 import net.sasakonnect.wallet.annotations.RequirePermission;
 import net.sasakonnect.wallet.constant.GlobalPermissionConstants;
 import net.sasakonnect.wallet.domain.User;
@@ -20,7 +21,7 @@ import net.sasakonnect.wallet.services.UserService;
 @CustomController()
 @RequestMapping("transaction")
 @Tag(name = "transaction", description = "Transaction")
-
+@IsUser()
 public class TransactionController {
 	private final UserService userService;
 	private final TransactionService transactionService;
