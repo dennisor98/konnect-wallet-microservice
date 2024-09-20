@@ -147,15 +147,9 @@ public class WebSecurityConfig {
 		return config.getAuthenticationManager();
 	}
 
-//	@Bean
-//	static MethodSecurityExpressionHandler expressionHandler(UserService userService) {
-//		var expressionHandler = new DefaultMethodSecurityExpressionHandler();
-//		expressionHandler.setPermissionEvaluator(new CustomPermissionEvaluator(userService));
-//		return expressionHandler;
-//	}
+
 
 	
-
     @Bean
     @Primary
      MethodSecurityExpressionHandler expressionHandler1(UserService userService) {

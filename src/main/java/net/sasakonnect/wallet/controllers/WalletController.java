@@ -39,6 +39,7 @@ import net.sasakonnect.wallet.RequestDto.UpgradeWalletAccountDto;
 import net.sasakonnect.wallet.RequestDto.WalletTransferDto;
 import net.sasakonnect.wallet.RequestDto.account.UpdateEmailDto;
 import net.sasakonnect.wallet.annotations.CustomController;
+import net.sasakonnect.wallet.annotations.IsUser;
 import net.sasakonnect.wallet.annotations.TransactionMiddleware;
 import net.sasakonnect.wallet.constant.ChannelType;
 import net.sasakonnect.wallet.domain.User;
@@ -53,6 +54,7 @@ import net.sasakonnect.wallet.services.WalletService;
 @RequestMapping("/wallet")
 @Tag(name = "Wallet", description = "Wallet routes")
 
+@IsUser()
 public class WalletController {
 	private final UserService userService;
 	private final WalletService walletService;
@@ -72,6 +74,7 @@ public class WalletController {
 	}
 
 	@PostMapping("")
+	
 	public Object onBoarding(@Valid @RequestBody EasyOnboardingRequestParams easyOnboarding,
 			@RequestHeader("app-version-number") String konnectHeader) {
 
