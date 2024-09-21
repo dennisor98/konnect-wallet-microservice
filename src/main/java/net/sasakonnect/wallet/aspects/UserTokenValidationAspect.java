@@ -54,23 +54,22 @@ public class UserTokenValidationAspect {
 		 HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 	        String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-	        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-	            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing or invalid Authorization header");
-	        }
+	        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
 
-	        String token = authorizationHeader.substring(7);
-	        try {
-	        	Claims claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
-	            String tokenType = claims.get("token_type", String.class);
+	        	String token = authorizationHeader.substring(7);
+	        	try {
+	        		Claims claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
+	        		String tokenType = claims.get("token_type", String.class);
 
-	            if (!JwtType.ACCESS_TOKEN.getToken().equals(tokenType)) {
-	                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token type");
-	            }
-	            // Set the authenticated user in the security context
-	            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();;
-	            SecurityContextHolder.getContext().setAuthentication(authentication);
-	        } catch (JwtException ex) {
-	            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid JWT token");
+	        		if (!JwtType.ACCESS_TOKEN.getToken().equals(tokenType)) {
+	        			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token type");
+	        		}
+	        		// Set the authenticated user in the security context
+	        		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();;
+	        		SecurityContextHolder.getContext().setAuthentication(authentication);
+	        	} catch (JwtException ex) {
+	        		throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid JWT token");
+	        	}
 	        }
 	}
 	
