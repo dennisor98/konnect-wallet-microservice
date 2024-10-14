@@ -10,3 +10,4 @@ WORKDIR /app
 COPY /build/libs/wallet-backend-0.0.1-SNAPSHOT.jar wallet-dev.jar
 EXPOSE 8081
 CMD ["java", "-jar", "/wallet-dev.jar"]
+
