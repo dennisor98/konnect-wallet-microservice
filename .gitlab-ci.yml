@@ -31,3 +31,13 @@ move:
     - echo "Artifacts uploaded to GitLab CI/CD."
   only:
     - dev
+
+deploy:
+  stage: deploy
+  script:
+    - ssh wallet "docker pull $DOCKER_IMAGE:latest && \
+      docker stop wallet || true && \
+      docker rm wallet || true && \
+      docker run -d --name your-app -p 8081:8081 $DOCKER_IMAGE:latest"
+  only:
+    - main
