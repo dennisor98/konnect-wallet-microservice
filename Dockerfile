@@ -1,0 +1,12 @@
+# Stage 1: Build the JAR file
+FROM gradle:8-jdk17 AS build
+WORKDIR /app
+COPY . .
+RUN gradle build --no-daemon
+
+# Stage 2: Run the application
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+COPY --from=build /app/build/libs/your-app.jar /app/your-app.jar
+EXPOSE 8081
+CMD ["java", "-jar", "your-app.jar"]
