@@ -37,6 +37,8 @@ deploy:
   stage: deploy
   script:
     # SSH into the destination server and run Docker commands
+    - hostname
+    - pwd 
     - ssh wallet "
         docker ps -q -f name=wallet-dev | grep -q . && docker stop wallet-dev || true && \
         docker rm wallet-dev || true && \
