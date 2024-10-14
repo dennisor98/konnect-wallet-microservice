@@ -36,16 +36,16 @@ stages:
 deploy:
   stage: deploy
   script:
-    # SSH into the destination server and run Docker commands
     - hostname
-    - pwd 
+    - pwd
     - ssh wallet "
+        export PATH=\$PATH:/usr/bin && \
         docker --version && \
-        docker ps -q -f name=wallet-dev | grep  -q . && docker stop wallet-dev || true && \
+        docker ps -q -f name=wallet-dev | grep -q . && docker stop wallet-dev || true && \
         docker rm wallet-dev || true && \
         docker run -d --name wallet-dev -p 8081:8081 wallet-dev:latest
-        
       "
   only:
     - dev
+
 
