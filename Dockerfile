@@ -4,6 +4,5 @@ COPY . .
 RUN gradle build --no-daemon
 # Stage 2: Run the application
 FROM openjdk:17-jdk-slim
-COPY  ./build/libs/wallet-backend-0.0.1-SNAPSHOT.jar ./wallet-dev.jar
 EXPOSE 8081
-CMD ["java", "-jar", "./wallet-dev.jar"]
+CMD ["java", "-jar", "./build/libs/wallet-backend-0.0.1-SNAPSHOT.jar"]
