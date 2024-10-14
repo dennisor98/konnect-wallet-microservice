@@ -38,8 +38,7 @@ deploy:
   script:
     - hostname
     - pwd
-    - ssh wallet "docker --version && docker rm wallet-dev && docker ps -q -f name=wallet-dev | grep -q . && docker stop wallet-dev  &&
-      docker run -d --name wallet-dev -p 8081:8081 wallet-dev:latest"
+    - ssh wallet "docker --version && docker rm wallet-dev && docker ps -q -f name=wallet-dev | grep -q . && docker  stop wallet-dev || true && docker rm wallet-dev || true && docker run -d --name wallet-dev -p 8081:8081 wallet-dev:latest"
   only:
     - dev 
 
