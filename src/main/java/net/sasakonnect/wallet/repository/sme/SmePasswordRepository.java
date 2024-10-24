@@ -14,4 +14,5 @@ public interface SmePasswordRepository extends JpaRepository<SmePassword,String>
 	
 	@Query("SELECT p FROM SmePassword p WHERE p.corporate_id = :member_id")
      Optional<SmePassword> findSmePasswordBySmeCorporaterId(@Param("member_id") SmeCorporate member_id);
+	 	
 }

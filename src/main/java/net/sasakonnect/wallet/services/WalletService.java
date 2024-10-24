@@ -50,6 +50,8 @@ import com.google.gson.reflect.TypeToken;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import net.sasakonnect.wallet.RequestDto.BatchTransferDto;
+import net.sasakonnect.wallet.RequestDto.BeneficiaryDataDto;
 import net.sasakonnect.wallet.RequestDto.BuyAirtime;
 import net.sasakonnect.wallet.RequestDto.ChoiceTransferDto;
 import net.sasakonnect.wallet.RequestDto.EasyOnboardingRequestParams;
@@ -1270,12 +1272,17 @@ public class WalletService {
 				transaction.get().setExternalTxId(results.getParams().getExtInfo().getExternalTxId());
 				transaction.get().setRemarks(results.getParams().getErrorMsg());
 				var createdTransaction = this.transactionService.transactionRepository.save(transaction.get());
+				//syn transactions in elastic documents
+				
+				//this.elasticService.syncTransaction(createdTransaction);
 
 			} else {
 				var createdTransaction = this.transactionService.saveTransaction(results);
 				if (createdTransaction != null) {
 					log.info("publish transaction to socket {}", createdTransaction);
-
+					//syn transactions in elastic documents
+					
+					//this.elasticService.syncTransaction(createdTransaction);
 					this.publisher.publishEvent(TransactionEvent.builder().userService(userService)
 							.transaction(createdTransaction).build());
 				}
@@ -1339,6 +1346,61 @@ public class WalletService {
 			var reqs = this.requestSigner.signRequest(reqId);
 
 			Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.WITHDRAW)
+					.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
+					.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
+
+			String responseJson = responseMono.block();
+			log.info(responseJson);
+			// call wallet invitation thread
+
+			// save financial contact
+
+			if (responseJson != null) {
+				var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
+				choiceBankSmsService.invokeSms(resp.getData().txId);
+				return new Gson().fromJson(responseJson, Object.class);
+			}
+		}
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public Object batchTransfer(@Valid BatchTransferDto batchTransferDto) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		var userWallets = this.walletRepository.findByUserWalletsUser(user);
+		if (!userWallets.isEmpty()) {
+			var userwallet = userWallets.get(0);
+
+			var reqId = new HashMap<String, Object>();
+			reqId.put("payerAccountId", userwallet.getAccountId());
+//			ArrayList<BeneficiaryDataDto> beneficiaryData =  new ArrayList();
+			var beneficiaryData = batchTransferDto.getBeneficiaryData().stream().map(data->{
+				Map<String,Object> map = new HashMap<>();
+				map.put("payeeAccountName",data.getReceiverAccount());
+				map.put("payeeAccountId", data.getReceiverAccount());
+				map.put("payeeBankCode",data.getBankCode());
+				map.put("payeeType",data.getPayeeType().getCode());
+				map.put("payType",data.getPayType().getCode());
+				if(data.getPayeeType().getCode() == 1 && data.getPayType().getCode() == 0) {
+					map.put("payeeSubAccount", data.getSubAccount());	
+				}
+				map.put("amount",data.getAmount());
+				map.put("Currency", data.getCurrencyCode());
+				map.put("remark","Sent amount of "+data.getAmount()+" to "+data.getReceiverName()+" of Acc. No. "+ data.getReceiverAccount());	
+				map.put("payeeMobileForNotification",data.getPayeeMobileForNotification());
+				
+				return map;
+			}).collect(Collectors.toList());
+			
+			reqId.put("beneficiaryArray", beneficiaryData);		
+			var reqs = this.requestSigner.signRequest(reqId);
+			
+
+
+			
+
+			Mono<String> responseMono = this.bankClientBean.webClient.post().uri(ChoiceEndpointsConstants.WALLET_BATCH_TRANS)
 					.contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(reqs))
 					.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
 
@@ -2309,8 +2371,11 @@ public class WalletService {
 		var wallets = this.walletRepository.findByUserWalletsUser(loggedInUser);
 		if (!wallets.isEmpty()) {
 			var currentWallet = wallets.get(0);
-			return this.financialContactService.getTransactionContacts(currentWallet.getAccountId(), txtype, pageNumber,
-					pageSize);
+			if(txtype !=null) {
+				return this.financialContactService.getTransactionContacts(currentWallet.getAccountId(), txtype, pageNumber,pageSize);
+			}
+			return this.financialContactService.getFinancialContacts(currentWallet.getAccountId(), pageNumber, pageSize);
+			
 		}
 		return null;
 	}

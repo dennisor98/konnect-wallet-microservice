@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import net.sasakonnect.wallet.RequestDto.BatchTransferDto;
 import net.sasakonnect.wallet.RequestDto.BuyAirtime;
 import net.sasakonnect.wallet.RequestDto.ChangePin;
 import net.sasakonnect.wallet.RequestDto.ChoiceTransferDto;
@@ -43,6 +44,7 @@ import net.sasakonnect.wallet.annotations.IsUser;
 import net.sasakonnect.wallet.annotations.TransactionMiddleware;
 import net.sasakonnect.wallet.constant.ChannelType;
 import net.sasakonnect.wallet.domain.User;
+import net.sasakonnect.wallet.services.ElasticSearchService;
 import net.sasakonnect.wallet.services.NotificationService;
 import net.sasakonnect.wallet.services.TarrifService;
 import net.sasakonnect.wallet.services.TransactionService;
@@ -61,12 +63,12 @@ public class WalletController {
 
 	@Autowired
 	TransactionService transactionService;
-
 	@Autowired
 	TarrifService tarrifService;
-
 	@Autowired
 	NotificationService notificationService;
+	@Autowired
+	ElasticSearchService elasticService;
 
 	public WalletController(UserService userService, WalletService walletService) {
 		this.userService = userService;
@@ -122,6 +124,12 @@ public class WalletController {
 		return this.walletService.updateUserEmail(email.getEmail());
 	}
 
+	@PostMapping("/batchTransfer")
+	@TransactionMiddleware()
+	public Object batchTransfer(@Valid @RequestBody BatchTransferDto batchTransfer) {
+		return this.walletService.batchTransfer(batchTransfer);
+	}
+	
 	@PostMapping("/to/mpesa")
 	@TransactionMiddleware()
 	public Object toMpesa(@Valid @RequestBody TransferToMpesa mpesa) {
@@ -190,7 +198,19 @@ public class WalletController {
 	@GetMapping("/transactionhistory")
 	public Object getTransactionHistory(@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
 			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
-		return ResponseEntity.ok(transactionService.getUserTransactionHistory(pageNumber, pageSize));
+		return this.elasticService.getUserTransactions(pageNumber,pageSize);
+	}
+	
+	@GetMapping("/transaction/history")
+	public Object getUserTransactionHistory(@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
+			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+		return this.elasticService.getUserTransactions(pageNumber,pageSize);
+	}
+	
+	@GetMapping("/transaction/search")
+	public Object searchTransaction(@RequestParam(name = "search") String searchTerm ,@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
+			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+		return this.elasticService.searchTransaction(searchTerm,pageNumber,pageSize);
 	}
 //	public ResponseEntity<Object> transactionHistory() {
 //		return ResponseEntity.ok(this.walletService.getTransactionHistory());
@@ -286,7 +306,7 @@ public class WalletController {
 	}
 
 	@GetMapping("/transaction/recentContact")
-	public ResponseEntity<Object> getRecentTransactionContact(@RequestParam(name = "txType") String txType,
+	public ResponseEntity<Object> getRecentTransactionContact(@RequestParam(name = "txType",required=false) String txType,
 			@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
 			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
 		return this.walletService.getRecentTransactionContact(txType, pageNumber, pageSize);

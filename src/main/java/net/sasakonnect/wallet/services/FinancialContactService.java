@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -47,7 +48,8 @@ public class FinancialContactService {
       
       
       public ResponseEntity<Object> getFinancialContacts(String accountId,Integer pageNumber,Integer pageSize){
-    	  Page<FinancialContact> contacts = this.financialContactRepository.findByAccountId(accountId,PageRequest.of(pageNumber, pageSize));
+    	  Page<FinancialContact> contacts = this.financialContactRepository.findByAccountId(accountId, 
+    		        PageRequest.of(pageNumber,pageSize,Sort.by(Sort.Direction.DESC, "createdAt")));
     	  Map<String,Object> map = new HashMap<>();
     	  Map<String,Object> resMap = new HashMap<>();
     	  if(!contacts.isEmpty()) {
@@ -57,7 +59,7 @@ public class FinancialContactService {
     			  cMap.put("accountId",c.getOppoAccountId());
     			  cMap.put("subAccountId",c.getOppoSubAccountId());
     			  cMap.put("accountName",c.getOppoAccountName());
-    			  return map;
+    			  return cMap;
     		  }).collect(Collectors.toList());
     		map.put("success",true);
   		    map.put("message","Request successfull");
@@ -65,7 +67,7 @@ public class FinancialContactService {
   		    		    .page(contacts)
   		    		    .build();
     		map.put("contacts",fContacts);
-    		map.put("pager", page);
+//    		map.put("pager", page.getPagingInfo());
     	  }else {
     		  map.put("success",true);
     		  map.put("message","Request successfull");

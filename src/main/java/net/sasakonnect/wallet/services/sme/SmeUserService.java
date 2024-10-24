@@ -187,7 +187,13 @@ public class SmeUserService {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 		}
 		var password = this.generateRandomString();
+
 		smecorporatelist.stream().map(sc -> {
+			Optional<SmePassword> smePassOpt =  this.smePasswordRepository.findSmePasswordBySmeCorporaterId(sc);
+			if(smePassOpt.isPresent()) {
+				this.smePasswordRepository.delete(smePassOpt.get());
+			}
+
 			var defaultPassword = SmePassword.builder().isDefault(true).corporate_id(sc)
 					.password(this.passwordEncoder.encode(password)).build();
 
