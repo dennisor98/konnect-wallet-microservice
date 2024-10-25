@@ -153,7 +153,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
    List<Transaction> findWalletTransactions(@Param("startDate") Date startDate,@Param("endDate") Date endDate);
    
    @Query(value = "SELECT t FROM Transaction t " +
-           "WHERE (t.txType = 'TTID0002' OR t.txType = 'TTID0001') " +
+           "WHERE (t.txType = 'TTID0002') " +
            "AND t.createdAt >= :startDate " +
            "AND t.createdAt <= :endDate " +
            "AND t.txStatus = :txStatus " +
@@ -163,9 +163,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
     @Param("endDate") Date endDate,
     @Param("txStatus") int txStatus,
     @Param("oppoBankCode") String oppoBankCode);
-
-//   List<Transaction> findMpesaTransactions(@Param("startDate") String date, @Param("endDate") String endDate);
-//   List<Transaction> findMpesaTransactions(@Param("startDate") Date startDate,@Param("endDate") Date endDate);
    
    @Query("SELECT t FROM Transaction t WHERE t.txType = 'TTID0005' AND oppoSubAccount IS NOT NULL AND t.createdAt >= :startDate AND t.createdAt <= :endDate AND t.txStatus = 8")
   List<Transaction> findPayBillTransactions(@Param("startDate") Date startDate,@Param("endDate") Date endDate);

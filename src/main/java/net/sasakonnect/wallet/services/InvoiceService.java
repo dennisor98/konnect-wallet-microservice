@@ -71,11 +71,7 @@ public class InvoiceService {
 	
 
 	@Transactional
-   public ResponseEntity<Object> generateInvoice(Date startDate,Date endDate){
-	   List<ChannelType> channelTypes = new ArrayList<>(Arrays.asList(ChannelType.MPESA_ACCOUNT,
-			   ChannelType.MPESA_PAYBILL, ChannelType.MPESA_TILL, ChannelType.PESA_LINK,
-			   ChannelType.WALLET));
-	   
+   public ResponseEntity<Object> generateInvoice(Date startDate,Date endDate){ 
 	   ArrayList<InvoiceItem> ivoiceItems= new ArrayList<InvoiceItem>();
 	   var invoiceItem1 = this.computeValidTransactionsByChannel(ChannelType.MPESA_ACCOUNT, startDate, endDate);
 //	   return ResponseEntity.status(HttpStatus.OK).body(invoiceItem1);
@@ -134,7 +130,7 @@ public class InvoiceService {
                        return transactionTariff;
                    })
                    .reduce(InvoiceItem.builder().build(), (acc, incomingInvoiceData) -> {
-                	   acc.setAmount(acc.getAmount()+incomingInvoiceData.getTariff().getTotalPartnerProfit());
+                	   acc.setAmount(Math.abs(Double.valueOf(acc.getAmount()))+incomingInvoiceData.getTariff().getTotalPartnerProfit());
                 	   acc.setTax(acc.getTax()+incomingInvoiceData.getTariff().getExciseDutyTax());
                 	   acc.setDescription(channel.getValue());
                 	   acc.setTariff(null);
