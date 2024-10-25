@@ -212,13 +212,13 @@ Resource DIRECTOR_SIGN;
           transactionCount.setHorizontalAlignment(Element.ALIGN_CENTER);
           table.addCell(transactionCount);
           
-          PdfPCell taxt = new PdfPCell(new Phrase(String.valueOf(invoiceItem.getTax()),headFont));
+          PdfPCell taxt = new PdfPCell(new Phrase(String.format("%.2f", invoiceItem.getTax()), headFont));
           taxt.setPaddingLeft(2);
           taxt.setVerticalAlignment(Element.ALIGN_MIDDLE);
           taxt.setHorizontalAlignment(Element.ALIGN_CENTER);
           table.addCell(taxt);
 
-          PdfPCell amountCell = new PdfPCell(new Phrase(String.valueOf(invoiceItem.getAmount()),headFont));
+          PdfPCell amountCell = new PdfPCell(new Phrase(String.format("%2f",invoiceItem.getAmount()),headFont));
           amountCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
           amountCell.setHorizontalAlignment(Element.ALIGN_CENTER);
           amountCell.setPaddingRight(2);
@@ -406,10 +406,10 @@ private void loadTotalText(List<InvoiceItem> invoiceItems) {
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
 	 writeRaw(writer,"Subtotal",contentFont,170, 90);
-     writeRaw(writer,"Ksh "+String.valueOf(totalSum),contentFont,210, 90);
+     writeRaw(writer,"Ksh "+String.format("%.2f",totalSum),contentFont,210, 90);
      
      writeRaw(writer,"Total Tax",contentFont,170, 80);
-     writeRaw(writer,"Ksh "+String.valueOf(totalTax),contentFont,210, 80);
+     writeRaw(writer, "Ksh " + String.format("%.2f", totalTax), contentFont, 210, 80);
 	
 }
 public void loadTotalRow(List<InvoiceItem> invoiceItems) {
@@ -421,7 +421,7 @@ public void loadTotalRow(List<InvoiceItem> invoiceItems) {
 	            .reduce(BigDecimal.ZERO, BigDecimal::add);
 	// TODO Auto-generated method stub
 	try {
-		buildTableTotal(document,writer,contentFont,String.valueOf(totalSum));
+		buildTableTotal(document, writer, contentFont, String.format("%.2f", totalSum));
 	} catch (DocumentException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();

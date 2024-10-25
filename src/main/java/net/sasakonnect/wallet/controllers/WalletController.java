@@ -44,7 +44,6 @@ import net.sasakonnect.wallet.annotations.IsUser;
 import net.sasakonnect.wallet.annotations.TransactionMiddleware;
 import net.sasakonnect.wallet.constant.ChannelType;
 import net.sasakonnect.wallet.domain.User;
-import net.sasakonnect.wallet.services.ElasticSearchService;
 import net.sasakonnect.wallet.services.NotificationService;
 import net.sasakonnect.wallet.services.TarrifService;
 import net.sasakonnect.wallet.services.TransactionService;
@@ -67,8 +66,7 @@ public class WalletController {
 	TarrifService tarrifService;
 	@Autowired
 	NotificationService notificationService;
-	@Autowired
-	ElasticSearchService elasticService;
+	
 
 	public WalletController(UserService userService, WalletService walletService) {
 		this.userService = userService;
@@ -198,19 +196,19 @@ public class WalletController {
 	@GetMapping("/transactionhistory")
 	public Object getTransactionHistory(@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
 			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
-		return this.elasticService.getUserTransactions(pageNumber,pageSize);
+		return this.transactionService.getTransactionHistory(pageNumber, pageSize);
 	}
 	
-	@GetMapping("/transaction/history")
-	public Object getUserTransactionHistory(@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
-			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
-		return this.elasticService.getUserTransactions(pageNumber,pageSize);
-	}
+//	@GetMapping("/transaction/history")
+//	public Object getUserTransactionHistory(@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
+//			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+//		return this.transactionService.getUserTransactions();
+//	}
 	
 	@GetMapping("/transaction/search")
 	public Object searchTransaction(@RequestParam(name = "search") String searchTerm ,@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
 			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
-		return this.elasticService.searchTransaction(searchTerm,pageNumber,pageSize);
+		return this.transactionService.searchTransaction(searchTerm,pageNumber,pageSize);
 	}
 //	public ResponseEntity<Object> transactionHistory() {
 //		return ResponseEntity.ok(this.walletService.getTransactionHistory());

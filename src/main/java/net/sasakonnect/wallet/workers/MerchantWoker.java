@@ -40,8 +40,7 @@ public class MerchantWoker {
 			Transaction newTransaction = Transaction.builder().txId(transaction.getTxId())
 
 					.externalTxId(transaction.getExternalTxId()).accountId("***********")
-					.accountName(transaction.getAccountName()) // Assuming you want to set the currency as the account
-																// name
+					.accountName(transaction.getAccountName()) // Assuming you want to set the currency as the account name
 					.txType(transaction.getTxType()).oppoBankCode(transaction.getOppoBankCode())
 					.oppoAccountId(transaction.getOppoAccountId()).oppoSubAccount(transaction.getOppoSubAccount())
 					.txStatus(transaction.getTxStatus()).mpesaBusinessPayType(transaction.getMpesaBusinessPayType())
@@ -49,7 +48,6 @@ public class MerchantWoker {
 					.counterpartyName(transaction.getCounterpartyName()).extInfo(transaction.getExtInfo())
 					.oppoChannelId(transaction.getOppoChannelId()).thirdPartyTxType(transaction.getThirdPartyTxType())
 					.currency(transaction.getCurrency()).amount(transaction.getAmount())
-
 					.completeTime(transaction.getCompleteTime()).notificationType(transaction.getNotificationType())
 					.requestId(transaction.getRequestId()).build();
 //			var walletClient = this.walletClientAccountRepo.findWalletClientByTillNumberAndAccountType(

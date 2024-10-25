@@ -82,16 +82,12 @@ public class InvoiceService {
 	       ivoiceItems.add(invoiceItem1);
 	   var invoiceItem2 = this.computeValidTransactionsByChannel(ChannelType.MPESA_TILL, startDate, endDate);
 	       ivoiceItems.add(invoiceItem2);
-	   var invoiceItem3 = this.computeValidTransactionsByChannel(ChannelType.PESA_LINK, startDate, endDate);
-	     ivoiceItems.add(invoiceItem3);
+//	   var invoiceItem3 = this.computeValidTransactionsByChannel(ChannelType.PESA_LINK, startDate, endDate);
+//	     ivoiceItems.add(invoiceItem3);
        var invoiceItem4 = this.computeValidTransactionsByChannel(ChannelType.MPESA_PAYBILL, startDate, endDate);
           ivoiceItems.add(invoiceItem4);
      var invoiceItem5 = this.computeValidTransactionsByChannel(ChannelType.WALLET, startDate, endDate);
           ivoiceItems.add(invoiceItem5);
-//	  var invoiceItems = channelTypes.stream().map(channel ->{
-//		   
-//         return ivoiceItems;
-//	   });
       
        try {
               DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");

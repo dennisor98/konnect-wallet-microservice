@@ -1,6 +1,7 @@
 stages:
   - move
   - build
+  - deploy
   
 
 build:
@@ -9,11 +10,12 @@ build:
     - echo "Building the application on SSH server..."
     - hostname
     - pwd
-    - ssh wallet  "mkdir -p  /home/ahdev/application/wallet/ && cd /home/ahdev/application/wallet/ && chmod +x ./gradlew && ./gradlew clean && ./gradlew build -x test"
+    - ssh wallet  "mkdir -p  /home/ahdev/application/wallet-dev/ && cd /home/ahdev/application/wallet-dev/ && chmod +x ./gradlew && ./gradlew clean && ./gradlew build -x test"
 
     - echo "Source code built on remote server"
   only:
-    - main
+    - dev
+
 
 move:
   stage: move
@@ -23,11 +25,23 @@ move:
     - pwd
 
 
-    - ssh wallet "rm -rf /home/ahdev/application/wallet/*"
+    - ssh wallet "rm -rf /home/ahdev/application/wallet-dev/*"
 
-    - scp -o StrictHostKeyChecking=no   -r ./*  wallet:/home/ahdev/application/wallet/ 
+    - scp -o StrictHostKeyChecking=no   -r ./*  wallet:/home/ahdev/application/wallet-dev/ 
 
 
     - echo "Artifacts uploaded to GitLab CI/CD."
   only:
-    - main
+    - dev
+
+deploy:
+  stage: deploy
+  script:
+    - hostname
+    - pwd
+    - ssh wallet "cd /home/ahdev/application/wallet-dev/ && docker build -t wallet-dev:latest .  && docker ps -q -f name=wallet-dev | grep -q . && docker stop wallet-dev || true && docker rm wallet-dev || true && docker run -d --name wallet-dev -p 8081:8081 wallet-dev:latest"
+  only:
+    - dev
+
+
+
