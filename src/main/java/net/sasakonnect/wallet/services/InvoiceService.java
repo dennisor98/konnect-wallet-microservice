@@ -78,8 +78,8 @@ public class InvoiceService {
 	       ivoiceItems.add(invoiceItem1);
 	   var invoiceItem2 = this.computeValidTransactionsByChannel(ChannelType.MPESA_TILL, startDate, endDate);
 	       ivoiceItems.add(invoiceItem2);
-	   var invoiceItem3 = this.computeValidTransactionsByChannel(ChannelType.PESA_LINK, startDate, endDate);
-	     ivoiceItems.add(invoiceItem3);
+//	   var invoiceItem3 = this.computeValidTransactionsByChannel(ChannelType.PESA_LINK, startDate, endDate);
+//	     ivoiceItems.add(invoiceItem3);
        var invoiceItem4 = this.computeValidTransactionsByChannel(ChannelType.MPESA_PAYBILL, startDate, endDate);
           ivoiceItems.add(invoiceItem4);
      var invoiceItem5 = this.computeValidTransactionsByChannel(ChannelType.WALLET, startDate, endDate);
@@ -118,7 +118,7 @@ public class InvoiceService {
    private  InvoiceItem computeValidTransactionsByChannel(ChannelType channel,Date startDate,Date endDate){
 	   List<Tariff> tarrifs = this.tarrifRepository.findByChannelTypeOrderByMinAsc(channel);
 	   List<Transaction> transactions = this.transactionService.getAllTransactions(channel, startDate, endDate);
-	   log.info(tarrifs+"");
+	   log.info(channel+"channel");
 	   if(!transactions.isEmpty() && !tarrifs.isEmpty()) {
 		   var resultMap = transactions.stream()
                    .map(tr -> {

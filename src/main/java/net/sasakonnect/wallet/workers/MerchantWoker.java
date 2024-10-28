@@ -14,6 +14,7 @@ import net.sasakonnect.wallet.ResponseDto.TransactionResponseDto;
 import net.sasakonnect.wallet.beans.BankWebClientBean;
 import net.sasakonnect.wallet.beans.ClientAppsBean;
 import net.sasakonnect.wallet.domain.Transaction;
+import net.sasakonnect.wallet.enums.NotificationType;
 import net.sasakonnect.wallet.repository.WalletClientAccountRepository;
 import net.sasakonnect.wallet.services.TransactionService;
 import net.sasakonnect.wallet.services.UserService;
@@ -36,7 +37,8 @@ public class MerchantWoker {
 
 	@Transactional
 	public void notifyMerchant(Transaction transaction) {
-		if (transaction.getTxType().equalsIgnoreCase("TTID0005")) {
+		if (transaction.getTxType().equalsIgnoreCase("TTID0005") || (transaction.getTxType().equalsIgnoreCase(NotificationType.BALANCE.getCode()) && 
+				transaction.getAccountId().equalsIgnoreCase("46012000048133")) ) {
 			Transaction newTransaction = Transaction.builder().txId(transaction.getTxId())
 
 					.externalTxId(transaction.getExternalTxId()).accountId("***********")
@@ -70,6 +72,8 @@ public class MerchantWoker {
 
 			}
 		}
+		
+//		
 
 	}
 

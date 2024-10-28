@@ -129,20 +129,20 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
 	           "AND t.oppoAccountId IS NOT NULL " +
 	           "AND t.oppoAccountId NOT IN (SELECT w.accountId FROM Wallet w) " +
 	           "AND t.id = (SELECT MIN(t2.id) FROM Transaction t2 " +
-	           "            WHERE t2.oppoAccountId = t.oppoAccountId " +
-	           "            AND t2.txType = :txType " +
-	           "            AND t2.accountId = :accountId) ")
+	           "WHERE t2.oppoAccountId = t.oppoAccountId " +
+	           "AND t2.txType = :txType " +
+	           "AND t2.accountId = :accountId) ")
    Page<Transaction> findRecentTransactionContactByTxType(@Param("txType") String txType,@Param("accountId") String accountId,Pageable page);
    
 	 @Query("SELECT t FROM Transaction t " +
 		       "WHERE t.txType = :txType " +
 		       "AND t.accountId = :accountId " +
 		       "AND t.oppoAccountId IS NOT NULL " +
-		       "AND EXISTS (SELECT 1 FROM Wallet w WHERE w.accountId = t.oppoAccountId) " +
+		       "AND EXISTS (SELECT 1 FROM Wallet w WHERE w.accountId = t.oppoAccountId)" +
 		       "AND t.id = (SELECT MIN(t2.id) FROM Transaction t2 " +
-		       "            WHERE t2.oppoAccountId = t.oppoAccountId " +
-		       "            AND t2.txType = :txType " +
-		       "            AND t2.accountId = :accountId)")
+		       "WHERE t2.oppoAccountId = t.oppoAccountId " +
+		       "AND t2.txType = :txType " +
+		       "AND t2.accountId = :accountId)")
    Page<Transaction> findWalletToWalletTransContact(@Param("txType") String txType,@Param("accountId") String accountId,Pageable page);
 	 
    @Query("SELECT t FROM Transaction t WHERE t.txType =:channel AND ((t.createdAt BETWEEN :startDate AND :endDate) OR (t.updatedAt BETWEEN :startDate AND :endDate)) AND t.txStatus = 8")
@@ -152,12 +152,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
    		+ " AND :endDate)) AND t.txStatus = 8 AND t.oppoBankCode = 'CIC0018'")
    List<Transaction> findWalletTransactions(@Param("startDate") Date startDate,@Param("endDate") Date endDate);
    
-   @Query(value = "SELECT t FROM Transaction t " +
-           "WHERE (t.txType = 'TTID0002') " +
-           "AND t.createdAt >= :startDate " +
-           "AND t.createdAt <= :endDate " +
-           "AND t.txStatus = :txStatus " +
-           "AND t.oppoBankCode = :oppoBankCode")  
+   @Query(value = "SELECT t FROM Transaction t WHERE (t.txType = 'TTID0002') AND t.createdAt >= :startDate AND t.createdAt <= :endDate AND t.txStatus = :txStatus AND t.oppoBankCode = :oppoBankCode")  
    List<Transaction> findMpesaTransactions(
 	@Param("startDate") Date startDate,
     @Param("endDate") Date endDate,
@@ -195,14 +190,4 @@ Page<Object[]> findClientTransactions(
                        @Param("startDate") String startDate,
                        @Param("endDate") String endDate,
                        Pageable pageable);
-
-
-
-  
-  
-   
-   
-
-
-
 }

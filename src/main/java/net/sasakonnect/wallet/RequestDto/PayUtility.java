@@ -20,6 +20,10 @@ public class PayUtility {
 
 	UtilityBillType billType;
 	String amount;
+	
+	public UtilityBillType getBillTypeStr() {
+		return this.billType;
+	}
 
 	public Integer getBillType() {
 		switch (this.billType) {

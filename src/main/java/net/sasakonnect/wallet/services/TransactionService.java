@@ -536,6 +536,7 @@ public class TransactionService {
 		if(channel.getValue().equalsIgnoreCase(ChannelType.PESA_LINK.toString())) {
 			transactions = this.transactionRepository.findPesalinkTransactions(formattedStartDate,formattedEndDate);
 		}
+		
 		if(transactions !=null) {
 			return transactions;
 		}

@@ -5,7 +5,8 @@ public enum ChannelType {
     MPESA_PAYBILL("MPESA_PAYBILL"),
     PESA_LINK("PESA_LINK"),
     WALLET("WALLET"),
-    MPESA_ACCOUNT("MPESA_ACCOUNT");
+    MPESA_ACCOUNT("MPESA_ACCOUNT"),
+	UTILITY("UTILITY");
 
     private final String value;
 

@@ -87,6 +87,7 @@ import net.sasakonnect.wallet.domain.UserKycDoc;
 import net.sasakonnect.wallet.domain.UserOnbMaterial;
 import net.sasakonnect.wallet.domain.UserPin;
 import net.sasakonnect.wallet.domain.UserWallet;
+import net.sasakonnect.wallet.domain.UtilityDetails;
 import net.sasakonnect.wallet.domain.Wallet;
 import net.sasakonnect.wallet.domain.sme.SmeAccount;
 import net.sasakonnect.wallet.domain.sme.SmeTransaction;
@@ -118,6 +119,7 @@ import net.sasakonnect.wallet.repository.UserKycDocRepository;
 import net.sasakonnect.wallet.repository.UserOnbMaterialRepository;
 import net.sasakonnect.wallet.repository.UserPinRepository;
 import net.sasakonnect.wallet.repository.UserWalletRepository;
+import net.sasakonnect.wallet.repository.UtilityDetailsRepository;
 import net.sasakonnect.wallet.repository.WalletRepository;
 import net.sasakonnect.wallet.services.extensions.LarkUtilityService;
 import net.sasakonnect.wallet.services.sme.SmeAccountService;
@@ -222,7 +224,8 @@ public class WalletService {
 	String onbdocsdir;
 	
 	
-	
+	@Autowired
+	UtilityDetailsRepository utilityDetailsRepository;
 	
 
 	@Value("${KONNECT_BANK}")
@@ -1119,6 +1122,11 @@ public class WalletService {
 								this.notificationService.save(ntf);
 
 							}
+							
+							if (results.getParams().getTxType()
+									.equalsIgnoreCase(WalletTransactionType.TTID0011.getValue())) {
+								
+							}
 
 							if (reqParams.getTxStatus() == 8) {
 								var fContact = FinancialContact.builder().accountId(reqParams.getAccountId())
@@ -1590,6 +1598,13 @@ public class WalletService {
 		if (responseJson != null) {
 			var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
 			choiceBankSmsService.invokeSms(resp.getData().txId);
+			var utilityDetails =	UtilityDetails.builder().txId(resp.getData().txId).accountId(buyAirtime.getAccountId()).oppoAccountId(buyAirtime.getMobileNumber()).provider(buyAirtime.getNetworkProvider()).build();
+			try {
+				this.utilityDetailsRepository.save(utilityDetails);
+			}catch(Exception ex) {
+				ex.printStackTrace();
+				
+			}
 			return new Gson().fromJson(responseJson, Object.class);
 
 		}
@@ -1630,6 +1645,13 @@ public class WalletService {
 		if (responseJson != null) {
 			var resp = new Gson().fromJson(responseJson, TransactionResponseDto.class);
 			choiceBankSmsService.invokeSms(resp.getData().txId);
+			var utilityDetails = UtilityDetails.builder().accountId(payUtiltiy.getAccountId()).oppoAccountId(payUtiltiy.getAccountId()).oppoAccountId(payUtiltiy.getBillOrderNumber()).provider(payUtiltiy.getBillTypeStr().toString()).build();
+			try {
+				this.utilityDetailsRepository.save(utilityDetails);
+			}catch(Exception ex) {
+				ex.printStackTrace();
+				
+			}
 			return new Gson().fromJson(responseJson, Object.class);
 
 		}
