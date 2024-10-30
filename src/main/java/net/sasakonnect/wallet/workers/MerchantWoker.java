@@ -37,8 +37,8 @@ public class MerchantWoker {
 
 	@Transactional
 	public void notifyMerchant(Transaction transaction) {
-		if (transaction.getTxType().equalsIgnoreCase("TTID0005") || (transaction.getTxType().equalsIgnoreCase(NotificationType.BALANCE.getCode()) && 
-				transaction.getAccountId().equalsIgnoreCase("46012000048133")) ) {
+		if (transaction.getTxType().equalsIgnoreCase("TTID0005") || (transaction.getTxType().equalsIgnoreCase(NotificationType.TRANSACTION.getCode()) && 
+				transaction.getOppoAccountId().equalsIgnoreCase("46011000000433")) ) {
 			Transaction newTransaction = Transaction.builder().txId(transaction.getTxId())
 
 					.externalTxId(transaction.getExternalTxId()).accountId("***********")
