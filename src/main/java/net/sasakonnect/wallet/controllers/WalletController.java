@@ -196,7 +196,7 @@ public class WalletController {
 	@GetMapping("/transactionhistory")
 	public Object getTransactionHistory(@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
 			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
-		return this.transactionService.getTransactionHistory(pageNumber, pageSize);
+		return this.transactionService.getUserTransactionHistory(pageNumber, pageSize);
 	}
 	
 //	@GetMapping("/transaction/history")
