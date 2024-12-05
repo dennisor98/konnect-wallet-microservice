@@ -77,8 +77,7 @@ public class JwtService {
 			claims.put("token_type", JwtType.WALLET_ADMIN_TOKEN.getToken());
 			claims.put("firstName", user.getFirstName());
 			return Jwts.builder().setClaims(claims).setSubject(user.getId().toString()).setIssuedAt(new Date())
-					.setExpiration(new Date(System.currentTimeMillis() + jwtExpiryTime))// 10
-																						// days
+					.setExpiration(new Date(System.currentTimeMillis() + jwtExpiryTime))// 10days
 									          											// validity
 					.setId(UUID.randomUUID().toString())
 
