@@ -752,6 +752,7 @@ public class WalletService {
 		if (easyOnboarding.getIdPhoto() != null && easyOnboarding.getSelfiePhoto() != null) {
 			userMap.put("frontSidePhoto", easyOnboarding.getIdPhoto());
 			userMap.put("selfiePhoto", easyOnboarding.getSelfiePhoto());
+			userMap.put("backSidePhoto", easyOnboarding.getIdBack());
 			onboardingUrl = ChoiceEndpointsConstants.OPEN_WALLET_ACCOUNT_V3;
 		}
 		userMap.put("address", easyOnboarding.getMobile());
@@ -815,8 +816,8 @@ public class WalletService {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(map);
 			} else {
 				//create user documents files
-				if (easyOnboarding.getIdPhoto() != null && easyOnboarding.getSelfiePhoto() != null) {
-					this.processUserOnboardingDocs(easyOnboarding.getIdPhoto(), easyOnboarding.getSelfiePhoto(),savedUser);
+				if (easyOnboarding.getIdPhoto() != null && easyOnboarding.getSelfiePhoto() != null && easyOnboarding.getIdBack() !=null) {
+					this.processUserOnboardingDocs(easyOnboarding.getIdPhoto(),easyOnboarding.getIdBack(), easyOnboarding.getSelfiePhoto(),savedUser);
 				}
 				
 				savedUser.setOnboardingRequestId(onboardingRequestId.asText());
@@ -2028,7 +2029,7 @@ public class WalletService {
     }
 	
 	
-	private void processUserOnboardingDocs(String idFrontDoc,String selfieDoc, User user) {
+	private void processUserOnboardingDocs(String idFrontDoc,String idBackDoc, String selfieDoc, User user) {
         Runnable task = () -> {
             // Define the base directory for user KYC docs
             Path userParentPath = Paths.get(onbdocsdir + "/" +user.getIdNumber()+"/"+ user.getId());
@@ -2044,11 +2045,12 @@ public class WalletService {
                 // Create directories for idFront, idBack, and selfie
                 Path idFront = Files.createDirectories(userParentDir.resolve("idFront"));
                 Path selfie = Files.createDirectories(userParentDir.resolve("selfie"));
-                
+                Path idBack = Files.createDirectories(userParentPath.resolve("idBack"));
                 // Create text files for each photo with the current date and time
                 Path fronttextFile = idFront.resolve("idFront_" + dateStr + ".txt");
                 Files.createFile(fronttextFile);
                 
+                Path idBacktextFile = idBack.resolve("idBack_"+dateStr+".txt");
                 
                 Path selfietextFile = selfie.resolve("selfie_" + dateStr + ".txt");
                 Files.createFile(selfietextFile);
@@ -2056,12 +2058,14 @@ public class WalletService {
                 // Write the Base64-encoded photo data to the text files
                 Files.write(fronttextFile, idFrontDoc.getBytes(StandardCharsets.UTF_8));
                 Files.write(selfietextFile, selfieDoc.getBytes(StandardCharsets.UTF_8));
+                Files.write(idBacktextFile,idBackDoc.getBytes(StandardCharsets.UTF_8));
                 
                 // Build the UserKycDoc object and save it
                 var userId = user.getId();
                 var kycBuild = UserOnbMaterial.builder()
                         .idFrontUrl(userId + "/idFront/" + fronttextFile.getFileName())
                         .selfieUrl(userId + "/selfie/" + selfietextFile.getFileName())
+                        .idBackUrl(userId+"/idBack/"+idBacktextFile.getFileName())
                         .idNumber(user.getIdNumber())
                         .user(user)
                         .build();
@@ -2119,7 +2123,6 @@ public class WalletService {
 			var reqId = new HashMap<String, Object>();
 			reqId.put("accountId", currentWallet.getAccountId());
 			reqId.put("startTime", startDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli());
-
 			reqId.put("endTime", endDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli());
 
 			var reqs = requestSigner.signRequest(reqId);

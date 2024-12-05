@@ -61,6 +61,8 @@ public class EasyOnboardingRequestParams {
 
 	@Nullable()
 	String idPhoto;
+	@Nullable
+	String idBack;
 	@Nullable()
 	String address;
 	@Nullable()

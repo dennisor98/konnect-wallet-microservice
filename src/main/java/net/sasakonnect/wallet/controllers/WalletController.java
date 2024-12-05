@@ -74,7 +74,6 @@ public class WalletController {
 	}
 
 	@PostMapping("")
-	
 	public Object onBoarding(@Valid @RequestBody EasyOnboardingRequestParams easyOnboarding,
 			@RequestHeader("app-version-number") String konnectHeader) {
 

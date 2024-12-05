@@ -29,6 +29,9 @@ public class UserOnbMaterial extends BaseWalletDomain {
 	
 	@Column
 	String idFrontUrl;
+	
+	@Column(nullable=true)
+	String idBackUrl;
 		
 	@Column
 	String selfieUrl;
