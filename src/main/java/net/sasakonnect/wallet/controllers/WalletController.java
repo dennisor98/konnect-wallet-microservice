@@ -6,6 +6,8 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -76,8 +81,12 @@ public class WalletController {
 	@PostMapping("")
 	public Object onBoarding(@Valid @RequestBody EasyOnboardingRequestParams easyOnboarding,
 			@RequestHeader("app-version-number") String konnectHeader) {
-
-		return this.walletService.createNewOnBoardingUser(easyOnboarding, konnectHeader);
+		ObjectNode res = JsonNodeFactory.instance.objectNode();
+		res.put("success",false);
+		res.put("message","New Registrations are not supported");
+		
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(res);
+//		return this.walletService.createNewOnBoardingUser(easyOnboarding, konnectHeader);
 	}
 
 	@GetMapping("pin/set")
